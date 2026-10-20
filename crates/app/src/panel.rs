@@ -53,7 +53,8 @@ impl VersePanel {
             .get(&settings.translation)
             .map(|e| e.meta.ref_name(self.verse.book).to_string())
             .unwrap_or_else(|| self.verse.book.ref_name().into());
-        let reference = format!("{name} {}:{}", self.verse.chapter, self.verse.verse);
+        let (chapter, verse) = self.verse.shown_numbers();
+        let reference = format!("{name} {chapter}:{verse}");
         let mut close = false;
 
         // Header: title and detail, copy and close.
@@ -275,7 +276,7 @@ impl VersePanel {
 }
 
 /// A 28 pt round icon button with a 16 pt glyph in secondary ink.
-fn round_button(
+pub(crate) fn round_button(
     ui: &mut Ui,
     p: &Palette,
     r: Rect,

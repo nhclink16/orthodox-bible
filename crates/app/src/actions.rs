@@ -73,6 +73,8 @@ pub enum Action {
     /// Make an image of the selected verses to share.
     ShareImage,
     Compare,
+    /// The Church Fathers on the selected verse, in the inspector.
+    ShowFathers,
     ClearSelection,
     SelectNext,
     SelectPrev,

@@ -231,6 +231,10 @@ pub struct BibleApp {
     motion_step: f64,
     palette: Option<CommandPalette>,
     pub panel: Option<VersePanel>,
+    /// The Church Fathers panel, in the inspector's place (opening one closes the other).
+    pub fathers: Option<crate::fathers_panel::FathersPanel>,
+    /// The installed quotes (`bible_core::fathers`); `None` until installed.
+    fathers_db: Option<bible_core::fathers::Fathers>,
     settings_ui: Option<SettingsUi>,
     shortcuts_open: bool,
     shortcuts_overlay: crate::shortcuts_overlay::ShortcutsOverlay,
@@ -346,6 +350,7 @@ impl BibleApp {
             cc.egui_ctx.send_viewport_cmd(egui::ViewportCommand::InnerSize(crate::onboarding::SIZE));
             crate::onboarding::Onboarding::new(&cc.egui_ctx)
         });
+        let fathers_db = bible_core::fathers::Fathers::open(&data_dir);
         Self {
             data_dir,
             library,
@@ -361,6 +366,8 @@ impl BibleApp {
             motion_step: 1.5 / 60.0,
             palette: None,
             panel: None,
+            fathers: None,
+            fathers_db,
             settings_ui: None,
             shortcuts_open: false,
             shortcuts_overlay: Default::default(),
@@ -759,11 +766,18 @@ impl BibleApp {
                 if self.columns().len() > 1 {
                     // Beside parallel columns: the Compare inspector (frame 07).
                     self.panel = Some(VersePanel::new(v));
+                    self.fathers = None;
                 } else {
                     self.compare = Some(crate::compare_popover::ComparePopover::new(v));
                 }
                 let ids: Vec<String> = self.library.entries().iter().map(|e| e.meta.id.clone()).collect();
                 self.library.warm(&ids);
+            }
+            Action::ShowFathers => {
+                let v = self.selection_or_location()[0];
+                self.reader.set_selection(Some(v));
+                self.panel = None;
+                self.fathers = Some(crate::fathers_panel::FathersPanel::new(v));
             }
             Action::SearchStep(d) => self.sidebar.step_result(d),
             Action::ClearSearch => {
@@ -777,6 +791,7 @@ impl BibleApp {
                     self.reader.selection = None;
                 } else {
                     self.panel = None;
+                    self.fathers = None;
                 }
             }
             Action::SelectNext => {
@@ -940,6 +955,7 @@ impl BibleApp {
             "search" => actions.push(Action::OpenSearch(Some(arg.to_string()))),
             "step" => actions.push(Action::SearchStep(arg.parse().unwrap_or(1))),
             "note" => actions.extend(verse().map(Action::EditNote)),
+            "fathers" => actions.push(Action::ShowFathers),
             "compare" => {
                 self.reader.set_selection(verse());
                 actions.push(Action::Compare);
@@ -2315,7 +2331,11 @@ impl eframe::App for BibleApp {
             }
             // The reader runs the full height, beside the inspector when one is open; the
             // toolbar floats over the top of both.
-            let inspector = if self.panel.is_some() { crate::panel::INSPECTOR_WIDTH } else { 0.0 };
+            let inspector = if self.panel.is_some() || self.fathers.is_some() {
+                crate::panel::INSPECTOR_WIDTH
+            } else {
+                0.0
+            };
             let reader_rect =
                 egui::Rect::from_min_max(full.min, egui::pos2(full.right() - inspector, full.bottom()));
             let cols = self.columns();
@@ -2404,6 +2424,42 @@ impl eframe::App for BibleApp {
                 child.set_clip_rect(r);
                 if panel.show(&mut child, &self.library, &self.settings, &cols, &mut actions) {
                     self.panel = None;
+                }
+            }
+            if let Some(fathers) = &mut self.fathers {
+                let r = egui::Rect::from_min_max(
+                    egui::pos2(reader_rect.right(), full.top() + self.chrome.height),
+                    egui::pos2(
+                        full.right() - theme::metrics::SIDEBAR_INSET,
+                        full.bottom() - theme::metrics::SIDEBAR_INSET,
+                    ),
+                );
+                p.shadows.panel.paint(ui.painter(), r, theme::radius::LG);
+                ui.painter().rect_filled(r, theme::radius::LG, p.sidebar);
+                // The panel follows the verse selected in the reader.
+                if let Some((v, _)) = self.reader.selection {
+                    fathers.verse = v;
+                }
+                let mut child = ui.new_child(egui::UiBuilder::new().max_rect(r));
+                child.set_clip_rect(r);
+                match fathers.show(&mut child, p, self.fathers_db.as_ref()) {
+                    crate::fathers_panel::Outcome::Stay => {}
+                    crate::fathers_panel::Outcome::Close => self.fathers = None,
+                    crate::fathers_panel::Outcome::Install(src) => {
+                        let dest = self.data_dir.join(bible_core::fathers::FILE);
+                        match bible_core::fathers::install(&src, &dest) {
+                            Ok(done) => {
+                                self.fathers_db = bible_core::fathers::Fathers::open(&self.data_dir);
+                                actions.push(Action::Toast(format!(
+                                    "Installed {} quotes from {} Church Fathers",
+                                    done.quotes, done.authors
+                                )));
+                            }
+                            Err(e) => {
+                                actions.push(Action::Toast(format!("Couldn't install the Fathers: {e:#}")))
+                            }
+                        }
+                    }
                 }
             }
             let material = ctx.animate_bool_with_time(

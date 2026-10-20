@@ -154,7 +154,7 @@ const fn fixed(
 
 pub const GROUPS: [&str; 3] = ["Navigate", "Verses", "View"];
 
-pub const ALL: [Shortcut; 18] = [
+pub const ALL: [Shortcut; 19] = [
     bindable("jump", "Navigate", "Jump to a reference", Chord::cmd(Key::K)),
     fixed("chapter", "Navigate", "Previous / next chapter", &["←", "→"]),
     fixed("history", "Navigate", "Back / forward", &["⌘", "[", "⌘", "]"]),
@@ -166,6 +166,7 @@ pub const ALL: [Shortcut; 18] = [
     bindable("bookmark", "Verses", "Bookmark", Chord::new(Key::B)),
     bindable("copy", "Verses", "Copy with reference", Chord::shift_cmd(Key::C)),
     bindable("compare", "Verses", "Compare translations", Chord::new(Key::C)),
+    bindable("fathers", "Verses", "Church Fathers on the verse", Chord::new(Key::F)),
     fixed("translation", "View", "Switch translation", &["⌘", "1…9"]),
     bindable("parallel", "View", "Parallel translations", Chord::shift_cmd(Key::P)),
     fixed("size", "View", "Text size", &["⌘", "+", "⌘", "−"]),
@@ -185,6 +186,7 @@ pub fn action(id: &str) -> Option<Action> {
         "bookmark" => Action::ToggleBookmark,
         "copy" => Action::Copy,
         "compare" => Action::Compare,
+        "fathers" => Action::ShowFathers,
         "parallel" => Action::ToggleParallel,
         "mode" => Action::ToggleMode,
         "red" => Action::ToggleRedLetters,

@@ -85,6 +85,17 @@ references all go through `lxx::shown` and `lxx::from_lxx`, so Psalm 51 reads as
 too. Verse numbers follow English Bibles (titles aren't verses), which is how LXX2012 numbers them.
 Psalm 151 and the Prayer of Azariah (the Song of the Three Youths) are books of their own.
 
+*Church Fathers.* The Fathers panel (verse menu → Church Fathers, or F) reads quotes from the
+Historical Christian Faith Commentaries Database, keyed by grid verse (it uses Hebrew psalm
+numbers too). That database mixes public-domain translations with fair-use excerpts of modern
+ones, so it is never bundled or committed: the panel installs it from a `commentaries.sqlite` the
+user downloads, into `fathers.sqlite` in the data directory (`bible_core::fathers::install`, or
+`bible-rs install-fathers <file>`). It keeps authors before 1054 that the source doesn't mark as
+condemned, minus a named list (`fathers::LEFT_OUT`: those condemned in 553 and by other councils,
+and writers of churches outside Orthodox communion) and the source's non-patristic categories.
+This replaces "no notes from the source texts" for this one panel; it is a separate, read-only
+file, not part of any translation.
+
 `.bbl` files store that model as column arrays compressed with zstd (level 19 for bundled data):
 the 4.1 MB KJV is 1.04 MB, all seven bundled translations ≈ 7 MB. The JSON metadata header is
 uncompressed, so listing translations never decompresses anything. Decoding is a handful of linear

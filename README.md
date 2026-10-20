@@ -12,6 +12,9 @@ typeset, searchable as you type, with highlights, notes and bookmarks kept on yo
 - **Typeset for reading.** Literata serif, a comfortable measure, superscript verse numbers,
   chapter and section headings, poetry with hanging indents, LORD in small capitals, optional red
   letters, paragraphs or verse-per-line, adjustable size, light / sepia / dark.
+- **The Church Fathers on every verse** (Orthodox fork): select a verse and press F for quotes from
+  the Fathers before 1054, from the Historical Christian Faith Commentaries Database. Installed from
+  the database file you download; nothing is bundled.
 - **Eight public-domain translations built in** (the Septuagint with the KJV New Testament, KJV, WEB, BSB, ASV, YLT, Darby, Webster), side by
   side in parallel columns or one verse across all of them. Add the NLT and the NET Bible free in
   one click, the ESV with a free key, others with an API.Bible key or a file you own

@@ -8,6 +8,7 @@ pub mod app;
 pub mod book_picker;
 pub mod cli;
 pub mod compare_popover;
+pub mod fathers_panel;
 pub mod icons;
 pub mod import_sheet;
 pub mod keymap;

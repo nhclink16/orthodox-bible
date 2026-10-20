@@ -8,6 +8,7 @@
 //! bible-rs remove <id>
 //! bible-rs export --markdown|--json [-o file]
 //! bible-rs import-notes <export.json>
+//! bible-rs install-fathers <commentaries.sqlite>
 //! ```
 
 use std::path::{Path, PathBuf};
@@ -53,6 +54,7 @@ pub fn run(args: &[String], data_dir: &Path) -> Option<Result<()>> {
         "remove" => remove(rest, data_dir),
         "export" => export(rest, data_dir),
         "import-notes" => import_notes(rest, data_dir),
+        "install-fathers" => install_fathers(rest, data_dir),
         "--version" | "-V" => {
             println!("bible-rs {}", env!("CARGO_PKG_VERSION"));
             Ok(())
@@ -212,6 +214,23 @@ fn export(rest: &[String], data_dir: &Path) -> Result<()> {
         Some(path) => std::fs::write(&path, body).with_context(|| path.clone())?,
         None => print!("{body}"),
     }
+    Ok(())
+}
+
+fn install_fathers(rest: &[String], data_dir: &Path) -> Result<()> {
+    let path = positional(rest)
+        .first()
+        .map(|s| s.to_string())
+        .context("usage: bible-rs install-fathers <commentaries.sqlite>")?;
+    std::fs::create_dir_all(data_dir)?;
+    let started = std::time::Instant::now();
+    let done = bible_core::fathers::install(Path::new(&path), &data_dir.join(bible_core::fathers::FILE))?;
+    println!(
+        "Installed {} quotes from {} Church Fathers in {:.1} s",
+        done.quotes,
+        done.authors,
+        started.elapsed().as_secs_f32()
+    );
     Ok(())
 }
 

@@ -65,6 +65,7 @@ impl VerseMenu {
             item(icons::share, "Share as Image…", "", Some(Action::ShareImage)),
             Line::Separator,
             item(icons::compare, "Compare Translations", "C", Some(Action::Compare)),
+            item(icons::quote, "Church Fathers", "F", Some(Action::ShowFathers)),
             item(icons::columns, "Open in Parallel", "⇧⌘P", Some(Action::ToggleParallel)),
             Line::Separator,
             item(icons::text_cursor, "Select Verse Range", "⇧-click", None),

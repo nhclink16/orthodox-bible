@@ -107,7 +107,18 @@ Original checklist:
 3. Show LXX numbers when reading an LXX text, with a setting for "Psalm numbering: Septuagint / Hebrew".
 4. Build in "Orthodox (Brenton + KJV)": add an xtask source with a pinned SHA-256, add it to the `bundled.rs` table, and update `LICENSES/bibles.md`.
 
-## Phase 3: Fathers panel
+## Phase 3: Fathers panel (done 2026-10-20 on `orthodox/fathers`)
+
+Done:
+- Select a verse, then press F (or use the verse menu → Church Fathers). A panel lists the quotes, oldest first, each with a "Show more" link. It follows the selection.
+- The data isn't bundled or committed, because some excerpts come from copyrighted modern translations. The panel installs it from the `commentaries.sqlite` you download (Download Page → Install from File…), or use `bible-rs install-fathers <file>`. It becomes `fathers.sqlite` (about 94 MB) in the data folder.
+- About 63,000 quotes from 214 Fathers. Left out: authors after 1054, anyone the source marks condemned, the list in `crates/core/src/fathers.rs` (`LEFT_OUT`), and non-patristic categories.
+
+Left for later:
+- No margin marker for verses that have quotes.
+- Install runs on the main thread (about half a second).
+
+Original checklist:
 
 1. Add a new xtask step. It reads `commentaries.sqlite` and keeps authors before 1054 who aren't condemned, then also removes the four authors above.
 2. In the same step, map book names to codes and Psalm numbers to the internal ones. Write a small zstd-compressed file (target about 10 MB) and build it in, so it works offline.
