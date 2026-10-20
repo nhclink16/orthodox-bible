@@ -383,6 +383,14 @@ What differs is the toolkit, and here the Mac's choice is overruled.
   which would change widths and line breaks. The reading size follows Dynamic Type.
 - **Settings and the reading position** are one JSON value in the study store's settings table
   (`ios`), written 1.5 s after a change and when the app goes to the background.
+- **The prayer rule, reading plans and the month** (Orthodox fork) cross the bridge ready to
+  draw: `rule_day` gives a day's items in season with their check marks and what each opens (a
+  prayer's text, a chapter, a plan's next day, the Jesus Prayer's count), `church_month` a
+  month's fasts, great feasts and kept days, and the plan calls each day's passages. The phone
+  passes its own local date and midnight, so the bridge needs no time zone. Reminders are daily
+  local notifications, one per part of the day with a time (`rule-<block id>`), replaced whenever
+  the rule or the switch changes; the app asks to send notifications only when the switch is
+  first turned on.
 - **No network, no encryption.** The phone build turns off `bible-core`'s `tls` feature, so the
   app contains no TLS or other encryption code. Its Info.plist sets
   `ITSAppUsesNonExemptEncryption` to `NO`, and the App Store's export questions don't apply.
