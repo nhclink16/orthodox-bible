@@ -6,16 +6,17 @@ use std::collections::HashSet;
 
 use eframe::egui::{self, Align2, FontId, Key, Modifiers, Rect, Sense, Ui, pos2, vec2};
 
-use bible_core::calendar::{self, Day};
+use bible_core::calendar::{self, Day, Style};
 use bible_core::rule::{Block, Item, Kind, Rule};
-use bible_core::study::PlanProgress;
-use bible_core::{ChapterIdx, Translation, lxx, plans, prayers};
+use bible_core::study::{PlanProgress, StudyStore};
+use bible_core::{BookId, ChapterIdx, Translation, lxx, plans, prayers};
 
+use super::plans::Under;
 use super::{PageEnv, group_label, text};
 use crate::actions::Action;
 use crate::icons;
 use crate::theme::{self, Palette};
-use crate::widgets::{self, Button, Kind as ButtonKind, css_baseline, paint_on_baseline};
+use crate::widgets::{self, Button, Kind as ButtonKind};
 
 /// The Jesus Prayer, as the counter shows it.
 const JESUS_PRAYER: &str = "Lord Jesus Christ, Son of God, have mercy on me, a sinner.";
@@ -32,6 +33,69 @@ pub fn clock(minutes: i64) -> String {
     format!("{}:{:02}", minutes / 60, minutes % 60)
 }
 
+/// A psalm's Septuagint number in the numbering the app shows.
+pub(super) fn shown_psalm(n: u8) -> u8 {
+    match lxx::from_lxx(n, 1) {
+        _ if lxx::numbering() => n,
+        Some((b, c, _)) if b == BookId::PSALMS => c,
+        _ => n,
+    }
+}
+
+/// The rule's reminders while the app is open: a block's title and time when it comes and
+/// something in it is still to do. Up to 30 minutes late still reminds; later doesn't.
+#[derive(Default)]
+pub struct Reminders {
+    /// The minute last looked at, the blocks reminded of (day, block id), and when the next
+    /// block's time comes (Unix seconds).
+    checked: i64,
+    reminded: Vec<(Day, String)>,
+    wake: Option<i64>,
+}
+
+impl Reminders {
+    /// Looks at the rule again on the next call (it, or the setting, changed).
+    pub fn reset(&mut self) {
+        self.checked = 0;
+        self.wake = None;
+    }
+
+    /// At `now`, what to remind of ("Evening — 20:30"), and how many seconds egui may sleep
+    /// before asking again: until the next block's time, and no more than an hour.
+    pub fn due(&mut self, now: i64, study: &StudyStore, style: Style) -> (Vec<String>, u64) {
+        let mut due = Vec::new();
+        if self.checked != now.div_euclid(60) {
+            self.checked = now.div_euclid(60);
+            let t = crate::time::local(now);
+            let day = calendar::civil(t.year, t.month, t.day);
+            let minute = i64::from(t.hour) * 60 + i64::from(t.minute);
+            let rule = study.rule();
+            let started = study.plans();
+            let mut done = study.rule_done(day);
+            done.extend(plans_read(&rule, day, style, day, &following(&rule, &started, study)));
+            done.extend(idle(&rule, day, style));
+            self.wake = None;
+            for (block, items) in rule.for_day(day, style) {
+                let Some(at) = block.time.as_deref().and_then(minutes) else { continue };
+                if at > minute {
+                    let wake = now - now.rem_euclid(60) + (at - minute) * 60;
+                    self.wake = Some(self.wake.map_or(wake, |w| w.min(wake)));
+                    continue;
+                }
+                let todo = items.iter().any(|i| !i.optional && !done.contains(&i.id));
+                let key = (day, block.id.clone());
+                if minute - at >= 30 || !todo || self.reminded.contains(&key) {
+                    continue;
+                }
+                self.reminded.push(key);
+                due.push(format!("{} — {}", block.title, clock(at)));
+            }
+        }
+        // The hour's cap also covers the Mac sleeping and the clocks changing.
+        (due, self.wake.map_or(3600, |wake| (wake - now).clamp(1, 3600)) as u64)
+    }
+}
+
 /// What an item opens.
 enum Open {
     /// A prayer or another text, with where its wording comes from.
@@ -43,13 +107,16 @@ enum Open {
     Read(ChapterIdx, Option<u8>),
     /// The Jesus Prayer's counter, up to this many.
     Count(u16),
-    /// A reading plan that isn't under way.
+    /// A reading plan never started.
     Start(&'static str),
     /// The day's Epistle and Gospel and the Fathers on it wait for the daily lectionary, which is
     /// built separately: with it, `resolve` opens the readings in the reader and the Fathers
     /// panel on the Gospel.
     Soon,
     Nothing,
+    /// Nothing to do on this day (no kathisma on Sunday evening): no check box, and it counts
+    /// as done.
+    NotToday,
 }
 
 impl Open {
@@ -60,28 +127,79 @@ impl Open {
             Open::Read(..) => "Read",
             Open::Start(_) => "Start plan",
             Open::Soon => "Coming soon",
-            Open::Nothing => return None,
+            Open::Nothing | Open::NotToday => return None,
         })
     }
 }
 
-/// The line under a kathisma item: the day's kathismata at Matins (the morning block) or at
-/// Vespers (any other).
+/// The day's kathismata for a kathisma item: at Matins in the morning block (or any block
+/// before noon), at Vespers in the others.
 fn kathismata(block: &Block, d: Day) -> &'static [u8] {
     let (matins, vespers) = calendar::kathismata(calendar::weekday(d));
-    if block.id == "morning" { matins } else { vespers }
+    let before_noon = block.time.as_deref().and_then(minutes).is_some_and(|m| m < 12 * 60);
+    if block.id == "morning" || before_noon { matins } else { vespers }
 }
 
-/// What `item` (in `block`) opens on day `d`, and the line under its title.
+/// The reading plans under way that the rule's items follow, with their progress.
+pub(super) fn following<'a>(rule: &Rule, started: &'a [PlanProgress], study: &StudyStore) -> Vec<Under<'a>> {
+    let followed = |id: &str| {
+        let mut items = rule.blocks.iter().flat_map(|b| &b.items);
+        items.any(|i| matches!(&i.kind, Kind::Plan { plan } if plan == id))
+    };
+    started
+        .iter()
+        .filter(|s| s.finished.is_none() && followed(&s.id))
+        .filter_map(|s| Some(Under::new(plans::get(&s.id)?, s, study)))
+        .collect()
+}
+
+/// The day of a plan's reading that falls on day `d` (as the Reading plans row has it), if any.
+pub(super) fn plan_day(u: &Under<'_>, d: Day, today: Day) -> Option<usize> {
+    let day = u.today as i64 + (d - today);
+    (1..=u.plan.len() as i64).contains(&day).then_some(day as usize)
+}
+
+/// The ids of day `d`'s items that follow a plan whose reading for that day is read: those are
+/// done without a tick of their own.
+pub(super) fn plans_read(rule: &Rule, d: Day, style: Style, today: Day, under: &[Under<'_>]) -> Vec<String> {
+    let read = |plan: &str| {
+        under.iter().any(|u| u.plan.id == plan && plan_day(u, d, today).is_some_and(|day| u.day_done(day)))
+    };
+    let mut items = rule.for_day(d, style).into_iter().flat_map(|(_, items)| items);
+    items.filter(|i| matches!(&i.kind, Kind::Plan { plan } if read(plan))).map(|i| i.id.clone()).collect()
+}
+
+/// The ids of day `d`'s items with nothing to do then (the kathisma on Sunday evening): they
+/// count as done for `Rule::kept` and the reminders.
+pub(super) fn idle(rule: &Rule, d: Day, style: Style) -> Vec<String> {
+    let mut out = Vec::new();
+    for (block, items) in rule.for_day(d, style) {
+        let none = kathismata(block, d).is_empty();
+        out.extend(items.into_iter().filter(|i| none && i.kind == Kind::Kathisma).map(|i| i.id.clone()));
+    }
+    out
+}
+
+/// A plan's day that an item follows: its box ticks the day's readings, and it's done once
+/// they're read.
+struct PlanDay {
+    plan: &'static str,
+    day: usize,
+    passages: usize,
+}
+
+/// What `item` (in `block`) opens on day `d` (`today` being today), the line under its title,
+/// and the plan's day it follows, if it's a plan's.
 fn resolve(
     item: &Item,
     block: &Block,
-    d: Day,
-    env: &PageEnv<'_>,
+    (d, today): (Day, Day),
     t: Option<&Translation>,
     started: &[PlanProgress],
-) -> (Open, String) {
+    under: &[Under<'_>],
+) -> (Open, String, Option<PlanDay>) {
     let mut detail = item.note.clone();
+    let mut follows = None;
     let open = match &item.kind {
         Kind::Prayers { prayer, text } => match (prayer.as_deref().and_then(prayers::get), text) {
             (Some(p), _) => Open::Text { text: p.text.into(), source: p.source.into() },
@@ -93,7 +211,7 @@ fn resolve(
         Kind::Kathisma => {
             let ks = kathismata(block, d);
             detail = match ks {
-                [] => "No kathisma on Sunday evening".into(),
+                [] => return (Open::NotToday, "No kathisma on Sunday evening".into(), None),
                 [k] => format!("Kathisma {k} · {}", calendar::kathisma_psalms(*k)),
                 [first @ .., last] => {
                     let first: Vec<String> = first.iter().map(u8::to_string).collect();
@@ -105,34 +223,47 @@ fn resolve(
                 .and_then(|(b, c)| ChapterIdx::new(b, c))
                 .map_or(Open::Nothing, |c| Open::Read(c, None))
         }
-        Kind::Psalm { lxx } => lxx::from_lxx(*lxx, 1)
-            .and_then(|(b, c, _)| ChapterIdx::new(b, c))
-            .map_or(Open::Nothing, |c| Open::Read(c, None)),
-        Kind::Plan { plan } => match plans::get(plan) {
-            None => Open::Nothing,
-            Some(p) => match started.iter().find(|s| s.id == p.id && s.finished.is_none()) {
-                // The next day not yet read, at its first passage not yet read.
-                Some(s) => {
-                    let u = super::plans::Under::new(p, s, env);
-                    match (1..=p.len()).find(|day| !u.day_done(*day)) {
-                        Some(day) => {
-                            detail = format!("Day {day} · {}", super::plans::day_label(p.day(day), t));
-                            let i = (0..p.day(day).len()).find(|i| !u.passage_done(day, *i)).unwrap_or(0);
-                            p.day(day)
-                                .get(i)
-                                .map_or(Open::Nothing, |ps| Open::Read(ps.chapter, ps.verses.map(|(a, _)| a)))
-                        }
-                        None => {
-                            detail = "Every day read".into();
-                            Open::Nothing
-                        }
+        Kind::Psalm { lxx } => {
+            // The number as the reader shows it, when the title has another (the starter's
+            // Psalm 90 is 91 in the Hebrew numbering).
+            let n = shown_psalm(*lxx).to_string();
+            if !item.title.split(|c: char| !c.is_ascii_digit()).any(|w| w == n) {
+                let psalm = format!("Psalm {n}");
+                detail = if detail.is_empty() { psalm } else { format!("{psalm} · {detail}") };
+            }
+            lxx::from_lxx(*lxx, 1)
+                .and_then(|(b, c, _)| ChapterIdx::new(b, c))
+                .map_or(Open::Nothing, |c| Open::Read(c, None))
+        }
+        Kind::Plan { plan } => match (plans::get(plan), started.iter().find(|s| s.id == *plan)) {
+            (None, _) => Open::Nothing,
+            (Some(p), None) => {
+                detail = format!("{} · Not started", p.title);
+                Open::Start(p.id)
+            }
+            // Ticked like any other item; reading it again starts on the Plans page.
+            (Some(p), Some(s)) if s.finished.is_some() => {
+                detail = format!("{} · Finished", p.title);
+                Open::Nothing
+            }
+            // The plan's reading for the day, at its first passage not yet read.
+            (Some(p), Some(_)) => {
+                let u = under.iter().find(|u| u.plan.id == p.id);
+                match u.and_then(|u| Some((u, plan_day(u, d, today)?))) {
+                    Some((u, day)) => {
+                        detail = format!("Day {day} · {}", super::plans::day_label(p.day(day), t));
+                        follows = Some(PlanDay { plan: p.id, day, passages: p.day(day).len() });
+                        let i = (0..p.day(day).len()).find(|i| !u.passage_done(day, *i)).unwrap_or(0);
+                        p.day(day)
+                            .get(i)
+                            .map_or(Open::Nothing, |ps| Open::Read(ps.chapter, ps.verses.map(|(a, _)| a)))
+                    }
+                    None => {
+                        detail = format!("{} · No reading on this day", p.title);
+                        Open::Nothing
                     }
                 }
-                None => {
-                    detail = format!("{} · Not started", p.title);
-                    Open::Start(p.id)
-                }
-            },
+            }
         },
         Kind::Readings | Kind::Fathers => Open::Soon,
         Kind::JesusPrayer { count } => {
@@ -146,7 +277,7 @@ fn resolve(
     if item.optional {
         detail = if detail.is_empty() { "Optional".into() } else { format!("{detail} · Optional") };
     }
-    (open, detail)
+    (open, detail, follows)
 }
 
 /// The rule's blocks for day `d` from `top`, in a column `width` wide at `left`; returns the
@@ -170,10 +301,12 @@ pub fn section(
     let (_, r) =
         edit.show_right(ui, p, left + width - 12.0 + edit.rest_inset(), top + 8.0, ui.id().with("edit-rule"));
     if r.clicked() {
-        *view = Some(View::Edit(Box::new(super::rule_editor::Editor::new(rule.clone()))));
+        let editor = super::rule_editor::Editor::new(rule.clone(), env.settings.rule_reminders);
+        *view = Some(View::Edit(Box::new(editor)));
     }
     let mut y = top + 26.0;
-    let blocks = rule.for_day(d, env.settings.calendar);
+    let style = env.settings.calendar;
+    let blocks = rule.for_day(d, style);
     if blocks.is_empty() {
         text(
             &painter,
@@ -187,42 +320,44 @@ pub fn section(
         );
         return y + 20.0;
     }
-    let done: HashSet<String> = env.study.rule_done(d);
+    let today = super::today::today();
     let t = super::reading_text(env);
     let started = env.study.plans();
+    let under = following(rule, &started, env.study);
+    let mut done: HashSet<String> = env.study.rule_done(d);
+    done.extend(plans_read(rule, d, style, today, &under));
     for (i, (block, items)) in blocks.iter().enumerate() {
         if i > 0 {
             y += 14.0;
         }
-        let w = text(&painter, left + 12.0, y, 24.0, &block.title, theme::ui_semibold(15.0), p.ink, false);
-        if let Some(at) = block.time.as_deref().and_then(minutes) {
-            text(
-                &painter,
-                left + 12.0 + w + 8.0,
-                y + 2.0,
-                20.0,
-                &clock(at),
-                theme::ui_font(13.0),
-                p.ink_3,
-                false,
-            );
+        // The name, shortened to leave room for the time after it.
+        let at = block.time.as_deref().and_then(minutes).map(clock);
+        let tw = at.as_ref().map_or(0.0, |at| {
+            8.0 + painter.layout_no_wrap(at.clone(), theme::ui_font(13.0), p.ink_3).size().x
+        });
+        let name = super::elide(&painter, &block.title, &theme::ui_semibold(15.0), width - 24.0 - tw);
+        let w = text(&painter, left + 12.0, y, 24.0, &name, theme::ui_semibold(15.0), p.ink, false);
+        if let Some(at) = at {
+            text(&painter, left + 12.0 + w + 8.0, y + 2.0, 20.0, &at, theme::ui_font(13.0), p.ink_3, false);
         }
         y += 28.0;
         for item in items {
-            let (open, detail) = resolve(item, block, d, env, t.as_deref(), &started);
+            let (open, detail, follows) = resolve(item, block, (d, today), t.as_deref(), &started, &under);
             let row = Rect::from_min_size(pos2(left, y), vec2(width, 48.0));
             let id = ui.id().with(("rule-item", &item.id));
-            let resp = ui.interact(row, id, Sense::click());
-            if ui.rect_contains_pointer(row) {
+            let idle = matches!(open, Open::NotToday);
+            let resp = ui.interact(row, id, if idle { Sense::hover() } else { Sense::click() });
+            if !idle && ui.rect_contains_pointer(row) {
                 painter.rect_filled(
                     row,
                     10.0,
                     if resp.is_pointer_button_down_on() { p.fill_strong } else { p.fill },
                 );
             }
+            widgets::focus_ring(&painter, p, &resp, row, 10.0);
             let is_done = done.contains(&item.id);
             let b = Rect::from_min_size(pos2(row.left() + 12.0, row.center().y - 8.0), vec2(16.0, 16.0));
-            let tick = widgets::tick(ui, p, b, is_done, id.with("tick"));
+            let tick = (!idle).then(|| widgets::tick(ui, p, b, is_done, id.with("tick")));
             let x = b.right() + 12.0;
             let label = open.label(&item.kind);
             let mut room = row.right() - 12.0 - x;
@@ -241,9 +376,17 @@ pub fn section(
                 let detail = super::elide(&painter, &detail, &theme::ui_font(12.0), room);
                 text(&painter, x, row.top() + 25.0, 18.0, &detail, theme::ui_font(12.0), p.ink_3, false);
             }
-            if tick.clicked() {
-                actions.push(Action::SetRuleDone { day: d, item: item.id.clone(), done: !is_done });
-            } else if resp.on_hover_cursor(egui::CursorIcon::PointingHand).clicked() {
+            if tick.is_some_and(|t| t.clicked()) {
+                // A plan's item ticks the plan's readings for the day, which say whether it's done.
+                if let Some(pd) = &follows {
+                    for i in 0..pd.passages {
+                        let (plan, day, passage) = (pd.plan.to_string(), pd.day as u16, i as u8);
+                        actions.push(Action::SetPlanRead { plan, day, passage, read: !is_done });
+                    }
+                }
+                let done = !is_done && follows.is_none();
+                actions.push(Action::SetRuleDone { day: d, item: item.id.clone(), done });
+            } else if !idle && resp.on_hover_cursor(egui::CursorIcon::PointingHand).clicked() {
                 activate(open, item, d, is_done, view, actions);
                 ui.ctx().request_repaint();
             }
@@ -265,6 +408,7 @@ fn activate(open: Open, item: &Item, d: Day, done: bool, view: &mut Option<View>
         }
         Open::Start(plan) => actions.push(Action::StartPlan(plan.to_string())),
         Open::Soon | Open::Nothing => actions.push(Action::SetRuleDone { day, item: id, done: !done }),
+        Open::NotToday => {}
     }
 }
 
@@ -278,9 +422,12 @@ pub fn open_item(
     actions: &mut Vec<Action>,
 ) {
     let t = super::reading_text(env);
+    let started = env.study.plans();
+    let under = following(rule, &started, env.study);
     for (block, items) in rule.for_day(d, env.settings.calendar) {
         if let Some(item) = items.into_iter().find(|i| i.id == id) {
-            let (open, _) = resolve(item, block, d, env, t.as_deref(), &env.study.plans());
+            let today = super::today::today();
+            let (open, _, _) = resolve(item, block, (d, today), t.as_deref(), &started, &under);
             activate(open, item, d, env.study.rule_done(d).contains(id), view, actions);
         }
     }
@@ -298,7 +445,8 @@ pub enum View {
 
 impl View {
     /// Draws the view in the page's `content`; returns its bottom and whether to go back to
-    /// Today.
+    /// Today. Escape goes back too, unless a field has the keyboard or the editor has changes
+    /// to lose.
     pub fn show(
         &mut self,
         ui: &mut Ui,
@@ -306,30 +454,37 @@ impl View {
         env: &PageEnv<'_>,
         actions: &mut Vec<Action>,
     ) -> (f32, bool) {
-        match self {
+        let escape = !ui.ctx().egui_wants_keyboard_input()
+            && ui.input_mut(|i| i.consume_key(Modifiers::NONE, Key::Escape));
+        let (bottom, back) = match self {
             View::Text { day, item, title, text, source } => {
                 reading(ui, content, env, (*day, item.as_str()), title, text, source, actions)
             }
             View::Count { day, item, title, target, n } => {
                 counter(ui, content, env, (*day, item.as_str()), title, *target, n, actions)
             }
-            View::Edit(editor) => editor.show(ui, content, env, actions),
-        }
+            View::Edit(editor) => {
+                let (bottom, back) = editor.show(ui, content, env, actions);
+                (bottom, back || escape && !editor.changed())
+            }
+        };
+        (bottom, back || escape && !matches!(self, View::Edit(_)))
     }
 }
 
-/// "Today › title" at the top of a view; returns whether "Today" was clicked.
-pub fn crumb(ui: &mut Ui, p: &Palette, left: f32, top: f32, title: &str) -> bool {
+/// "Today › title" at the top of a view, the title shortened to `width`; returns whether
+/// "Today" was clicked.
+pub fn crumb(ui: &mut Ui, p: &Palette, left: f32, top: f32, width: f32, title: &str) -> bool {
     let painter = ui.painter().clone();
     let w = text(&painter, left, top, 16.0, "Today", theme::ui_medium(13.0), p.accent, false);
     let link = Rect::from_min_size(pos2(left, top), vec2(w, 16.0));
-    let clicked = ui
-        .interact(link, ui.id().with("crumb"), Sense::click())
-        .on_hover_cursor(egui::CursorIcon::PointingHand)
-        .clicked();
+    let resp = ui.interact(link, ui.id().with("crumb"), Sense::click());
+    widgets::focus_ring(&painter, p, &resp, link.expand(2.0), 4.0);
+    let clicked = resp.on_hover_cursor(egui::CursorIcon::PointingHand).clicked();
     let chev = Rect::from_min_size(pos2(left + w + 6.0, top + 2.0), vec2(12.0, 12.0));
     icons::disclosure(&painter, chev, p.ink_3);
-    text(&painter, chev.right() + 6.0, top, 16.0, title, theme::ui_medium(13.0), p.ink_2, false);
+    let title = super::elide(&painter, title, &theme::ui_medium(13.0), left + width - chev.right() - 6.0);
+    text(&painter, chev.right() + 6.0, top, 16.0, &title, theme::ui_medium(13.0), p.ink_2, false);
     clicked
 }
 
@@ -348,14 +503,18 @@ fn reading(
 ) -> (f32, bool) {
     let p = env.settings.theme.palette();
     let painter = ui.painter().clone();
-    let mut back = crumb(ui, p, content.left(), content.top(), title);
+    let mut back = crumb(ui, p, content.left(), content.top(), content.width(), title);
     let measure = content.width().min(560.0);
     let x = content.center().x - measure / 2.0;
     let mut y = content.top() + 64.0;
-    let g =
-        widgets::line(&painter, title, FontId::new(28.0, theme::family(theme::SERIF_HEADING)), p.ink, -0.01);
-    paint_on_baseline(&painter, x, css_baseline(y, 36.0, 28.0, true), g, p.ink);
-    y += 36.0 + 24.0;
+    // The title, on as many lines as it needs.
+    let heading = FontId::new(28.0, theme::family(theme::SERIF_HEADING));
+    for mut runs in widgets::flow(&painter, title, &heading, 28.0, measure, 4) {
+        runs.iter_mut().for_each(|r| r.tracking -= 0.01);
+        widgets::paint_runs(&painter, x, widgets::css_baseline(y, 36.0, 28.0, true), &runs, p.ink);
+        y += 36.0;
+    }
+    y += 24.0;
     let size = env.settings.typo.size;
     let mut job = egui::text::LayoutJob::simple(
         body.to_string(),
@@ -400,7 +559,7 @@ fn counter(
 ) -> (f32, bool) {
     let p = env.settings.theme.palette();
     let painter = ui.painter().clone();
-    let mut back = crumb(ui, p, content.left(), content.top(), title);
+    let mut back = crumb(ui, p, content.left(), content.top(), content.width(), title);
     let cx = content.center().x;
     let mut y = content.top() + 64.0;
     let mut job = egui::text::LayoutJob::simple(
@@ -428,7 +587,13 @@ fn counter(
     } else if !finished && resp.hovered() {
         painter.circle_filled(c, radius, p.fill);
     }
-    let space = !finished && ui.input_mut(|i| i.consume_key(Modifiers::NONE, Key::Space));
+    if resp.has_focus() {
+        painter.circle_stroke(c, radius + 1.5, egui::Stroke::new(3.0, p.focus));
+    }
+    // Space counts unless a field (the toolbar's search) is being typed in.
+    let space = !finished
+        && !ui.ctx().egui_wants_keyboard_input()
+        && ui.input_mut(|i| i.consume_key(Modifiers::NONE, Key::Space));
     if !finished && (resp.clicked() || space) {
         *n += 1;
         if *n >= target {

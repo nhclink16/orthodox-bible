@@ -8,9 +8,9 @@ use std::collections::{HashMap, HashSet};
 use eframe::egui::{self, Color32, Id, Rect, Sense, Stroke, StrokeKind, Ui, pos2, vec2};
 
 use bible_core::rule::{Block, Item, Kind, Rule, Season};
-use bible_core::{BookId, lxx, plans, prayers};
+use bible_core::{lxx, plans, prayers};
 
-use super::rule::{clock, crumb, minutes};
+use super::rule::{clock, crumb, minutes, shown_psalm};
 use super::{PageEnv, text};
 use crate::actions::Action;
 use crate::icons;
@@ -46,6 +46,9 @@ pub struct Editor {
     open: Option<String>,
     /// Numbers as typed (a psalm, a count), by item id, kept while they don't read as numbers.
     numbers: HashMap<String, String>,
+    /// The reminders switch, and how it was: a draft like the rest.
+    reminders: bool,
+    saved_reminders: bool,
 }
 
 /// A block being edited, with its time as typed.
@@ -82,6 +85,10 @@ fn typed_time(s: &str) -> Option<Option<String>> {
     if s.is_empty() {
         return Some(None);
     }
+    // Digits and separators only, so the split below falls between characters.
+    if !s.bytes().all(|b| b.is_ascii_digit() || b == b':' || b == b'.') {
+        return None;
+    }
     let (h, m) = match s.split_once([':', '.']) {
         Some(hm) => hm,
         None if s.len() > 2 => s.split_at(s.len() - 2),
@@ -102,15 +109,7 @@ fn new_id(prefix: &str, taken: &HashSet<String>) -> String {
         .unwrap_or_default()
 }
 
-/// A psalm's Septuagint number in the numbering the app shows, and back.
-fn shown_psalm(n: u8) -> u8 {
-    match lxx::from_lxx(n, 1) {
-        _ if lxx::numbering() => n,
-        Some((b, c, _)) if b == BookId::PSALMS => c,
-        _ => n,
-    }
-}
-
+/// A psalm number as the app shows it, in the Septuagint numbering.
 fn lxx_psalm(shown: u8) -> u8 {
     if lxx::numbering() || shown >= 151 { shown } else { lxx::to_lxx(shown, 1).0 }
 }
@@ -133,6 +132,18 @@ fn new_item(k: usize) -> (String, Kind, &'static str) {
         7 => ("Examination of conscience".into(), Kind::Reflection, "Before sleep"),
         _ => ("Something else".into(), Kind::Other, ""),
     }
+}
+
+/// The title an item of `kind` starts with. While it's still the title, it follows the psalm,
+/// plan or prayer chosen; a title typed stays.
+fn default_title(kind: &Kind) -> Option<String> {
+    Some(match kind {
+        Kind::Prayers { prayer: Some(id), .. } => prayers::get(id)?.title.into(),
+        Kind::Prayers { .. } => "Prayers".into(),
+        Kind::Psalm { lxx } => format!("Psalm {}", shown_psalm(*lxx)),
+        Kind::Plan { plan } => plans::get(plan)?.title.into(),
+        _ => return None,
+    })
 }
 
 fn prayer_choice(prayer: &Option<String>, own: &Option<String>) -> String {
@@ -211,8 +222,21 @@ fn number_field(
 }
 
 impl Editor {
-    pub fn new(rule: Rule) -> Self {
-        Self { blocks: drafts(&rule), saved: rule, open: None, numbers: HashMap::new() }
+    /// The editor for `rule`, with the reminders on or off.
+    pub fn new(rule: Rule, reminders: bool) -> Self {
+        Self {
+            blocks: drafts(&rule),
+            saved: rule,
+            open: None,
+            numbers: HashMap::new(),
+            reminders,
+            saved_reminders: reminders,
+        }
+    }
+
+    /// Something would be lost by leaving without saving.
+    pub fn changed(&self) -> bool {
+        self.rule().is_none_or(|r| r != self.saved) || self.reminders != self.saved_reminders
     }
 
     /// Opens the item `id` (demo captures).
@@ -250,11 +274,13 @@ impl Editor {
         let left = content.left();
         let width = content.width().min(640.0);
         let right = left + width;
-        let mut close = crumb(ui, p, left, content.top(), "Your rule");
+        let mut close = crumb(ui, p, left, content.top(), width, "Your rule");
         let top = content.top() + 36.0;
         super::title(&painter, p, left, top, "Your rule", "Changes to your rule apply when you save.");
+        // Saved only while every time reads as one.
         let edited = self.rule();
-        let changed = edited.as_ref().is_some_and(|r| *r != self.saved);
+        let switched = self.reminders != self.saved_reminders;
+        let changed = edited.as_ref().is_some_and(|r| *r != self.saved || switched);
         let (save, resp) = Button::new(ButtonKind::Primary, "Save").enabled(changed).show_right(
             ui,
             p,
@@ -265,7 +291,12 @@ impl Editor {
         if resp.clicked()
             && let Some(rule) = edited
         {
-            actions.push(Action::SaveRule(Box::new(rule)));
+            if rule != self.saved {
+                actions.push(Action::SaveRule(Box::new(rule)));
+            }
+            if switched {
+                actions.push(Action::SetRuleReminders(self.reminders));
+            }
             close = true;
         }
         close |= Button::new(ButtonKind::Plain, "Cancel")
@@ -279,13 +310,11 @@ impl Editor {
         painter.rect_filled(card, 12.0, p.surface);
         painter.rect_stroke(card, 12.0, Stroke::new(0.5, p.border), StrokeKind::Outside);
         text(&painter, left + 16.0, y + 12.0, 20.0, "Reminders", theme::ui_medium(13.0), p.ink, false);
-        let note = "At each block's time, while the app is open";
-        text(&painter, left + 16.0, y + 32.0, 16.0, note, theme::ui_font(12.0), p.ink_3, false);
-        let mut on = env.settings.rule_reminders;
+        let note = "A message in the app at each block's time, while it's open";
+        let note = super::elide(&painter, note, &theme::ui_font(12.0), width - 32.0 - 40.0 - 12.0);
+        text(&painter, left + 16.0, y + 32.0, 16.0, &note, theme::ui_font(12.0), p.ink_3, false);
         let at = pos2(card.right() - 16.0, card.center().y);
-        if widgets::toggle(ui, p, at, ui.id().with("rule-reminders"), &mut on).clicked() {
-            actions.push(Action::SetRuleReminders(on));
-        }
+        widgets::toggle(ui, p, at, ui.id().with("rule-reminders"), &mut self.reminders);
         y = card.bottom() + 24.0;
 
         // The blocks, each a card.
@@ -296,7 +325,10 @@ impl Editor {
             let bg = painter.add(egui::Shape::Noop);
             let card_top = y;
             let cy = y + 28.0;
-            let field = Rect::from_min_size(pos2(left + 16.0, cy - 16.0), vec2(220.0, 32.0));
+            // The name and time fields share what the arrows leave.
+            let room = width - 16.0 - 8.0 - 3.0 * 32.0 - 16.0;
+            let time_w = 104.0f32.min(room * 0.4);
+            let field = Rect::from_min_size(pos2(left + 16.0, cy - 16.0), vec2((room - 8.0 - time_w).min(220.0), 32.0));
             let id = Id::new(("rule-block", &draft.block.id));
             widgets::text_field(
                 ui,
@@ -309,7 +341,7 @@ impl Editor {
                 false,
                 id.with("title"),
             );
-            let clock_field = Rect::from_min_size(pos2(field.right() + 8.0, cy - 16.0), vec2(104.0, 32.0));
+            let clock_field = Rect::from_min_size(pos2(field.right() + 8.0, cy - 16.0), vec2(time_w, 32.0));
             let bad = typed_time(&draft.time).is_none();
             let icon = Some(icons::clock as widgets::IconFn);
             widgets::text_field(
@@ -323,18 +355,21 @@ impl Editor {
                 bad,
                 id.with("time"),
             );
+            // What a time looks like: beside the fields when there's room before the arrows,
+            // else under them.
+            let mut below = 0.0;
             if bad {
                 let hint = "A time like 7:00 or 20:30";
-                text(
-                    &painter,
-                    clock_field.right() + 12.0,
-                    cy - 8.0,
-                    16.0,
-                    hint,
-                    theme::ui_font(12.0),
-                    p.danger,
-                    false,
-                );
+                let hw = painter.layout_no_wrap(hint.into(), theme::ui_font(12.0), p.danger).size().x;
+                let end = right - 16.0 - 3.0 * 32.0 - 8.0;
+                let (hx, hy) = if clock_field.right() + 12.0 + hw <= end {
+                    (clock_field.right() + 12.0, cy - 8.0)
+                } else {
+                    below = 22.0;
+                    let x = if clock_field.left() + hw <= end { clock_field.left() } else { left + 16.0 };
+                    (x, clock_field.bottom() + 6.0)
+                };
+                text(&painter, hx, hy, 16.0, hint, theme::ui_font(12.0), p.danger, false);
             }
             if let Some(c) = arrows(ui, p, right - 16.0, cy, id, bi, count) {
                 change = Some(match c {
@@ -343,7 +378,7 @@ impl Editor {
                     Arrow::Remove => Change::RemoveBlock(bi),
                 });
             }
-            y += 56.0;
+            y += 56.0 + below;
 
             let items = draft.block.items.len();
             for (ii, item) in draft.block.items.iter_mut().enumerate() {
@@ -547,11 +582,12 @@ fn item_fields(
         let s = super::elide(&painter, s, &theme::ui_font(13.0), w);
         text(&painter, x, y + 12.0, 20.0, &s, theme::ui_font(13.0), p.ink_3, false);
     };
+    let was = default_title(&item.kind);
     match &mut item.kind {
         Kind::Prayers { prayer, text: own } => {
             label(y, "Prayer");
             let value = prayer_choice(prayer, own);
-            let resp = widgets::select_field(ui, p, row(y, 260.0), &value, None, id.with("prayer"));
+            let resp = widgets::select_field(ui, p, row(y, w.min(260.0)), &value, None, id.with("prayer"));
             crate::menu::popup(&resp, p).show(|ui| {
                 ui.set_min_width(260.0);
                 for pr in prayers::all() {
@@ -581,15 +617,15 @@ fn item_fields(
             number_field(ui, p, row(y, 72.0), numbers, format!("{}:psalm", item.id), &mut n, 1..=151);
             *lxx = lxx_psalm(n as u8);
             if lxx::numbering() {
-                let hint = "Septuagint numbering";
-                text(&painter, x + 72.0 + 12.0, y + 12.0, 20.0, hint, theme::ui_font(12.0), p.ink_3, false);
+                let hint = super::elide(&painter, "Septuagint numbering", &theme::ui_font(12.0), w - 84.0);
+                text(&painter, x + 72.0 + 12.0, y + 12.0, 20.0, &hint, theme::ui_font(12.0), p.ink_3, false);
             }
             y += 44.0;
         }
         Kind::Plan { plan } => {
             label(y, "Plan");
             let value = plans::get(plan).map_or(plan.as_str(), |p| p.title).to_string();
-            let resp = widgets::select_field(ui, p, row(y, 300.0), &value, None, id.with("plan"));
+            let resp = widgets::select_field(ui, p, row(y, w.min(300.0)), &value, None, id.with("plan"));
             crate::menu::popup(&resp, p).show(|ui| {
                 ui.set_min_width(300.0);
                 for pl in plans::catalogue() {
@@ -606,7 +642,7 @@ fn item_fields(
             y += 44.0;
         }
         Kind::Kathisma => {
-            about(y, "At Matins in your morning block, at Vespers in the others.");
+            about(y, "At Matins in a block before noon, at Vespers in the others.");
             y += 44.0;
         }
         Kind::Readings => {
@@ -623,25 +659,55 @@ fn item_fields(
         }
         Kind::Other => {}
     }
+    let now = default_title(&item.kind);
+    if now != was
+        && was.as_deref() == Some(item.title.trim())
+        && let Some(title) = now
+    {
+        item.title = title;
+    }
 
+    // The season: a segmented control, or a menu where that doesn't fit.
     label(y, "When");
     let labels: Vec<&str> = SEASONS.iter().map(|(_, l)| *l).collect();
     let selected = SEASONS.iter().position(|(s, _)| *s == item.season).unwrap_or(0);
     let sw = segmented_width(ui, &labels, selected);
-    let (_, pick) =
-        widgets::segmented_tight(ui, p, pos2(x + sw, y + 22.0), id.with("season"), &labels, selected);
-    if let Some(i) = pick {
-        item.season = SEASONS[i].0;
+    if sw <= w {
+        let (_, pick) =
+            widgets::segmented_tight(ui, p, pos2(x + sw, y + 22.0), id.with("season"), &labels, selected);
+        if let Some(i) = pick {
+            item.season = SEASONS[i].0;
+        }
+    } else {
+        let resp = widgets::select_field(ui, p, row(y, w), labels[selected], None, id.with("season"));
+        crate::menu::popup(&resp, p).show(|ui| {
+            for (season, l) in SEASONS {
+                if ui.selectable_label(item.season == season, l).clicked() {
+                    item.season = season;
+                }
+            }
+        });
     }
     y += 44.0;
     let b = Rect::from_min_size(pos2(x, y + 6.0), vec2(16.0, 16.0));
     if widgets::checkbox(ui, p, b, item.optional, "Optional").clicked() {
         item.optional = !item.optional;
     }
+    // What optional means: after the box, or under it when there isn't room.
     let lw = painter.layout_no_wrap("Optional".into(), theme::text::UI.font(), p.ink).size().x;
     let hint = "Done or not, it doesn't decide whether the day was kept";
-    text(&painter, b.right() + 8.0 + lw + 12.0, y + 4.0, 20.0, hint, theme::ui_font(12.0), p.ink_3, false);
-    y + 36.0
+    let font = theme::ui_font(12.0);
+    let hx = b.right() + 8.0 + lw + 12.0;
+    if painter.layout_no_wrap(hint.into(), font.clone(), p.ink_3).size().x <= right - 16.0 - hx {
+        text(&painter, hx, y + 4.0, 20.0, hint, font, p.ink_3, false);
+        return y + 36.0;
+    }
+    let lines = widgets::flow(&painter, hint, &font, 12.0, w, 3);
+    for (i, runs) in lines.iter().enumerate() {
+        let base = widgets::css_baseline(y + 30.0 + 18.0 * i as f32, 18.0, 12.0, false);
+        widgets::paint_runs(&painter, x, base, runs, p.ink_3);
+    }
+    y + 36.0 + 18.0 * lines.len() as f32
 }
 
 /// A field for the person's own prayer: several lines, as tall as the words need.
@@ -692,14 +758,29 @@ mod tests {
         assert_eq!(typed_time("  "), Some(None));
         assert_eq!(typed_time("25:00"), None);
         assert_eq!(typed_time("noon"), None);
+        // Characters of more than one byte don't split the string mid-character.
+        for s in ["•", "é7", "–", "7:3–", "١٢"] {
+            assert_eq!(typed_time(s), None, "{s}");
+        }
         assert_eq!(minutes("20:30"), Some(20 * 60 + 30));
         assert_eq!((clock(7 * 60), clock(20 * 60 + 30)), ("7:00".into(), "20:30".into()));
     }
 
     #[test]
+    fn new_items_start_with_the_title_that_follows_their_choice() {
+        for k in [0, 2, 4] {
+            let (title, kind, _) = new_item(k);
+            assert_eq!(default_title(&kind), Some(title));
+        }
+    }
+
+    #[test]
     fn an_unchanged_rule_saves_as_it_was_and_new_ids_are_new() {
-        let editor = Editor::new(Rule::starter());
+        let mut editor = Editor::new(Rule::starter(), false);
         assert_eq!(editor.rule(), Some(Rule::starter()));
+        assert!(!editor.changed());
+        editor.reminders = true;
+        assert!(editor.changed(), "the reminders switch is part of the draft");
         let taken = editor.taken();
         assert!(taken.contains("morning") && taken.contains("evening-kathisma"));
         assert!(!taken.contains(&new_id("item", &taken)));

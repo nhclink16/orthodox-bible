@@ -54,9 +54,11 @@ pub struct State {
     /// has closed.
     scrolled: f32,
     restore: Option<f32>,
+    /// A day was picked lower down the page (the month, Coming up): show it from the top.
+    to_top: bool,
 }
 
-fn today() -> Day {
+pub(super) fn today() -> Day {
     let t = crate::time::local(bible_core::study::now());
     calendar::civil(t.year, t.month, t.day)
 }
@@ -159,6 +161,11 @@ impl State {
         matches!(self.view, Some(View::Count { .. }))
     }
 
+    /// A view is open in the page's place (Escape goes back).
+    pub fn viewing(&self) -> bool {
+        self.view.is_some()
+    }
+
     /// `edit` (or `edit:<item id>`, that item open), `day:<offset>`, `count:<n>` or an item's
     /// id to open it, on the next frame (demo captures).
     pub fn demo(&mut self, step: &str) {
@@ -170,7 +177,7 @@ impl State {
         let (cmd, arg) = step.split_once(':').unwrap_or((&step, ""));
         match cmd {
             "edit" => {
-                let mut editor = super::rule_editor::Editor::new(rule.clone());
+                let mut editor = super::rule_editor::Editor::new(rule.clone(), env.settings.rule_reminders);
                 if !arg.is_empty() {
                     editor.open(arg);
                 }
@@ -199,6 +206,9 @@ impl State {
             scroll_to(ui, offset);
         }
         let bottom = self.page(ui, content, env, actions);
+        if std::mem::take(&mut self.to_top) {
+            scroll_to(ui, 0.0);
+        }
         match (viewing, self.view.is_some()) {
             (false, true) => {
                 self.scrolled = ui.clip_rect().top() - origin;
@@ -296,7 +306,7 @@ impl State {
             }
         }
 
-        // The month stands beside the day when there's room, else after it.
+        // The month stands beside the day when there's room, else after the rule.
         let beside = right - left - MONTH_W - MONTH_GAP >= 440.0;
         let width = if beside { right - left - MONTH_W - MONTH_GAP } else { right - left }.min(640.0);
         let serif = FontId::new(20.0, theme::family(theme::SERIF));
@@ -327,7 +337,12 @@ impl State {
         y = rule_view::section(ui, env, &prayer_rule, left, width, y, d, &mut self.view, actions) + 20.0;
         rule(y);
         y += 20.0;
-        y = self.plans(ui, env, left, width, y, actions) + 20.0;
+        if !beside {
+            y = self.month(ui, env, &prayer_rule, left, y, d) + 20.0;
+            rule(y);
+            y += 20.0;
+        }
+        y = self.plans(ui, env, left, width, y, d, actions) + 20.0;
         rule(y);
         y += 20.0;
 
@@ -395,6 +410,7 @@ impl State {
                         if resp.is_pointer_button_down_on() { p.fill_strong } else { p.fill },
                     );
                 }
+                widgets::focus_ring(&painter, p, &resp, row, 10.0);
                 text(
                     &painter,
                     row.left() + 12.0,
@@ -465,6 +481,7 @@ impl State {
                     if resp.is_pointer_button_down_on() { p.fill_strong } else { p.fill },
                 );
             }
+            widgets::focus_ring(&painter, p, &resp, row, 10.0);
             text(
                 &painter,
                 row.left() + 12.0,
@@ -502,23 +519,22 @@ impl State {
             if resp.on_hover_cursor(eframe::egui::CursorIcon::PointingHand).clicked() {
                 self.offset += n;
                 self.month = None;
+                self.to_top = true;
             }
             y += 36.0;
         }
-        let month_top = ny + 16.0 + 32.0;
         if beside {
-            let bottom = self.month(ui, env, &prayer_rule, right - MONTH_W, month_top, d);
+            let bottom = self.month(ui, env, &prayer_rule, right - MONTH_W, ny + 16.0 + 32.0, d);
             y.max(bottom)
         } else {
-            y += 20.0;
-            rule(y);
-            self.month(ui, env, &prayer_rule, left, y + 20.0, d)
+            y
         }
     }
 
-    /// The reading plans under way, a row each: the plan's passages for the day shown, a check
-    /// box that ticks them all, and Read for the first not yet read. The Plans page has each
-    /// passage on its own, and starts and stops plans.
+    /// The reading plans under way with their passages for day `d`, a row and a check box
+    /// each (the plan and its day under the first), and Read. The Plans page starts and stops
+    /// plans.
+    #[allow(clippy::too_many_arguments)]
     fn plans(
         &mut self,
         ui: &mut Ui,
@@ -526,6 +542,7 @@ impl State {
         left: f32,
         width: f32,
         top: f32,
+        d: Day,
         actions: &mut Vec<Action>,
     ) -> f32 {
         let p = env.settings.theme.palette();
@@ -545,58 +562,45 @@ impl State {
         let mut shown = 0;
         for s in under {
             let Some(plan) = plans::get(&s.id) else { continue };
-            let u = super::plans::Under::new(plan, s, env);
+            let u = super::plans::Under::new(plan, s, env.study);
             // The plan's day on the day shown.
-            let day = (u.today as i64 + self.offset).max(0) as usize;
-            if day < 1 || day > plan.len() {
-                continue;
-            }
+            let Some(day) = rule_view::plan_day(&u, d, today()) else { continue };
             shown += 1;
-            let passages = plan.day(day);
-            let row = Rect::from_min_size(pos2(left, y), vec2(width, 48.0));
-            let id = ui.id().with(("today-plan", plan.id));
-            let resp = ui.interact(row, id, Sense::click());
-            if ui.rect_contains_pointer(row) {
-                let fill = if resp.is_pointer_button_down_on() { p.fill_strong } else { p.fill };
-                painter.rect_filled(row, 10.0, fill);
-            }
-            let done = u.day_done(day);
-            let b = Rect::from_min_size(pos2(row.left() + 12.0, row.center().y - 8.0), vec2(16.0, 16.0));
-            let tick = widgets::tick(ui, p, b, done, id.with("tick"));
-            let x = b.right() + 12.0;
-            let read = text(
-                &painter,
-                right - 12.0,
-                row.top() + 14.0,
-                20.0,
-                "Read",
-                theme::ui_medium(13.0),
-                p.accent,
-                true,
-            );
-            let room = right - 12.0 - read - 16.0 - x;
-            let label = super::elide(
-                &painter,
-                &super::plans::day_label(passages, t.as_deref()),
-                &theme::ui_medium(14.0),
-                room,
-            );
-            text(&painter, x, row.top() + 5.0, 20.0, &label, theme::ui_medium(14.0), p.ink, false);
-            let detail = format!("{} · Day {day} of {}", plan.title, plan.len());
-            let detail = super::elide(&painter, &detail, &theme::ui_font(12.0), room);
-            text(&painter, x, row.top() + 25.0, 18.0, &detail, theme::ui_font(12.0), p.ink_3, false);
-            if tick.clicked() {
-                for i in 0..passages.len() {
+            for (i, ps) in plan.day(day).iter().enumerate() {
+                let h = if i == 0 { 48.0 } else { 36.0 };
+                let row = Rect::from_min_size(pos2(left, y), vec2(width, h));
+                let id = ui.id().with(("today-plan", plan.id, i));
+                let resp = ui.interact(row, id, Sense::click());
+                if ui.rect_contains_pointer(row) {
+                    let fill = if resp.is_pointer_button_down_on() { p.fill_strong } else { p.fill };
+                    painter.rect_filled(row, 10.0, fill);
+                }
+                widgets::focus_ring(&painter, p, &resp, row, 10.0);
+                let done = u.passage_done(day, i);
+                let b = Rect::from_min_size(pos2(row.left() + 12.0, row.center().y - 8.0), vec2(16.0, 16.0));
+                let tick = widgets::tick(ui, p, b, done, id.with("tick"));
+                let x = b.right() + 12.0;
+                let (cy, ty) = (row.center().y - 10.0, row.center().y - 10.0 - if i == 0 { 9.0 } else { 0.0 });
+                let read =
+                    text(&painter, right - 12.0, cy, 20.0, "Read", theme::ui_medium(13.0), p.accent, true);
+                let room = right - 12.0 - read - 16.0 - x;
+                let font = theme::ui_medium(14.0);
+                let label = super::plans::day_label(std::slice::from_ref(ps), t.as_deref());
+                let label = super::elide(&painter, &label, &font, room);
+                text(&painter, x, ty, 20.0, &label, font, p.ink, false);
+                if i == 0 {
+                    let detail = format!("{} · Day {day} of {}", plan.title, plan.len());
+                    let detail = super::elide(&painter, &detail, &theme::ui_font(12.0), room);
+                    text(&painter, x, ty + 20.0, 18.0, &detail, theme::ui_font(12.0), p.ink_3, false);
+                }
+                if tick.clicked() {
                     let (plan, day, passage) = (plan.id.to_string(), day as u16, i as u8);
                     actions.push(Action::SetPlanRead { plan, day, passage, read: !done });
-                }
-            } else if resp.on_hover_cursor(egui::CursorIcon::PointingHand).clicked() {
-                let next = (0..passages.len()).find(|i| !u.passage_done(day, *i)).unwrap_or(0);
-                if let Some(ps) = passages.get(next) {
+                } else if resp.on_hover_cursor(egui::CursorIcon::PointingHand).clicked() {
                     super::plans::open_passage(ps, actions);
                 }
+                y += h;
             }
-            y += 48.0;
         }
         if shown == 0 {
             let none = if started.iter().all(|s| s.finished.is_some()) {
@@ -661,8 +665,9 @@ impl State {
             painter.text(c, Align2::CENTER_CENTER, label, theme::ui_medium(11.0), p.ink_3);
         }
         y += 22.0;
-        let done = env.study.rule_done_between(first, last);
-        let none = HashSet::new();
+        let mut done = env.study.rule_done_between(first, last);
+        let started = env.study.plans();
+        let under = rule_view::following(rule, &started, env.study);
         let cell_h = 46.0;
         for day in first..=last {
             let k = day - first + lead;
@@ -674,6 +679,7 @@ impl State {
             } else if let Some(fill) = widgets::hover_fill(ui, &resp, p, false) {
                 painter.rect_filled(cell.shrink(2.0), 10.0, fill);
             }
+            widgets::focus_ring(&painter, p, &resp, cell.shrink(2.0), 10.0);
             let info = calendar::day(day, style);
             let (_, _, dom) = calendar::civil_date(day);
             let (font, ink) =
@@ -685,10 +691,15 @@ impl State {
             }
             // Nothing on days to come.
             if day <= now {
-                let ticked = done.get(&day).unwrap_or(&none);
-                let (kept, of) = rule.kept(day, style, ticked);
+                // What was ticked, and a plan's item once that day's reading was read; what
+                // had nothing to do that day (Sunday evening's kathisma) counts as kept.
+                let ticked = done.entry(day).or_default();
+                ticked.extend(rule_view::plans_read(rule, day, style, now, &under));
                 let some =
                     rule.for_day(day, style).iter().flat_map(|(_, i)| i).any(|i| ticked.contains(&i.id));
+                let mut kept_or_idle = ticked.clone();
+                kept_or_idle.extend(rule_view::idle(rule, day, style));
+                let (kept, of) = rule.kept(day, style, &kept_or_idle);
                 let c = pos2(cell.center().x, cell.top() + 29.0);
                 if of > 0 && kept == of {
                     painter.circle_filled(c, 2.5, p.accent);
@@ -705,6 +716,7 @@ impl State {
             if resp.on_hover_text(about.join(" · ")).clicked() {
                 self.offset = day - now;
                 self.month = None;
+                self.to_top = true;
                 ui.ctx().request_repaint();
             }
         }

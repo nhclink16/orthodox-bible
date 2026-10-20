@@ -281,11 +281,8 @@ pub struct BibleApp {
     backup_checked: Option<f64>,
     /// The day the plan reminder last showed.
     reminded: Option<i64>,
-    /// The rule's reminders: the minute last checked, the blocks reminded of (day, block id)
-    /// and when to wake for the next block's time (Unix seconds).
-    rule_checked: i64,
-    rule_reminded: Vec<(i64, String)>,
-    rule_wake: Option<i64>,
+    /// The prayer rule's reminders, when they're on.
+    rule_reminders: crate::pages::rule::Reminders,
     /// The page in the main area (the reader unless a library or study page is open).
     pub pages: crate::pages::Pages,
     /// `BIBLE_RS_DEMO`: steps that put the window into a given state (screenshots), one per frame.
@@ -410,9 +407,7 @@ impl BibleApp {
             share_sheet: None,
             compare: None,
             reminded: None,
-            rule_checked: 0,
-            rule_reminded: Vec::new(),
-            rule_wake: None,
+            rule_reminders: Default::default(),
             focus: false,
             focus_reveal: false,
             backup_checked: None,
@@ -496,6 +491,8 @@ impl BibleApp {
         let anywhere = |a: &Action| matches!(a, Action::OpenPalette | Action::OpenSearch(_));
         // The Jesus Prayer's counter on the Today page counts with Space.
         let counting = self.pages.page == crate::pages::Page::Today && self.pages.today.counting();
+        // Escape leaves a prayer, the counter or the rule's editor there.
+        let viewing = self.pages.page == crate::pages::Page::Today && self.pages.today.viewing();
         ctx.input_mut(|i| {
             let cmd = Modifiers::COMMAND;
             let cmd_shift = Modifiers::COMMAND | Modifiers::SHIFT;
@@ -571,7 +568,9 @@ impl BibleApp {
             }
             key(Modifiers::NONE, Key::J, Action::SelectNext);
             key(Modifiers::NONE, Key::K, Action::SelectPrev);
-            key(Modifiers::NONE, Key::Escape, Action::ClearSelection);
+            if !viewing {
+                key(Modifiers::NONE, Key::Escape, Action::ClearSelection);
+            }
             key(Modifiers::NONE, Key::Slash, Action::OpenSearch(None));
             key(Modifiers::SHIFT, Key::Questionmark, Action::ShowShortcuts);
             key(Modifiers::NONE, Key::Questionmark, Action::ShowShortcuts);
@@ -801,8 +800,15 @@ impl BibleApp {
                 if let Err(e) = self.study.set_rule(&rule) {
                     self.toast(ctx, format!("Couldn't save your rule: {e:#}"));
                 }
+                // The times may have moved: work the next reminder out again.
+                self.rule_reminders.reset();
+                ctx.request_repaint();
             }
-            Action::SetRuleReminders(on) => self.settings.rule_reminders = on,
+            Action::SetRuleReminders(on) => {
+                self.settings.rule_reminders = on;
+                self.rule_reminders.reset();
+                ctx.request_repaint();
+            }
             Action::ShowFathers => {
                 let v = self.selection_or_location()[0];
                 self.reader.set_selection(Some(v));
@@ -1214,7 +1220,7 @@ impl BibleApp {
         self.reminded = Some(today);
         let due = self.study.plans().into_iter().filter(|p| p.finished.is_none()).find_map(|p| {
             let plan = bible_core::plans::get(&p.id)?;
-            let day = ((today - p.started) / 86_400 + 1) as usize;
+            let day = crate::pages::plans::day_number(p.started, now).max(1) as usize;
             let reads = self.study.plan_reads(&p.id);
             let todo = (0..plan.day(day).len()).any(|i| !reads.contains(&(day as u16, i as u8)));
             todo.then(|| {
@@ -1228,50 +1234,17 @@ impl BibleApp {
     }
 
     /// The prayer rule's reminders (Orthodox fork): when a block's time comes while the app is
-    /// open, and something in it is still to do, its title and time in a toast, and in
-    /// Notification Centre when the app isn't in front. Launching up to 30 minutes late still
-    /// reminds; later than that it doesn't.
+    /// open, and something in it is still to do, its title and time in a toast.
     fn rule_reminder(&mut self, ctx: &egui::Context) {
         if !self.settings.rule_reminders || self.startup.frames < 3 {
             return;
         }
         let now = bible_core::study::now();
-        // egui sleeps while nothing happens: wake for the next block's time, or within the hour.
-        let wait = self.rule_wake.map_or(3600, |wake| (wake - now).clamp(1, 3600));
-        ctx.request_repaint_after(Duration::from_secs(wait as u64));
-        if self.rule_checked == now.div_euclid(60) {
-            return;
-        }
-        self.rule_checked = now.div_euclid(60);
-        let t = crate::time::local(now);
-        let day = bible_core::calendar::civil(t.year, t.month, t.day);
-        let minute = i64::from(t.hour) * 60 + i64::from(t.minute);
-        let rule = self.study.rule();
-        let done = self.study.rule_done(day);
-        self.rule_wake = None;
-        for (block, items) in rule.for_day(day, self.settings.calendar) {
-            let Some(at) = block.time.as_deref().and_then(crate::pages::rule::minutes) else { continue };
-            if at > minute {
-                let wake = now - now.rem_euclid(60) + (at - minute) * 60;
-                self.rule_wake = Some(self.rule_wake.map_or(wake, |w| w.min(wake)));
-                continue;
-            }
-            let todo: Vec<&str> = items
-                .iter()
-                .filter(|i| !i.optional && !done.contains(&i.id))
-                .map(|i| i.title.as_str())
-                .collect();
-            let key = (day, block.id.clone());
-            if minute - at >= 30 || todo.is_empty() || self.rule_reminded.contains(&key) {
-                continue;
-            }
-            self.rule_reminded.push(key);
-            let time = crate::pages::rule::clock(at);
-            self.toast(ctx, format!("{} — {time}", block.title));
-            #[cfg(target_os = "macos")]
-            if !crate::offscreen() {
-                crate::macos_window::notify(&format!("{} — {time}", block.title), &todo.join(", "));
-            }
+        let (due, wait) = self.rule_reminders.due(now, &self.study, self.settings.calendar);
+        // egui sleeps while nothing happens: wake for the next block's time.
+        ctx.request_repaint_after(Duration::from_secs(wait));
+        for message in due {
+            self.toast(ctx, message);
         }
     }
 

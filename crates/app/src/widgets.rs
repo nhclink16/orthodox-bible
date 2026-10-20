@@ -491,11 +491,19 @@ pub fn checkbox(ui: &mut Ui, p: &Palette, b: Rect, on: bool, label: &str) -> Res
     resp
 }
 
+/// The focus halo of a field (`ds-14`) around a row or control that Tab has focused.
+pub fn focus_ring(painter: &Painter, p: &Palette, resp: &Response, rect: Rect, radius: f32) {
+    if resp.has_focus() {
+        painter.rect_stroke(rect, radius, Stroke::new(3.0, p.focus), StrokeKind::Outside);
+    }
+}
+
 /// A check box with no label, as a plan's readings have: 16 pt, radius 4; on, the accent with a
 /// check; off, the field colour with a hairline that darkens on hover. It answers 6 pt around.
 pub fn tick(ui: &mut Ui, p: &Palette, b: Rect, on: bool, id: egui::Id) -> Response {
     let resp = ui.interact(b.expand(6.0), id, Sense::click());
     let painter = ui.painter();
+    focus_ring(painter, p, &resp, b, 4.0);
     if on {
         painter.rect_filled(b, 4.0, p.accent);
         crate::icons::check(painter, Rect::from_center_size(b.center(), vec2(12.0, 12.0)), p.on_accent);

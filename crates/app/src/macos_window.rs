@@ -180,32 +180,3 @@ pub fn share_file(handle: &impl HasWindowHandle, path: &std::path::Path, anchor:
     );
     picker.showRelativeToRect_ofView_preferredEdge(rect, view, NSRectEdge::MinY);
 }
-
-/// Posts a notification to Notification Centre (the prayer rule's reminders). It goes through
-/// `NSUserNotificationCenter`, deprecated but still delivering and part of Foundation, which is
-/// already linked; macOS shows it only while the app isn't in front, and asks once for
-/// permission. Outside an app bundle (`cargo run`) there is no centre, so nothing happens.
-pub fn notify(title: &str, body: &str) {
-    use objc2::msg_send;
-    use objc2::runtime::{AnyClass, AnyObject};
-    use objc2_foundation::{NSBundle, NSString};
-    if NSBundle::mainBundle().bundleIdentifier().is_none() {
-        return;
-    }
-    let (Some(centres), Some(notes)) =
-        (AnyClass::get(c"NSUserNotificationCenter"), AnyClass::get(c"NSUserNotification"))
-    else {
-        return;
-    };
-    // SAFETY: `+defaultUserNotificationCenter` returns the shared centre or nil; a new
-    // `NSUserNotification` takes its title and text as strings, and `-deliverNotification:`
-    // copies what it needs.
-    unsafe {
-        let centre: Option<Retained<AnyObject>> = msg_send![centres, defaultUserNotificationCenter];
-        let Some(centre) = centre else { return };
-        let note: Retained<AnyObject> = msg_send![notes, new];
-        let () = msg_send![&note, setTitle: &*NSString::from_str(title)];
-        let () = msg_send![&note, setInformativeText: &*NSString::from_str(body)];
-        let () = msg_send![&centre, deliverNotification: &*note];
-    }
-}
