@@ -5,7 +5,7 @@
 
 use std::collections::{HashMap, HashSet};
 
-use eframe::egui::{self, Color32, Id, Rect, Sense, Stroke, StrokeKind, Ui, pos2, vec2};
+use eframe::egui::{self, Id, Rect, Sense, Stroke, StrokeKind, Ui, pos2, vec2};
 
 use bible_core::rule::{Block, Item, Kind, Rule, Season};
 use bible_core::{lxx, plans, prayers};
@@ -146,6 +146,16 @@ fn default_title(kind: &Kind) -> Option<String> {
     })
 }
 
+/// The note a prayers item starts with, which follows the choice the same way: "From your
+/// prayer book" only while it opens nothing.
+fn default_note(kind: &Kind) -> Option<&'static str> {
+    match kind {
+        Kind::Prayers { prayer: None, text: None } => Some("From your prayer book"),
+        Kind::Prayers { .. } => Some(""),
+        _ => None,
+    }
+}
+
 fn prayer_choice(prayer: &Option<String>, own: &Option<String>) -> String {
     match (prayer, own) {
         (Some(id), _) => prayers::get(id).map_or("A built-in prayer", |p| p.title).into(),
@@ -181,23 +191,6 @@ fn summary(item: &Item) -> String {
         parts.push("Optional".into());
     }
     if parts.is_empty() { item.note.clone() } else { parts.join(" · ") }
-}
-
-/// The width of a [`widgets::segmented_tight`] control, to draw it from its left edge.
-fn segmented_width(ui: &Ui, labels: &[&str], selected: usize) -> f32 {
-    let w: f32 = labels
-        .iter()
-        .enumerate()
-        .map(|(i, l)| {
-            let font = if i == selected {
-                theme::text::UI_STRONG.font()
-            } else {
-                theme::ui_medium(theme::text::UI.size)
-            };
-            ui.painter().layout_no_wrap(l.to_string(), font, Color32::PLACEHOLDER).size().x + 20.0
-        })
-        .sum();
-    w + 2.0 * (labels.len() as f32 - 1.0) + 4.0
 }
 
 /// A number field: the number as typed, taken into `value` once it reads as one in `range`.
@@ -306,13 +299,17 @@ impl Editor {
 
         // Reminders.
         let mut y = top + 58.0 + 24.0;
-        let card = Rect::from_min_size(pos2(left, y), vec2(width, 60.0));
+        let note = "A message in the app at each block's time, while it's open";
+        let font = theme::ui_font(12.0);
+        let lines = widgets::flow(&painter, note, &font, 12.0, width - 32.0 - 40.0 - 12.0, 3);
+        let card = Rect::from_min_size(pos2(left, y), vec2(width, 44.0 + 16.0 * lines.len() as f32));
         painter.rect_filled(card, 12.0, p.surface);
         painter.rect_stroke(card, 12.0, Stroke::new(0.5, p.border), StrokeKind::Outside);
         text(&painter, left + 16.0, y + 12.0, 20.0, "Reminders", theme::ui_medium(13.0), p.ink, false);
-        let note = "A message in the app at each block's time, while it's open";
-        let note = super::elide(&painter, note, &theme::ui_font(12.0), width - 32.0 - 40.0 - 12.0);
-        text(&painter, left + 16.0, y + 32.0, 16.0, &note, theme::ui_font(12.0), p.ink_3, false);
+        for (i, runs) in lines.iter().enumerate() {
+            let base = widgets::css_baseline(y + 32.0 + 16.0 * i as f32, 16.0, 12.0, false);
+            widgets::paint_runs(&painter, left + 16.0, base, runs, p.ink_3);
+        }
         let at = pos2(card.right() - 16.0, card.center().y);
         widgets::toggle(ui, p, at, ui.id().with("rule-reminders"), &mut self.reminders);
         y = card.bottom() + 24.0;
@@ -327,8 +324,9 @@ impl Editor {
             let cy = y + 28.0;
             // The name and time fields share what the arrows leave.
             let room = width - 16.0 - 8.0 - 3.0 * 32.0 - 16.0;
-            let time_w = 104.0f32.min(room * 0.4);
-            let field = Rect::from_min_size(pos2(left + 16.0, cy - 16.0), vec2((room - 8.0 - time_w).min(220.0), 32.0));
+            let time_w = 104.0f32.min(room / 2.0);
+            let name_w = (room - 8.0 - time_w).min(220.0);
+            let field = Rect::from_min_size(pos2(left + 16.0, cy - 16.0), vec2(name_w, 32.0));
             let id = Id::new(("rule-block", &draft.block.id));
             widgets::text_field(
                 ui,
@@ -401,8 +399,9 @@ impl Editor {
                 let room = right - 16.0 - 3.0 * 32.0 - 8.0 - x;
                 let title = if item.title.trim().is_empty() { "Untitled" } else { item.title.as_str() };
                 let title = super::elide(&painter, title, &theme::ui_medium(13.0), room);
-                text(&painter, x, row.top() + 8.0, 20.0, &title, theme::ui_medium(13.0), p.ink, false);
                 let sum = super::elide(&painter, &summary(item), &theme::ui_font(12.0), room);
+                let title_top = if sum.is_empty() { row.top() + 16.0 } else { row.top() + 8.0 };
+                text(&painter, x, title_top, 20.0, &title, theme::ui_medium(13.0), p.ink, false);
                 text(&painter, x, row.top() + 28.0, 16.0, &sum, theme::ui_font(12.0), p.ink_3, false);
                 if let Some(c) = arrows(ui, p, right - 16.0, row.center().y, id, ii, items) {
                     change = Some(match c {
@@ -582,7 +581,7 @@ fn item_fields(
         let s = super::elide(&painter, s, &theme::ui_font(13.0), w);
         text(&painter, x, y + 12.0, 20.0, &s, theme::ui_font(13.0), p.ink_3, false);
     };
-    let was = default_title(&item.kind);
+    let was = (default_title(&item.kind), default_note(&item.kind));
     match &mut item.kind {
         Kind::Prayers { prayer, text: own } => {
             label(y, "Prayer");
@@ -659,19 +658,25 @@ fn item_fields(
         }
         Kind::Other => {}
     }
-    let now = default_title(&item.kind);
-    if now != was
-        && was.as_deref() == Some(item.title.trim())
-        && let Some(title) = now
+    let now = (default_title(&item.kind), default_note(&item.kind));
+    if now.0 != was.0
+        && was.0.as_deref() == Some(item.title.trim())
+        && let Some(title) = now.0
     {
         item.title = title;
+    }
+    if now.1 != was.1
+        && was.1 == Some(item.note.trim())
+        && let Some(note) = now.1
+    {
+        item.note = note.into();
     }
 
     // The season: a segmented control, or a menu where that doesn't fit.
     label(y, "When");
     let labels: Vec<&str> = SEASONS.iter().map(|(_, l)| *l).collect();
     let selected = SEASONS.iter().position(|(s, _)| *s == item.season).unwrap_or(0);
-    let sw = segmented_width(ui, &labels, selected);
+    let sw = widgets::segmented_tight_width(&painter, &labels, selected);
     if sw <= w {
         let (_, pick) =
             widgets::segmented_tight(ui, p, pos2(x + sw, y + 22.0), id.with("season"), &labels, selected);
@@ -772,6 +777,8 @@ mod tests {
             let (title, kind, _) = new_item(k);
             assert_eq!(default_title(&kind), Some(title));
         }
+        let (_, kind, note) = new_item(0);
+        assert_eq!(default_note(&kind), Some(note));
     }
 
     #[test]

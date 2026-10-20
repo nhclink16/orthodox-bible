@@ -93,7 +93,7 @@ impl Under<'_> {
     }
 
     /// The day to continue with: today's, or the first unfinished one before it.
-    fn current_day(&self) -> usize {
+    pub(super) fn current_day(&self) -> usize {
         let today = self.today.min(self.plan.len()).max(1);
         if self.day_done(today) {
             return today;

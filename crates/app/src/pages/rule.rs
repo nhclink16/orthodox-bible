@@ -61,7 +61,8 @@ impl Reminders {
     }
 
     /// At `now`, what to remind of ("Evening — 20:30"), and how many seconds egui may sleep
-    /// before asking again: until the next block's time, and no more than an hour.
+    /// before asking again: until the next block's time (midnight after the day's last), and no
+    /// more than an hour.
     pub fn due(&mut self, now: i64, study: &StudyStore, style: Style) -> (Vec<String>, u64) {
         let mut due = Vec::new();
         if self.checked != now.div_euclid(60) {
@@ -69,17 +70,17 @@ impl Reminders {
             let t = crate::time::local(now);
             let day = calendar::civil(t.year, t.month, t.day);
             let minute = i64::from(t.hour) * 60 + i64::from(t.minute);
+            let at_minute = |m: i64| now - now.rem_euclid(60) + (m - minute) * 60;
             let rule = study.rule();
             let started = study.plans();
             let mut done = study.rule_done(day);
             done.extend(plans_read(&rule, day, style, day, &following(&rule, &started, study)));
             done.extend(idle(&rule, day, style));
-            self.wake = None;
+            self.wake = Some(at_minute(24 * 60));
             for (block, items) in rule.for_day(day, style) {
                 let Some(at) = block.time.as_deref().and_then(minutes) else { continue };
                 if at > minute {
-                    let wake = now - now.rem_euclid(60) + (at - minute) * 60;
-                    self.wake = Some(self.wake.map_or(wake, |w| w.min(wake)));
+                    self.wake = self.wake.map(|w| w.min(at_minute(at)));
                     continue;
                 }
                 let todo = items.iter().any(|i| !i.optional && !done.contains(&i.id));
@@ -153,10 +154,11 @@ pub(super) fn following<'a>(rule: &Rule, started: &'a [PlanProgress], study: &St
         .collect()
 }
 
-/// The day of a plan's reading that falls on day `d` (as the Reading plans row has it), if any.
+/// The day of a plan's reading for day `d`, if any: today, the Plans page's day to continue
+/// with (yesterday's while that's still to read); on other days, the one that falls on them.
 pub(super) fn plan_day(u: &Under<'_>, d: Day, today: Day) -> Option<usize> {
     let day = u.today as i64 + (d - today);
-    (1..=u.plan.len() as i64).contains(&day).then_some(day as usize)
+    (1..=u.plan.len() as i64).contains(&day).then(|| if d == today { u.current_day() } else { day as usize })
 }
 
 /// The ids of day `d`'s items that follow a plan whose reading for that day is read: those are
@@ -165,7 +167,7 @@ pub(super) fn plans_read(rule: &Rule, d: Day, style: Style, today: Day, under: &
     let read = |plan: &str| {
         under.iter().any(|u| u.plan.id == plan && plan_day(u, d, today).is_some_and(|day| u.day_done(day)))
     };
-    let mut items = rule.for_day(d, style).into_iter().flat_map(|(_, items)| items);
+    let items = rule.for_day(d, style).into_iter().flat_map(|(_, items)| items);
     items.filter(|i| matches!(&i.kind, Kind::Plan { plan } if read(plan))).map(|i| i.id.clone()).collect()
 }
 
@@ -186,6 +188,12 @@ struct PlanDay {
     plan: &'static str,
     day: usize,
     passages: usize,
+}
+
+/// A plan item's line when there's no reading to open: the plan's name, unless the title is
+/// it, and how the plan stands.
+fn plan_note(item: &Item, plan: &plans::Plan, state: &str) -> String {
+    if item.title.trim() == plan.title { state.into() } else { format!("{} · {state}", plan.title) }
 }
 
 /// What `item` (in `block`) opens on day `d` (`today` being today), the line under its title,
@@ -238,12 +246,12 @@ fn resolve(
         Kind::Plan { plan } => match (plans::get(plan), started.iter().find(|s| s.id == *plan)) {
             (None, _) => Open::Nothing,
             (Some(p), None) => {
-                detail = format!("{} · Not started", p.title);
+                detail = plan_note(item, p, "Not started");
                 Open::Start(p.id)
             }
             // Ticked like any other item; reading it again starts on the Plans page.
             (Some(p), Some(s)) if s.finished.is_some() => {
-                detail = format!("{} · Finished", p.title);
+                detail = plan_note(item, p, "Finished");
                 Open::Nothing
             }
             // The plan's reading for the day, at its first passage not yet read.
@@ -259,7 +267,7 @@ fn resolve(
                             .map_or(Open::Nothing, |ps| Open::Read(ps.chapter, ps.verses.map(|(a, _)| a)))
                     }
                     None => {
-                        detail = format!("{} · No reading on this day", p.title);
+                        detail = plan_note(item, p, "No reading on this day");
                         Open::Nothing
                     }
                 }
@@ -663,4 +671,55 @@ fn counter(
         }
     }
     (y + 72.0, back)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    /// The app left open on the starter rule, waking only when `due` says to: each timed block
+    /// is reminded of at its time, the morning's too after the night, and none twice.
+    #[test]
+    fn reminders_come_at_each_blocks_time() {
+        let mut study = StudyStore::open_in_memory().unwrap();
+        // Local midnight of a day in June, away from a change of the clocks.
+        let midnight = crate::time::day_start(1_781_000_000);
+        let (h, m) = (3600, 60);
+        let mut r = Reminders::default();
+        let mut now = midnight + 6 * h + 59 * m + 50;
+        let mut seen = Vec::new();
+        while now < midnight + 24 * h + 21 * h {
+            let (due, wait) = r.due(now, &study, Style::New);
+            seen.extend(due.into_iter().map(|d| (now - midnight, d)));
+            now += wait as i64;
+        }
+        let at = |s: i64, d: &str| (s, d.to_string());
+        let day = |s: i64| 24 * h + s;
+        assert_eq!(
+            seen,
+            [
+                at(7 * h, "Morning — 7:00"),
+                at(12 * h, "Midday — 12:00"),
+                at(20 * h + 30 * m, "Evening — 20:30"),
+                at(day(7 * h), "Morning — 7:00"),
+                at(day(12 * h), "Midday — 12:00"),
+                at(day(20 * h + 30 * m), "Evening — 20:30"),
+            ]
+        );
+
+        // The next evening, a block moved to a few minutes on is reminded of then, once the
+        // rule is saved.
+        let evening = midnight + 48 * h + 19 * h;
+        let (_, wait) = r.due(evening, &study, Style::New);
+        assert_eq!(wait, 3600);
+        let mut rule = Rule::starter();
+        rule.blocks.iter_mut().find(|b| b.id == "evening").unwrap().time = Some("19:05".into());
+        study.set_rule(&rule).unwrap();
+        r.reset();
+        let (due, wait) = r.due(evening + 40, &study, Style::New);
+        assert!(due.is_empty());
+        assert_eq!(wait, 5 * 60 - 40);
+        let (due, _) = r.due(evening + 5 * m, &study, Style::New);
+        assert_eq!(due, ["Evening — 19:05"]);
+    }
 }

@@ -1077,6 +1077,22 @@ pub fn text_field(
     )
 }
 
+fn segment_widths(painter: &Painter, labels: &[&str], selected: usize) -> Vec<f32> {
+    labels
+        .iter()
+        .enumerate()
+        .map(|(i, l)| {
+            let font = if i == selected { text::UI_STRONG.font() } else { theme::ui_medium(text::UI.size) };
+            painter.layout_no_wrap(l.to_string(), font, Color32::PLACEHOLDER).size().x + 20.0
+        })
+        .collect()
+}
+
+/// The width of a [`segmented_tight`] control, to place it before drawing it.
+pub fn segmented_tight_width(painter: &Painter, labels: &[&str], selected: usize) -> f32 {
+    segment_widths(painter, labels, selected).iter().sum::<f32>() + 2.0 * (labels.len() as f32 - 1.0) + 4.0
+}
+
 /// A segmented control sized to its labels (`ds-07`): segments 28 pt with 10 pt sides, 2 pt
 /// apart in a 32 pt `fill` track; the selected one `raised` with the knob shadow. Drawn with its
 /// right edge at `right_center`; returns the track and the newly selected index.
@@ -1088,15 +1104,8 @@ pub fn segmented_tight(
     labels: &[&str],
     selected: usize,
 ) -> (Rect, Option<usize>) {
-    let widths: Vec<f32> = labels
-        .iter()
-        .enumerate()
-        .map(|(i, l)| {
-            let font = if i == selected { text::UI_STRONG.font() } else { theme::ui_medium(text::UI.size) };
-            ui.painter().layout_no_wrap(l.to_string(), font, Color32::PLACEHOLDER).size().x + 20.0
-        })
-        .collect();
-    let total: f32 = widths.iter().sum::<f32>() + 2.0 * (labels.len() as f32 - 1.0) + 4.0;
+    let widths = segment_widths(ui.painter(), labels, selected);
+    let total = segmented_tight_width(ui.painter(), labels, selected);
     let track = Rect::from_min_size(pos2(right_center.x - total, right_center.y - 16.0), vec2(total, 32.0));
     ui.painter().rect_filled(track, 16.0, p.fill);
     let mut x = track.left() + 2.0;

@@ -3,8 +3,6 @@
 //! up, from `bible_core::calendar`; beside them a month of fasts, feasts and days the rule was
 //! kept. Days step back and forward; the church's calendar (New or Old) is a setting.
 
-use std::collections::HashSet;
-
 use eframe::egui::{self, Align2, Color32, FontId, Rect, Sense, Stroke, StrokeKind, Ui, pos2, vec2};
 
 use bible_core::calendar::{self, Day, Fast, Style};
@@ -258,22 +256,36 @@ impl State {
             0 => format!("Today · {}", date_label(d)),
             _ => date_label(d),
         };
-        super::title(&painter, p, left, top, &title, &subtitle);
-
-        // The calendar, then stepping through days.
-        let cy = top + 26.0 + 16.0;
-        let (_, pick) = widgets::segmented_tight(
-            ui,
-            p,
-            pos2(right, cy),
-            ui.id().with("calendar-style"),
-            &["New calendar", "Old calendar"],
-            usize::from(style == Style::Old),
-        );
-        if let Some(i) = pick {
-            actions.push(Action::SetCalendar(if i == 0 { Style::New } else { Style::Old }));
+        // The title with the calendar beside it; in a narrow window the title and its line wrap,
+        // and the calendar goes beside the days' buttons, or under them.
+        let calendars = ["New calendar", "Old calendar"];
+        let selected = usize::from(style == Style::Old);
+        let cal_w = widgets::segmented_tight_width(&painter, &calendars, selected);
+        let heading = FontId::new(28.0, theme::family(theme::SERIF_HEADING));
+        let title_w = painter.layout_no_wrap(title.clone(), heading.clone(), p.ink).size().x;
+        let beside_title = title_w + 24.0 + cal_w <= right - left;
+        let mut ny = top + 58.0 + 28.0;
+        if title_w <= right - left {
+            super::title(&painter, p, left, top, &title, &subtitle);
+        } else {
+            let mut y = top;
+            for mut runs in widgets::flow(&painter, &title, &heading, 28.0, right - left, 3) {
+                runs.iter_mut().for_each(|r| r.tracking -= 0.01);
+                widgets::paint_runs(&painter, left, widgets::css_baseline(y, 36.0, 28.0, true), &runs, p.ink);
+                y += 36.0;
+            }
+            y += paragraph(
+                &painter,
+                &subtitle,
+                &theme::ui_font(13.0),
+                20.0,
+                left,
+                y + 2.0,
+                right - left,
+                p.ink_2,
+            );
+            ny = y + 2.0 + 28.0;
         }
-        let ny = top + 58.0 + 28.0;
         let (prev, r) = Button::new(Kind::Secondary, "Previous").icon(crate::icons::chevron_left).show_left(
             ui,
             p,
@@ -292,18 +304,33 @@ impl State {
             self.offset += 1;
             self.month = None;
         }
+        let mut buttons = next.right();
         if self.offset != 0 {
-            let (_, r) = Button::new(Kind::Ghost, "Back to Today").show_left(
+            let (back, r) = Button::new(Kind::Ghost, "Back to Today").show_left(
                 ui,
                 p,
                 next.right() + 8.0,
                 ny,
                 ui.id().with("today"),
             );
+            buttons = back.right();
             if r.clicked() {
                 self.offset = 0;
                 self.month = None;
             }
+        }
+        let at = if beside_title {
+            pos2(right, top + 26.0 + 16.0)
+        } else if buttons + 16.0 + cal_w <= right {
+            pos2(right, ny)
+        } else {
+            ny += 44.0;
+            pos2(left + cal_w, ny)
+        };
+        let (_, pick) =
+            widgets::segmented_tight(ui, p, at, ui.id().with("calendar-style"), &calendars, selected);
+        if let Some(i) = pick {
+            actions.push(Action::SetCalendar(if i == 0 { Style::New } else { Style::Old }));
         }
 
         // The month stands beside the day when there's room, else after the rule.
@@ -580,7 +607,8 @@ impl State {
                 let b = Rect::from_min_size(pos2(row.left() + 12.0, row.center().y - 8.0), vec2(16.0, 16.0));
                 let tick = widgets::tick(ui, p, b, done, id.with("tick"));
                 let x = b.right() + 12.0;
-                let (cy, ty) = (row.center().y - 10.0, row.center().y - 10.0 - if i == 0 { 9.0 } else { 0.0 });
+                let (cy, ty) =
+                    (row.center().y - 10.0, row.center().y - 10.0 - if i == 0 { 9.0 } else { 0.0 });
                 let read =
                     text(&painter, right - 12.0, cy, 20.0, "Read", theme::ui_medium(13.0), p.accent, true);
                 let room = right - 12.0 - read - 16.0 - x;
@@ -701,7 +729,7 @@ impl State {
                 kept_or_idle.extend(rule_view::idle(rule, day, style));
                 let (kept, of) = rule.kept(day, style, &kept_or_idle);
                 let c = pos2(cell.center().x, cell.top() + 29.0);
-                if of > 0 && kept == of {
+                if of > 0 && some && kept == of {
                     painter.circle_filled(c, 2.5, p.accent);
                 } else if some {
                     painter.circle_stroke(c, 2.25, Stroke::new(1.0, p.accent));
