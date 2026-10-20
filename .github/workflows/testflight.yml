@@ -1,0 +1,55 @@
+# Builds the iPhone app and uploads it to TestFlight whenever main changes what the app ships.
+# Internal testers get each build without App Review; TestFlight's Automatic Updates installs it.
+#
+# Secrets (gh secret set …): ASC_KEY (the App Store Connect API key's .p8 file), ASC_KEY_ID and
+# ASC_ISSUER_ID. The key signs and uploads; no Apple ID is signed in on the runner.
+name: TestFlight
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "apps/ios/**"
+      - "crates/core/**"
+      - "crates/ffi/**"
+      - "data/**"
+      - "Cargo.lock"
+      - "scripts/build-ios.sh"
+      - "scripts/release-ios.sh"
+      - ".github/workflows/testflight.yml"
+  workflow_dispatch:
+
+# One upload at a time; a newer push waits rather than racing for the same build number.
+concurrency:
+  group: testflight
+  cancel-in-progress: false
+
+jobs:
+  upload:
+    name: Archive and upload
+    runs-on: macos-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # The build number is the commit count, so it needs the whole history.
+          fetch-depth: 0
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: aarch64-apple-ios,aarch64-apple-ios-sim
+      - uses: Swatinem/rust-cache@v2
+      - name: XcodeGen
+        run: brew install xcodegen && xcodebuild -version
+      - name: App Store Connect key
+        env:
+          ASC_KEY: ${{ secrets.ASC_KEY }}
+        run: |
+          mkdir -p "$RUNNER_TEMP/asc"
+          printf '%s' "$ASC_KEY" > "$RUNNER_TEMP/asc/AuthKey.p8"
+          echo "ASC_KEY_PATH=$RUNNER_TEMP/asc/AuthKey.p8" >> "$GITHUB_ENV"
+      - name: Archive and upload to TestFlight
+        env:
+          TEAM_ID: UH434K44A3
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+        run: scripts/release-ios.sh --upload

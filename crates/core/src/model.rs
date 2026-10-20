@@ -413,6 +413,9 @@ impl Translation {
     }
 }
 
+/// Moves a verse from a source's numbering to the grid's: (book, chapter, verse) in and out.
+pub type Remap = fn(BookId, u8, u8) -> Option<(BookId, u8, u8)>;
+
 /// Incrementally converts a stream of book/chapter/verse/text events into a [`Translation`].
 ///
 /// Used by every importer (USFM, OSIS, Zefania, SWORD, online APIs). Whitespace is collapsed,
@@ -445,7 +448,7 @@ pub struct TranslationBuilder {
     pub on_book: Option<Box<dyn FnMut(BookId) + Send>>,
     /// Moves each verse from the source's numbering to the grid's (book, chapter, verse); `None`
     /// drops it. Used for a Septuagint, whose psalms are numbered differently ([`crate::lxx`]).
-    pub remap: Option<fn(BookId, u8, u8) -> Option<(BookId, u8, u8)>>,
+    pub remap: Option<Remap>,
 }
 
 impl TranslationBuilder {
