@@ -1,8 +1,13 @@
 # Builds the iPhone app and uploads it to TestFlight whenever main changes what the app ships.
 # Internal testers get each build without App Review; TestFlight's Automatic Updates installs it.
 #
+# Runs on Nicholas's iMac (a self-hosted runner labelled `orthodox`): GitHub's hosted Macs are
+# often too busy to pick the job up. Only pushes to main and manual runs start it, never pull
+# requests, so no outside code runs there. It needs Xcode, rustup (with the iOS targets) and
+# XcodeGen installed, and leaves only the Rust build cache behind (pruned past 8 GB).
+#
 # Secrets (gh secret set …): ASC_KEY (the App Store Connect API key's .p8 file), ASC_KEY_ID and
-# ASC_ISSUER_ID. The key signs and uploads; no Apple ID is signed in on the runner.
+# ASC_ISSUER_ID. The key signs and uploads; no Apple ID is signed in for the runner.
 name: TestFlight
 
 on:
@@ -27,29 +32,39 @@ concurrency:
 jobs:
   upload:
     name: Archive and upload
-    runs-on: macos-latest
+    runs-on: [self-hosted, macOS, ARM64, orthodox]
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
         with:
           # The build number is the commit count, so it needs the whole history.
           fetch-depth: 0
-      - uses: dtolnay/rust-toolchain@stable
-        with:
-          targets: aarch64-apple-ios,aarch64-apple-ios-sim
-      - uses: Swatinem/rust-cache@v2
-      - name: XcodeGen
-        run: brew install xcodegen && xcodebuild -version
+      - name: Tools
+        run: |
+          echo "$HOME/.cargo/bin" >> "$GITHUB_PATH"
+          echo "/opt/homebrew/bin" >> "$GITHUB_PATH"
       - name: App Store Connect key
         env:
           ASC_KEY: ${{ secrets.ASC_KEY }}
         run: |
           mkdir -p "$RUNNER_TEMP/asc"
           printf '%s' "$ASC_KEY" > "$RUNNER_TEMP/asc/AuthKey.p8"
+          chmod 600 "$RUNNER_TEMP/asc/AuthKey.p8"
           echo "ASC_KEY_PATH=$RUNNER_TEMP/asc/AuthKey.p8" >> "$GITHUB_ENV"
       - name: Archive and upload to TestFlight
         env:
           TEAM_ID: UH434K44A3
           ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
           ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
-        run: scripts/release-ios.sh --upload
+        run: |
+          xcodebuild -version
+          scripts/release-ios.sh --upload
+      - name: Clean up
+        if: always()
+        run: |
+          rm -rf "$RUNNER_TEMP/asc" dist target/ios
+          # The Rust build cache speeds the next build; drop it once it grows past 8 GB.
+          if [ "$(du -sm target 2>/dev/null | cut -f1)" -gt 8192 ] 2>/dev/null; then rm -rf target; fi
+          # The runner's own logs.
+          find "$RUNNER_WORKSPACE/../../_diag" -name '*.log' -mtime +14 -delete 2>/dev/null || true
+          df -h "$GITHUB_WORKSPACE" | tail -1
