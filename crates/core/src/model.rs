@@ -271,6 +271,44 @@ impl VerseView<'_> {
 }
 
 impl Translation {
+    /// This translation with the chapters `take` picks replaced by `other`'s, and the titles of
+    /// their books too. Builds the bundled Septuagint, whose New Testament is the KJV's.
+    pub fn with_chapters_from(self, other: &Translation, take: impl Fn(ChapterIdx) -> bool) -> Translation {
+        let base = self.extra.len() as u32;
+        let mut extra = self.extra.clone();
+        extra.push_str(&other.extra);
+        let mut text = String::with_capacity(self.text.len() + other.text.len());
+        let (mut verses, mut marks, mut spans) = (Vec::new(), Vec::new(), Vec::new());
+        let mut chapter_start = Vec::with_capacity(CHAPTER_COUNT + 1);
+        chapter_start.push(0);
+        let mut meta = self.meta.clone();
+        for c in ChapterIdx::all() {
+            let (t, shift) = if take(c) { (other, base) } else { (&self, 0) };
+            if take(c) {
+                meta.books[c.book().index()] = other.meta.books[c.book().index()].clone();
+            }
+            for v in &t.verses[t.chapter_range(c)] {
+                let (ts, ms, ss) = (v.text_start as usize, v.marks_start as usize, v.spans_start as usize);
+                verses.push(Verse {
+                    text_start: text.len() as u32,
+                    marks_start: marks.len() as u32,
+                    spans_start: spans.len() as u32,
+                    ..*v
+                });
+                text.push_str(&t.text[ts..ts + v.text_len as usize]);
+                marks.extend(
+                    t.marks[ms..ms + v.marks_len as usize]
+                        .iter()
+                        .map(|m| Mark { payload: (m.payload.0 + shift, m.payload.1), ..*m }),
+                );
+                spans.extend_from_slice(&t.spans[ss..ss + v.spans_len as usize]);
+            }
+            chapter_start.push(verses.len() as u32);
+        }
+        meta.red_letters |= other.meta.red_letters;
+        Translation { meta, text, extra, verses, chapter_start, marks, spans, search: OnceLock::new() }
+    }
+
     pub fn id(&self) -> &str {
         &self.meta.id
     }
@@ -390,6 +428,8 @@ pub struct TranslationBuilder {
 
     book: Option<BookId>,
     chapter: Option<ChapterIdx>,
+    /// The chapter number as the source gives it (see `remap`).
+    src_chapter: u32,
     in_verse: bool,
     verse_start: usize,
     cur_marks: Vec<Mark>,
@@ -403,6 +443,9 @@ pub struct TranslationBuilder {
     pub skipped_books: Vec<String>,
     /// Called as each book begins (import progress).
     pub on_book: Option<Box<dyn FnMut(BookId) + Send>>,
+    /// Moves each verse from the source's numbering to the grid's (book, chapter, verse); `None`
+    /// drops it. Used for a Septuagint, whose psalms are numbered differently ([`crate::lxx`]).
+    pub remap: Option<fn(BookId, u8, u8) -> Option<(BookId, u8, u8)>>,
 }
 
 impl TranslationBuilder {
@@ -420,6 +463,7 @@ impl TranslationBuilder {
             spans: Vec::new(),
             book: None,
             chapter: None,
+            src_chapter: 0,
             in_verse: false,
             verse_start: 0,
             cur_marks: Vec::new(),
@@ -431,6 +475,7 @@ impl TranslationBuilder {
             warnings: Vec::new(),
             skipped_books: Vec::new(),
             on_book: None,
+            remap: None,
         }
     }
 
@@ -485,6 +530,11 @@ impl TranslationBuilder {
         // Breaks left over from the previous chapter are meaningless; headings may precede `\c`.
         self.pending_marks.retain(|(k, _, _)| k.has_text());
         self.chapter = self.book.and_then(|b| u8::try_from(chapter).ok().and_then(|c| ChapterIdx::new(b, c)));
+        self.src_chapter = chapter;
+        if self.remap.is_some() {
+            // Verses are placed one by one: Psalm 151 of a Septuagint is outside the Psalms.
+            return true;
+        }
         if self.chapter.is_none()
             && let Some(b) = self.book
         {
@@ -497,10 +547,32 @@ impl TranslationBuilder {
     /// Starts a verse (or a bridged verse range).
     pub fn begin_verse(&mut self, number: u32, number_end: u32) {
         self.end_verse();
-        let Some(c) = self.chapter else { return };
-        let (Ok(n), Ok(e)) = (u8::try_from(number), u8::try_from(number_end.max(number))) else {
-            self.warnings.push(format!("{}: verse {number} out of range", c.display()));
-            return;
+        let (c, n, e) = match (self.remap, self.book) {
+            (Some(remap), Some(book)) => {
+                let (Ok(ch), Ok(n), Ok(e)) = (
+                    u8::try_from(self.src_chapter),
+                    u8::try_from(number),
+                    u8::try_from(number_end.max(number)),
+                ) else {
+                    return;
+                };
+                let Some((c, v)) =
+                    remap(book, ch, n).and_then(|(b, ch, v)| Some((ChapterIdx::new(b, ch)?, v)))
+                else {
+                    self.warnings
+                        .push(format!("{} {ch}:{n}: outside the canonical grid, skipped", book.name()));
+                    return;
+                };
+                (c, v, (v as u32 + (e - n) as u32).min(u8::MAX as u32) as u8)
+            }
+            _ => {
+                let Some(c) = self.chapter else { return };
+                let (Ok(n), Ok(e)) = (u8::try_from(number), u8::try_from(number_end.max(number))) else {
+                    self.warnings.push(format!("{}: verse {number} out of range", c.display()));
+                    return;
+                };
+                (c, n, e)
+            }
         };
         if n == 0 {
             return;
@@ -782,7 +854,7 @@ mod tests {
     #[test]
     fn styles_split_across_verses() {
         let mut b = TranslationBuilder::new(meta());
-        b.begin_book(BookId(57));
+        b.begin_book(BookId(58));
         b.begin_chapter(3);
         b.begin_verse(1, 1);
         b.text("He said, ");
@@ -793,7 +865,7 @@ mod tests {
         b.pop_style(Style::WordsOfJesus);
         b.text(" And");
         let t = b.finish();
-        let c = ChapterIdx::new(BookId(57), 3).unwrap();
+        let c = ChapterIdx::new(BookId(58), 3).unwrap();
         let vs: Vec<_> = t.verses_in(c).collect();
         assert_eq!(vs[0].spans, &[Span { start: 9, end: 17, style: Style::WordsOfJesus }]);
         assert_eq!(&vs[0].text[9..17], "“Truly");
@@ -804,7 +876,7 @@ mod tests {
     #[test]
     fn adjacent_spans_merge() {
         let mut b = TranslationBuilder::new(meta());
-        b.begin_book(BookId(57));
+        b.begin_book(BookId(58));
         b.begin_chapter(3);
         b.begin_verse(16, 16);
         b.push_style(Style::WordsOfJesus);
@@ -816,7 +888,7 @@ mod tests {
         b.pop_style(Style::WordsOfJesus);
         b.text(" end");
         let t = b.finish();
-        let v = t.verses_in(ChapterIdx::new(BookId(57), 3).unwrap()).next().unwrap();
+        let v = t.verses_in(ChapterIdx::new(BookId(58), 3).unwrap()).next().unwrap();
         assert_eq!(v.spans, &[Span { start: 0, end: 13, style: Style::WordsOfJesus }]);
     }
 

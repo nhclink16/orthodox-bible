@@ -20,13 +20,15 @@ macro_rules! bbl {
 
 /// `(id, compressed bytes)`, in the order they are offered to the reader.
 pub static BUNDLED: &[(&str, &[u8])] =
-    &[bbl!("kjv"), bbl!("web"), bbl!("bsb"), bbl!("asv"), bbl!("ylt"), bbl!("dby"), bbl!("wbs")];
+    &[bbl!("lxx"), bbl!("kjv"), bbl!("web"), bbl!("bsb"), bbl!("asv"), bbl!("ylt"), bbl!("dby"), bbl!("wbs")];
 
-pub const DEFAULT_ID: &str = "kjv";
+/// The Orthodox fork reads the Septuagint first.
+pub const DEFAULT_ID: &str = "lxx";
 
 /// The year of the edition a bundled text follows, shown beside its abbreviation.
 pub fn year(id: &str) -> Option<u16> {
     Some(match id {
+        "lxx" => 1851,
         "kjv" => 1769,
         "web" => 2020,
         "bsb" => 2023,
@@ -41,6 +43,7 @@ pub fn year(id: &str) -> Option<u16> {
 /// A line about each bundled text for the translation library.
 pub fn description(id: &str) -> Option<&'static str> {
     Some(match id {
+        "lxx" => "Septuagint Old Testament with Tobit, Sirach, the Maccabees · KJV New Testament",
         "kjv" => "Red letters · italics · small-caps LORD",
         "web" => "Red letters · modern English",
         "bsb" => "Section headings · modern English",
@@ -96,7 +99,7 @@ mod tests {
     fn red_letters_where_the_source_has_them() {
         let kjv = load("kjv").unwrap();
         assert!(kjv.meta.red_letters);
-        let v = kjv.find(VerseRef::new(BookId(57), 3, 16)).unwrap();
+        let v = kjv.find(VerseRef::new(BookId(58), 3, 16)).unwrap();
         assert!(v.spans.iter().any(|s| s.style == crate::model::Style::WordsOfJesus));
         assert_eq!(
             v.text,

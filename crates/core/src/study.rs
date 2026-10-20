@@ -958,7 +958,7 @@ mod tests {
     use super::*;
 
     fn jn316() -> VerseRef {
-        VerseRef::new(BookId(57), 3, 16)
+        VerseRef::new(BookId(58), 3, 16)
     }
 
     #[test]
@@ -966,7 +966,7 @@ mod tests {
         let s = StudyStore::open_in_memory().unwrap();
         let mut session = ReadingSession {
             started: 1_000,
-            book: BookId(57),
+            book: BookId(58),
             chapter: 3,
             translation: "kjv".into(),
             seconds: 30,
@@ -1044,7 +1044,7 @@ mod tests {
         // History and plans travel when asked for, and erasing clears everything.
         a.record_reading(&ReadingSession {
             started: 1_000,
-            book: BookId(57),
+            book: BookId(58),
             chapter: 3,
             translation: "kjv".into(),
             seconds: 300,

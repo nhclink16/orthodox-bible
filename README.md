@@ -12,7 +12,7 @@ typeset, searchable as you type, with highlights, notes and bookmarks kept on yo
 - **Typeset for reading.** Literata serif, a comfortable measure, superscript verse numbers,
   chapter and section headings, poetry with hanging indents, LORD in small capitals, optional red
   letters, paragraphs or verse-per-line, adjustable size, light / sepia / dark.
-- **Seven public-domain translations built in** (KJV, WEB, BSB, ASV, YLT, Darby, Webster), side by
+- **Eight public-domain translations built in** (the Septuagint with the KJV New Testament, KJV, WEB, BSB, ASV, YLT, Darby, Webster), side by
   side in parallel columns or one verse across all of them. Add the NLT and the NET Bible free in
   one click, the ESV with a free key, others with an API.Bible key or a file you own
   ([which translations, and how](TRANSLATIONS.md)).

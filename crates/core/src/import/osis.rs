@@ -376,7 +376,7 @@ mod tests {
         let t = b.finish();
         assert_eq!(work.title, "Test Bible");
         assert_eq!(work.rights, "Public domain test.");
-        let john = BookId(57);
+        let john = BookId(58);
         assert_eq!(t.meta.books[john.index()].long, "The Gospel of John");
         let v16 = t.find(VerseRef::new(john, 3, 16)).unwrap();
         assert_eq!(v16.text, "For God so loved the world, that he gave");

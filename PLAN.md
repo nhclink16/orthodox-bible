@@ -82,7 +82,19 @@ Today the app holds exactly 66 books (`BOOK_COUNT`, `CHAPTER_COUNT=1189` at `boo
 5. Book order: `testament()` is index-based today (`books.rs:150`). Give each book a "section" instead: OT, extra books, NT.
 6. Before forking deeply, ask upstream in a GitHub issue whether they'd take this phase.
 
-## Phase 2: Septuagint numbering and the built-in Orthodox text
+## Phase 2: Septuagint numbering and the built-in Orthodox text (done 2026-10-20 on `orthodox/septuagint`)
+
+Done:
+- A new built-in `lxx` Bible, now the default: LXX2012 (Brenton, updated spelling) for the Old Testament plus the bundled KJV New Testament. Built with `cargo run -p xtask -- build-orthodox`. It uses the grid's modern book names and drops LXX2012's "⌃" plural marker.
+- Its psalms are stored at Hebrew/KJV numbers (`crates/core/src/lxx.rs`).
+- A *Septuagint psalm numbers* setting (Settings → Reading, on by default) shows and reads psalm numbers the Orthodox way in every translation.
+- New book: the Prayer of Azariah (Song of the Three Youths), after Daniel. The grid is now 82 books and 1,365 chapters.
+
+Left for later:
+- Only the Psalms are mapped. Jeremiah 25–51, Exodus 35–40, 1 Kings, Job and a few others keep LXX2012's numbering, so side by side with the KJV they can be a verse or a chapter apart. Fixing this needs a full Septuagint versification table under a license that fits MIT.
+- Imported Septuagints (raw Brenton, for example) aren't remapped.
+
+Original checklist:
 
 1. Keep one internal numbering system, the Protestant one. That keeps notes, the side-by-side view and the commentary aligned.
 2. Add a mapping table, LXX ↔ internal, used at import and for showing numbers. It has to cover:

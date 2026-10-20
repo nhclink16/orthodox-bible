@@ -12,7 +12,7 @@ use bible_rs::{book_picker, theme};
 use eframe::egui::{self, Key, Modifiers, OutputCommand};
 use egui_kittest::Harness;
 
-const JOHN: BookId = BookId(57);
+const JOHN: BookId = BookId(58);
 
 #[test]
 fn in_the_app_the_picker_takes_single_keys_but_copying_still_works() {

@@ -414,7 +414,7 @@ mod tests {
         let imp = import_path(&zpath, &ImportOptions::default()).unwrap();
         assert_eq!(imp.translation.meta.abbrev, "BIBLE");
         assert_eq!(
-            imp.translation.find(VerseRef::new(BookId(57), 1, 1)).unwrap().text,
+            imp.translation.find(VerseRef::new(BookId(58), 1, 1)).unwrap().text,
             "In the beginning was the Word."
         );
         let _ = std::fs::remove_dir_all(&d);
@@ -434,7 +434,7 @@ mod tests {
         let imp = import_with_progress(&d, &ImportOptions::default(), &progress).unwrap();
         assert_eq!(imp.skipped_books, vec!["2ES".to_string()]);
         assert_eq!((progress.step(), progress.books()), (3, 1));
-        assert_eq!(progress.book(), Some(BookId(57)));
+        assert_eq!(progress.book(), Some(BookId(58)));
         let cancelled = Arc::new(Progress::default());
         cancelled.cancel.store(true, Ordering::Relaxed);
         assert!(import_with_progress(&d, &ImportOptions::default(), &cancelled).is_err());
@@ -463,7 +463,7 @@ mod tests {
     fn imports_sword_folder_and_conf() {
         let d = tmp("sword");
         let files = sword::tests::build_module(
-            &[(VerseRef::new(BookId(57), 3, 16), "For God so loved the world.")],
+            &[(VerseRef::new(BookId(58), 3, 16), "For God so loved the world.")],
             false,
             None,
             "Abbreviation=TSW\nShortCopyright=Public domain test module\n",

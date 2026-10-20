@@ -10,8 +10,8 @@ use eframe::egui::{self, Key};
 use egui_kittest::Harness;
 use egui_kittest::kittest::{NodeT, Queryable};
 
-const JOHN: BookId = BookId(57);
-const GALATIANS: BookId = BookId(62);
+const JOHN: BookId = BookId(58);
+const GALATIANS: BookId = BookId(63);
 
 /// A button standing in for the toolbar's location button, opening the picker on John 1, with the
 /// picker open.
@@ -55,13 +55,13 @@ fn books_sit_in_the_menu_insets_with_the_current_one_selected() {
     let rect = |label: &str| harness.get_by_label(label).rect();
     let (genesis, exodus, leviticus, numbers) =
         (rect("Genesis"), rect("Exodus"), rect("Leviticus"), rect("Numbers"));
-    let (matthew, luke, zechariah) = (rect("Matthew"), rect("Luke"), rect("Zechariah"));
+    let (matthew, luke, last) = (rect("Matthew"), rect("Luke"), rect("4 Maccabees"));
 
     // The cells' highlights keep the menu's padding, under a section header.
     near(genesis.left() - edge.left(), PADDING_X, "left inset");
     near(genesis.top() - edge.top(), PADDING_Y + tokens::HEADER_HEIGHT, "top inset");
     near(edge.right() - luke.right(), PADDING_X, "right inset");
-    near(edge.bottom() - zechariah.bottom(), PADDING_Y, "bottom inset");
+    near(edge.bottom() - last.bottom(), PADDING_Y, "bottom inset");
     // Rows of the menu's height, edge to edge across and down, as menu rows are.
     near(genesis.height(), ITEM_HEIGHT, "row height");
     near(exodus.left(), genesis.right(), "columns abut");

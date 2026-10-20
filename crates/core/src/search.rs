@@ -431,7 +431,7 @@ mod tests {
     #[test]
     fn suggests_a_near_word_that_finds_verses() {
         let mut b = TranslationBuilder::new(TranslationMeta::default());
-        b.begin_book(crate::books::BookId(57));
+        b.begin_book(crate::books::BookId(58));
         b.begin_chapter(5);
         b.begin_verse(2, 2);
         b.text("Now there is at Jerusalem by the sheep market a pool, which is called Bethesda.");
@@ -464,7 +464,7 @@ mod tests {
         b.text("In the beginning God created the heaven and the earth.");
         b.begin_verse(2, 2);
         b.text("And the earth was without form, and void.");
-        b.begin_book(BookId(57));
+        b.begin_book(BookId(58));
         b.begin_chapter(3);
         b.begin_verse(16, 16);
         b.text("For God so loved the world, that he gave his only begotten Son.");

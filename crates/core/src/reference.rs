@@ -21,33 +21,29 @@ impl Reference {
     }
 
     pub fn display(&self) -> String {
-        let mut s = format!("{} {}", self.book.ref_name(), self.chapter);
-        if let Some(v) = self.verse {
-            s.push_str(&format!(":{v}"));
-            if let Some(e) = self.verse_end.filter(|&e| e > v) {
-                s.push_str(&format!("–{e}"));
-            }
+        let Some(v) = self.verse else { return self.chapter_idx().display() };
+        let from = VerseRef::new(self.book, self.chapter, v);
+        match self.verse_end.filter(|&e| e > v) {
+            Some(e) => format_range(from, VerseRef::new(self.book, self.chapter, e)),
+            None => from.to_string(),
         }
-        s
     }
 }
 
 /// Formats a contiguous verse range: "John 3:16", "John 3:16–18".
 pub fn format_range(from: VerseRef, to: VerseRef) -> String {
-    if from == to || from.book != to.book || from.chapter != to.chapter {
-        if from.book == to.book && from.chapter != to.chapter {
-            return format!(
-                "{} {}:{}–{}:{}",
-                from.book.name(),
-                from.chapter,
-                from.verse,
-                to.chapter,
-                to.verse
-            );
-        }
+    if from == to || from.book != to.book {
         return from.to_string();
     }
-    format!("{} {}:{}–{}", from.book.ref_name(), from.chapter, from.verse, to.verse)
+    // Shown numbers: with Septuagint numbering, Psalms 9 and 10 are both Psalm 9.
+    let (name, a, av) = crate::lxx::shown(from.book, from.chapter, from.verse);
+    let (_, b, bv) = crate::lxx::shown(to.book, to.chapter, to.verse);
+    match (a, b) {
+        (Some(a), Some(b)) if a == b => format!("{name} {a}:{av}–{bv}"),
+        // Across chapters the book's own name: "Psalms 9:1–10:4".
+        (Some(a), Some(b)) => format!("{} {a}:{av}–{b}:{bv}", from.book.name()),
+        _ => format!("{name}:{av}–{bv}"),
+    }
 }
 
 /// The best single interpretation of `input`, if any.
@@ -66,14 +62,22 @@ pub fn suggest(input: &str, limit: usize) -> Vec<Reference> {
             (Some(&n), None, _) if book.chapters() == 1 && n > 1 && n <= 255 => {
                 Some(Reference { book, chapter: 1, verse: Some(n as u8), verse_end: None })
             }
-            (Some(&c), v, e) if c >= 1 && c <= book.chapters() as u32 => Some(Reference {
-                book,
-                chapter: c as u8,
-                verse: v.and_then(|&v| u8::try_from(v).ok()).filter(|&v| v > 0),
-                verse_end: e.and_then(|&e| u8::try_from(e).ok()),
-            }),
+            // "Psalm 151" is a book of its own.
+            (Some(&c), v, e)
+                if c >= 1 && (c <= book.chapters() as u32 || book == BookId::PSALMS && c == 151) =>
+            {
+                Some(Reference {
+                    book,
+                    chapter: c as u8,
+                    verse: v.and_then(|&v| u8::try_from(v).ok()).filter(|&v| v > 0),
+                    verse_end: e.and_then(|&e| u8::try_from(e).ok()),
+                })
+            }
             _ => None,
         };
+        let r = r.and_then(|r| {
+            if r.book == BookId::PSALMS { typed_psalm(r, crate::lxx::numbering()) } else { Some(r) }
+        });
         if let Some(r) = r {
             out.push(r);
             if out.len() >= limit {
@@ -82,6 +86,20 @@ pub fn suggest(input: &str, limit: usize) -> Vec<Reference> {
         }
     }
     out
+}
+
+/// A psalm as typed: in Septuagint numbers when that numbering is on, and Psalm 151 either way.
+fn typed_psalm(r: Reference, lxx: bool) -> Option<Reference> {
+    if !lxx && r.chapter != 151 {
+        return Some(r);
+    }
+    let (book, chapter, verse) = crate::lxx::from_lxx(r.chapter, r.verse.unwrap_or(1))?;
+    let verse_end = r.verse_end.and_then(|e| {
+        let (b, c, v) = crate::lxx::from_lxx(r.chapter, e)?;
+        (b == book && c == chapter).then_some(v)
+    });
+    let whole = r.verse.is_none() && (book != BookId::PSALMS || verse == 1);
+    Some(Reference { book, chapter, verse: if whole { None } else { Some(verse) }, verse_end })
 }
 
 struct Parts {
@@ -262,6 +280,22 @@ mod tests {
     }
 
     #[test]
+    fn psalms_typed_in_septuagint_numbers() {
+        let ps = |chapter, verse, verse_end| Reference { book: BookId::PSALMS, chapter, verse, verse_end };
+        let ps151 = BookId::from_code("PS2").unwrap();
+        assert_eq!(typed_psalm(ps(50, Some(3), None), true), Some(ps(51, Some(3), None)));
+        assert_eq!(typed_psalm(ps(50, Some(3), None), false), Some(ps(50, Some(3), None)));
+        assert_eq!(typed_psalm(ps(22, None, None), true), Some(ps(23, None, None)));
+        assert_eq!(typed_psalm(ps(9, Some(22), Some(24)), true), Some(ps(10, Some(2), Some(4))));
+        assert_eq!(typed_psalm(ps(113, Some(9), None), true), Some(ps(115, Some(1), None)));
+        let r = typed_psalm(ps(151, Some(2), None), false).unwrap();
+        assert_eq!((r.book, r.chapter, r.verse), (ps151, 1, Some(2)));
+        assert_eq!(p("ps 151"), "Psalm 151");
+        assert_eq!(p("ps 151:4"), "Psalm 151:4");
+        assert_eq!(p("prayer of azariah 3"), "Prayer of Azariah 1:3");
+    }
+
+    #[test]
     fn deuterocanonical_books() {
         assert_eq!(p("sir 2"), "Sirach 2");
         assert_eq!(p("ecclus 2"), "Sirach 2");
@@ -289,9 +323,9 @@ mod tests {
 
     #[test]
     fn range_formatting() {
-        let a = VerseRef::new(BookId(57), 3, 16);
+        let a = VerseRef::new(BookId(58), 3, 16);
         assert_eq!(format_range(a, a), "John 3:16");
-        assert_eq!(format_range(a, VerseRef::new(BookId(57), 3, 18)), "John 3:16–18");
-        assert_eq!(format_range(a, VerseRef::new(BookId(57), 4, 2)), "John 3:16–4:2");
+        assert_eq!(format_range(a, VerseRef::new(BookId(58), 3, 18)), "John 3:16–18");
+        assert_eq!(format_range(a, VerseRef::new(BookId(58), 4, 2)), "John 3:16–4:2");
     }
 }

@@ -2,8 +2,8 @@
 //! the deuterocanonical books the Orthodox Church reads, each in its Orthodox place (Tobit after
 //! Nehemiah, Wisdom after the Song of Songs, …).
 //!
-//! Every translation — bundled, imported or fetched — is mapped onto this grid of 81 books and
-//! 1,364 chapters, which is what makes parallel and compare views line up. Grid order is reading
+//! Every translation — bundled, imported or fetched — is mapped onto this grid of 82 books and
+//! 1,365 chapters, which is what makes parallel and compare views line up. Grid order is reading
 //! order. Files and sources that number books in KJV order go through [`BookId::from_kjv_index`].
 
 use std::sync::OnceLock;
@@ -113,6 +113,14 @@ pub static BOOKS: [BookInfo; BOOK_COUNT] = [
     ),
     book!("EZK", "Ezek", "Ezekiel", "Ezek", 48, ["ezek", "eze", "ezk"]),
     book!("DAN", "Dan", "Daniel", "Dan", 12, ["dan", "da", "dn"]),
+    book!(
+        "S3Y",
+        "PrAzar",
+        "Prayer of Azariah",
+        "Pr Azar",
+        1,
+        ["prazar", "s3y", "azariah", "prayerofazariah", "sgthree", "songofthethree", "songofthreeyouths"]
+    ),
     book!("SUS", "Sus", "Susanna", "Sus", 1, ["sus", "susanna"]),
     book!("BEL", "Bel", "Bel and the Dragon", "Bel", 1, ["bel", "belanddragon", "belandthedragon"]),
     book!("HOS", "Hos", "Hosea", "Hos", 14, ["hos", "ho"]),
@@ -157,12 +165,12 @@ pub static BOOKS: [BookInfo; BOOK_COUNT] = [
     book!("REV", "Rev", "Revelation", "Rev", 22, ["rev", "re", "rv", "revelations", "apocalypse", "apoc"]),
 ];
 
-pub const BOOK_COUNT: usize = 81;
-/// Number of chapters in the canonical grid: the 1,189 of the 66 books and 175 deuterocanonical.
-pub const CHAPTER_COUNT: usize = 1364;
+pub const BOOK_COUNT: usize = 82;
+/// Number of chapters in the canonical grid: the 1,189 of the 66 books and 176 deuterocanonical.
+pub const CHAPTER_COUNT: usize = 1365;
 /// First New Testament book (Matthew). Every book before it, deuterocanonical ones included, is
 /// in the Old Testament.
-pub const FIRST_NT_BOOK: BookId = BookId(54);
+pub const FIRST_NT_BOOK: BookId = BookId(55);
 
 /// The 66 books in KJV order, which SWORD and Zefania number books by and `.bbl` version 1 files
 /// were laid out in.
@@ -180,7 +188,7 @@ pub const KJV_CHAPTER_COUNT: usize = 1189;
 impl BookId {
     pub const GENESIS: BookId = BookId(0);
     pub const PSALMS: BookId = BookId(25);
-    pub const REVELATION: BookId = BookId(80);
+    pub const REVELATION: BookId = BookId(81);
 
     pub fn new(index: usize) -> Option<Self> {
         (index < BOOK_COUNT).then_some(BookId(index as u8))
@@ -256,7 +264,7 @@ impl BookId {
     }
 }
 
-/// Index of a chapter in the canonical grid: `0` is Genesis 1, `1363` is Revelation 22.
+/// Index of a chapter in the canonical grid: `0` is Genesis 1, `1364` is Revelation 22.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord, Default)]
 pub struct ChapterIdx(pub u16);
 
@@ -297,8 +305,17 @@ impl ChapterIdx {
         (0..CHAPTER_COUNT as u16).map(ChapterIdx)
     }
 
+    /// The chapter's number as shown: its Septuagint number for a psalm when that numbering is
+    /// on ([`crate::lxx`]).
+    pub fn shown_number(self) -> u8 {
+        crate::lxx::shown(self.book(), self.chapter(), 1).1.unwrap_or(self.chapter())
+    }
+
     pub fn display(self) -> String {
-        format!("{} {}", self.book().ref_name(), self.chapter())
+        match crate::lxx::shown(self.book(), self.chapter(), 1) {
+            (name, Some(c), _) => format!("{name} {c}"),
+            (name, None, _) => name.to_string(),
+        }
     }
 }
 
@@ -356,7 +373,7 @@ pub static KJV_VERSES: [u8; KJV_CHAPTER_COUNT] = [
 
 /// Verses per chapter of the deuterocanonical books, counted from Brenton's English Septuagint
 /// (public domain; eBible.org `eng-Brenton`).
-const DEUTERO_VERSES: [(&str, &[u8]); 15] = [
+const DEUTERO_VERSES: [(&str, &[u8]); 16] = [
     ("MAN", &[15]),
     ("1ES", &[58, 30, 24, 63, 73, 34, 15, 96, 55]),
     ("TOB", &[22, 14, 17, 21, 22, 17, 18, 21, 6, 13, 19, 22, 18, 15]),
@@ -376,6 +393,7 @@ const DEUTERO_VERSES: [(&str, &[u8]); 15] = [
     ),
     ("BAR", &[22, 35, 37, 37, 9]),
     ("LJE", &[73]),
+    ("S3Y", &[67]),
     ("SUS", &[64]),
     ("BEL", &[42]),
     ("4MA", &[35, 24, 21, 26, 38, 35, 25, 27, 32, 21, 27, 20, 27, 20, 32, 25, 24, 24]),
@@ -476,11 +494,20 @@ impl VerseRef {
     pub fn display(self) -> String {
         self.to_string()
     }
+
+    /// Chapter and verse as shown (Septuagint numbers for a psalm when that numbering is on).
+    pub fn shown_numbers(self) -> (u8, u8) {
+        let (_, c, v) = crate::lxx::shown(self.book, self.chapter, self.verse);
+        (c.unwrap_or(self.chapter), v)
+    }
 }
 
 impl std::fmt::Display for VerseRef {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{} {}:{}", self.book.ref_name(), self.chapter, self.verse)
+        match crate::lxx::shown(self.book, self.chapter, self.verse) {
+            (name, Some(c), v) => write!(f, "{name} {c}:{v}"),
+            (name, None, v) => write!(f, "{name}:{v}"),
+        }
     }
 }
 
@@ -489,7 +516,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn grid_has_1364_chapters() {
+    fn grid_has_1365_chapters() {
         assert_eq!(BOOKS.iter().map(|b| b.chapters as usize).sum::<usize>(), CHAPTER_COUNT);
         let chapters =
             |books: &mut dyn Iterator<Item = BookId>| books.map(|b| b.chapters() as usize).sum::<usize>();

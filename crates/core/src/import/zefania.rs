@@ -172,11 +172,11 @@ mod tests {
             (info.title.as_str(), info.abbrev.as_str(), info.rights.as_str()),
             ("Zef Test", "ZT", "PD")
         );
-        let v = t.find(VerseRef::new(BookId(57), 3, 16)).unwrap();
+        let v = t.find(VerseRef::new(BookId(58), 3, 16)).unwrap();
         assert_eq!(v.text, "For God so loved the world, that he gave");
         assert_eq!(v.spans[0].style, Style::WordsOfJesus);
         assert_eq!(v.marks[0].kind, MarkKind::Heading);
-        let v = t.find(VerseRef::new(BookId(57), 3, 17)).unwrap();
+        let v = t.find(VerseRef::new(BookId(58), 3, 17)).unwrap();
         assert_eq!(v.plain_text(), "Second line");
         assert_eq!(t.verse_count(), 2);
     }

@@ -669,7 +669,7 @@ pub(crate) mod tests {
         assert!(cache.get("esv", genesis(4), p).unwrap().is_some());
         // Jude is one chapter (25 verses): storing it would keep the whole book, so it isn't
         // stored, and nothing else is evicted on its account.
-        let jude = ChapterIdx::new(BookId(79), 1).unwrap();
+        let jude = ChapterIdx::new(BookId(80), 1).unwrap();
         cache.put("esv", jude, &chapter_with(jude, 25), None, p).unwrap();
         assert!(cache.get("esv", jude, p).unwrap().is_none());
         assert_eq!(cache.stored_verses("esv"), 90);
@@ -695,11 +695,11 @@ pub(crate) mod tests {
         assert!(!over_limit(three.into_iter(), p));
         assert!(over_limit(three.into_iter().chain([(ruth(4), 22)]), p));
         // A one-chapter book is a whole book on its own.
-        let jude = ChapterIdx::new(BookId(79), 1).unwrap();
+        let jude = ChapterIdx::new(BookId(80), 1).unwrap();
         assert!(over_limit(std::iter::once((jude, 25)), p));
         // Every chapter is the whole book even with fewer verses than the KJV: the NLT has no
         // Romans 16:24, so all of Romans is 432 verses against the KJV's 433.
-        let romans = |n| ChapterIdx::new(BookId(59), n).unwrap();
+        let romans = |n| ChapterIdx::new(BookId(60), n).unwrap();
         let all: Vec<_> =
             (1..=16).map(|n| (romans(n), romans(n).kjv_verses() as usize - usize::from(n == 16))).collect();
         assert_eq!(all.iter().map(|(_, v)| v).sum::<usize>(), 432);

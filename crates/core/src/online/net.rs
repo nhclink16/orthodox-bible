@@ -196,13 +196,13 @@ mod tests {
 
     #[test]
     fn parses_prose_and_ignores_other_chapters() {
-        let c = ChapterIdx::new(BookId(57), 3).unwrap();
+        let c = ChapterIdx::new(BookId(58), 3).unwrap();
         let t = parse_json(c, JOHN).unwrap();
         assert_eq!(t.verse_count(), 2);
-        let v16 = t.find(VerseRef::new(BookId(57), 3, 16)).unwrap();
+        let v16 = t.find(VerseRef::new(BookId(58), 3, 16)).unwrap();
         assert_eq!(v16.text, "For God so loved the world, that he gave his only begotten Son.");
         assert_eq!(v16.marks.iter().map(|m| m.kind).collect::<Vec<_>>(), [MarkKind::Paragraph]);
-        let v17 = t.find(VerseRef::new(BookId(57), 3, 17)).unwrap();
+        let v17 = t.find(VerseRef::new(BookId(58), 3, 17)).unwrap();
         assert!(v17.marks.is_empty(), "verse 17 continues the paragraph");
         assert!(!Net::default().needs_key());
     }

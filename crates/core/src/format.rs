@@ -5,7 +5,7 @@
 //! u32 body_len  zstd(body)
 //!
 //! body = u32 text_len text  u32 extra_len extra
-//!        u16 × 1364 verses-per-chapter, in grid order (version 1: × 1189, in KJV book order)
+//!        u16 × 1365 verses-per-chapter, in grid order (version 1: × 1189, in KJV book order)
 //!        u32 n  then column arrays: number u8×n, number_end u8×n, text_len u16×n, marks_len u16×n, spans_len u16×n
 //!        u32 m  marks: offset u16×m, kind u8×m, level u8×m, payload_start u32×m, payload_len u32×m
 //!        u32 k  spans: start u16×k, end u16×k, style u8×k
@@ -307,8 +307,8 @@ mod tests {
     #[test]
     fn round_trip_preserves_everything() {
         let mut b = TranslationBuilder::new(TranslationMeta { id: "x".into(), ..Default::default() });
-        b.begin_book(BookId(57));
-        b.set_book_title(BookId(57), Some("John"), Some("The Gospel of John"));
+        b.begin_book(BookId(58));
+        b.set_book_title(BookId(58), Some("John"), Some("The Gospel of John"));
         b.begin_chapter(1);
         b.heading(MarkKind::Heading, 1, "The Word");
         b.mark(MarkKind::Paragraph, 0);
@@ -322,9 +322,9 @@ mod tests {
         b.text("Ünïcode ✓");
         let t = b.finish();
         let bytes = encode(&t, 3).unwrap();
-        assert_eq!(read_meta(&bytes).unwrap().books[57].long, "The Gospel of John");
+        assert_eq!(read_meta(&bytes).unwrap().books[58].long, "The Gospel of John");
         let back = decode(&bytes).unwrap();
-        let c = ChapterIdx::new(BookId(57), 1).unwrap();
+        let c = ChapterIdx::new(BookId(58), 1).unwrap();
         let a: Vec<_> = t
             .verses_in(c)
             .map(|v| (v.number, v.text.to_string(), v.marks.to_vec(), v.spans.to_vec()))

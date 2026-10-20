@@ -1,4 +1,5 @@
 //! `cargo run -p xtask -- build-data`
+//! `cargo run -p xtask -- build-orthodox` (after build-data, or with the committed `kjv.bbl`)
 //!
 //! Downloads the public-domain USFM sources pinned below from eBible.org (into `.sources/`),
 //! verifies their SHA-256, converts them with the same USFM importer users get, and writes
@@ -96,11 +97,26 @@ const SOURCES: &[Source] = &[
     },
 ];
 
+/// The Orthodox fork's Old Testament: Brenton's Septuagint as eBible.org's LXX2012 (updated
+/// spelling, the deuterocanonical books, Psalm 151). Its New Testament is the bundled KJV's.
+const LXX2012: Source = Source {
+    id: "lxx",
+    abbrev: "LXX",
+    name: "Septuagint with the King James New Testament",
+    ebible_id: "eng-lxx2012",
+    sha256: "dc9a055d0b4e82fbcdc576f6330cf7138f987285d7ff01d0b29e061d49df87ef",
+    license: "Public Domain",
+    copyright: "Old Testament: Sir Lancelot C. L. Brenton's English Septuagint (1851), public domain, with \
+                spelling and wording updated by Michael Paul Johnson (LXX2012), dedicated to the public \
+                domain. New Testament: King James Version (1769), public domain outside the United Kingdom.",
+};
+
 fn main() -> Result<()> {
     let args: Vec<String> = std::env::args().skip(1).collect();
     let root = Path::new(env!("CARGO_MANIFEST_DIR")).parent().unwrap().to_path_buf();
     match args.first().map(String::as_str) {
         Some("build-data") => build_data(&root, &args[1..]),
+        Some("build-orthodox") => build_orthodox(&root),
         Some("missing") => {
             // Lists verses present in the first translation but absent from the others.
             let load = |id: &str| -> Result<bible_core::Translation> {
@@ -301,6 +317,66 @@ fn build_data(root: &Path, ids: &[String]) -> Result<()> {
         for w in warnings.iter().take(5) {
             println!("      {w}");
         }
+    }
+    Ok(())
+}
+
+fn build_orthodox(root: &Path) -> Result<()> {
+    let s = &LXX2012;
+    let zip_path = fetch(root, s)?;
+    let digest = hex(&Sha256::digest(std::fs::read(&zip_path)?));
+    let mut archive = zip::ZipArchive::new(std::fs::File::open(&zip_path)?)?;
+    let mut names: Vec<String> =
+        archive.file_names().filter(|n| n.ends_with(".usfm")).map(String::from).collect();
+    names.sort();
+    let meta = TranslationMeta {
+        id: s.id.into(),
+        abbrev: s.abbrev.into(),
+        name: s.name.into(),
+        language: "en".into(),
+        license: s.license.into(),
+        copyright: s.copyright.into(),
+        source: format!(
+            "https://ebible.org/Scriptures/{}_usfm.zip (sha256 {digest}); details: https://ebible.org/{}/. \
+             New Testament from the bundled KJV.",
+            s.ebible_id, s.ebible_id
+        ),
+        origin: Origin::Bundled,
+        ..Default::default()
+    };
+    let mut b = TranslationBuilder::new(meta);
+    // LXX2012 numbers the Psalms as the Septuagint does; the grid numbers them as the Hebrew.
+    b.remap = Some(bible_core::lxx::remap_lxx2012);
+    for name in &names {
+        let mut f = archive.by_name(name)?;
+        let mut text = String::new();
+        std::io::Read::read_to_string(&mut f, &mut text).with_context(|| name.clone())?;
+        // LXX2012 marks a plural "you" as "you⌃"; read aloud or at a glance it's a stray symbol.
+        usfm::UsfmParser::new(&mut b).parse(&text.replace('⌃', ""))?;
+    }
+    let warnings = std::mem::take(&mut b.warnings);
+    let skipped = std::mem::take(&mut b.skipped_books);
+    let mut lxx = b.finish();
+    // The grid's book names (Isaiah, 1 Kings) rather than LXX2012's (Esias, Kings III).
+    for book in bible_core::BookId::all() {
+        lxx.meta.books[book.index()] =
+            bible_core::model::BookTitle { short: book.name().into(), long: String::new() };
+    }
+    let kjv = format::decode(&std::fs::read(root.join("data/translations/kjv.bbl"))?)?;
+    let t = lxx.with_chapters_from(&kjv, |c| c.book().testament() == bible_core::books::Testament::New);
+    let bytes = format::encode(&t, 19)?;
+    std::fs::write(root.join(format!("data/translations/{}.bbl", s.id)), &bytes)?;
+    println!(
+        "{:<4} {:>6} verses  {:>5.2} MB text → {:>5.2} MB  ({} warnings; skipped {:?})",
+        s.abbrev,
+        t.verse_count(),
+        t.total_text_bytes() as f64 / 1e6,
+        bytes.len() as f64 / 1e6,
+        warnings.len(),
+        skipped
+    );
+    for w in &warnings {
+        println!("      {w}");
     }
     Ok(())
 }

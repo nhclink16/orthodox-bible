@@ -51,6 +51,8 @@ pub struct Typography {
     pub headings: bool,
     /// Maximum text measure in ems.
     pub measure: f32,
+    /// Psalms in Septuagint numbering, as the Orthodox Church reads them ([`bible_core::lxx`]).
+    pub septuagint_psalms: bool,
     /// Focus mode: the chapter's head is one quiet line ("JOHN 15 · KJV").
     #[serde(skip)]
     pub quiet_head: bool,
@@ -67,6 +69,7 @@ impl Default for Typography {
             verse_numbers: true,
             headings: true,
             measure: reading::MEASURE / reading::SIZE_DEFAULT,
+            septuagint_psalms: true,
             quiet_head: false,
         }
     }
@@ -746,8 +749,15 @@ fn hanging(galley: Arc<Galley>, hang: f32) -> Arc<Galley> {
 /// The heading at the top of a chapter. Chapter 1 shows the book's title, its long name and a
 /// CHAPTER 1 label; later chapters a book-name label over a large numeral; psalms a left-aligned
 /// PSALM n label followed by the psalm's own heading and title.
+/// A verse's number as shown: with Septuagint numbering, Psalm 10:1 is Psalm 9:21.
+fn shown_verse(c: ChapterIdx, number: u8) -> u8 {
+    bible_core::lxx::shown(c.book(), c.chapter(), number).2
+}
+
 fn chapter_head(b: &mut Builder<'_, '_>, t: Option<&Translation>, c: ChapterIdx, single_column: bool) {
     let cx = b.cx;
+    // The chapter's number as shown (Septuagint psalm numbers when they're on).
+    let number = bible_core::lxx::shown(c.book(), c.chapter(), 1).1.unwrap_or(c.chapter());
     let p = cx.p();
     let short =
         t.map(|t| t.meta.book_short(c.book()).to_string()).unwrap_or_else(|| c.book().name().to_string());
@@ -756,7 +766,7 @@ fn chapter_head(b: &mut Builder<'_, '_>, t: Option<&Translation>, c: ChapterIdx,
         // 20 pt gap.
         let book = if c.book() == BookId::PSALMS { "Psalm".to_string() } else { short.clone() };
         let abbrev = t.map(|t| t.meta.abbrev.clone()).unwrap_or_default();
-        let label = format!("{} {} · {abbrev}", book.to_uppercase(), c.chapter());
+        let label = format!("{} {number} · {abbrev}", book.to_uppercase());
         b.label_line_in(&label, single_column, p.ink_3);
         // The design's spacing in points, whatever the size: 16 under the 16 pt label, then 20.
         b.y += 16.0 - (cx.s(text::LABEL.line_height) - text::LABEL.line_height);
@@ -765,7 +775,7 @@ fn chapter_head(b: &mut Builder<'_, '_>, t: Option<&Translation>, c: ChapterIdx,
         return;
     }
     if c.book() == BookId::PSALMS && single_column {
-        b.label_line(&format!("PSALM {}", c.chapter()), false);
+        b.label_line(&format!("PSALM {number}"), false);
         b.psalm_head = true;
         b.space = cx.s(16.0);
         b.after_heading = true;
@@ -788,7 +798,7 @@ fn chapter_head(b: &mut Builder<'_, '_>, t: Option<&Translation>, c: ChapterIdx,
     } else {
         b.label_line(&short.to_uppercase(), true);
         b.y += cx.s(4.0);
-        b.serif_line(&c.chapter().to_string(), SERIF_DISPLAY, display.0, display.1, display.2, p.ink, true);
+        b.serif_line(&number.to_string(), SERIF_DISPLAY, display.0, display.1, display.2, p.ink, true);
     }
     // 24 pt under the heading, then the column's 16 pt gap before the text.
     b.y += cx.s(24.0);
@@ -881,12 +891,12 @@ pub fn layout_chapter(
                     // Verse-per-line, and poetry lines that begin a verse, hang their number in
                     // the margin so the text of every line aligns.
                     if (per_line || matches!(p.kind, Kind::Poetry(_))) && p.chars == 0 {
-                        p.gutter = Some(v.number);
+                        p.gutter = Some(shown_verse(c, v.number));
                     } else {
                         let label = if v.number_end > v.number {
-                            format!("{}–{}", v.number, v.number_end)
+                            format!("{}–{}", shown_verse(c, v.number), shown_verse(c, v.number_end))
                         } else {
-                            v.number.to_string()
+                            shown_verse(c, v.number).to_string()
                         };
                         let n = label.chars().count() + 1;
                         // The no-break space keeps the number with its verse at line ends.
@@ -983,7 +993,7 @@ pub fn layout_parallel(
             _ => None,
         });
         let label = if c.book() == BookId::PSALMS {
-            format!("PSALM {}", c.chapter())
+            format!("PSALM {}", bible_core::lxx::shown(c.book(), c.chapter(), 1).1.unwrap_or(c.chapter()))
         } else {
             let name = first_t
                 .map(|t| t.meta.book_short(c.book()).to_string())
@@ -1061,8 +1071,10 @@ pub fn layout_parallel(
             let g = b.fonts.layout_job(job);
             row_h = row_h.max(g.size().y);
             let gutter = cx.typo.verse_numbers.then(|| {
-                let ng =
-                    b.fonts.layout_job(LayoutJob::single_section(v.number.to_string(), number_fmt.clone()));
+                let ng = b.fonts.layout_job(LayoutJob::single_section(
+                    shown_verse(c, v.number).to_string(),
+                    number_fmt.clone(),
+                ));
                 let pos = vec2(ci as f32 * (col_w + cx.gutter), row_top + (cx.lh() - ng.size().y) / 2.0);
                 (ng, pos)
             });

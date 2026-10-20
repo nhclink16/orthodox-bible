@@ -1304,7 +1304,7 @@ fn reading(ui: &mut Ui, library: &Library, settings: &mut Settings, actions: &mu
         .ok()
         .map(|t| {
             let get = |v| {
-                t.find(bible_core::VerseRef::new(bible_core::BookId(57), 1, v))
+                t.find(bible_core::VerseRef::new(bible_core::BookId(58), 1, v))
                     .map(|v| v.plain_text())
                     .unwrap_or_default()
             };
@@ -1466,7 +1466,7 @@ fn reading(ui: &mut Ui, library: &Library, settings: &mut Settings, actions: &mu
     // Layout.
     group_title(ui, p, "Layout");
     let mut red = typo.red_letters;
-    rows_card(ui, p, &[44.0, 48.0, 44.0, 48.0, 44.0], |ui, i, r| {
+    rows_card(ui, p, &[44.0, 48.0, 44.0, 48.0, 48.0, 44.0], |ui, i, r| {
         let right = pos2(r.right() - 16.0, r.center().y);
         match i {
             0 => {
@@ -1494,6 +1494,10 @@ fn reading(ui: &mut Ui, library: &Library, settings: &mut Settings, actions: &mu
             3 => {
                 row_label(ui, p, r, "Section headings", Some("Where the translation has them (BSB, WEB)"));
                 widgets::toggle(ui, p, right, ui.id().with("headings"), &mut typo.headings);
+            }
+            4 => {
+                row_label(ui, p, r, "Septuagint psalm numbers", Some("Psalm 50 is the Hebrew Psalm 51"));
+                widgets::toggle(ui, p, right, ui.id().with("septuagint"), &mut typo.septuagint_psalms);
             }
             _ => {
                 row_label(ui, p, r, "Justify text", None);

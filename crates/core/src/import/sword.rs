@@ -650,7 +650,7 @@ pub(crate) mod tests {
                 "<title type=\"psalm\" canonical=\"true\">A Psalm of David.</title><l level=\"1\">The <divineName>Lord</divineName> is my shepherd; I shall not want.</l>",
             ),
             (
-                VerseRef::new(BookId(57), 3, 16),
+                VerseRef::new(BookId(58), 3, 16),
                 "For God so loved the world, <note>n</note><q who=\"Jesus\" marker=\"\">that he gave</q>",
             ),
             (
@@ -677,7 +677,7 @@ pub(crate) mod tests {
             let ps = t.find(VerseRef::new(BookId::PSALMS, 23, 1)).unwrap();
             assert_eq!(ps.text, "The Lord is my shepherd; I shall not want.");
             assert_eq!(ps.marks[0].kind, MarkKind::PsalmTitle);
-            let jn = t.find(VerseRef::new(BookId(57), 3, 16)).unwrap();
+            let jn = t.find(VerseRef::new(BookId(58), 3, 16)).unwrap();
             assert_eq!(jn.text, "For God so loved the world, that he gave");
             assert_eq!(jn.spans[0].style, Style::WordsOfJesus);
             assert!(t.find(VerseRef::new(BookId::REVELATION, 22, 21)).is_some());
@@ -723,7 +723,7 @@ pub(crate) mod tests {
             .map(|c| versification("NRSV").unwrap()(c) as u32)
             .sum();
         assert_eq!(total, 31_104);
-        assert_eq!(versification("nrsva").unwrap()(ChapterIdx::new(BookId(78), 1).unwrap()), 15);
+        assert_eq!(versification("nrsva").unwrap()(ChapterIdx::new(BookId(79), 1).unwrap()), 15);
         assert_eq!(versification("NRSV").unwrap()(ChapterIdx::new(BookId::REVELATION, 12).unwrap()), 18);
         assert!(versification("Vulg").is_none());
     }
@@ -741,17 +741,17 @@ pub(crate) mod tests {
     #[test]
     fn gbf_and_thml() {
         let mut b = TranslationBuilder::new(TranslationMeta::default());
-        b.begin_book(BookId(57));
+        b.begin_book(BookId(58));
         b.begin_chapter(3);
         b.begin_verse(16, 16);
         gbf(&mut b, "For God<WG2316> so loved<RF>note<Rf> the world, <FR>that he gave<Fr>");
         b.begin_verse(17, 17);
         thml(&mut b, "For God <scripRef>x</scripRef>sent <font color=\"red\">not</font> his<br/>Son");
         let t = b.finish();
-        let v = t.find(VerseRef::new(BookId(57), 3, 16)).unwrap();
+        let v = t.find(VerseRef::new(BookId(58), 3, 16)).unwrap();
         assert_eq!(v.text, "For God so loved the world, that he gave");
         assert_eq!(v.spans[0].style, Style::WordsOfJesus);
-        let v = t.find(VerseRef::new(BookId(57), 3, 17)).unwrap();
+        let v = t.find(VerseRef::new(BookId(58), 3, 17)).unwrap();
         assert_eq!(v.plain_text(), "For God sent not his Son");
         assert_eq!(v.spans[0].style, Style::WordsOfJesus);
     }

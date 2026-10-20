@@ -8,6 +8,7 @@ pub mod copy;
 pub mod format;
 pub mod import;
 pub mod library;
+pub mod lxx;
 pub mod model;
 pub mod online;
 pub mod plans;

@@ -25,7 +25,7 @@ fn chapter(t: &bible_core::Translation, typo: &Typography, c: ChapterIdx) -> Cha
 #[test]
 fn every_verse_has_an_anchor_in_reading_order() {
     let kjv = bible_core::bundled::load("kjv").unwrap();
-    let c = ChapterIdx::new(BookId(57), 3).unwrap();
+    let c = ChapterIdx::new(BookId(58), 3).unwrap();
     let l = chapter(&kjv, &Typography::default(), c);
     let numbers: Vec<u8> = l.anchors.iter().map(|a| a.number).collect();
     assert_eq!(numbers, (1..=36).collect::<Vec<u8>>());
@@ -39,9 +39,9 @@ fn every_verse_has_an_anchor_in_reading_order() {
 #[test]
 fn hit_testing_maps_glyphs_back_to_verses() {
     let kjv = bible_core::bundled::load("kjv").unwrap();
-    let c = ChapterIdx::new(BookId(57), 3).unwrap();
+    let c = ChapterIdx::new(BookId(58), 3).unwrap();
     let l = chapter(&kjv, &Typography::default(), c);
-    let v16 = kjv.find(bible_core::VerseRef::new(BookId(57), 3, 16)).unwrap();
+    let v16 = kjv.find(bible_core::VerseRef::new(BookId(58), 3, 16)).unwrap();
     let block = l.blocks.iter().find(|b| b.verse_chars(v16.index).is_some()).unwrap();
     let range = block.verse_chars(v16.index).unwrap();
     // Every character of the verse maps back to the verse, and its rectangles are inside the block.
@@ -100,7 +100,7 @@ fn poetry_wraps_with_a_hanging_indent() {
 #[test]
 fn verse_per_line_starts_every_verse_on_a_new_block_with_a_gutter_number() {
     let kjv = bible_core::bundled::load("kjv").unwrap();
-    let c = ChapterIdx::new(BookId(57), 3).unwrap();
+    let c = ChapterIdx::new(BookId(58), 3).unwrap();
     let typo = Typography { mode: Mode::VersePerLine, ..Typography::default() };
     let l = chapter(&kjv, &typo, c);
     let starts = l.blocks.iter().filter(|b| b.verses.first().is_some_and(|(ch, _, _)| *ch == 0)).count();
@@ -174,7 +174,7 @@ fn publisher_notices_follow_the_text_as_links() {
     // An online chapter ends with its publisher's notice, below the last verse, across the columns.
     let kjv = bible_core::bundled::load("kjv").unwrap();
     let web = bible_core::bundled::load("web").unwrap();
-    let c = ChapterIdx::new(BookId(57), 3).unwrap();
+    let c = ChapterIdx::new(BookId(58), 3).unwrap();
     let typo = Typography::default();
     let notice = |abbrev: &str| layout::Notice {
         abbrev: abbrev.into(),

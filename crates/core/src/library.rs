@@ -434,7 +434,7 @@ mod tests {
             ..Default::default()
         };
         let mut b = TranslationBuilder::new(meta);
-        b.begin_book(BookId(57));
+        b.begin_book(BookId(58));
         b.begin_chapter(3);
         b.begin_verse(16, 16);
         b.text("Imported text.");
@@ -449,13 +449,13 @@ mod tests {
         assert!(lib.remove("kjv").is_err());
         let id = lib.install(imported("KJV")).unwrap();
         assert_eq!(id, "kjv-2", "ids never collide with bundled translations");
-        let jn3 = ChapterIdx::new(BookId(57), 3).unwrap();
+        let jn3 = ChapterIdx::new(BookId(58), 3).unwrap();
         assert!(matches!(lib.chapter(&id, jn3), Chapter::Ready(_)));
         assert!(matches!(lib.chapter(&id, ChapterIdx(0)), Chapter::Missing));
         // Reopening finds the import on disk.
         let lib2 = Library::open(&dir, Arc::new(|| {}));
         let t = lib2.load(&id).unwrap();
-        assert_eq!(t.find(VerseRef::new(BookId(57), 3, 16)).unwrap().text, "Imported text.");
+        assert_eq!(t.find(VerseRef::new(BookId(58), 3, 16)).unwrap().text, "Imported text.");
         assert!(matches!(t.meta.origin, Origin::Imported { .. }));
         lib.remove(&id).unwrap();
         assert!(!Library::open(&dir, Arc::new(|| {})).contains(&id));

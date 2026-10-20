@@ -313,8 +313,11 @@ impl Sidebar {
                                 // Places are chapters, except a verse selected where the reader is now.
                                 let verse = env.selection.filter(|s| i == 0 && s.chapter_idx() == *c);
                                 let label = match verse {
-                                    Some(s) => format!("{} {}:{}", ref_name(c.book()), c.chapter(), s.verse),
-                                    None => format!("{} {}", ref_name(c.book()), c.chapter()),
+                                    Some(s) => {
+                                        let (ch, v) = s.shown_numbers();
+                                        format!("{} {ch}:{v}", ref_name(c.book()))
+                                    }
+                                    None => format!("{} {}", ref_name(c.book()), c.shown_number()),
                                 };
                                 let r = row(
                                     ui,

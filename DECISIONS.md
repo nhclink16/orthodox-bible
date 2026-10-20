@@ -62,8 +62,8 @@ a reader has no use for a discrete GPU, and waking one costs start-up time and b
 Every translation — bundled, imported or fetched — becomes the same structure: one UTF-8 string of
 verse text plus flat arrays of verses, structural *marks* (paragraph, poetry line + level, stanza
 break, heading, Psalm title) and character *spans* (words of Christ, additions, divine name, Selah),
-all keyed to the canonical **81-book / 1,364-chapter grid**: the 66 books in KJV versification plus
-the 15 deuterocanonical books the Orthodox Church reads, each in its Orthodox place (Tobit after
+all keyed to the canonical **82-book / 1,365-chapter grid**: the 66 books in KJV versification plus
+the 16 deuterocanonical books the Orthodox Church reads, each in its Orthodox place (Tobit after
 Nehemiah, Wisdom after the Song of Songs, 4 Maccabees after Malachi). Grid order is reading order.
 Using one grid is what makes verse-aligned parallel columns, the compare view, and
 translation-independent highlights possible.
@@ -76,6 +76,14 @@ in KJV order (SWORD, Zefania) go through `BookId::from_kjv_index`. Study data wa
 book code, so notes and highlights don't move. A deuterocanonical chapter that no open column has
 takes no room in the reader, so the KJV still runs from Nehemiah to Esther. Reading plans keep to
 the 66 books.
+
+*Septuagint psalms.* The grid keeps Hebrew/KJV psalm numbers, and the bundled Septuagint is moved
+onto them at build time (`lxx::remap_lxx2012` through `TranslationBuilder::remap`). One grid means
+notes, parallel columns and commentary line up in every translation. What a reader sees is a
+setting, *Septuagint psalm numbers* (on by default): labels, headings, verse numbers and typed
+references all go through `lxx::shown` and `lxx::from_lxx`, so Psalm 51 reads as Psalm 50 in the KJV
+too. Verse numbers follow English Bibles (titles aren't verses), which is how LXX2012 numbers them.
+Psalm 151 and the Prayer of Azariah (the Song of the Three Youths) are books of their own.
 
 `.bbl` files store that model as column arrays compressed with zstd (level 19 for bundled data):
 the 4.1 MB KJV is 1.04 MB, all seven bundled translations ≈ 7 MB. The JSON metadata header is
@@ -384,6 +392,7 @@ What differs is the toolkit, and here the Mac's choice is overruled.
 - No footnotes or cross-references from the source texts (dropped at import).
 - SWORD modules in versifications other than KJV(A)/NRSV(A) (e.g. Vulgate, Synodal) aren't supported yet,
   and SWORD imports don't read the deuterocanonical books yet (USFM, OSIS and Zefania do).
-- Septuagint numbering (Psalms 9–147, Psalm 151, Brenton's psalm titles as verses) isn't mapped yet:
-  a Septuagint is stored by its own chapter and verse numbers.
+- Septuagint numbering is mapped for the Psalms only, and only for the bundled `lxx` (LXX2012). Its
+  other books (Jeremiah 25–51, Exodus 35–40, 1 Kings, Job, …) keep LXX2012's numbering, so parallel
+  columns can be a verse or a chapter apart there. Imported Septuagints keep their own numbering.
 - Search covers locally available text; online translations are searched via their own sites.

@@ -80,7 +80,7 @@ impl Default for Settings {
             sidebar_tab: SidebarTab::Books,
             theme_system: false,
             // John 1 is a friendlier first page than Genesis 1.
-            chapter: ChapterIdx::new(BookId(57), 1).unwrap().0,
+            chapter: ChapterIdx::new(BookId(58), 1).unwrap().0,
             verse: 1,
             whole_words: false,
             plan_reminder: false,
@@ -1423,7 +1423,7 @@ impl BibleApp {
                 .map(|m| m.ref_name(c.book()).to_string())
                 .unwrap_or_else(|| c.book().ref_name().into())
         };
-        let title = format!("{book_name} {}", c.chapter());
+        let title = format!("{book_name} {}", c.shown_number());
         let abbrev = if self.settings.parallel_on {
             self.columns()
                 .iter()
@@ -2156,6 +2156,8 @@ impl BibleApp {
 impl eframe::App for BibleApp {
     fn ui(&mut self, ui: &mut Ui, frame: &mut eframe::Frame) {
         let frame_start = Instant::now();
+        // Every label and typed reference reads the psalm numbering from here.
+        bible_core::lxx::set_numbering(self.settings.typo.septuagint_psalms);
         if self.startup.frames < 2 {
             crate::trace(self.startup.t0, &format!("frame {} start", self.startup.frames));
         }

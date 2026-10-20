@@ -23,7 +23,7 @@ use crate::widgets::{self, css_baseline, flow, line, paint_on_baseline, paint_ru
 pub const SIZE: egui::Vec2 = vec2(960.0, 680.0);
 
 /// Translations offered on the first step, in the design's order.
-const OFFERED: [&str; 6] = ["kjv", "web", "bsb", "asv", "ylt", "dby"];
+const OFFERED: [&str; 6] = ["lxx", "kjv", "web", "bsb", "asv", "ylt"];
 
 const STEPS: [&str; 3] = ["Translation", "Theme", "Ready"];
 
@@ -512,7 +512,7 @@ fn samples() -> Samples {
         .iter()
         .filter_map(|id| {
             let t = bundled::load(id).ok()?;
-            let v = t.find(VerseRef::new(BookId(57), 3, 16))?;
+            let v = t.find(VerseRef::new(BookId(58), 3, 16))?;
             Some((id.to_string(), v.plain_text()))
         })
         .collect();

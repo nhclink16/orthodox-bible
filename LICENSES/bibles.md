@@ -3,6 +3,31 @@
 Verbatim text of each eBible.org archive's `copr.htm`, as downloaded on 2026-10-14.
 
 
+## LXX — `eng-lxx2012` (Orthodox fork; downloaded 2026-10-20)
+
+The Old Testament of the bundled `lxx`. Its New Testament is the bundled KJV's text.
+
+> LXX2012: Septuagint in American English 2012    
+> LXX2012: Septuagint in American English 2012  
+> LXX2012: Septuagint in American English 2012  
+> The Septuagint with Apocrypha, translated from Greek to English by Sir Lancelot C. L. Brenton and published in 1885, with some language updates (American English)  
+> Public Domain  
+> Language: English   
+> Dialect (if applicable): American  
+> Language in English: English  
+> Translation by:  
+> Sir Lancelot Charles Lee Brenton  
+> Michael Paul Johnson  
+> LXX2012: Septuagint in English 2012  
+> This is a translation of the Old Testament and Apocrypha/Deuterocanon from Hebrew to Greek to 19th Century British English, with some updates of spelling and word usage to contemporary American English. The original English translation was done by Sir Lancelot Charles Lee Brenton and published by Samuel Bagster & Sons, Ltd., in London in 1851. It has entered the Public Domain due to the passage of sufficient time. In the process of scanning and typing the text, the original poetry and prose formatting, as well as peripheral material like introductions and notes, have been omitted.  
+> This edition of the Septuagint has some language updates. Brenton's word order and punctuation has been mostly retained, meaning that quotation marks are not used, and sentences within quotes may not start with capital letters, as was standard usage in 1851.  Names transliterated from Greek to those transliterated from Hebrew in the common English Bibles often differ. These language updates are dedicated to the Public Domain by the author of those edits, Michael Paul Johnson. Therefore this edition may be freely copied, published, etc.  
+> Before considering making changes to the text of this work, I recommend that you consult with God, because this is really His Book.  
+> If you find errors in the text, please report them so that we can correct them.  
+> Donations to help with the expenses of operating this web site and thus help others have free access to the Word of God may be made to us, but are not required. Please see http://MLJohnson.org/partner/ for more about that.  
+> HTML generated with Haiola by eBible.org 18 Oct 2026 from source files dated 12 Mar 2026  
+> The LXX2012 is in the Public Domain. You may copy and share it freely. Please report any typos you find. Help keep free Bibles online! Support the missionary who runs this site.  
+> Public Domain  
+
 ## KJV — `eng-kjv2006`
 
 > King James (Authorized) Version  

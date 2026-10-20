@@ -235,7 +235,7 @@ mod tests {
         let name = |b: BookId| b.name().to_string();
         assert_eq!(label(pp.day(1), name), "Psalms 1, 31, 61, 91, 121 · Proverbs 1");
         assert_eq!(label(get("sermon-mount").unwrap().day(1), name), "Matthew 5:1–16");
-        let luke5 = ChapterIdx::new(BookId(56), 5).unwrap();
+        let luke5 = ChapterIdx::new(BookId(57), 5).unwrap();
         let two = [Passage::whole(luke5), Passage::whole(ChapterIdx(luke5.0 + 1))];
         assert_eq!(label(&two, name), "Luke 5–6");
     }

@@ -223,15 +223,15 @@ mod tests {
 
     #[test]
     fn parses_prose_with_inline_verse_numbers() {
-        let c = ChapterIdx::new(BookId(57), 3).unwrap();
+        let c = ChapterIdx::new(BookId(58), 3).unwrap();
         let t = parse_text(c, JOHN);
-        let v16 = t.find(VerseRef::new(BookId(57), 3, 16)).unwrap();
+        let v16 = t.find(VerseRef::new(BookId(58), 3, 16)).unwrap();
         assert_eq!(
             v16.marks.iter().map(|m| m.kind).collect::<Vec<_>>(),
             [MarkKind::Heading, MarkKind::Paragraph]
         );
         assert!(v16.text.ends_with("everlasting life."));
-        let v17 = t.find(VerseRef::new(BookId(57), 3, 17)).unwrap();
+        let v17 = t.find(VerseRef::new(BookId(58), 3, 17)).unwrap();
         assert_eq!(
             v17.plain_text(),
             "For God sent not his Son into the world to condemn the world; but that the world through him might be saved."

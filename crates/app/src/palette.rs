@@ -241,10 +241,14 @@ impl CommandPalette {
                 .map(|e| e.meta.abbrev.clone())
                 .unwrap_or_else(|| s.translation.clone());
             let (title, detail, verse) = if s.finished() || s.furthest <= 1 {
-                (format!("{} {}", name(c.book()), c.chapter()), "finished".to_string(), None)
+                (format!("{} {}", name(c.book()), c.shown_number()), "finished".to_string(), None)
             } else {
                 (
-                    format!("{} {}:{}", name(c.book()), c.chapter(), s.furthest),
+                    {
+                        let (ch, v) =
+                            bible_core::VerseRef::new(c.book(), c.chapter(), s.furthest).shown_numbers();
+                        format!("{} {ch}:{v}", name(c.book()))
+                    },
                     format!("stopped at verse {}", s.furthest),
                     Some(s.furthest),
                 )

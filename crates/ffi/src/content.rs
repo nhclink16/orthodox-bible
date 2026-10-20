@@ -48,7 +48,7 @@ pub enum ChapterStatus {
 
 #[derive(Debug, Clone, PartialEq, uniffi::Record)]
 pub struct ChapterContent {
-    /// The chapter's index in the canonical grid (0 = Genesis 1, 1363 = Revelation 22).
+    /// The chapter's index in the canonical grid (0 = Genesis 1, 1364 = Revelation 22).
     pub index: u16,
     pub book: u8,
     pub chapter: u8,

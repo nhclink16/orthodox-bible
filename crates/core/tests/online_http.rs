@@ -114,11 +114,11 @@ fn esv_fetches_with_token_and_caches_on_disk() {
         copyright: String::new(),
     };
     lib.add_online_with_source(cfg.clone(), Arc::new(Esv::with_base(&base)));
-    let jn3 = ChapterIdx::new(BookId(57), 3).unwrap();
+    let jn3 = ChapterIdx::new(BookId(58), 3).unwrap();
     assert!(matches!(lib.chapter("esv", jn3), Chapter::NoKey));
     lib.set_api_key("esv-api-key", "SECRET").unwrap();
     let Chapter::Ready(t) = wait_ready(&lib, "esv", jn3, &rx) else { panic!("not ready") };
-    assert!(t.find(VerseRef::new(BookId(57), 3, 16)).unwrap().text.starts_with("For God so loved"));
+    assert!(t.find(VerseRef::new(BookId(58), 3, 16)).unwrap().text.starts_with("For God so loved"));
     let reqs = log.lock().unwrap().clone();
     assert_eq!(reqs.len(), 1);
     assert!(reqs[0].path.contains("q=John+3"));
@@ -176,9 +176,9 @@ fn api_bible_fetches_reports_fums_and_lists_bibles() {
     };
     let source = ApiBible::with_base(&format!("{base}/v1"), &format!("{base}/f3"), "abc-01", "device42");
     lib.add_online_with_source(cfg, Arc::new(source));
-    let jn3 = ChapterIdx::new(BookId(57), 3).unwrap();
+    let jn3 = ChapterIdx::new(BookId(58), 3).unwrap();
     let Chapter::Ready(t) = wait_ready(&lib, "kjvapi", jn3, &rx) else { panic!("not ready") };
-    let v = t.find(VerseRef::new(BookId(57), 3, 16)).unwrap();
+    let v = t.find(VerseRef::new(BookId(58), 3, 16)).unwrap();
     assert_eq!(v.text, "For God so loved the world, that he gave his only begotten Son");
     assert_eq!(lib.get("kjvapi").unwrap().copyright(), "PUBLIC DOMAIN except in the United Kingdom");
     let req = log.lock().unwrap().iter().find(|r| r.path.contains("JHN.3")).cloned().unwrap();
@@ -277,7 +277,7 @@ fn nlt_works_without_a_key_in_ranges_the_terms_allow() {
     assert!(log.lock().unwrap().iter().all(|r| query(&r.path, "key") == Some("TEST")));
     assert!(lib.get("nlt").unwrap().copyright().contains("Tyndale House Foundation"));
     // The NLT numbers 15 verses in 3 John, the KJV 14: the last one isn't lost.
-    let jn3 = ChapterIdx::new(BookId(78), 1).unwrap();
+    let jn3 = ChapterIdx::new(BookId(79), 1).unwrap();
     let Chapter::Ready(t) = wait_ready(&lib, "nlt", jn3, &rx) else { panic!("not ready") };
     assert_eq!(t.verses_in(jn3).last().unwrap().number, 15);
     // Every request counted toward the day's 500.
@@ -306,7 +306,7 @@ fn nlt_works_without_a_key_in_ranges_the_terms_allow() {
     let spent_dir = temp_dir("nlt-spent");
     let mut lib = Library::open(&spent_dir, notify);
     lib.add_online_with_source(cfg, Arc::new(nlt()));
-    let jn3 = ChapterIdx::new(BookId(57), 3).unwrap();
+    let jn3 = ChapterIdx::new(BookId(58), 3).unwrap();
     match wait_ready(&lib, "nlt", jn3, &rx) {
         Chapter::Failed(m) => {
             assert!(m.starts_with("NLT API: the daily limit of 500"), "{m}");
@@ -343,10 +343,10 @@ fn net_fetches_without_a_key() {
         copyright: String::new(),
     };
     lib.add_online_with_source(cfg, Arc::new(Net::with_base(&format!("{base}/api/"))));
-    let jn3 = ChapterIdx::new(BookId(57), 3).unwrap();
+    let jn3 = ChapterIdx::new(BookId(58), 3).unwrap();
     let Chapter::Ready(t) = wait_ready(&lib, "net", jn3, &rx) else { panic!("not ready") };
     assert_eq!(
-        t.find(VerseRef::new(BookId(57), 3, 16)).unwrap().text,
+        t.find(VerseRef::new(BookId(58), 3, 16)).unwrap().text,
         "For God so loved the world, that he gave his only begotten Son."
     );
     let online = lib.get("net").unwrap().online().unwrap().clone();
