@@ -4,6 +4,9 @@
 //! while reading the KJV shows up in the WEB too. The tables are mirrored in memory — they hold
 //! hundreds of rows, not millions — so the reader can look them up per verse every frame; writes go
 //! straight through to SQLite (WAL mode, a few hundred microseconds each).
+//!
+//! Every write also logs the record's latest state in `changes` (one row per record), which is
+//! what [`crate::sync`] sends to the user's other devices.
 
 use std::collections::{BTreeMap, HashMap};
 use std::path::Path;
@@ -11,8 +14,10 @@ use std::path::Path;
 use anyhow::{Context, Result, bail};
 use rusqlite::{Connection, OptionalExtension, params};
 use serde::{Deserialize, Serialize};
+use serde_json::json;
 
 use crate::books::{BookId, ChapterIdx, VerseRef};
+use crate::sync::Change;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 #[serde(rename_all = "lowercase")]
@@ -76,6 +81,8 @@ pub struct StudyStore {
     notes: HashMap<u32, Note>,
     bookmarks: BTreeMap<u32, Bookmark>,
     generation: u64,
+    /// This device's id in `changes`, kept in the settings.
+    device: String,
 }
 
 const SCHEMA: &str = "
@@ -104,6 +111,8 @@ CREATE TABLE IF NOT EXISTS plan_reads(
 CREATE TABLE IF NOT EXISTS rule_done(
     day INTEGER NOT NULL, item TEXT NOT NULL, at INTEGER NOT NULL,
     PRIMARY KEY(day, item));
+CREATE TABLE IF NOT EXISTS changes(
+    key TEXT PRIMARY KEY, value TEXT, at INTEGER NOT NULL, device TEXT NOT NULL);
 ";
 
 /// A stretch of reading one chapter: when it started, for how long, and how far it got.
@@ -157,6 +166,80 @@ fn verse_from_row(book: &str, chapter: i64, verse: i64) -> Option<VerseRef> {
     Some(VerseRef::new(book, u8::try_from(chapter).ok()?, u8::try_from(verse).ok()?))
 }
 
+/// A fresh id for this device: a hash of the time and the process id.
+fn new_device_id() -> String {
+    use std::hash::BuildHasher;
+    let nanos =
+        std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map(|d| d.as_nanos()).unwrap_or(0);
+    let hash = std::collections::hash_map::RandomState::new().hash_one((nanos, std::process::id()));
+    format!("{hash:016x}")
+}
+
+/// A record that syncs, as named by its key in `changes`. Verses are written `JHN.3.16` (the
+/// book code the tables use, which stays the same when books are added).
+#[derive(Debug, Clone, PartialEq, Eq)]
+enum Record {
+    Highlight(VerseRef),
+    Note(VerseRef),
+    Bookmark(VerseRef),
+    Plan(String),
+    /// Plan, day and passage.
+    PlanRead(String, u16, u8),
+    /// Day and item.
+    RuleDone(i64, String),
+    /// A reading session, by when it started.
+    Reading(i64),
+    /// The prayer rule (the only setting that syncs; the rest are per device).
+    Rule,
+}
+
+impl Record {
+    fn key(&self) -> String {
+        let verse = |v: &VerseRef| format!("{}.{}.{}", v.book.info().code, v.chapter, v.verse);
+        match self {
+            Record::Highlight(v) => format!("highlight:{}", verse(v)),
+            Record::Note(v) => format!("note:{}", verse(v)),
+            Record::Bookmark(v) => format!("bookmark:{}", verse(v)),
+            Record::Plan(id) => format!("plan:{id}"),
+            Record::PlanRead(plan, day, passage) => format!("plan-read:{plan}:{day}:{passage}"),
+            Record::RuleDone(day, item) => format!("rule-done:{day}:{item}"),
+            Record::Reading(started) => format!("reading:{started}"),
+            Record::Rule => "setting:rule".into(),
+        }
+    }
+
+    fn parse(key: &str) -> Option<Record> {
+        let verse = |s: &str| {
+            let mut parts = s.split('.');
+            let (book, chapter, verse) = (parts.next()?, parts.next()?, parts.next()?);
+            if parts.next().is_some() {
+                return None;
+            }
+            Some(VerseRef::new(BookId::from_code(book)?, chapter.parse().ok()?, verse.parse().ok()?))
+        };
+        let (kind, rest) = key.split_once(':')?;
+        Some(match kind {
+            "highlight" => Record::Highlight(verse(rest)?),
+            "note" => Record::Note(verse(rest)?),
+            "bookmark" => Record::Bookmark(verse(rest)?),
+            "plan" => Record::Plan(rest.to_string()),
+            "plan-read" => {
+                // From the right, so a plan id may contain colons.
+                let mut parts = rest.rsplitn(3, ':');
+                let (passage, day, plan) = (parts.next()?, parts.next()?, parts.next()?);
+                Record::PlanRead(plan.to_string(), day.parse().ok()?, passage.parse().ok()?)
+            }
+            "rule-done" => {
+                let (day, item) = rest.split_once(':')?;
+                Record::RuleDone(day.parse().ok()?, item.to_string())
+            }
+            "reading" => Record::Reading(rest.parse().ok()?),
+            "setting" if rest == "rule" => Record::Rule,
+            _ => return None,
+        })
+    }
+}
+
 impl StudyStore {
     pub fn open(path: &Path) -> Result<Self> {
         if let Some(dir) = path.parent() {
@@ -180,12 +263,22 @@ impl StudyStore {
             notes: HashMap::new(),
             bookmarks: BTreeMap::new(),
             generation: 1,
+            device: String::new(),
         };
+        s.device = match s.setting("device-id") {
+            Some(id) => id,
+            None => {
+                let id = new_device_id();
+                s.set_setting("device-id", &id)?;
+                id
+            }
+        };
+        s.backfill_changes()?;
         s.reload()?;
         Ok(s)
     }
 
-    fn reload(&mut self) -> Result<()> {
+    pub(crate) fn reload(&mut self) -> Result<()> {
         self.highlights.clear();
         self.notes.clear();
         self.bookmarks.clear();
@@ -284,11 +377,11 @@ impl StudyStore {
                 self.highlights.remove(&v.key());
             }
         }
+        self.log_change(&Record::Highlight(v))?;
         self.generation += 1;
         Ok(())
     }
 
-    /// Saves a note; an empty (whitespace-only) body deletes it.
     /// Adds `text` to the verse's note, after a blank line if there is one already.
     pub fn append_note(&mut self, v: VerseRef, text: &str) -> Result<()> {
         let body = match self.note(v) {
@@ -298,6 +391,7 @@ impl StudyStore {
         self.set_note(v, &body)
     }
 
+    /// Saves a note; an empty (whitespace-only) body deletes it.
     pub fn set_note(&mut self, v: VerseRef, body: &str) -> Result<()> {
         let code = v.book.info().code;
         if body.trim().is_empty() {
@@ -316,6 +410,7 @@ impl StudyStore {
             let created = self.notes.get(&v.key()).map_or(t, |n| n.created);
             self.notes.insert(v.key(), Note { body: body.to_string(), created, updated: t });
         }
+        self.log_change(&Record::Note(v))?;
         self.generation += 1;
         Ok(())
     }
@@ -341,6 +436,7 @@ impl StudyStore {
                 self.bookmarks.remove(&v.key());
             }
         }
+        self.log_change(&Record::Bookmark(v))?;
         self.generation += 1;
         Ok(())
     }
@@ -404,7 +500,7 @@ impl StudyStore {
                verses = excluded.verses, translation = excluded.translation",
             params![s.started, s.book.info().code, s.chapter, s.translation, s.seconds, s.furthest, s.verses],
         )?;
-        Ok(())
+        self.log_change(&Record::Reading(s.started))
     }
 
     /// Reading sessions that started at or after `since` (Unix seconds), newest first.
@@ -444,7 +540,15 @@ impl StudyStore {
 
     /// Forgets reading history from `since` on (all of it for 0).
     pub fn clear_reading(&self, since: i64) -> Result<()> {
+        let started: Vec<i64> = self
+            .conn
+            .prepare("SELECT started FROM reading WHERE started >= ?1")?
+            .query_map([since], |r| r.get(0))?
+            .collect::<rusqlite::Result<_>>()?;
         self.conn.execute("DELETE FROM reading WHERE started >= ?1", [since])?;
+        for t in started {
+            self.log_change(&Record::Reading(t))?;
+        }
         Ok(())
     }
 
@@ -462,24 +566,33 @@ impl StudyStore {
 
     /// Starts (or restarts) a plan on the day containing `started`, forgetting earlier progress.
     pub fn start_plan(&mut self, id: &str, started: i64) -> Result<()> {
+        let reads = self.plan_reads(id);
         self.conn.execute("DELETE FROM plan_reads WHERE plan = ?1", [id])?;
         self.conn.execute(
             "INSERT OR REPLACE INTO plans(id, started, finished) VALUES(?1, ?2, NULL)",
             params![id, started],
         )?;
-        self.generation += 1;
-        Ok(())
+        self.log_plan(id, reads)
     }
 
     pub fn finish_plan(&mut self, id: &str, at: Option<i64>) -> Result<()> {
         self.conn.execute("UPDATE plans SET finished = ?2 WHERE id = ?1", params![id, at])?;
-        self.generation += 1;
-        Ok(())
+        self.log_plan(id, Default::default())
     }
 
     pub fn stop_plan(&mut self, id: &str) -> Result<()> {
+        let reads = self.plan_reads(id);
         self.conn.execute("DELETE FROM plans WHERE id = ?1", [id])?;
         self.conn.execute("DELETE FROM plan_reads WHERE plan = ?1", [id])?;
+        self.log_plan(id, reads)
+    }
+
+    /// Logs a change to a plan and to the passages it had ticked (now cleared).
+    fn log_plan(&mut self, id: &str, cleared: std::collections::HashSet<(u16, u8)>) -> Result<()> {
+        for (day, passage) in cleared {
+            self.log_change(&Record::PlanRead(id.to_string(), day, passage))?;
+        }
+        self.log_change(&Record::Plan(id.to_string()))?;
         self.generation += 1;
         Ok(())
     }
@@ -511,6 +624,7 @@ impl StudyStore {
                 params![id, day, passage],
             )?;
         }
+        self.log_change(&Record::PlanRead(id.to_string(), day, passage))?;
         self.generation += 1;
         Ok(())
     }
@@ -564,6 +678,7 @@ impl StudyStore {
         } else {
             self.conn.execute("DELETE FROM rule_done WHERE day = ?1 AND item = ?2", params![day, item])?;
         }
+        self.log_change(&Record::RuleDone(day, item.to_string()))?;
         self.generation += 1;
         Ok(())
     }
@@ -576,12 +691,21 @@ impl StudyStore {
             .flatten()
     }
 
+    /// Saves a setting. Only the prayer rule syncs; the others belong to this device.
     pub fn set_setting(&self, key: &str, value: &str) -> Result<()> {
         self.conn.execute(
             "INSERT INTO settings(key, value) VALUES(?1, ?2) ON CONFLICT(key) DO UPDATE SET value = excluded.value",
             params![key, value],
         )?;
+        if key == "rule" {
+            self.log_change(&Record::Rule)?;
+        }
         Ok(())
+    }
+
+    /// This device's id in the sync files (made once, then kept in the settings).
+    pub fn device_id(&self) -> String {
+        self.device.clone()
     }
 
     /// JSON export of all study data. `text` supplies verse text for context (may return `None`).
@@ -781,6 +905,7 @@ impl StudyStore {
                     parse_rfc3339(&h.created).unwrap_or_else(now)
                 ],
             )?;
+            self.log_change(&Record::Highlight(v))?;
         }
         for n in &doc.notes {
             let v = verse(&n.verse)?;
@@ -796,6 +921,7 @@ impl StudyStore {
                     parse_rfc3339(&n.updated).unwrap_or_else(now)
                 ],
             )?;
+            self.log_change(&Record::Note(v))?;
         }
         for b in &doc.bookmarks {
             let v = verse(&b.verse)?;
@@ -810,22 +936,17 @@ impl StudyStore {
                     parse_rfc3339(&b.created).unwrap_or_else(now)
                 ],
             )?;
+            self.log_change(&Record::Bookmark(v))?;
         }
         for r in &doc.history {
             let Some(book) = BookId::from_code(&r.book) else { continue };
+            let started = parse_rfc3339(&r.started).unwrap_or_else(now);
             tx.execute(
                 "INSERT OR REPLACE INTO reading(started, book, chapter, translation, seconds, furthest, verses)
                  VALUES(?1, ?2, ?3, ?4, ?5, ?6, ?7)",
-                params![
-                    parse_rfc3339(&r.started).unwrap_or_else(now),
-                    book.info().code,
-                    r.chapter,
-                    r.translation,
-                    r.seconds,
-                    r.furthest,
-                    r.verses
-                ],
+                params![started, book.info().code, r.chapter, r.translation, r.seconds, r.furthest, r.verses],
             )?;
+            self.log_change(&Record::Reading(started))?;
         }
         for p in &doc.plans {
             tx.execute(
@@ -836,11 +957,13 @@ impl StudyStore {
                     p.finished.as_deref().and_then(parse_rfc3339)
                 ],
             )?;
-            for (day, passage) in &p.read {
+            self.log_change(&Record::Plan(p.id.clone()))?;
+            for &(day, passage) in &p.read {
                 tx.execute(
                     "INSERT OR REPLACE INTO plan_reads(plan, day, passage, at) VALUES(?1, ?2, ?3, ?4)",
                     params![p.id, day, passage, now()],
                 )?;
+                self.log_change(&Record::PlanRead(p.id.clone(), day, passage))?;
             }
         }
         tx.commit()?;
@@ -849,12 +972,321 @@ impl StudyStore {
     }
 
     /// Erases every highlight, note, bookmark, plan and the reading history.
+    ///
+    /// This resets this device only: it forgets their changes instead of logging deletions, so
+    /// other devices keep their copies and the next sync brings them back here.
     pub fn erase_all(&mut self) -> Result<()> {
         self.conn.execute_batch(
             "DELETE FROM highlights; DELETE FROM notes; DELETE FROM bookmarks;
-             DELETE FROM plans; DELETE FROM plan_reads; DELETE FROM reading;",
+             DELETE FROM plans; DELETE FROM plan_reads; DELETE FROM reading;
+             DELETE FROM changes WHERE key NOT LIKE 'rule-done:%' AND key <> 'setting:rule';",
         )?;
         self.reload()
+    }
+
+    /// Logs the record's current state (or its deletion) as this device's latest change to it.
+    /// The time is at least a second past the change it replaces, so an edit made after a sync
+    /// still wins when this device's clock is behind, or when two edits fall in the same second.
+    fn log_change(&self, r: &Record) -> Result<()> {
+        let key = r.key();
+        let prev: Option<i64> = self
+            .conn
+            .query_row("SELECT at FROM changes WHERE key = ?1", [&key], |row| row.get(0))
+            .optional()?;
+        let at = prev.map_or(now(), |p| now().max(p + 1));
+        self.put_change(&key, self.record_value(r)?.as_deref(), at, &self.device)
+    }
+
+    fn put_change(&self, key: &str, value: Option<&str>, at: i64, device: &str) -> Result<()> {
+        self.conn.execute(
+            "INSERT OR REPLACE INTO changes(key, value, at, device) VALUES(?1, ?2, ?3, ?4)",
+            params![key, value, at, device],
+        )?;
+        Ok(())
+    }
+
+    /// The record's row as JSON, or `None` when there is none.
+    fn record_value(&self, r: &Record) -> Result<Option<String>> {
+        let c = &self.conn;
+        let verse = |v: &VerseRef| (v.book.info().code, v.chapter, v.verse);
+        let value = match r {
+            Record::Highlight(v) => c
+                .query_row(
+                    "SELECT color, created FROM highlights WHERE book = ?1 AND chapter = ?2 AND verse = ?3",
+                    verse(v),
+                    |r| Ok(json!({"color": r.get::<_, i64>(0)?, "created": r.get::<_, i64>(1)?})),
+                )
+                .optional()?,
+            Record::Note(v) => c
+                .query_row(
+                    "SELECT body, created, updated FROM notes WHERE book = ?1 AND chapter = ?2 AND verse = ?3",
+                    verse(v),
+                    |r| {
+                        Ok(json!({
+                            "body": r.get::<_, String>(0)?,
+                            "created": r.get::<_, i64>(1)?,
+                            "updated": r.get::<_, i64>(2)?,
+                        }))
+                    },
+                )
+                .optional()?,
+            Record::Bookmark(v) => c
+                .query_row(
+                    "SELECT label, created FROM bookmarks WHERE book = ?1 AND chapter = ?2 AND verse = ?3",
+                    verse(v),
+                    |r| Ok(json!({"label": r.get::<_, String>(0)?, "created": r.get::<_, i64>(1)?})),
+                )
+                .optional()?,
+            Record::Plan(id) => c
+                .query_row("SELECT started, finished FROM plans WHERE id = ?1", [id], |r| {
+                    Ok(json!({"started": r.get::<_, i64>(0)?, "finished": r.get::<_, Option<i64>>(1)?}))
+                })
+                .optional()?,
+            Record::PlanRead(plan, day, passage) => c
+                .query_row(
+                    "SELECT at FROM plan_reads WHERE plan = ?1 AND day = ?2 AND passage = ?3",
+                    params![plan, day, passage],
+                    |r| Ok(json!({"at": r.get::<_, i64>(0)?})),
+                )
+                .optional()?,
+            Record::RuleDone(day, item) => c
+                .query_row("SELECT at FROM rule_done WHERE day = ?1 AND item = ?2", params![day, item], |r| {
+                    Ok(json!({"at": r.get::<_, i64>(0)?}))
+                })
+                .optional()?,
+            Record::Reading(started) => c
+                .query_row(
+                    "SELECT book, chapter, translation, seconds, furthest, verses FROM reading WHERE started = ?1",
+                    [started],
+                    |r| {
+                        Ok(json!({
+                            "book": r.get::<_, String>(0)?,
+                            "chapter": r.get::<_, i64>(1)?,
+                            "translation": r.get::<_, String>(2)?,
+                            "seconds": r.get::<_, i64>(3)?,
+                            "furthest": r.get::<_, i64>(4)?,
+                            "verses": r.get::<_, i64>(5)?,
+                        }))
+                    },
+                )
+                .optional()?,
+            Record::Rule => self.setting("rule").map(|v| json!({ "value": v })),
+        };
+        Ok(value.map(|v| v.to_string()))
+    }
+
+    /// Writes a record that came from another device (`None` deletes it). `false`, with nothing
+    /// written, when the value isn't one this version understands.
+    fn apply_record(&self, r: &Record, value: Option<&str>) -> Result<bool> {
+        let c = &self.conn;
+        let verse = |v: &VerseRef| (v.book.info().code, v.chapter, v.verse);
+        let Some(value) = value else {
+            match r {
+                Record::Highlight(v) => c.execute(
+                    "DELETE FROM highlights WHERE book = ?1 AND chapter = ?2 AND verse = ?3",
+                    verse(v),
+                )?,
+                Record::Note(v) => {
+                    c.execute("DELETE FROM notes WHERE book = ?1 AND chapter = ?2 AND verse = ?3", verse(v))?
+                }
+                Record::Bookmark(v) => c.execute(
+                    "DELETE FROM bookmarks WHERE book = ?1 AND chapter = ?2 AND verse = ?3",
+                    verse(v),
+                )?,
+                Record::Plan(id) => c.execute("DELETE FROM plans WHERE id = ?1", [id])?,
+                Record::PlanRead(plan, day, passage) => c.execute(
+                    "DELETE FROM plan_reads WHERE plan = ?1 AND day = ?2 AND passage = ?3",
+                    params![plan, day, passage],
+                )?,
+                Record::RuleDone(day, item) => {
+                    c.execute("DELETE FROM rule_done WHERE day = ?1 AND item = ?2", params![day, item])?
+                }
+                Record::Reading(started) => c.execute("DELETE FROM reading WHERE started = ?1", [started])?,
+                Record::Rule => c.execute("DELETE FROM settings WHERE key = 'rule'", [])?,
+            };
+            return Ok(true);
+        };
+        let Ok(j) = serde_json::from_str::<serde_json::Value>(value) else { return Ok(false) };
+        let int = |k: &str| j.get(k).and_then(|x| x.as_i64());
+        let text = |k: &str| j.get(k).and_then(|x| x.as_str());
+        match r {
+            Record::Highlight(v) => {
+                let (Some(color), Some(created)) =
+                    (int("color").and_then(HighlightColor::from_i64), int("created"))
+                else {
+                    return Ok(false);
+                };
+                let (book, chapter, verse) = verse(v);
+                c.execute(
+                    "INSERT OR REPLACE INTO highlights(book, chapter, verse, color, created) VALUES(?1, ?2, ?3, ?4, ?5)",
+                    params![book, chapter, verse, color.to_i64(), created],
+                )?;
+            }
+            Record::Note(v) => {
+                let (Some(body), Some(created), Some(updated)) =
+                    (text("body"), int("created"), int("updated"))
+                else {
+                    return Ok(false);
+                };
+                let (book, chapter, verse) = verse(v);
+                c.execute(
+                    "INSERT OR REPLACE INTO notes(book, chapter, verse, body, created, updated)
+                     VALUES(?1, ?2, ?3, ?4, ?5, ?6)",
+                    params![book, chapter, verse, body, created, updated],
+                )?;
+            }
+            Record::Bookmark(v) => {
+                let (Some(label), Some(created)) = (text("label"), int("created")) else { return Ok(false) };
+                let (book, chapter, verse) = verse(v);
+                c.execute(
+                    "INSERT OR REPLACE INTO bookmarks(book, chapter, verse, label, created) VALUES(?1, ?2, ?3, ?4, ?5)",
+                    params![book, chapter, verse, label, created],
+                )?;
+            }
+            Record::Plan(id) => {
+                let Some(started) = int("started") else { return Ok(false) };
+                c.execute(
+                    "INSERT OR REPLACE INTO plans(id, started, finished) VALUES(?1, ?2, ?3)",
+                    params![id, started, int("finished")],
+                )?;
+            }
+            Record::PlanRead(plan, day, passage) => {
+                let Some(at) = int("at") else { return Ok(false) };
+                c.execute(
+                    "INSERT OR REPLACE INTO plan_reads(plan, day, passage, at) VALUES(?1, ?2, ?3, ?4)",
+                    params![plan, day, passage, at],
+                )?;
+            }
+            Record::RuleDone(day, item) => {
+                let Some(at) = int("at") else { return Ok(false) };
+                c.execute(
+                    "INSERT OR REPLACE INTO rule_done(day, item, at) VALUES(?1, ?2, ?3)",
+                    params![day, item, at],
+                )?;
+            }
+            Record::Reading(started) => {
+                let (
+                    Some(book),
+                    Some(chapter),
+                    Some(translation),
+                    Some(seconds),
+                    Some(furthest),
+                    Some(verses),
+                ) = (
+                    text("book").and_then(BookId::from_code),
+                    int("chapter"),
+                    text("translation"),
+                    int("seconds"),
+                    int("furthest"),
+                    int("verses"),
+                )
+                else {
+                    return Ok(false);
+                };
+                c.execute(
+                    "INSERT OR REPLACE INTO reading(started, book, chapter, translation, seconds, furthest, verses)
+                     VALUES(?1, ?2, ?3, ?4, ?5, ?6, ?7)",
+                    params![started, book.info().code, chapter, translation, seconds, furthest, verses],
+                )?;
+            }
+            Record::Rule => {
+                let Some(rule) = text("value") else { return Ok(false) };
+                c.execute("INSERT OR REPLACE INTO settings(key, value) VALUES('rule', ?1)", [rule])?;
+            }
+        }
+        Ok(true)
+    }
+
+    /// Every record's latest change, by key.
+    pub(crate) fn changes(&self) -> Result<Vec<Change>> {
+        let mut st = self.conn.prepare("SELECT key, value, at, device FROM changes ORDER BY key")?;
+        let rows = st.query_map([], |r| {
+            Ok(Change { key: r.get(0)?, value: r.get(1)?, at: r.get(2)?, device: r.get(3)? })
+        })?;
+        Ok(rows.collect::<rusqlite::Result<_>>()?)
+    }
+
+    /// Applies changes from other devices and logs them as they came (with their time and
+    /// device, so they travel on unchanged). Returns how many were applied: ones with a key or
+    /// value this version doesn't know are skipped.
+    pub(crate) fn apply_changes(&mut self, changes: &[Change]) -> Result<usize> {
+        let tx = self.conn.unchecked_transaction()?;
+        let mut applied = 0;
+        for change in changes {
+            let Some(r) = Record::parse(&change.key) else { continue };
+            if self.apply_record(&r, change.value.as_deref())? {
+                self.put_change(&change.key, change.value.as_deref(), change.at, &change.device)?;
+                applied += 1;
+            }
+        }
+        tx.commit()?;
+        if applied > 0 {
+            self.reload()?;
+        }
+        Ok(applied)
+    }
+
+    /// Seeds an empty `changes` from the rows already there (a database from before sync), each
+    /// at the row's own time, so the first sync sends everything.
+    fn backfill_changes(&self) -> Result<()> {
+        let any: bool = self.conn.query_row("SELECT EXISTS(SELECT 1 FROM changes)", [], |r| r.get(0))?;
+        if any {
+            return Ok(());
+        }
+        let mut records: Vec<(Record, i64)> = Vec::new();
+        for (sql, record) in [
+            ("SELECT book, chapter, verse, created FROM highlights", Record::Highlight as fn(_) -> _),
+            ("SELECT book, chapter, verse, updated FROM notes", Record::Note),
+            ("SELECT book, chapter, verse, created FROM bookmarks", Record::Bookmark),
+        ] {
+            let mut st = self.conn.prepare(sql)?;
+            let rows = st.query_map([], |r| {
+                Ok((r.get::<_, String>(0)?, r.get::<_, i64>(1)?, r.get::<_, i64>(2)?, r.get::<_, i64>(3)?))
+            })?;
+            for row in rows {
+                let (b, c, v, at) = row?;
+                if let Some(v) = verse_from_row(&b, c, v) {
+                    records.push((record(v), at));
+                }
+            }
+        }
+        let mut st = self.conn.prepare("SELECT id, MAX(started, COALESCE(finished, started)) FROM plans")?;
+        for row in st.query_map([], |r| Ok((r.get::<_, String>(0)?, r.get::<_, i64>(1)?)))? {
+            let (id, at) = row?;
+            records.push((Record::Plan(id), at));
+        }
+        let mut st = self.conn.prepare("SELECT plan, day, passage, at FROM plan_reads")?;
+        let rows = st.query_map([], |r| {
+            Ok((r.get::<_, String>(0)?, r.get::<_, i64>(1)?, r.get::<_, i64>(2)?, r.get::<_, i64>(3)?))
+        })?;
+        for row in rows {
+            let (plan, day, passage, at) = row?;
+            if let (Ok(day), Ok(passage)) = (u16::try_from(day), u8::try_from(passage)) {
+                records.push((Record::PlanRead(plan, day, passage), at));
+            }
+        }
+        let mut st = self.conn.prepare("SELECT day, item, at FROM rule_done")?;
+        for row in
+            st.query_map([], |r| Ok((r.get::<_, i64>(0)?, r.get::<_, String>(1)?, r.get::<_, i64>(2)?)))?
+        {
+            let (day, item, at) = row?;
+            records.push((Record::RuleDone(day, item), at));
+        }
+        let mut st = self.conn.prepare("SELECT started FROM reading")?;
+        for row in st.query_map([], |r| r.get::<_, i64>(0))? {
+            let started = row?;
+            records.push((Record::Reading(started), started));
+        }
+        // Settings carry no time; 0 lets any real edit on another device win.
+        if self.setting("rule").is_some() {
+            records.push((Record::Rule, 0));
+        }
+        let tx = self.conn.unchecked_transaction()?;
+        for (r, at) in records {
+            self.put_change(&r.key(), self.record_value(&r)?.as_deref(), at, &self.device)?;
+        }
+        tx.commit()?;
+        Ok(())
     }
 }
 
