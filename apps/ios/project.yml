@@ -3,7 +3,7 @@
 # to make Bible.xcodeproj; none of those three are checked in.
 name: Bible
 options:
-  bundleIdPrefix: dev.bible-rs
+  bundleIdPrefix: dev.nhclink16
   deploymentTarget:
     iOS: "17.0"
   createIntermediateGroups: true
@@ -38,7 +38,7 @@ targets:
     info:
       path: Generated/Info.plist
       properties:
-        CFBundleDisplayName: Bible
+        CFBundleDisplayName: Orthodox Bible
         CFBundleShortVersionString: $(MARKETING_VERSION)
         CFBundleVersion: $(CURRENT_PROJECT_VERSION)
         LSRequiresIPhoneOS: true

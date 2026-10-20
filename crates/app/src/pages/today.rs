@@ -52,19 +52,6 @@ fn short_date(d: Day) -> String {
     format!("{} {dd} {}", &WEEKDAYS[calendar::weekday(d) as usize][..3], &MONTHS[m as usize - 1][..3])
 }
 
-/// "Psalms 24–31", in the numbering the reader shows.
-fn psalms_label(k: u8) -> String {
-    let (a, b) = calendar::KATHISMATA[k as usize - 1];
-    let shown = |n: u8| {
-        if bible_core::lxx::numbering() {
-            n
-        } else {
-            bible_core::lxx::from_lxx(n, 1).map_or(n, |(_, c, _)| c)
-        }
-    };
-    if a == b { format!("Psalm {}", shown(a)) } else { format!("Psalms {}–{}", shown(a), shown(b)) }
-}
-
 /// The great days and fast beginnings in the `AHEAD` days after `from`.
 fn coming_up(from: Day, style: Style) -> Vec<(Day, String)> {
     let mut out = Vec::new();
@@ -286,7 +273,7 @@ impl State {
                     p.ink,
                     false,
                 );
-                let label = format!("Kathisma {k} · {}", psalms_label(k));
+                let label = format!("Kathisma {k} · {}", calendar::kathisma_psalms(k));
                 text(
                     &painter,
                     row.left() + 96.0,

@@ -3,7 +3,7 @@
 //
 //   DEVELOPMENT_TEAM = ABCDE12345
 //   BIBLE_BUNDLE_ID = com.example.bible
-BIBLE_BUNDLE_ID = dev.bible-rs.ios
+BIBLE_BUNDLE_ID = dev.nhclink16.orthodox-bible.ios
 DEVELOPMENT_TEAM =
 CODE_SIGN_STYLE = Automatic
 

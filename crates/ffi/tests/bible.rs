@@ -97,7 +97,8 @@ fn plain() -> Run {
 #[test]
 fn psalms_hang_numbers_and_set_lord_in_small_caps() {
     let (bible, dir) = open("psalm");
-    let c = bible.chapter("kjv".into(), index("ps 23"), ContentOptions::default());
+    // Psalms are typed in Septuagint numbers (the bridge turns them on): 22 is the Shepherd psalm.
+    let c = bible.chapter("kjv".into(), index("ps 22"), ContentOptions::default());
     assert_eq!(c.blocks[0].kind, BlockKind::PsalmTitle);
     assert_eq!((text(&c.blocks[0]).as_str(), c.blocks[0].space_before), ("A Psalm of David.", 0.0));
     let line = &c.blocks[1];
@@ -283,5 +284,22 @@ fn unknown_translations_and_chapters_fail_softly() {
     assert_eq!(c.book_name, "John");
     let last = bible.chapter("kjv".into(), u16::MAX, ContentOptions::default());
     assert_eq!((last.book, last.chapter), (81, 22));
+    let _ = std::fs::remove_dir_all(dir);
+}
+
+#[test]
+fn church_days_and_the_fathers() {
+    let (bible, dir) = open("church");
+    let pascha = church_day(2026, 4, 12, false);
+    assert!(pascha.feasts[0].starts_with("Pascha"));
+    assert_eq!((pascha.fast.as_str(), pascha.days_to_pascha), ("No fast", 0));
+    let nativity_old = church_day(2027, 1, 7, true);
+    assert_eq!(nativity_old.feasts, ["Nativity of Our Lord"]);
+    let tuesday = church_day(2026, 10, 20, false);
+    assert_eq!(tuesday.matins.iter().map(|k| k.number).collect::<Vec<_>>(), [7, 8]);
+    assert_eq!(tuesday.vespers[0].number, 9);
+    assert_eq!(tuesday.matins[0].chapter_index, index("ps 46"));
+    assert!(!bible.fathers_installed());
+    assert!(bible.fathers(JOHN_3_16).unwrap().is_empty());
     let _ = std::fs::remove_dir_all(dir);
 }

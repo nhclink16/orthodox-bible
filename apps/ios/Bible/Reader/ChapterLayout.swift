@@ -344,7 +344,7 @@ private struct Typesetter {
         let s = t.s
         var firstSpace: CGFloat = 0
         if c.book == 25 {
-            label("PSALM \(c.chapter)", before: 0, align: .natural)
+            label("PSALM \(c.shownChapter)", before: 0, align: .natural)
         } else if c.chapter == 1 {
             display(c.bookName, before: 0)
             if !c.bookTitle.isEmpty {
@@ -356,7 +356,7 @@ private struct Typesetter {
             firstSpace = s(24)
         } else {
             label(c.bookName.uppercased(), before: 0, align: .center)
-            display("\(c.chapter)", before: s(4))
+            display("\(c.shownChapter)", before: s(4))
             firstSpace = s(24)
         }
 

@@ -147,7 +147,20 @@ Not done:
 - It needs the date of Pascha (Julian computus), the movable feasts counted from Pascha, and a table of the fixed-date readings.
 - **Blocker:** we have no openly licensed table of the daily readings yet. Research this before building.
 
-## Phase 5: iPhone (later)
+## Phase 5: iPhone (bridge done 2026-10-20 on `orthodox/iphone`; screens wait for Xcode)
+
+Done, tested with `cargo test -p bible-ffi`:
+- App ID `dev.nhclink16.orthodox-bible.ios`, display name "Orthodox Bible".
+- The bridge turns on Septuagint numbering and adds `set_septuagint_numbering`, `church_day(year, month, day, old_calendar)`, and `Bible.fathers_installed / install_fathers / fathers(verse)`.
+- Chapter content carries `shown_chapter`, and its verse labels use Septuagint numbers.
+- Two small Swift edits (chapter heading uses `shownChapter`), plus the 82-book literals. **These haven't been compiled yet.**
+
+Needs Xcode (Nicholas is installing it):
+- Build with `scripts/build-ios.sh` (also needs XcodeGen).
+- iPhone screens: a Fathers sheet from the selection bar, a Today in the Church sheet, and the numbering switch in settings.
+- Run the UI tests.
+
+Original checklist:
 
 - The books and numbering come through the FFI automatically.
 - Hard-coded spots to fix: `ReaderView.swift:95` (`chapterCount = 1189`) and `ChapterLayout.swift:66` (`isPsalm` is book 18).

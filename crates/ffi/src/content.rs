@@ -52,6 +52,8 @@ pub struct ChapterContent {
     pub index: u16,
     pub book: u8,
     pub chapter: u8,
+    /// The chapter's number as shown: a psalm's Septuagint number when that numbering is on.
+    pub shown_chapter: u8,
     pub status: ChapterStatus,
     /// The book's name as the translation spells it ("John", "Psalms").
     pub book_name: String,
@@ -124,6 +126,7 @@ impl ChapterContent {
             index: c.0,
             book: c.book().0,
             chapter: c.chapter(),
+            shown_chapter: c.shown_number(),
             status,
             book_name,
             book_title,
@@ -210,10 +213,12 @@ pub fn chapter(t: &Translation, c: ChapterIdx, opts: ContentOptions) -> ChapterC
                     push(&mut p.runs, plain(" ", verse));
                 }
                 if opts.verse_numbers {
+                    // Shown numbers: with Septuagint numbering, Psalm 10:1 is 9:21.
+                    let shown = |n: u8| bible_core::VerseRef::new(c.book(), c.chapter(), n).shown_numbers().1;
                     let label = if v.number_end > v.number {
-                        format!("{}–{}", v.number, v.number_end)
+                        format!("{}–{}", shown(v.number), shown(v.number_end))
                     } else {
-                        v.number.to_string()
+                        shown(v.number).to_string()
                     };
                     // Verse-per-line, and poetry lines that begin a verse, hang their number in
                     // the margin so every line's text aligns.
@@ -245,6 +250,7 @@ pub fn chapter(t: &Translation, c: ChapterIdx, opts: ContentOptions) -> ChapterC
         index: c.0,
         book: c.book().0,
         chapter: c.chapter(),
+        shown_chapter: c.shown_number(),
         status: ChapterStatus::Ready,
         book_name,
         book_title,

@@ -323,6 +323,14 @@ pub fn kathismata(weekday: u8) -> (&'static [u8], &'static [u8]) {
     }
 }
 
+/// "Psalms 24–31": kathisma `n`'s psalms in the numbering shown ([`crate::lxx::numbering`]).
+pub fn kathisma_psalms(n: u8) -> String {
+    let Some(&(a, b)) = KATHISMATA.get(n.saturating_sub(1) as usize) else { return String::new() };
+    let shown =
+        |p: u8| if crate::lxx::numbering() { p } else { crate::lxx::from_lxx(p, 1).map_or(p, |(_, c, _)| c) };
+    if a == b { format!("Psalm {}", shown(a)) } else { format!("Psalms {}–{}", shown(a), shown(b)) }
+}
+
 /// Where kathisma `n` (1–20) begins in the grid: its first psalm.
 pub fn kathisma_start(n: u8) -> Option<(BookId, u8)> {
     let (first, _) = *KATHISMATA.get(n.checked_sub(1)? as usize)?;

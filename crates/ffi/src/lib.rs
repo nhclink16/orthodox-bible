@@ -7,7 +7,7 @@
 //! hits — and safe from any thread.
 
 use std::ops::Range;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::sync::{Arc, Mutex, MutexGuard, RwLock, RwLockReadGuard};
 use std::time::Instant;
 
@@ -42,7 +42,8 @@ fn fail(message: impl Into<String>) -> BibleError {
     BibleError::Failed { message: message.into() }
 }
 
-/// A verse in the canonical grid: `book` 0–65 (Genesis–Revelation), `chapter` and `verse` from 1.
+/// A verse in the canonical grid: `book` 0–81 (Genesis–Revelation, deuterocanonical books in
+/// their Orthodox places), `chapter` and `verse` from 1.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, uniffi::Record)]
 pub struct VerseRef {
     pub book: u8,
@@ -258,6 +259,43 @@ pub enum ExportFormat {
 pub struct Bible {
     library: RwLock<Library>,
     study: Mutex<StudyStore>,
+    dir: PathBuf,
+    /// The Church Fathers' quotes, once installed (`bible_core::fathers`).
+    fathers: RwLock<Option<bible_core::fathers::Fathers>>,
+}
+
+/// A quote from a Church Father on a verse.
+#[derive(Debug, Clone, PartialEq, uniffi::Record)]
+pub struct FatherQuote {
+    pub author: String,
+    pub year: i32,
+    pub source: String,
+    pub url: String,
+    pub text: String,
+}
+
+/// A kathisma of the Psalter: its number, "Psalms 24–31", and the chapter its first psalm is.
+#[derive(Debug, Clone, PartialEq, uniffi::Record)]
+pub struct Kathisma {
+    pub number: u8,
+    pub psalms: String,
+    pub chapter_index: u16,
+}
+
+/// A day of the church year (`bible_core::calendar`).
+#[derive(Debug, Clone, PartialEq, uniffi::Record)]
+pub struct ChurchDay {
+    pub feasts: Vec<String>,
+    /// "Great Lent", "Nativity Fast", "Bright Week: fast-free".
+    pub season: Option<String>,
+    /// "Wine and oil allowed".
+    pub fast: String,
+    /// "No meat, dairy or fish."
+    pub fast_detail: String,
+    pub matins: Vec<Kathisma>,
+    pub vespers: Vec<Kathisma>,
+    /// Days until the next Pascha (0 on Pascha).
+    pub days_to_pascha: i32,
 }
 
 #[uniffi::export]
@@ -269,7 +307,39 @@ impl Bible {
         let dir = PathBuf::from(data_dir);
         let study = StudyStore::open(&dir.join("study.sqlite"))?;
         let library = Library::open(&dir, Arc::new(|| {}));
-        Ok(Arc::new(Bible { library: RwLock::new(library), study: Mutex::new(study) }))
+        // The Orthodox fork numbers the Psalms as the Septuagint does unless told otherwise.
+        bible_core::lxx::set_numbering(true);
+        let fathers = RwLock::new(bible_core::fathers::Fathers::open(&dir));
+        Ok(Arc::new(Bible { library: RwLock::new(library), study: Mutex::new(study), dir, fathers }))
+    }
+
+    /// Whether the Church Fathers' quotes are installed.
+    pub fn fathers_installed(&self) -> bool {
+        self.fathers.read().unwrap().is_some()
+    }
+
+    /// Installs the quotes from a downloaded `commentaries.sqlite`; returns how many were kept.
+    pub fn install_fathers(&self, path: String) -> Result<u32, BibleError> {
+        let done = bible_core::fathers::install(Path::new(&path), &self.dir.join(bible_core::fathers::FILE))?;
+        *self.fathers.write().unwrap() = bible_core::fathers::Fathers::open(&self.dir);
+        Ok(done.quotes as u32)
+    }
+
+    /// The Fathers on a verse, oldest first; empty until installed.
+    pub fn fathers(&self, verse: VerseRef) -> Result<Vec<FatherQuote>, BibleError> {
+        let v = verse.core()?;
+        Ok(self.fathers.read().unwrap().as_ref().map_or_else(Vec::new, |f| {
+            f.quotes(v)
+                .into_iter()
+                .map(|q| FatherQuote {
+                    author: q.author,
+                    year: q.year,
+                    source: q.source,
+                    url: q.url,
+                    text: q.text,
+                })
+                .collect()
+        }))
     }
 
     pub fn translations(&self) -> Vec<TranslationInfo> {
@@ -517,6 +587,45 @@ pub fn parse_reference(input: String) -> Option<Reference> {
 #[uniffi::export]
 pub fn suggest_references(input: String, limit: u32) -> Vec<Reference> {
     bible_core::reference::suggest(&input, limit as usize).into_iter().map(Into::into).collect()
+}
+
+/// Psalm numbers as the Septuagint numbers them (on by default) or as the Hebrew does, for every
+/// label and typed reference.
+#[uniffi::export]
+pub fn set_septuagint_numbering(on: bool) {
+    bible_core::lxx::set_numbering(on);
+}
+
+/// The church year on a civil date: feasts, fast and kathismata, on the New or Old calendar.
+#[uniffi::export]
+pub fn church_day(year: i32, month: u8, day: u8, old_calendar: bool) -> ChurchDay {
+    use bible_core::calendar;
+    let style = if old_calendar { calendar::Style::Old } else { calendar::Style::New };
+    let d = calendar::civil(year, month, day);
+    let info = calendar::day(d, style);
+    let kathismata = |ks: &[u8]| {
+        ks.iter()
+            .map(|&n| Kathisma {
+                number: n,
+                psalms: calendar::kathisma_psalms(n),
+                chapter_index: calendar::kathisma_start(n)
+                    .and_then(|(b, c)| ChapterIdx::new(b, c))
+                    .map_or(0, |c| c.0),
+            })
+            .collect()
+    };
+    let (matins, vespers) = calendar::kathismata(info.weekday);
+    let pascha =
+        if calendar::pascha(year) >= d { calendar::pascha(year) } else { calendar::pascha(year + 1) };
+    ChurchDay {
+        feasts: info.feasts.iter().map(|f| f.to_string()).collect(),
+        season: info.season.map(str::to_string),
+        fast: info.fast.label().to_string(),
+        fast_detail: info.fast.detail().to_string(),
+        matins: kathismata(matins),
+        vespers: kathismata(vespers),
+        days_to_pascha: (pascha - d) as i32,
+    }
 }
 
 /// "John 3", "Psalm 23".
