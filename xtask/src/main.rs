@@ -102,7 +102,7 @@ const SOURCES: &[Source] = &[
 const LXX2012: Source = Source {
     id: "lxx",
     abbrev: "LXX",
-    name: "Septuagint with the King James New Testament",
+    name: "Septuagint and KJV New Testament",
     ebible_id: "eng-lxx2012",
     sha256: "dc9a055d0b4e82fbcdc576f6330cf7138f987285d7ff01d0b29e061d49df87ef",
     license: "Public Domain",

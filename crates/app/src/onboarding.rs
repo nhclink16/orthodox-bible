@@ -210,7 +210,10 @@ impl Onboarding {
             } else {
                 painter.circle_stroke(radio.center(), 8.5, Stroke::new(1.0, p.border));
             }
-            let g = line(&painter, &entry.meta.name, theme::ui_medium(12.0), p.ink_2, 0.0);
+            // A long name (an imported translation's, say) ends in an ellipsis inside the card.
+            let name =
+                crate::pages::elide(&painter, &entry.meta.name, &theme::ui_medium(12.0), card.width() - 28.0);
+            let g = line(&painter, &name, theme::ui_medium(12.0), p.ink_2, 0.0);
             paint_on_baseline(&painter, x, css_baseline(card.top() + 36.0, 16.0, 12.0, false), g, p.ink_2);
             let sample = self.samples.as_ref().and_then(|s| s.john.iter().find(|(i, _)| i == id));
             if let Some((_, verse)) = sample {
