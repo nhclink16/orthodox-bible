@@ -31,6 +31,8 @@ pub struct FathersPanel {
 pub enum Outcome {
     Stay,
     Close,
+    /// Add this quote (formatted for a note) to the note on the panel's verse.
+    AddToNote(String),
     /// Install the database from this `commentaries.sqlite`.
     Install(std::path::PathBuf),
 }
@@ -95,12 +97,18 @@ impl FathersPanel {
             Some(_) if self.quotes.is_empty() => {
                 message(&mut child, p, "No quotes from the Fathers on this verse.");
             }
-            Some(_) => self.list(&mut child, p),
+            Some(_) => {
+                if let Some(note) = self.list(&mut child, p) {
+                    outcome = Outcome::AddToNote(note);
+                }
+            }
         }
         outcome
     }
 
-    fn list(&mut self, ui: &mut Ui, p: &Palette) {
+    /// The quotes; returns a quote's note text when its "Add to Note" is clicked.
+    fn list(&mut self, ui: &mut Ui, p: &Palette) -> Option<String> {
+        let mut add = None;
         ScrollArea::vertical().auto_shrink(false).id_salt(("fathers", self.verse)).show(ui, |ui| {
             egui::Frame::NONE.inner_margin(egui::Margin::symmetric(16, 12)).show(ui, |ui| {
                 let width = ui.available_width();
@@ -167,20 +175,26 @@ impl FathersPanel {
                     let cut = g.elided;
                     let (r, _) = ui.allocate_exact_size(g.size(), Sense::hover());
                     ui.painter().galley(r.min, g, p.ink);
-                    if cut || open {
-                        ui.add_space(4.0);
-                        let label = if open { "Show less" } else { "Show more" };
+                    ui.add_space(4.0);
+                    let link = |ui: &mut Ui, label: &str| {
                         let g = ui.painter().layout_no_wrap(label.into(), theme::ui_medium(12.0), p.accent);
                         let (r, resp) = ui.allocate_exact_size(g.size(), Sense::click());
                         ui.painter().galley(r.min, g, p.accent);
-                        if resp.on_hover_cursor(egui::CursorIcon::PointingHand).clicked() {
+                        resp.on_hover_cursor(egui::CursorIcon::PointingHand).clicked()
+                    };
+                    ui.horizontal(|ui| {
+                        ui.spacing_mut().item_spacing.x = 16.0;
+                        if (cut || open) && link(ui, if open { "Show less" } else { "Show more" }) {
                             if open {
                                 self.open.remove(&i);
                             } else {
                                 self.open.insert(i);
                             }
                         }
-                    }
+                        if link(ui, "Add to Note") {
+                            add = Some(q.as_note());
+                        }
+                    });
                 }
                 ui.add_space(16.0);
                 let mut job = LayoutJob::single_section(
@@ -195,6 +209,7 @@ impl FathersPanel {
                 ui.painter().galley(r.min, g, p.ink_3);
             });
         });
+        add
     }
 }
 

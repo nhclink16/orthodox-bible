@@ -20,6 +20,7 @@ pub mod rule;
 pub mod search;
 pub mod secrets;
 pub mod study;
+pub mod sync;
 pub mod usfm;
 pub mod xml;
 
