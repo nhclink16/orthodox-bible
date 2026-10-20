@@ -50,7 +50,17 @@ Original checklist:
    - Turn off the Sparkle updater. Remove `SUFeedURL` and `SUPublicEDKey` (`bundle-macos.sh:29-30`) and the updater (`crates/app/src/updater.rs`). The fork must never pull upstream's updates.
    - Leave the export tag `app: "bible-rs"` (`study.rs:546, 698`) alone, so notes can still move between the two apps.
 
-## Phase 1: Extra books (biggest phase; could go upstream)
+## Phase 1: Extra books (done 2026-10-20 on `orthodox/extra-books`)
+
+Done. The books sit in their Orthodox places, so grid order is reading order (see DECISIONS.md, "Orthodox fork"). Brenton imports, and Tobit, Sirach, 4 Maccabees and Greek Daniel 3 all read.
+
+Left for later:
+- The book picker lists the extra books even for the KJV. Picking one jumps to the next chapter the KJV has.
+- SWORD imports don't read the extra books yet.
+- Online translations never show them.
+- Brenton's own book titles are archaic (Esaias, Osee, Kings I–IV). A setting for modern names could come later.
+
+Original checklist:
 
 Today the app holds exactly 66 books (`BOOK_COUNT`, `CHAPTER_COUNT=1189` at `books.rs:114-116`), and DECISIONS.md:373-374 says extra books are skipped "to keep the 66-book grid".
 
