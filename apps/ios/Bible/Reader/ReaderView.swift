@@ -456,8 +456,11 @@ final class ReaderView: UIScrollView, UIScrollViewDelegate, UIGestureRecognizerD
     // MARK: Taps
 
     func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldReceive touch: UITouch) -> Bool {
-        // A tap that stops a fling only stops it.
-        !isDecelerating
+        // A tap that stops a fling only stops it. The reader is its own pan gesture's delegate
+        // too, and that must always get the touch: if `isDecelerating` is left on after a fling
+        // (it can be, on iOS 27), refusing it would stop the reader scrolling for good.
+        guard !(gestureRecognizer is UIPanGestureRecognizer) else { return true }
+        return !isDecelerating
     }
 
     @objc private func tapped(_ tap: UITapGestureRecognizer) {
