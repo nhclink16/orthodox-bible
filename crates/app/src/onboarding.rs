@@ -140,7 +140,7 @@ impl Onboarding {
         let cx = full.center().x;
         let top = full.top();
         app_icon(&painter, Rect::from_center_size(pos2(cx, top + 68.0 + 32.0), vec2(64.0, 64.0)));
-        centered(&painter, cx, top + 144.0, 48.0, "Welcome to Bible", display(40.0), p.ink, -0.015);
+        centered(&painter, cx, top + 144.0, 48.0, "Welcome to Orthodox Bible", display(40.0), p.ink, -0.015);
         centered(
             &painter,
             cx,
@@ -512,7 +512,7 @@ fn samples() -> Samples {
         .iter()
         .filter_map(|id| {
             let t = bundled::load(id).ok()?;
-            let v = t.find(VerseRef::new(BookId(42), 3, 16))?;
+            let v = t.find(VerseRef::new(BookId(57), 3, 16))?;
             Some((id.to_string(), v.plain_text()))
         })
         .collect();
@@ -522,7 +522,7 @@ fn samples() -> Samples {
             let mut heading = String::new();
             let mut text = String::new();
             for n in 1..=4 {
-                let Some(v) = t.find(VerseRef::new(BookId(18), 23, n)) else { continue };
+                let Some(v) = t.find(VerseRef::new(BookId(25), 23, n)) else { continue };
                 if n == 1
                     && let Some(m) = v.marks.iter().find(|m| m.kind == MarkKind::Heading)
                 {

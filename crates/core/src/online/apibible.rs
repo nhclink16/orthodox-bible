@@ -246,18 +246,18 @@ mod tests {
     #[test]
     fn parses_json_tree() {
         let v: Value = serde_json::from_str(SAMPLE).unwrap();
-        let c = ChapterIdx::new(BookId(42), 3).unwrap();
+        let c = ChapterIdx::new(BookId(57), 3).unwrap();
         let t = parse_json_content(c, v["data"]["content"].as_array().unwrap());
-        let v16 = t.find(VerseRef::new(BookId(42), 3, 16)).unwrap();
+        let v16 = t.find(VerseRef::new(BookId(57), 3, 16)).unwrap();
         assert_eq!(v16.text, "For God so loved the world, that he gave");
         assert_eq!(
             v16.marks.iter().map(|m| m.kind).collect::<Vec<_>>(),
             [MarkKind::Heading, MarkKind::Paragraph]
         );
         assert_eq!(v16.spans[0].style, Style::WordsOfJesus);
-        let v17 = t.find(VerseRef::new(BookId(42), 3, 18)).unwrap();
+        let v17 = t.find(VerseRef::new(BookId(57), 3, 18)).unwrap();
         assert_eq!((v17.number, v17.number_end), (17, 18));
-        let v19 = t.find(VerseRef::new(BookId(42), 3, 19)).unwrap();
+        let v19 = t.find(VerseRef::new(BookId(57), 3, 19)).unwrap();
         assert_eq!(v19.plain_text(), "And this is the condemnation, that light is come.");
         assert_eq!(
             v19.marks.iter().map(|m| (m.kind, m.level)).collect::<Vec<_>>(),

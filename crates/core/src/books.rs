@@ -1,7 +1,10 @@
-//! The canonical 66-book Protestant canon in English (KJV) versification.
+//! The canonical grid: the 66 books of the Protestant canon in English (KJV) versification, plus
+//! the deuterocanonical books the Orthodox Church reads, each in its Orthodox place (Tobit after
+//! Nehemiah, Wisdom after the Song of Songs, …).
 //!
-//! Every translation — bundled, imported or fetched — is mapped onto this grid of
-//! 66 books and 1,189 chapters, which is what makes parallel and compare views line up.
+//! Every translation — bundled, imported or fetched — is mapped onto this grid of 81 books and
+//! 1,364 chapters, which is what makes parallel and compare views line up. Grid order is reading
+//! order. Files and sources that number books in KJV order go through [`BookId::from_kjv_index`].
 
 use std::sync::OnceLock;
 
@@ -35,7 +38,7 @@ macro_rules! book {
     };
 }
 
-pub static BOOKS: [BookInfo; 66] = [
+pub static BOOKS: [BookInfo; BOOK_COUNT] = [
     book!("GEN", "Gen", "Genesis", "Gen", 50, ["gen", "ge", "gn"]),
     book!("EXO", "Exod", "Exodus", "Exod", 40, ["ex", "exo", "exod", "exd"]),
     book!("LEV", "Lev", "Leviticus", "Lev", 27, ["lev", "le", "lv"]),
@@ -50,11 +53,26 @@ pub static BOOKS: [BookInfo; 66] = [
     book!("2KI", "2Kgs", "2 Kings", "2 Kgs", 25, ["2kgs", "2ki", "2kin", "2k", "2kg"]),
     book!("1CH", "1Chr", "1 Chronicles", "1 Chr", 29, ["1chr", "1ch", "1chron", "1chro"]),
     book!("2CH", "2Chr", "2 Chronicles", "2 Chr", 36, ["2chr", "2ch", "2chron", "2chro"]),
+    book!(
+        "MAN",
+        "PrMan",
+        "Prayer of Manasseh",
+        "Pr Man",
+        1,
+        ["prman", "man", "manasseh", "prayerofmanasseh", "prayerofmanasses", "prmanasseh"]
+    ),
+    book!("1ES", "1Esd", "1 Esdras", "1 Esd", 9, ["1esd", "1es", "1esdr", "1esdras"]),
     book!("EZR", "Ezra", "Ezra", "Ezra", 10, ["ezra", "ezr", "ez"]),
     book!("NEH", "Neh", "Nehemiah", "Neh", 13, ["neh", "ne"]),
+    book!("TOB", "Tob", "Tobit", "Tob", 14, ["tob", "tobit", "tb", "tobias"]),
+    book!("JDT", "Jdt", "Judith", "Jdt", 16, ["jdt", "jth", "judith"]),
     book!("EST", "Esth", "Esther", "Esth", 10, ["esth", "est", "es"]),
+    book!("1MA", "1Macc", "1 Maccabees", "1 Macc", 16, ["1macc", "1mac", "1ma", "1m", "1maccabees"]),
+    book!("2MA", "2Macc", "2 Maccabees", "2 Macc", 15, ["2macc", "2mac", "2ma", "2m", "2maccabees"]),
+    book!("3MA", "3Macc", "3 Maccabees", "3 Macc", 7, ["3macc", "3mac", "3ma", "3m", "3maccabees"]),
     book!("JOB", "Job", "Job", "Job", 42, ["job", "jb"]),
     book!("PSA", "Ps", "Psalms", "Ps", 150, ["ps", "psa", "psalm", "pss", "psm", "pslm"]),
+    book!("PS2", "AddPs", "Psalm 151", "Ps 151", 1, ["ps151", "psalm151", "addps", "ps2"]),
     book!("PRO", "Prov", "Proverbs", "Prov", 31, ["prov", "pro", "prv", "pr", "prv"]),
     book!("ECC", "Eccl", "Ecclesiastes", "Eccl", 12, ["eccl", "ecc", "ec", "eccles", "qoh", "qoheleth"]),
     book!(
@@ -65,11 +83,38 @@ pub static BOOKS: [BookInfo; 66] = [
         8,
         ["song", "sng", "sos", "so", "songofsongs", "canticles", "cant", "canticleofcanticles"]
     ),
+    book!(
+        "WIS",
+        "Wis",
+        "Wisdom of Solomon",
+        "Wis",
+        19,
+        ["wis", "ws", "wisd", "wisdom", "wisofsol", "wisdomofsolomon"]
+    ),
+    book!(
+        "SIR",
+        "Sir",
+        "Sirach",
+        "Sir",
+        51,
+        ["sir", "sirach", "ecclus", "ecclesiasticus", "bensira", "wisdomofsirach"]
+    ),
     book!("ISA", "Isa", "Isaiah", "Isa", 66, ["isa", "is"]),
     book!("JER", "Jer", "Jeremiah", "Jer", 52, ["jer", "je", "jr"]),
     book!("LAM", "Lam", "Lamentations", "Lam", 5, ["lam", "la"]),
+    book!("BAR", "Bar", "Baruch", "Bar", 5, ["bar", "baruch", "ba"]),
+    book!(
+        "LJE",
+        "EpJer",
+        "Letter of Jeremiah",
+        "Ep Jer",
+        1,
+        ["lje", "epjer", "letjer", "letterofjeremiah", "epistleofjeremiah", "epjr"]
+    ),
     book!("EZK", "Ezek", "Ezekiel", "Ezek", 48, ["ezek", "eze", "ezk"]),
     book!("DAN", "Dan", "Daniel", "Dan", 12, ["dan", "da", "dn"]),
+    book!("SUS", "Sus", "Susanna", "Sus", 1, ["sus", "susanna"]),
+    book!("BEL", "Bel", "Bel and the Dragon", "Bel", 1, ["bel", "belanddragon", "belandthedragon"]),
     book!("HOS", "Hos", "Hosea", "Hos", 14, ["hos", "ho"]),
     book!("JOL", "Joel", "Joel", "Joel", 3, ["joel", "jl", "jol"]),
     book!("AMO", "Amos", "Amos", "Amos", 9, ["amos", "am", "amo"]),
@@ -82,6 +127,7 @@ pub static BOOKS: [BookInfo; 66] = [
     book!("HAG", "Hag", "Haggai", "Hag", 2, ["hag", "hg"]),
     book!("ZEC", "Zech", "Zechariah", "Zech", 14, ["zech", "zec", "zc"]),
     book!("MAL", "Mal", "Malachi", "Mal", 4, ["mal", "ml"]),
+    book!("4MA", "4Macc", "4 Maccabees", "4 Macc", 18, ["4macc", "4mac", "4ma", "4m", "4maccabees"]),
     book!("MAT", "Matt", "Matthew", "Matt", 28, ["matt", "mat", "mt"]),
     book!("MRK", "Mark", "Mark", "Mark", 16, ["mark", "mrk", "mk", "mr", "mar"]),
     book!("LUK", "Luke", "Luke", "Luke", 24, ["luke", "luk", "lk", "lu"]),
@@ -111,16 +157,30 @@ pub static BOOKS: [BookInfo; 66] = [
     book!("REV", "Rev", "Revelation", "Rev", 22, ["rev", "re", "rv", "revelations", "apocalypse", "apoc"]),
 ];
 
-pub const BOOK_COUNT: usize = 66;
-/// Number of chapters in the canonical grid.
-pub const CHAPTER_COUNT: usize = 1189;
-/// First New Testament book (Matthew).
-pub const FIRST_NT_BOOK: BookId = BookId(39);
+pub const BOOK_COUNT: usize = 81;
+/// Number of chapters in the canonical grid: the 1,189 of the 66 books and 175 deuterocanonical.
+pub const CHAPTER_COUNT: usize = 1364;
+/// First New Testament book (Matthew). Every book before it, deuterocanonical ones included, is
+/// in the Old Testament.
+pub const FIRST_NT_BOOK: BookId = BookId(54);
+
+/// The 66 books in KJV order, which SWORD and Zefania number books by and `.bbl` version 1 files
+/// were laid out in.
+const KJV_ORDER: [&str; 66] = [
+    "GEN", "EXO", "LEV", "NUM", "DEU", "JOS", "JDG", "RUT", "1SA", "2SA", "1KI", "2KI", "1CH", "2CH", "EZR",
+    "NEH", "EST", "JOB", "PSA", "PRO", "ECC", "SNG", "ISA", "JER", "LAM", "EZK", "DAN", "HOS", "JOL", "AMO",
+    "OBA", "JON", "MIC", "NAM", "HAB", "ZEP", "HAG", "ZEC", "MAL", "MAT", "MRK", "LUK", "JHN", "ACT", "ROM",
+    "1CO", "2CO", "GAL", "EPH", "PHP", "COL", "1TH", "2TH", "1TI", "2TI", "TIT", "PHM", "HEB", "JAS", "1PE",
+    "2PE", "1JN", "2JN", "3JN", "JUD", "REV",
+];
+
+/// Number of chapters in KJV order's 66 books.
+pub const KJV_CHAPTER_COUNT: usize = 1189;
 
 impl BookId {
     pub const GENESIS: BookId = BookId(0);
-    pub const PSALMS: BookId = BookId(18);
-    pub const REVELATION: BookId = BookId(65);
+    pub const PSALMS: BookId = BookId(25);
+    pub const REVELATION: BookId = BookId(80);
 
     pub fn new(index: usize) -> Option<Self> {
         (index < BOOK_COUNT).then_some(BookId(index as u8))
@@ -151,6 +211,27 @@ impl BookId {
         if self < FIRST_NT_BOOK { Testament::Old } else { Testament::New }
     }
 
+    /// One of the books outside the 66-book canon (Tobit, Sirach, the Maccabees, …).
+    pub fn is_deuterocanonical(self) -> bool {
+        self.kjv_index().is_none()
+    }
+
+    /// This book's position in KJV order (Genesis 0 … Revelation 65); `None` for a
+    /// deuterocanonical book.
+    pub fn kjv_index(self) -> Option<usize> {
+        kjv_tables().book_kjv[self.index()].map(usize::from)
+    }
+
+    /// The book at `index` in KJV order.
+    pub fn from_kjv_index(index: usize) -> Option<Self> {
+        KJV_ORDER.get(index).and_then(|code| Self::from_code(code))
+    }
+
+    /// The 66 books of the Protestant canon, in grid order.
+    pub fn canonical() -> impl Iterator<Item = BookId> {
+        Self::all().filter(|b| !b.is_deuterocanonical())
+    }
+
     pub fn all() -> impl Iterator<Item = BookId> {
         (0..BOOK_COUNT as u8).map(BookId)
     }
@@ -171,11 +252,11 @@ impl BookId {
 
     /// Is this a book whose text is mostly poetry (used for typographic defaults)?
     pub fn is_poetic(self) -> bool {
-        matches!(self.0, 17..=21 | 24)
+        matches!(self.info().code, "JOB" | "PSA" | "PS2" | "PRO" | "ECC" | "SNG" | "LAM")
     }
 }
 
-/// Index of a chapter in the canonical grid: `0` is Genesis 1, `1188` is Revelation 22.
+/// Index of a chapter in the canonical grid: `0` is Genesis 1, `1363` is Revelation 22.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord, Default)]
 pub struct ChapterIdx(pub u16);
 
@@ -221,9 +302,10 @@ impl ChapterIdx {
     }
 }
 
-/// Verses per chapter in KJV versification (31,102 verses), indexed by [`ChapterIdx`].
-/// Used for SWORD's KJV verse index and for validating references without loading a text.
-pub static KJV_VERSES: [u8; CHAPTER_COUNT] = [
+/// Verses per chapter in KJV versification (31,102 verses), in KJV book order (not grid order:
+/// use [`ChapterIdx::kjv_verses`]). Used for SWORD's KJV verse index and for validating
+/// references without loading a text.
+pub static KJV_VERSES: [u8; KJV_CHAPTER_COUNT] = [
     31, 25, 24, 26, 32, 22, 24, 22, 29, 32, 32, 20, 18, 24, 21, 16, 27, 33, 38, 18, 34, 24, 20, 67, 34, 35,
     46, 22, 35, 43, 55, 32, 20, 31, 29, 43, 36, 30, 23, 23, 57, 38, 34, 34, 28, 34, 31, 22, 33, 26, 22, 25,
     22, 31, 23, 30, 25, 32, 35, 29, 10, 51, 22, 31, 27, 36, 16, 27, 25, 26, 36, 31, 33, 18, 40, 37, 21, 43,
@@ -272,14 +354,87 @@ pub static KJV_VERSES: [u8; CHAPTER_COUNT] = [
     21, 15, 27, 21,
 ];
 
+/// Verses per chapter of the deuterocanonical books, counted from Brenton's English Septuagint
+/// (public domain; eBible.org `eng-Brenton`).
+const DEUTERO_VERSES: [(&str, &[u8]); 15] = [
+    ("MAN", &[15]),
+    ("1ES", &[58, 30, 24, 63, 73, 34, 15, 96, 55]),
+    ("TOB", &[22, 14, 17, 21, 22, 17, 18, 21, 6, 13, 19, 22, 18, 15]),
+    ("JDT", &[16, 28, 10, 15, 24, 21, 32, 36, 14, 23, 23, 20, 20, 19, 13, 25]),
+    ("1MA", &[64, 70, 60, 61, 68, 63, 50, 32, 73, 89, 74, 53, 53, 49, 41, 24]),
+    ("2MA", &[36, 32, 40, 50, 27, 31, 42, 36, 29, 38, 38, 45, 26, 46, 39]),
+    ("3MA", &[29, 33, 30, 21, 51, 41, 23]),
+    ("PS2", &[7]),
+    ("WIS", &[16, 24, 19, 20, 23, 25, 30, 21, 18, 21, 26, 27, 19, 31, 19, 29, 21, 25, 22]),
+    (
+        "SIR",
+        &[
+            30, 18, 31, 31, 15, 37, 36, 19, 18, 31, 34, 18, 26, 27, 20, 30, 32, 33, 30, 31, 28, 27, 27, 34,
+            26, 29, 30, 26, 28, 40, 26, 20, 12, 31, 24, 31, 31, 34, 35, 30, 24, 25, 33, 23, 26, 20, 25, 25,
+            16, 29, 30,
+        ],
+    ),
+    ("BAR", &[22, 35, 37, 37, 9]),
+    ("LJE", &[73]),
+    ("SUS", &[64]),
+    ("BEL", &[42]),
+    ("4MA", &[35, 24, 21, 26, 38, 35, 25, 27, 32, 21, 27, 20, 27, 20, 32, 25, 24, 24]),
+];
+
 impl ChapterIdx {
-    /// Number of verses in this chapter in KJV versification.
+    /// Number of verses in this chapter in KJV versification; for a deuterocanonical book, in
+    /// Brenton's Septuagint.
     pub fn kjv_verses(self) -> u8 {
-        KJV_VERSES[self.index()]
+        kjv_tables().verses[self.index()]
+    }
+
+    /// This chapter's index in KJV order's 1,189 chapters; `None` in a deuterocanonical book.
+    pub fn kjv_index(self) -> Option<usize> {
+        let book = self.book().kjv_index()?;
+        Some(kjv_tables().kjv_offsets[book] as usize + self.chapter() as usize - 1)
     }
 }
 
-/// `offsets[b]` = global index of the first chapter of book `b`; `offsets[66]` = 1189.
+struct KjvTables {
+    /// Grid book → KJV-order index.
+    book_kjv: [Option<u8>; BOOK_COUNT],
+    /// `kjv_offsets[k]` = KJV-order index of the first chapter of KJV-order book `k`.
+    kjv_offsets: [u16; 66],
+    /// Verses per chapter in grid order.
+    verses: [u8; CHAPTER_COUNT],
+}
+
+fn kjv_tables() -> &'static KjvTables {
+    static TABLES: OnceLock<KjvTables> = OnceLock::new();
+    TABLES.get_or_init(|| {
+        let mut book_kjv = [None; BOOK_COUNT];
+        let mut kjv_offsets = [0u16; 66];
+        let mut acc = 0u16;
+        for (k, code) in KJV_ORDER.iter().enumerate() {
+            let b = BookId::from_code(code).expect("KJV_ORDER code is in BOOKS");
+            book_kjv[b.index()] = Some(k as u8);
+            kjv_offsets[k] = acc;
+            acc += b.chapters() as u16;
+        }
+        let mut verses = [0u8; CHAPTER_COUNT];
+        let offsets = chapter_offsets();
+        for b in BookId::all() {
+            let start = offsets[b.index()] as usize;
+            let counts: &[u8] = match book_kjv[b.index()] {
+                Some(k) => {
+                    let first = kjv_offsets[k as usize] as usize;
+                    &KJV_VERSES[first..first + b.chapters() as usize]
+                }
+                None => DEUTERO_VERSES.iter().find(|(c, _)| *c == b.info().code).expect("verse counts").1,
+            };
+            verses[start..start + counts.len()].copy_from_slice(counts);
+        }
+        KjvTables { book_kjv, kjv_offsets, verses }
+    })
+}
+
+/// `offsets[b]` = global index of the first chapter of book `b`; `offsets[BOOK_COUNT]` =
+/// `CHAPTER_COUNT`.
 fn chapter_offsets() -> &'static [u16; BOOK_COUNT + 1] {
     static OFFSETS: OnceLock<[u16; BOOK_COUNT + 1]> = OnceLock::new();
     OFFSETS.get_or_init(|| {
@@ -334,10 +489,59 @@ mod tests {
     use super::*;
 
     #[test]
-    fn grid_has_1189_chapters() {
+    fn grid_has_1364_chapters() {
         assert_eq!(BOOKS.iter().map(|b| b.chapters as usize).sum::<usize>(), CHAPTER_COUNT);
-        assert_eq!(BOOKS[..39].iter().map(|b| b.chapters as usize).sum::<usize>(), 929);
+        let chapters =
+            |books: &mut dyn Iterator<Item = BookId>| books.map(|b| b.chapters() as usize).sum::<usize>();
+        assert_eq!(chapters(&mut BookId::canonical()), KJV_CHAPTER_COUNT);
+        assert_eq!(chapters(&mut BookId::canonical().filter(|b| b.testament() == Testament::Old)), 929);
+        assert_eq!(BookId::canonical().count(), 66);
         assert_eq!(FIRST_NT_BOOK.name(), "Matthew");
+        assert_eq!(BookId::PSALMS.info().code, "PSA");
+        assert_eq!(BookId::REVELATION.info().code, "REV");
+        assert_eq!(BookId::from_code("TOB").unwrap().testament(), Testament::Old);
+    }
+
+    #[test]
+    fn kjv_order_round_trips() {
+        for k in 0..66 {
+            assert_eq!(BookId::from_kjv_index(k).unwrap().kjv_index(), Some(k));
+        }
+        assert_eq!(BookId::from_kjv_index(39).unwrap().name(), "Matthew");
+        assert!(BookId::from_code("SIR").unwrap().is_deuterocanonical());
+        assert!(!BookId::PSALMS.is_deuterocanonical());
+        let mut kjv: Vec<usize> = ChapterIdx::all().filter_map(ChapterIdx::kjv_index).collect();
+        kjv.sort_unstable();
+        assert_eq!(kjv, (0..KJV_CHAPTER_COUNT).collect::<Vec<_>>());
+        let rev22 = ChapterIdx::new(BookId::REVELATION, 22).unwrap();
+        assert_eq!(rev22.kjv_index(), Some(KJV_CHAPTER_COUNT - 1));
+    }
+
+    #[test]
+    fn deuterocanonical_verse_counts_cover_every_chapter() {
+        for (code, counts) in DEUTERO_VERSES {
+            let b = BookId::from_code(code).unwrap();
+            assert!(b.is_deuterocanonical(), "{code}");
+            assert_eq!(counts.len(), b.chapters() as usize, "{code}");
+        }
+        assert!(ChapterIdx::all().all(|c| c.kjv_verses() > 0));
+        assert_eq!(ChapterIdx::new(BookId::from_code("SIR").unwrap(), 51).unwrap().kjv_verses(), 30);
+    }
+
+    #[test]
+    fn codes_and_aliases_are_unique() {
+        let mut seen = std::collections::HashSet::new();
+        for b in &BOOKS {
+            assert!(seen.insert(b.code.to_ascii_lowercase()), "code {}", b.code);
+        }
+        let mut aliases = std::collections::HashMap::new();
+        for b in &BOOKS {
+            for a in b.aliases {
+                if let Some(other) = aliases.insert(*a, b.code) {
+                    assert_eq!(other, b.code, "alias {a} is used by {other} and {}", b.code);
+                }
+            }
+        }
     }
 
     #[test]
@@ -364,12 +568,12 @@ mod tests {
     fn kjv_verse_table() {
         assert_eq!(KJV_VERSES.iter().map(|&v| v as u32).sum::<u32>(), 31_102);
         assert_eq!(ChapterIdx::new(BookId::PSALMS, 119).unwrap().kjv_verses(), 176);
-        assert_eq!(ChapterIdx::new(BookId(42), 3).unwrap().kjv_verses(), 36);
+        assert_eq!(ChapterIdx::new(BookId::from_code("JHN").unwrap(), 3).unwrap().kjv_verses(), 36);
     }
 
     #[test]
     fn verse_keys_round_trip() {
-        let v = VerseRef::new(BookId(42), 3, 16);
+        let v = VerseRef::new(BookId::from_code("JHN").unwrap(), 3, 16);
         assert_eq!(VerseRef::from_key(v.key()), Some(v));
         assert_eq!(v.to_string(), "John 3:16");
     }

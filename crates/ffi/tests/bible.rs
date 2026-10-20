@@ -18,18 +18,19 @@ fn text(b: &Block) -> String {
     b.runs.iter().map(|r| r.text.as_str()).collect()
 }
 
-const JOHN_3_16: VerseRef = VerseRef { book: 42, chapter: 3, verse: 16 };
+const JOHN_3_16: VerseRef = VerseRef { book: 57, chapter: 3, verse: 16 };
 
 #[test]
 fn books_and_references() {
     let books = books();
-    assert_eq!(books.len(), 66);
-    assert_eq!((books[42].name.as_str(), books[42].chapters), ("John", 21));
-    assert!(!books[38].new_testament && books[39].new_testament);
+    assert_eq!(books.len(), 81);
+    assert_eq!((books[57].name.as_str(), books[57].chapters), ("John", 21));
+    assert!(!books[53].new_testament && books[54].new_testament);
+    assert_eq!((books[18].name.as_str(), books[18].new_testament), ("Tobit", false));
     assert_eq!(books[1].first_chapter, 50);
 
     let r = parse_reference("jn 3:16".into()).unwrap();
-    assert_eq!((r.book, r.chapter, r.verse, r.label.as_str()), (42, 3, Some(16), "John 3:16"));
+    assert_eq!((r.book, r.chapter, r.verse, r.label.as_str()), (57, 3, Some(16), "John 3:16"));
     assert_eq!(chapter_label(r.chapter_index), "John 3");
     assert_eq!(parse_reference("1co13:4-7".into()).unwrap().label, "1 Corinthians 13:4–7");
     assert_eq!(parse_reference("revalation 21".into()).unwrap().label, "Revelation 21");
@@ -59,7 +60,7 @@ fn prose_has_inline_numbers_and_red_letters() {
     let (bible, dir) = open("prose");
     let c = bible.chapter("kjv".into(), index("jn 3"), ContentOptions::default());
     assert_eq!(c.status, ChapterStatus::Ready);
-    assert_eq!((c.book, c.chapter, c.book_name.as_str()), (42, 3, "John"));
+    assert_eq!((c.book, c.chapter, c.book_name.as_str()), (57, 3, "John"));
     assert_eq!(c.book_title, "The Gospel According to St. John");
     let first = &c.blocks[0];
     assert_eq!(first.kind, BlockKind::Prose { indent: false });
@@ -192,7 +193,7 @@ fn search_pages_and_utf16_match_ranges() {
     assert_eq!(rest.hits.len(), 2);
 
     // The WEB's curly quotes are three bytes in UTF-8 and one unit in UTF-16.
-    let john = SearchScope::Book { book: 42 };
+    let john = SearchScope::Book { book: 57 };
     let page = bible.search("web".into(), "kingdom".into(), john, false, 0, 100).unwrap();
     let hit = page.hits.iter().find(|h| h.reference == "John 3:3").unwrap();
     assert!(hit.text.contains('“'));
@@ -200,11 +201,11 @@ fn search_pages_and_utf16_match_ranges() {
     let m = hit.matches[0];
     let matched = String::from_utf16(&units[m.start as usize..(m.start + m.length) as usize]).unwrap();
     assert_eq!(matched, "Kingdom");
-    assert_eq!((hit.verse, hit.chapter_index), (VerseRef { book: 42, chapter: 3, verse: 3 }, index("jn 3")));
+    assert_eq!((hit.verse, hit.chapter_index), (VerseRef { book: 57, chapter: 3, verse: 3 }, index("jn 3")));
 
     let nt = bible.search("kjv".into(), "faith".into(), SearchScope::NewTestament, false, 0, 1).unwrap();
     let ot = bible.search("kjv".into(), "faith".into(), SearchScope::OldTestament, false, 0, 1).unwrap();
-    assert!(nt.total > ot.total && nt.hits[0].verse.book >= 39);
+    assert!(nt.total > ot.total && nt.hits[0].verse.book >= 54);
     assert!(bible.search("nlt".into(), "love".into(), SearchScope::All, false, 0, 1).is_err());
     let _ = std::fs::remove_dir_all(dir);
 }
@@ -228,7 +229,7 @@ fn study_marks_follow_the_verse_and_persist() {
     bible.set_note(JOHN_3_16, "God's love".into()).unwrap();
     bible.set_bookmark(VerseRef { verse: 1, ..JOHN_3_16 }, true).unwrap();
     bible.set_setting("ios".into(), "{\"theme\":\"sepia\"}".into()).unwrap();
-    assert!(bible.set_highlight(VerseRef { book: 66, ..JOHN_3_16 }, None).is_err());
+    assert!(bible.set_highlight(VerseRef { book: 81, ..JOHN_3_16 }, None).is_err());
     drop(bible);
 
     let bible = Bible::new(dir.to_string_lossy().into()).unwrap();
@@ -279,6 +280,6 @@ fn unknown_translations_and_chapters_fail_softly() {
     assert!(matches!(c.status, ChapterStatus::Failed { .. }) && c.blocks.is_empty());
     assert_eq!(c.book_name, "John");
     let last = bible.chapter("kjv".into(), u16::MAX, ContentOptions::default());
-    assert_eq!((last.book, last.chapter), (65, 22));
+    assert_eq!((last.book, last.chapter), (80, 22));
     let _ = std::fs::remove_dir_all(dir);
 }

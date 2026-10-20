@@ -29,8 +29,8 @@ every source above; copies of those statements are reproduced in [`bibles.md`](b
   United States is disputed (Cambridge University Press published the 1965 edition), so it is
   left out.
 * **Translations with Apocrypha/Deuterocanon or non-KJV versification** (Douay–Rheims, Brenton
-  Septuagint, …) — public domain, but they don't fit the 66-book KJV verse grid used for parallel
-  and compare views. Users can import them; deuterocanonical books are skipped.
+  Septuagint, …) — public domain. Users can import them, deuterocanonical books included; their
+  verse numbering isn't mapped to the KJV's yet, so parallel columns may not line up.
 * **NLT, NASB, LSB, ESV, NIV, NKJV and any other copyrighted translation** — never bundled: no
   text, no derived index, no test fixtures. They can be imported from a file the user owns or
   fetched with the user's own API key (see the README).

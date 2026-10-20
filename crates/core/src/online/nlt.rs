@@ -410,9 +410,9 @@ mod tests {
 
     #[test]
     fn parses_prose_red_letters_and_notes() {
-        let c = ChapterIdx::new(BookId(42), 3).unwrap();
+        let c = ChapterIdx::new(BookId(57), 3).unwrap();
         let t = parse_html(c, JOHN);
-        let v16 = t.find(VerseRef::new(BookId(42), 3, 16)).unwrap();
+        let v16 = t.find(VerseRef::new(BookId(57), 3, 16)).unwrap();
         assert_eq!(v16.text, "“For God so loved the world, that he gave his only begotten Son.");
         assert_eq!(
             v16.marks.iter().map(|m| m.kind).collect::<Vec<_>>(),
@@ -425,11 +425,11 @@ mod tests {
             (Style::WordsOfJesus, 0, v16.text.len())
         );
         // Verse 17 continues the paragraph (no break), still in red; the stray `<p>` is no break.
-        let v17 = t.find(VerseRef::new(BookId(42), 3, 17)).unwrap();
+        let v17 = t.find(VerseRef::new(BookId(57), 3, 17)).unwrap();
         assert!(v17.marks.is_empty());
         assert!(v17.text.ends_with("condemn the world.”"));
         assert_eq!(v17.spans[0].style, Style::WordsOfJesus);
-        let v18 = t.find(VerseRef::new(BookId(42), 3, 18)).unwrap();
+        let v18 = t.find(VerseRef::new(BookId(57), 3, 18)).unwrap();
         assert_eq!(v18.marks.iter().map(|m| m.kind).collect::<Vec<_>>(), [MarkKind::Paragraph]);
         assert_eq!(v18.text, "He that believeth on him is not condemned: thus saith the LORD, verily.");
         let styles: Vec<_> =
@@ -442,7 +442,7 @@ mod tests {
     #[test]
     fn ranges_of_a_chapter_join_up() {
         // Two consecutive ranges, each a complete page: the second page's title isn't text.
-        let c = ChapterIdx::new(BookId(42), 3).unwrap();
+        let c = ChapterIdx::new(BookId(57), 3).unwrap();
         let page = |vn: u8, text: &str| {
             format!(
                 r#"<html><head><title>NLT API</title></head><body><div><section><h2 class="bk_ch_vs_header">John 3:{vn}, NLT</h2><verse_export vn="{vn}"><p class="body"><span class="vn">{vn}</span>{text}</p></verse_export></section></div></body></html>"#
@@ -480,8 +480,8 @@ mod tests {
     fn book_names_and_policy() {
         assert_eq!(api_book(BookId::GENESIS), "Gen");
         assert_eq!(api_book(BookId::PSALMS), "Ps");
-        assert_eq!(api_book(BookId(51)), "1Thes");
-        assert_eq!(api_book(BookId(63)), "3Jn");
+        assert_eq!(api_book(BookId(66)), "1Thes");
+        assert_eq!(api_book(BookId(78)), "3Jn");
         assert_eq!(url_encode("a b/c"), "a%20b%2Fc");
         let p = Nlt::new(None).policy();
         assert_eq!((p.max_verses, p.book_share), (500, BookShare::LessThanWhole));

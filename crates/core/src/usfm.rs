@@ -160,7 +160,13 @@ impl<'b> UsfmParser<'b> {
             "id" => {
                 self.flush_ctx();
                 self.flush_titles();
-                match BookId::from_code(arg) {
+                // Greek Esther and Greek Daniel are the whole book with its Greek additions.
+                let code = match arg {
+                    "ESG" => "EST",
+                    "DAG" => "DAN",
+                    other => other,
+                };
+                match BookId::from_code(code) {
                     Some(book) => {
                         self.skip_book = false;
                         self.b.begin_book(book);
@@ -496,11 +502,24 @@ mod tests {
     }
 
     #[test]
-    fn skips_non_canonical_books() {
+    fn skips_books_outside_the_grid() {
         let mut b = TranslationBuilder::new(TranslationMeta::default());
-        UsfmParser::new(&mut b).parse("\\id TOB\n\\c 1\n\\p\n\\v 1 Tobit text").unwrap();
+        UsfmParser::new(&mut b).parse("\\id 2ES\n\\c 1\n\\p\n\\v 1 Second Esdras text").unwrap();
         UsfmParser::new(&mut b).parse("\\id FRT\n\\p Front matter").unwrap();
         assert_eq!(b.finish().verse_count(), 0);
+    }
+
+    #[test]
+    fn reads_deuterocanonical_books_and_greek_esther_and_daniel() {
+        let mut b = TranslationBuilder::new(TranslationMeta::default());
+        UsfmParser::new(&mut b).parse("\\id TOB\n\\c 1\n\\p\n\\v 1 Tobit text").unwrap();
+        UsfmParser::new(&mut b).parse("\\id ESG\n\\c 1\n\\p\n\\v 1 Greek Esther").unwrap();
+        UsfmParser::new(&mut b).parse("\\id DAG\n\\c 3\n\\p\n\\v 97 Greek Daniel").unwrap();
+        let t = b.finish();
+        let book = |code| BookId::from_code(code).unwrap();
+        assert_eq!(t.find(VerseRef::new(book("TOB"), 1, 1)).unwrap().text, "Tobit text");
+        assert_eq!(t.find(VerseRef::new(book("EST"), 1, 1)).unwrap().text, "Greek Esther");
+        assert_eq!(t.find(VerseRef::new(book("DAN"), 3, 97)).unwrap().text, "Greek Daniel");
     }
 
     #[test]

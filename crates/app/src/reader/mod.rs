@@ -253,6 +253,7 @@ impl Reader {
         let cx = Ctx::new(env.typo, env.theme, geom.col_w, geom.gutter);
         let mut provisional = false;
         let mut chapters: Vec<(String, Result<Arc<bible_core::Translation>, String>)> = Vec::new();
+        let mut missing = 0;
         for id in env.columns {
             let abbrev = env.library.get(id).map(|e| e.meta.abbrev.clone()).unwrap_or_else(|| id.clone());
             let state = match env.library.chapter(id, c) {
@@ -269,7 +270,10 @@ impl Reader {
                     provisional = true;
                     Err(format!("Couldn't load this chapter: {m}"))
                 }
-                Chapter::Missing => Err("This translation doesn't include this chapter.".into()),
+                Chapter::Missing => {
+                    missing += 1;
+                    Err("This translation doesn't include this chapter.".into())
+                }
             };
             chapters.push((abbrev, state));
         }
@@ -290,8 +294,20 @@ impl Reader {
             .collect();
         let t_layout = std::time::Instant::now();
         self.layouts += 1;
+        // Most translations have no deuterocanonical books. Where no column has the chapter it
+        // takes no room, so reading the KJV runs from Nehemiah straight on to Esther.
+        let skip = missing == chapters.len() && c.book().is_deuterocanonical();
         let layout = ui.ctx().fonts_mut(|fonts| {
-            let mut layout = if chapters.len() == 1 {
+            let mut layout = if skip {
+                layout::ChapterLayout {
+                    chapter: c,
+                    height: 0.0,
+                    blocks: Vec::new(),
+                    anchors: Vec::new(),
+                    labels: Vec::new(),
+                    links: Vec::new(),
+                }
+            } else if chapters.len() == 1 {
                 match &chapters[0].1 {
                     Ok(t) => layout::layout_chapter(fonts, &cx, t, c),
                     Err(m) => layout::layout_message(fonts, &cx, c, m),

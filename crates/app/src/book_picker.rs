@@ -6,7 +6,7 @@
 //! Arrow keys move a highlight through the grid (the books spatially, across both testaments;
 //! the chapters in order), return chooses, backspace goes back to the books and escape closes.
 
-use bible_core::books::{BookId, ChapterIdx, FIRST_NT_BOOK};
+use bible_core::books::{BOOK_COUNT, BookId, ChapterIdx, FIRST_NT_BOOK};
 use bible_core::model::TranslationMeta;
 use eframe::egui::{self, Align2, Id, Key, Modifiers, Rect, Response, Sense, Ui, Vec2, pos2, vec2};
 
@@ -24,7 +24,7 @@ const GROUP_GAP: f32 = 2.0 * PADDING_X;
 const MAX_NAME: usize = 12;
 /// Width the books leave spare each side of a narrow window when their cells narrow to fit.
 const WINDOW_MARGIN: f32 = 8.0;
-const BOOKS: usize = 66;
+const BOOKS: usize = BOOK_COUNT;
 
 /// Which grid the picker shows and where its highlight is, while it's open.
 #[derive(Clone, Copy, Default)]

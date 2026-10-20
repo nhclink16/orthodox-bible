@@ -80,7 +80,7 @@ impl Default for Settings {
             sidebar_tab: SidebarTab::Books,
             theme_system: false,
             // John 1 is a friendlier first page than Genesis 1.
-            chapter: ChapterIdx::new(BookId(42), 1).unwrap().0,
+            chapter: ChapterIdx::new(BookId(57), 1).unwrap().0,
             verse: 1,
             whole_words: false,
             plan_reminder: false,
@@ -410,6 +410,16 @@ impl BibleApp {
         }
     }
 
+    /// Whether chapter `c` takes room in the reader: a deuterocanonical chapter only when one of
+    /// the columns has it (see `Reader::chapter_layout`).
+    fn shown(&self, c: ChapterIdx) -> bool {
+        !c.book().is_deuterocanonical()
+            || self
+                .columns()
+                .iter()
+                .any(|id| !matches!(self.library.chapter(id, c), bible_core::library::Chapter::Missing))
+    }
+
     pub fn columns(&self) -> Vec<String> {
         let mut cols = vec![self.settings.translation.clone()];
         if self.settings.parallel_on {
@@ -595,14 +605,16 @@ impl BibleApp {
                 let target = if self.reader.anchor.chapter == c && self.reader.anchor.offset > 40.0 {
                     Some(c)
                 } else {
-                    c.prev()
+                    std::iter::successors(c.prev(), |c| c.prev()).find(|c| self.shown(*c))
                 };
                 if let Some(t) = target {
                     self.reader.jump(t, None, false);
                 }
             }
             Action::NextChapter => {
-                if let Some(n) = self.here().0.next() {
+                if let Some(n) =
+                    std::iter::successors(self.here().0.next(), |c| c.next()).find(|c| self.shown(*c))
+                {
                     self.reader.jump(n, None, false);
                 }
             }

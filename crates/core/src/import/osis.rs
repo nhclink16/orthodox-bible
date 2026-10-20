@@ -363,7 +363,8 @@ mod tests {
 <title type="psalm" canonical="true">A Psalm of David.</title>
 <lg><l level="1"><verse osisID="Ps.23.1">The <divineName>Lord</divineName> is my shepherd;</verse></l>
 <l level="2"><verse osisID="Ps.23.2 Ps.23.3">I shall not want.</verse></l></lg></chapter></div>
-<div type="book" osisID="Tob"><chapter osisID="Tob.1"><verse osisID="Tob.1.1">Apocrypha</verse></chapter></div>
+<div type="book" osisID="Tob"><chapter osisID="Tob.1"><verse osisID="Tob.1.1">Tobit</verse></chapter></div>
+<div type="book" osisID="2Esd"><chapter osisID="2Esd.1"><verse osisID="2Esd.1.1">Second Esdras</verse></chapter></div>
 </osisText></osis>"#;
 
     #[test]
@@ -375,8 +376,8 @@ mod tests {
         let t = b.finish();
         assert_eq!(work.title, "Test Bible");
         assert_eq!(work.rights, "Public domain test.");
-        let john = BookId(42);
-        assert_eq!(t.meta.books[42].long, "The Gospel of John");
+        let john = BookId(57);
+        assert_eq!(t.meta.books[john.index()].long, "The Gospel of John");
         let v16 = t.find(VerseRef::new(john, 3, 16)).unwrap();
         assert_eq!(v16.text, "For God so loved the world, that he gave");
         assert_eq!(
@@ -395,6 +396,8 @@ mod tests {
         assert_eq!((vs[1].number, vs[1].number_end), (2, 3));
         assert_eq!(vs[1].marks[0].level, 2);
         assert_eq!(vs[0].spans[0].style, Style::DivineName);
-        assert_eq!(t.verse_count(), 4, "deuterocanonical books are skipped");
+        let tobit = BookId::from_code("TOB").unwrap();
+        assert_eq!(t.find(VerseRef::new(tobit, 1, 1)).unwrap().text, "Tobit");
+        assert_eq!(t.verse_count(), 5, "books outside the grid are skipped");
     }
 }

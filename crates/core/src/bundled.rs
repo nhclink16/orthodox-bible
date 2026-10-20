@@ -79,9 +79,14 @@ mod tests {
             assert_eq!(t.meta.origin, Origin::Bundled);
             assert!(t.meta.license.starts_with("Public Domain"), "{id}: {}", t.meta.license);
             assert!(t.verse_count() > 31_000, "{id} has {} verses", t.verse_count());
-            for c in ChapterIdx::all() {
+            for c in ChapterIdx::all().filter(|c| !c.book().is_deuterocanonical()) {
                 assert!(t.has_chapter(c), "{id} is missing {}", c.display());
             }
+            // Bundled files are version 1 (KJV book order); re-encoding writes the grid layout.
+            let again = crate::format::decode(&crate::format::encode(&t, 1).unwrap()).unwrap();
+            assert_eq!(again.verse_count(), t.verse_count(), "{id}");
+            let last = VerseRef::new(BookId::REVELATION, 22, 21);
+            assert_eq!(again.find(last).unwrap().text, t.find(last).unwrap().text, "{id}");
             let first = t.find(VerseRef::new(BookId::GENESIS, 1, 1)).unwrap();
             assert!(first.text.contains("beginning"), "{id}: {}", first.text);
         }
@@ -91,7 +96,7 @@ mod tests {
     fn red_letters_where_the_source_has_them() {
         let kjv = load("kjv").unwrap();
         assert!(kjv.meta.red_letters);
-        let v = kjv.find(VerseRef::new(BookId(42), 3, 16)).unwrap();
+        let v = kjv.find(VerseRef::new(BookId(57), 3, 16)).unwrap();
         assert!(v.spans.iter().any(|s| s.style == crate::model::Style::WordsOfJesus));
         assert_eq!(
             v.text,

@@ -62,8 +62,20 @@ a reader has no use for a discrete GPU, and waking one costs start-up time and b
 Every translation — bundled, imported or fetched — becomes the same structure: one UTF-8 string of
 verse text plus flat arrays of verses, structural *marks* (paragraph, poetry line + level, stanza
 break, heading, Psalm title) and character *spans* (words of Christ, additions, divine name, Selah),
-all keyed to the canonical **66-book / 1,189-chapter KJV grid**. Using one grid is what makes
-verse-aligned parallel columns, the compare view, and translation-independent highlights possible.
+all keyed to the canonical **81-book / 1,364-chapter grid**: the 66 books in KJV versification plus
+the 15 deuterocanonical books the Orthodox Church reads, each in its Orthodox place (Tobit after
+Nehemiah, Wisdom after the Song of Songs, 4 Maccabees after Malachi). Grid order is reading order.
+Using one grid is what makes verse-aligned parallel columns, the compare view, and
+translation-independent highlights possible.
+
+*Orthodox fork.* Upstream keeps 66 books. Putting the new books in their places, not after
+Revelation, keeps every range in the code (Old Testament scope, scrolling, the book picker) correct
+without a separate reading order. The price is that book numbers moved, so `.bbl` became version 2;
+version 1 files (66 books in KJV order) are re-sorted as they're read, and sources that number books
+in KJV order (SWORD, Zefania) go through `BookId::from_kjv_index`. Study data was always keyed by
+book code, so notes and highlights don't move. A deuterocanonical chapter that no open column has
+takes no room in the reader, so the KJV still runs from Nehemiah to Esther. Reading plans keep to
+the 66 books.
 
 `.bbl` files store that model as column arrays compressed with zstd (level 19 for bundled data):
 the 4.1 MB KJV is 1.04 MB, all seven bundled translations ≈ 7 MB. The JSON metadata header is
@@ -370,6 +382,8 @@ What differs is the toolkit, and here the Mac's choice is overruled.
 - No per-word highlighting (verse-level only) and no free text selection inside verses — verse
   selection with "copy with reference" covers the common case.
 - No footnotes or cross-references from the source texts (dropped at import).
-- SWORD modules in versifications other than KJV(A)/NRSV(A) (e.g. Vulgate, Synodal) aren't supported yet;
-  deuterocanonical books are skipped everywhere to keep the 66-book grid.
+- SWORD modules in versifications other than KJV(A)/NRSV(A) (e.g. Vulgate, Synodal) aren't supported yet,
+  and SWORD imports don't read the deuterocanonical books yet (USFM, OSIS and Zefania do).
+- Septuagint numbering (Psalms 9–147, Psalm 151, Brenton's psalm titles as verses) isn't mapped yet:
+  a Septuagint is stored by its own chapter and verse numbers.
 - Search covers locally available text; online translations are searched via their own sites.

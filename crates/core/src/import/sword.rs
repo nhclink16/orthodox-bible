@@ -10,7 +10,7 @@ use std::io::Read;
 use anyhow::{Context, Result, bail, ensure};
 
 use super::osis::OsisHandler;
-use crate::books::{BookId, ChapterIdx, FIRST_NT_BOOK};
+use crate::books::{BookId, ChapterIdx};
 use crate::model::{MarkKind, Style, TranslationBuilder};
 use crate::xml::{Tok, attr, tokens};
 
@@ -172,7 +172,8 @@ pub fn read_module(
     let data_path = conf.get("DataPath").context("conf has no DataPath")?.trim_end_matches('/').to_string();
 
     let mut cipher_check: Option<usize> = None;
-    for (testament, books) in [("ot", 0..FIRST_NT_BOOK.0), ("nt", FIRST_NT_BOOK.0..66)] {
+    // SWORD's index walks the 66 books in KJV order; deuterocanonical books aren't read yet.
+    for (testament, books) in [("ot", 0..39), ("nt", 39..66)] {
         let reader = match TestamentReader::open(files, &data_path, testament, driver, key.as_deref()) {
             Ok(r) => r,
             // A module may cover only one testament.
@@ -182,7 +183,7 @@ pub fn read_module(
         // and per chapter a heading entry followed by its verses (so Genesis 1:1 is entry 4).
         let mut idx = 1usize;
         let mut handler = OsisHandler::new(b, true);
-        for book in books.map(BookId) {
+        for book in books.filter_map(BookId::from_kjv_index) {
             idx += 1;
             handler.b.begin_book(book);
             for ch in 1..=book.chapters() {
@@ -236,9 +237,9 @@ fn versification(name: &str) -> Option<fn(ChapterIdx) -> u8> {
     }
     fn nrsv(c: ChapterIdx) -> u8 {
         // 3 John 1 and Revelation 12 each have one more verse than in the KJV.
-        match c.0 {
-            1165 => 15,
-            1178 => 18,
+        match (c.book().info().code, c.chapter()) {
+            ("3JN", 1) => 15,
+            ("REV", 12) => 18,
             _ => c.kjv_verses(),
         }
     }
@@ -574,10 +575,10 @@ pub(crate) mod tests {
     ) -> MemFiles {
         let mut files = HashMap::new();
         let dir = "modules/texts/ztext/test";
-        for (t, books) in [("ot", 0..39u8), ("nt", 39..66u8)] {
+        for (t, books) in [("ot", 0..39), ("nt", 39..66)] {
             // Compute the index size for this testament.
             let mut entries: Vec<Vec<u8>> = vec![Vec::new(), Vec::new()];
-            for book in books.map(BookId) {
+            for book in books.filter_map(BookId::from_kjv_index) {
                 entries.push(Vec::new());
                 for ch in 1..=book.chapters() {
                     entries.push(Vec::new());
@@ -649,7 +650,7 @@ pub(crate) mod tests {
                 "<title type=\"psalm\" canonical=\"true\">A Psalm of David.</title><l level=\"1\">The <divineName>Lord</divineName> is my shepherd; I shall not want.</l>",
             ),
             (
-                VerseRef::new(BookId(42), 3, 16),
+                VerseRef::new(BookId(57), 3, 16),
                 "For God so loved the world, <note>n</note><q who=\"Jesus\" marker=\"\">that he gave</q>",
             ),
             (
@@ -676,7 +677,7 @@ pub(crate) mod tests {
             let ps = t.find(VerseRef::new(BookId::PSALMS, 23, 1)).unwrap();
             assert_eq!(ps.text, "The Lord is my shepherd; I shall not want.");
             assert_eq!(ps.marks[0].kind, MarkKind::PsalmTitle);
-            let jn = t.find(VerseRef::new(BookId(42), 3, 16)).unwrap();
+            let jn = t.find(VerseRef::new(BookId(57), 3, 16)).unwrap();
             assert_eq!(jn.text, "For God so loved the world, that he gave");
             assert_eq!(jn.spans[0].style, Style::WordsOfJesus);
             assert!(t.find(VerseRef::new(BookId::REVELATION, 22, 21)).is_some());
@@ -717,9 +718,12 @@ pub(crate) mod tests {
 
     #[test]
     fn nrsv_versification() {
-        let total: u32 = ChapterIdx::all().map(|c| versification("NRSV").unwrap()(c) as u32).sum();
+        let total: u32 = ChapterIdx::all()
+            .filter(|c| c.kjv_index().is_some())
+            .map(|c| versification("NRSV").unwrap()(c) as u32)
+            .sum();
         assert_eq!(total, 31_104);
-        assert_eq!(versification("nrsva").unwrap()(ChapterIdx::new(BookId(63), 1).unwrap()), 15);
+        assert_eq!(versification("nrsva").unwrap()(ChapterIdx::new(BookId(78), 1).unwrap()), 15);
         assert_eq!(versification("NRSV").unwrap()(ChapterIdx::new(BookId::REVELATION, 12).unwrap()), 18);
         assert!(versification("Vulg").is_none());
     }
@@ -737,17 +741,17 @@ pub(crate) mod tests {
     #[test]
     fn gbf_and_thml() {
         let mut b = TranslationBuilder::new(TranslationMeta::default());
-        b.begin_book(BookId(42));
+        b.begin_book(BookId(57));
         b.begin_chapter(3);
         b.begin_verse(16, 16);
         gbf(&mut b, "For God<WG2316> so loved<RF>note<Rf> the world, <FR>that he gave<Fr>");
         b.begin_verse(17, 17);
         thml(&mut b, "For God <scripRef>x</scripRef>sent <font color=\"red\">not</font> his<br/>Son");
         let t = b.finish();
-        let v = t.find(VerseRef::new(BookId(42), 3, 16)).unwrap();
+        let v = t.find(VerseRef::new(BookId(57), 3, 16)).unwrap();
         assert_eq!(v.text, "For God so loved the world, that he gave");
         assert_eq!(v.spans[0].style, Style::WordsOfJesus);
-        let v = t.find(VerseRef::new(BookId(42), 3, 17)).unwrap();
+        let v = t.find(VerseRef::new(BookId(57), 3, 17)).unwrap();
         assert_eq!(v.plain_text(), "For God sent not his Son");
         assert_eq!(v.spans[0].style, Style::WordsOfJesus);
     }

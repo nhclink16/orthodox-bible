@@ -1304,7 +1304,7 @@ fn reading(ui: &mut Ui, library: &Library, settings: &mut Settings, actions: &mu
         .ok()
         .map(|t| {
             let get = |v| {
-                t.find(bible_core::VerseRef::new(bible_core::BookId(42), 1, v))
+                t.find(bible_core::VerseRef::new(bible_core::BookId(57), 1, v))
                     .map(|v| v.plain_text())
                     .unwrap_or_default()
             };

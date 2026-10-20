@@ -119,8 +119,9 @@ Supported formats:
 | **SWORD module** | the module `.zip`, its unpacked folder, or its `mods.d/*.conf` file. zText/RawText drivers in KJV, KJVA, NRSV or NRSVA versification; OSIS, ThML and GBF markup. **Locked modules** (e.g. purchased from a publisher) work with your unlock key: enter it in the *SWORD unlock key* field (or `--key`). |
 
 The text is converted to bible-rs's format and stored only in your data folder
-(`~/Library/Application Support/bible-rs/translations/` on macOS). Deuterocanonical books are
-skipped. Remove an import from the same settings page or with `bible-rs remove <id>`.
+(`~/Library/Application Support/orthodox-bible/translations/` on macOS). Deuterocanonical books
+(Tobit, Sirach, the Maccabees, …) are kept from USFM, OSIS and Zefania files; Greek Esther and Greek
+Daniel (USFM `ESG`, `DAG`) are read as Esther and Daniel. Remove an import from the same settings page or with `bible-rs remove <id>`.
 
 ### Online translations
 

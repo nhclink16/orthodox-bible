@@ -5,7 +5,7 @@ use std::collections::HashSet;
 use std::sync::Arc;
 use std::time::Duration;
 
-use bible_core::books::{BookId, ChapterIdx, FIRST_NT_BOOK, VerseRef};
+use bible_core::books::{BOOK_COUNT, BookId, ChapterIdx, FIRST_NT_BOOK, VerseRef};
 use bible_core::library::Library;
 use bible_core::search::{Query, Scope};
 use bible_core::study::{HighlightColor, StudyStore};
@@ -444,10 +444,12 @@ impl Sidebar {
                     }
 
                     section(ui, p, "Books", false);
-                    for (t, (label, range)) in
-                        [("Old Testament", 0..FIRST_NT_BOOK.0), ("New Testament", FIRST_NT_BOOK.0..66)]
-                            .into_iter()
-                            .enumerate()
+                    for (t, (label, range)) in [
+                        ("Old Testament", 0..FIRST_NT_BOOK.0),
+                        ("New Testament", FIRST_NT_BOOK.0..BOOK_COUNT as u8),
+                    ]
+                    .into_iter()
+                    .enumerate()
                     {
                         let books: Vec<BookId> = range.clone().map(BookId).filter(|b| matches(*b)).collect();
                         if books.is_empty() {

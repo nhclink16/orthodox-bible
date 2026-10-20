@@ -53,7 +53,8 @@ pub fn read(b: &mut TranslationBuilder, src: &str) -> ZefaniaInfo {
                     "BIBLEBOOK" => {
                         let n: usize =
                             attr(attrs, "bnumber").and_then(|n| n.trim().parse().ok()).unwrap_or(0);
-                        match n.checked_sub(1).and_then(BookId::new) {
+                        // Zefania numbers the 66 books in KJV order.
+                        match n.checked_sub(1).and_then(BookId::from_kjv_index) {
                             Some(book) => {
                                 skip_book = false;
                                 b.begin_book(book);
@@ -171,11 +172,11 @@ mod tests {
             (info.title.as_str(), info.abbrev.as_str(), info.rights.as_str()),
             ("Zef Test", "ZT", "PD")
         );
-        let v = t.find(VerseRef::new(BookId(42), 3, 16)).unwrap();
+        let v = t.find(VerseRef::new(BookId(57), 3, 16)).unwrap();
         assert_eq!(v.text, "For God so loved the world, that he gave");
         assert_eq!(v.spans[0].style, Style::WordsOfJesus);
         assert_eq!(v.marks[0].kind, MarkKind::Heading);
-        let v = t.find(VerseRef::new(BookId(42), 3, 17)).unwrap();
+        let v = t.find(VerseRef::new(BookId(57), 3, 17)).unwrap();
         assert_eq!(v.plain_text(), "Second line");
         assert_eq!(t.verse_count(), 2);
     }

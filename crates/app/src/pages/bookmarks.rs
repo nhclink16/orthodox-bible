@@ -169,7 +169,7 @@ pub(super) fn empty_page(
     let top = super::optical_top(super::under_toolbar(ui, content), h, content.top() + 58.0 + 20.0);
     let buttons = empty.show(ui, p, content.center().x, top, room);
     if buttons.first().is_some_and(|r| r.clicked()) {
-        let john = bible_core::ChapterIdx::new(bible_core::BookId(42), 1).expect("John 1");
+        let john = bible_core::ChapterIdx::new(bible_core::BookId(57), 1).expect("John 1");
         actions.push(Action::Jump { chapter: john, verse: None, flash: false });
         actions.push(Action::OpenPage(Page::Reader));
     }

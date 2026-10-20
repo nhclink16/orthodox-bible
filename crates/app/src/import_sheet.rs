@@ -583,8 +583,9 @@ impl ImportSheet {
             Err(e) if is_lock_error(e) => out.push(Issue::Locked),
             Err(e) => out.push(Issue::Failed(e.clone())),
             Ok(imp) => {
+                // Deuterocanonical books are optional: most translations don't have them.
                 let missing: Vec<BookId> =
-                    (0..66).map(BookId).filter(|b| !imp.translation.has_book(*b)).collect();
+                    BookId::canonical().filter(|b| !imp.translation.has_book(*b)).collect();
                 if !missing.is_empty() {
                     out.push(Issue::Missing(missing));
                 }
@@ -622,7 +623,7 @@ impl ImportSheet {
         let tx = body.left() + 44.0 + 14.0;
         let (headline, sub) = match result {
             Ok(imp) => {
-                let n = (0..66).filter(|b| imp.translation.has_book(BookId(*b))).count();
+                let n = BookId::canonical().filter(|b| imp.translation.has_book(*b)).count();
                 let k = cards.len();
                 (
                     format!("{n} of 66 books imported"),
@@ -740,7 +741,7 @@ fn summary(peek: &Peek) -> String {
 
 /// How many things a finished import needs looked at.
 fn issues(imp: &Imported) -> usize {
-    let missing = (0..66).any(|b| !imp.translation.has_book(BookId(b)));
+    let missing = BookId::canonical().any(|b| !imp.translation.has_book(b));
     usize::from(missing) + usize::from(!imp.skipped_books.is_empty()) + usize::from(!imp.warnings.is_empty())
 }
 

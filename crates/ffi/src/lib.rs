@@ -310,7 +310,7 @@ impl Bible {
         self.library().warm(&translations);
     }
 
-    /// Chapter `index` (0–1188) of a translation, ready to typeset.
+    /// Chapter `index` (0–1363) of a translation, ready to typeset.
     pub fn chapter(&self, translation: String, index: u16, options: ContentOptions) -> ChapterContent {
         let c = ChapterIdx(index.min(CHAPTER_COUNT as u16 - 1));
         let lib = self.library();
@@ -487,7 +487,7 @@ impl Bible {
     }
 }
 
-/// The 66 books of the canonical grid.
+/// The books of the canonical grid, in reading order (deuterocanonical books in the Old Testament).
 #[uniffi::export]
 pub fn books() -> Vec<BookInfo> {
     BOOKS

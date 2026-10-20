@@ -28,15 +28,15 @@ mod tests {
     #[test]
     fn single_and_range() {
         let mut b = TranslationBuilder::new(TranslationMeta { abbrev: "KJV".into(), ..Default::default() });
-        b.begin_book(BookId(42));
+        b.begin_book(BookId(57));
         b.begin_chapter(3);
         b.begin_verse(16, 16);
         b.text("For God so loved the world.");
         b.begin_verse(17, 17);
         b.text("For God sent not his Son.");
         let t = b.finish();
-        let v16 = VerseRef::new(BookId(42), 3, 16);
-        let v17 = VerseRef::new(BookId(42), 3, 17);
+        let v16 = VerseRef::new(BookId(57), 3, 16);
+        let v17 = VerseRef::new(BookId(57), 3, 17);
         assert_eq!(format_verses(&t, &[v16]).unwrap(), "“For God so loved the world.” — John 3:16 (KJV)");
         assert_eq!(
             format_verses(&t, &[v16, v17]).unwrap(),

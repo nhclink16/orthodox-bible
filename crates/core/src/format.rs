@@ -5,24 +5,27 @@
 //! u32 body_len  zstd(body)
 //!
 //! body = u32 text_len text  u32 extra_len extra
-//!        u16 × 1189 verses-per-chapter
+//!        u16 × 1364 verses-per-chapter, in grid order (version 1: × 1189, in KJV book order)
 //!        u32 n  then column arrays: number u8×n, number_end u8×n, text_len u16×n, marks_len u16×n, spans_len u16×n
 //!        u32 m  marks: offset u16×m, kind u8×m, level u8×m, payload_start u32×m, payload_len u32×m
 //!        u32 k  spans: start u16×k, end u16×k, style u8×k
 //! ```
 //!
 //! Columns compress far better than interleaved records, and decoding is a few linear passes.
+//!
+//! Version 1 files predate the deuterocanonical books: their 66 books are in KJV order, and
+//! `meta.books` has 66 entries in that order. Decoding moves them into the grid.
 
 use std::io::Read;
 use std::sync::OnceLock;
 
 use anyhow::{Context, Result, bail, ensure};
 
-use crate::books::CHAPTER_COUNT;
+use crate::books::{BOOK_COUNT, BookId, CHAPTER_COUNT, ChapterIdx, KJV_CHAPTER_COUNT};
 use crate::model::{Mark, MarkKind, Span, Style, Translation, TranslationMeta, Verse};
 
 const MAGIC: &[u8; 4] = b"BIBL";
-const VERSION: u16 = 1;
+const VERSION: u16 = 2;
 
 /// Serializes a translation. `level` is the zstd level (19 for bundled data, ~9 for imports).
 pub fn encode(t: &Translation, level: i32) -> Result<Vec<u8>> {
@@ -93,15 +96,22 @@ pub fn encode(t: &Translation, level: i32) -> Result<Vec<u8>> {
 /// Reads only the metadata header.
 pub fn read_meta(bytes: &[u8]) -> Result<TranslationMeta> {
     let mut r = Reader::new(bytes);
-    header(&mut r)
+    Ok(header(&mut r)?.1)
 }
 
-fn header(r: &mut Reader<'_>) -> Result<TranslationMeta> {
+fn header(r: &mut Reader<'_>) -> Result<(u16, TranslationMeta)> {
     ensure!(r.take(4)? == MAGIC, "not a bible-rs translation file");
     let version = r.u16()?;
-    ensure!(version == VERSION, "unsupported translation file version {version}");
-    let meta = r.bytes()?;
-    serde_json::from_slice(meta).context("translation metadata")
+    ensure!(version == 1 || version == VERSION, "unsupported translation file version {version}");
+    let mut meta: TranslationMeta = serde_json::from_slice(r.bytes()?).context("translation metadata")?;
+    if version == 1 && meta.books.len() == 66 {
+        let mut books = vec![Default::default(); BOOK_COUNT];
+        for (k, title) in meta.books.drain(..).enumerate() {
+            books[BookId::from_kjv_index(k).expect("66 books").index()] = title;
+        }
+        meta.books = books;
+    }
+    Ok((version, meta))
 }
 
 /// The size of a translation once decoded (its body before compression), from the header alone.
@@ -113,7 +123,8 @@ pub fn decoded_len(bytes: &[u8]) -> Option<u64> {
 
 pub fn decode(bytes: &[u8]) -> Result<Translation> {
     let mut r = Reader::new(bytes);
-    let meta = header(&mut r)?;
+    let (version, meta) = header(&mut r)?;
+    let chapters = if version == 1 { KJV_CHAPTER_COUNT } else { CHAPTER_COUNT };
     let body_len = r.u32()? as usize;
     ensure!(body_len < 256 << 20, "implausible body size");
     let body = decompress(r.rest(), body_len)?;
@@ -121,10 +132,10 @@ pub fn decode(bytes: &[u8]) -> Result<Translation> {
 
     let text = String::from_utf8(r.bytes()?.to_vec()).context("text is not UTF-8")?;
     let extra = String::from_utf8(r.bytes()?.to_vec()).context("extra is not UTF-8")?;
-    let mut chapter_start = Vec::with_capacity(CHAPTER_COUNT + 1);
+    let mut chapter_start = Vec::with_capacity(chapters + 1);
     let mut acc = 0u32;
     chapter_start.push(0);
-    for _ in 0..CHAPTER_COUNT {
+    for _ in 0..chapters {
         acc += r.u16()? as u32;
         chapter_start.push(acc);
     }
@@ -199,7 +210,36 @@ pub fn decode(bytes: &[u8]) -> Result<Translation> {
             bail!("corrupt mark/span offsets");
         }
     }
-    Ok(Translation { meta, text, extra, verses, chapter_start, marks, spans, search: OnceLock::new() })
+    let t = Translation { meta, text, extra, verses, chapter_start, marks, spans, search: OnceLock::new() };
+    Ok(if version == 1 { from_kjv_order(t) } else { t })
+}
+
+/// Moves a version 1 translation's chapters, laid out in KJV book order, into the grid.
+fn from_kjv_order(t: Translation) -> Translation {
+    let mut text = String::with_capacity(t.text.len());
+    let mut verses = Vec::with_capacity(t.verses.len());
+    let mut marks = Vec::with_capacity(t.marks.len());
+    let mut spans = Vec::with_capacity(t.spans.len());
+    let mut chapter_start = Vec::with_capacity(CHAPTER_COUNT + 1);
+    chapter_start.push(0);
+    for c in ChapterIdx::all() {
+        if let Some(k) = c.kjv_index() {
+            for v in &t.verses[t.chapter_start[k] as usize..t.chapter_start[k + 1] as usize] {
+                let (ts, ms, ss) = (v.text_start as usize, v.marks_start as usize, v.spans_start as usize);
+                verses.push(Verse {
+                    text_start: text.len() as u32,
+                    marks_start: marks.len() as u32,
+                    spans_start: spans.len() as u32,
+                    ..*v
+                });
+                text.push_str(&t.text[ts..ts + v.text_len as usize]);
+                marks.extend_from_slice(&t.marks[ms..ms + v.marks_len as usize]);
+                spans.extend_from_slice(&t.spans[ss..ss + v.spans_len as usize]);
+            }
+        }
+        chapter_start.push(verses.len() as u32);
+    }
+    Translation { text, verses, chapter_start, marks, spans, ..t }
 }
 
 fn decompress(data: &[u8], len: usize) -> Result<Vec<u8>> {
@@ -267,8 +307,8 @@ mod tests {
     #[test]
     fn round_trip_preserves_everything() {
         let mut b = TranslationBuilder::new(TranslationMeta { id: "x".into(), ..Default::default() });
-        b.begin_book(BookId(42));
-        b.set_book_title(BookId(42), Some("John"), Some("The Gospel of John"));
+        b.begin_book(BookId(57));
+        b.set_book_title(BookId(57), Some("John"), Some("The Gospel of John"));
         b.begin_chapter(1);
         b.heading(MarkKind::Heading, 1, "The Word");
         b.mark(MarkKind::Paragraph, 0);
@@ -282,9 +322,9 @@ mod tests {
         b.text("Ünïcode ✓");
         let t = b.finish();
         let bytes = encode(&t, 3).unwrap();
-        assert_eq!(read_meta(&bytes).unwrap().books[42].long, "The Gospel of John");
+        assert_eq!(read_meta(&bytes).unwrap().books[57].long, "The Gospel of John");
         let back = decode(&bytes).unwrap();
-        let c = ChapterIdx::new(BookId(42), 1).unwrap();
+        let c = ChapterIdx::new(BookId(57), 1).unwrap();
         let a: Vec<_> = t
             .verses_in(c)
             .map(|v| (v.number, v.text.to_string(), v.marks.to_vec(), v.spans.to_vec()))

@@ -398,7 +398,7 @@ impl State {
         let local = if e.is_local() { env.library.load(&m.id).ok() } else { None };
         let sample = local
             .as_ref()
-            .and_then(|t| t.find(VerseRef::new(BookId(18), 23, 1)))
+            .and_then(|t| t.find(VerseRef::new(BookId(25), 23, 1)))
             .map(|v| v.plain_text())
             .unwrap_or_default();
         let serif = FontId::new(14.0, theme::family(theme::SERIF));
@@ -427,7 +427,7 @@ impl State {
         let tx = tile.right() + 12.0;
         let name = elide(&painter, &m.name, &theme::ui_semibold(15.0), card.right() - 20.0 - tx);
         text(&painter, tx, y + 5.0, 20.0, &name, theme::ui_semibold(15.0), p.ink, false);
-        let books = local.as_ref().map(|t| (0..66).filter(|b| t.has_book(BookId(*b))).count());
+        let books = local.as_ref().map(|t| BookId::all().filter(|b| t.has_book(*b)).count());
         let mut facts = Vec::new();
         if let Some(year) = bundled::year(&m.id) {
             facts.push(year.to_string());

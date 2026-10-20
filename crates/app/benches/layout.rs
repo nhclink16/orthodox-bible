@@ -29,7 +29,7 @@ fn bench(c: &mut Criterion) {
     };
     let mut g = c.benchmark_group("layout");
     for (name, book, ch) in [
-        ("John 3 (36 verses)", BookId(42), 3),
+        ("John 3 (36 verses)", BookId(57), 3),
         ("Genesis 1 (31 verses)", BookId::GENESIS, 1),
         ("Psalm 23 (poetry)", BookId::PSALMS, 23),
         ("Psalm 119 (176 verses, longest)", BookId::PSALMS, 119),
@@ -46,7 +46,7 @@ fn bench(c: &mut Criterion) {
             )
         });
     }
-    let john3 = ChapterIdx::new(BookId(42), 3).unwrap();
+    let john3 = ChapterIdx::new(BookId(57), 3).unwrap();
     g.bench_function("verse-per-line/John 3", |b| {
         b.iter_batched(
             &mut fresh,

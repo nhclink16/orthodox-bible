@@ -63,7 +63,7 @@ final class ChapterLayout {
 
     var book: Int { Int(content.book) }
     var chapter: Int { Int(content.chapter) }
-    var isPsalm: Bool { content.book == 18 }
+    var isPsalm: Bool { content.book == 25 }
     var verseCount: Int { verseTops.last?.verse ?? 0 }
 
     init(content: ChapterContent, typography t: Typography) {
@@ -79,7 +79,7 @@ final class ChapterLayout {
         headings = set.headings
 
         let column = t.column
-        let top = content.book == 18 ? 0 : t.s(16)
+        let top = content.book == 25 ? 0 : t.s(16)
         let origin = CGPoint(x: column.x, y: top)
         let container = NSTextContainer(size: CGSize(width: column.width, height: .greatestFiniteMagnitude))
         container.lineFragmentPadding = 0
@@ -343,7 +343,7 @@ private struct Typesetter {
     mutating func chapter(_ c: ChapterContent) {
         let s = t.s
         var firstSpace: CGFloat = 0
-        if c.book == 18 {
+        if c.book == 25 {
             label("PSALM \(c.chapter)", before: 0, align: .natural)
         } else if c.chapter == 1 {
             display(c.bookName, before: 0)

@@ -782,7 +782,7 @@ mod tests {
     #[test]
     fn styles_split_across_verses() {
         let mut b = TranslationBuilder::new(meta());
-        b.begin_book(BookId(42));
+        b.begin_book(BookId(57));
         b.begin_chapter(3);
         b.begin_verse(1, 1);
         b.text("He said, ");
@@ -793,7 +793,7 @@ mod tests {
         b.pop_style(Style::WordsOfJesus);
         b.text(" And");
         let t = b.finish();
-        let c = ChapterIdx::new(BookId(42), 3).unwrap();
+        let c = ChapterIdx::new(BookId(57), 3).unwrap();
         let vs: Vec<_> = t.verses_in(c).collect();
         assert_eq!(vs[0].spans, &[Span { start: 9, end: 17, style: Style::WordsOfJesus }]);
         assert_eq!(&vs[0].text[9..17], "“Truly");
@@ -804,7 +804,7 @@ mod tests {
     #[test]
     fn adjacent_spans_merge() {
         let mut b = TranslationBuilder::new(meta());
-        b.begin_book(BookId(42));
+        b.begin_book(BookId(57));
         b.begin_chapter(3);
         b.begin_verse(16, 16);
         b.push_style(Style::WordsOfJesus);
@@ -816,7 +816,7 @@ mod tests {
         b.pop_style(Style::WordsOfJesus);
         b.text(" end");
         let t = b.finish();
-        let v = t.verses_in(ChapterIdx::new(BookId(42), 3).unwrap()).next().unwrap();
+        let v = t.verses_in(ChapterIdx::new(BookId(57), 3).unwrap()).next().unwrap();
         assert_eq!(v.spans, &[Span { start: 0, end: 13, style: Style::WordsOfJesus }]);
     }
 

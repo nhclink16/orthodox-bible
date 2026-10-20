@@ -958,7 +958,7 @@ mod tests {
     use super::*;
 
     fn jn316() -> VerseRef {
-        VerseRef::new(BookId(42), 3, 16)
+        VerseRef::new(BookId(57), 3, 16)
     }
 
     #[test]
@@ -966,7 +966,7 @@ mod tests {
         let s = StudyStore::open_in_memory().unwrap();
         let mut session = ReadingSession {
             started: 1_000,
-            book: BookId(42),
+            book: BookId(57),
             chapter: 3,
             translation: "kjv".into(),
             seconds: 30,
@@ -1022,7 +1022,7 @@ mod tests {
         let mut a = StudyStore::open_in_memory().unwrap();
         a.set_highlight(jn316(), Some(HighlightColor::Pink)).unwrap();
         a.set_note(jn316(), "line one\nline two").unwrap();
-        a.set_bookmark(VerseRef::new(BookId(18), 23, 1), Some("Shepherd")).unwrap();
+        a.set_bookmark(VerseRef::new(BookId(25), 23, 1), Some("Shepherd")).unwrap();
         let text = |v: VerseRef| Some(format!("text of {v}"));
         let json = a.export_json("KJV", text).unwrap();
         assert!(json.contains("\"reference\": \"John 3:16\""));
@@ -1032,7 +1032,7 @@ mod tests {
         assert_eq!(b.import_json(&json).unwrap(), (1, 1, 1));
         assert_eq!(b.highlight(jn316()), Some(HighlightColor::Pink));
         assert_eq!(b.note(jn316()).unwrap().body, "line one\nline two");
-        assert_eq!(b.bookmark(VerseRef::new(BookId(18), 23, 1)).unwrap().label, "Shepherd");
+        assert_eq!(b.bookmark(VerseRef::new(BookId(25), 23, 1)).unwrap().label, "Shepherd");
         assert_eq!(b.note(jn316()).unwrap().created, a.note(jn316()).unwrap().created);
 
         let md = b.export_markdown("KJV", text);
@@ -1044,7 +1044,7 @@ mod tests {
         // History and plans travel when asked for, and erasing clears everything.
         a.record_reading(&ReadingSession {
             started: 1_000,
-            book: BookId(42),
+            book: BookId(57),
             chapter: 3,
             translation: "kjv".into(),
             seconds: 300,

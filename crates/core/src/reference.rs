@@ -1,7 +1,7 @@
 //! Parsing human-typed references: "jn 3:16", "Rom 8", "1co13:4-7", "ii kings 2", "song 2",
 //! "revalation 21" (typo-tolerant), "jude 3" (single-chapter books take a verse).
 
-use crate::books::{BOOKS, BookId, ChapterIdx, VerseRef};
+use crate::books::{BOOKS, BookId, ChapterIdx, Testament, VerseRef};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Reference {
@@ -94,20 +94,24 @@ fn split(input: &str) -> Option<Parts> {
     let s = input.trim().to_lowercase();
     let mut rest = s.as_str();
     let mut ordinal = None;
-    // Leading ordinal: "1", "1st", "first", "i", "ii", "iii".
+    // Leading ordinal: "1", "1st", "first", "i", "ii", "iii", up to 4 for 4 Maccabees.
     for (prefix, n) in [
         ("first ", 1),
         ("second ", 2),
         ("third ", 3),
+        ("fourth ", 4),
         ("1st", 1),
         ("2nd", 2),
         ("3rd", 3),
+        ("4th", 4),
         ("iii ", 3),
         ("ii ", 2),
+        ("iv ", 4),
         ("i ", 1),
         ("1", 1),
         ("2", 2),
         ("3", 3),
+        ("4", 4),
     ] {
         if let Some(r) = rest.strip_prefix(prefix) {
             // "1" alone or "1 3" is not an ordinal; "1co", "1 cor" are.
@@ -152,7 +156,8 @@ pub fn book_candidates(key: &str, ordinal: Option<u8>) -> Vec<(BookId, i32)> {
         let name = normalized_name(info);
         // Name without its ordinal digit, compared against the typed letters.
         let bare = name.trim_start_matches(|c: char| c.is_ascii_digit());
-        let popularity = info.chapters.min(40) as i32 / 4 + if book.0 >= 39 { 3 } else { 0 };
+        let popularity =
+            info.chapters.min(40) as i32 / 4 + if book.testament() == Testament::New { 3 } else { 0 };
         let mut best = i32::MIN;
         if info.aliases.contains(&full_key.as_str()) || name == full_key {
             best = 1000;
@@ -257,6 +262,20 @@ mod tests {
     }
 
     #[test]
+    fn deuterocanonical_books() {
+        assert_eq!(p("sir 2"), "Sirach 2");
+        assert_eq!(p("ecclus 2"), "Sirach 2");
+        assert_eq!(p("tobit 4"), "Tobit 4");
+        assert_eq!(p("wis 3"), "Wisdom of Solomon 3");
+        assert_eq!(p("1 macc 4"), "1 Maccabees 4");
+        assert_eq!(p("4 macc 6"), "4 Maccabees 6");
+        assert_eq!(p("iv maccabees 6"), "4 Maccabees 6");
+        assert_eq!(p("bar 3"), "Baruch 3");
+        assert_eq!(p("jude 1"), "Jude 1");
+        assert_eq!(p("judith 8"), "Judith 8");
+    }
+
+    #[test]
     fn invalid_and_ambiguous() {
         assert_eq!(p(""), "-");
         assert_eq!(p("3:16"), "-");
@@ -270,9 +289,9 @@ mod tests {
 
     #[test]
     fn range_formatting() {
-        let a = VerseRef::new(BookId(42), 3, 16);
+        let a = VerseRef::new(BookId(57), 3, 16);
         assert_eq!(format_range(a, a), "John 3:16");
-        assert_eq!(format_range(a, VerseRef::new(BookId(42), 3, 18)), "John 3:16–18");
-        assert_eq!(format_range(a, VerseRef::new(BookId(42), 4, 2)), "John 3:16–4:2");
+        assert_eq!(format_range(a, VerseRef::new(BookId(57), 3, 18)), "John 3:16–18");
+        assert_eq!(format_range(a, VerseRef::new(BookId(57), 4, 2)), "John 3:16–4:2");
     }
 }

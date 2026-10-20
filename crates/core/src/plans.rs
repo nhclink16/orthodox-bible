@@ -54,11 +54,10 @@ impl Plan {
     }
 }
 
-fn book_chapters(books: impl IntoIterator<Item = u8>) -> Vec<ChapterIdx> {
+fn book_chapters(books: impl IntoIterator<Item = BookId>) -> Vec<ChapterIdx> {
     books
         .into_iter()
         .flat_map(|b| {
-            let b = BookId(b);
             let first = b.first_chapter();
             (0..b.chapters() as u16).map(move |i| ChapterIdx(first.0 + i))
         })
@@ -79,20 +78,19 @@ fn streams(parts: &[Vec<ChapterIdx>], days: usize) -> Vec<Vec<Passage>> {
     (0..days).map(|d| spread.iter().flat_map(|s| s[d].iter().copied()).collect()).collect()
 }
 
-const PSALMS: u8 = 18;
-const PROVERBS: u8 = 19;
-const MATTHEW: u8 = 39;
-const JOHN: u8 = 42;
-
+/// Plans keep to the 66 books.
 fn build() -> Vec<Plan> {
-    let gospels = book_chapters(MATTHEW..=JOHN);
-    let nt = book_chapters(MATTHEW..66);
-    let ot_without_psalms = book_chapters((0..MATTHEW).filter(|b| *b != PSALMS));
-    let psalms = book_chapters([PSALMS]);
+    let book = |code| BookId::from_code(code).expect("book code");
+    let (psalms_book, proverbs, matthew, john) = (BookId::PSALMS, book("PRO"), book("MAT"), book("JHN"));
+    let canon = || BookId::canonical();
+    let gospels = book_chapters(canon().filter(|b| (matthew..=john).contains(b)));
+    let nt = book_chapters(canon().filter(|b| *b >= matthew));
+    let ot_without_psalms = book_chapters(canon().filter(|b| *b < matthew && *b != psalms_book));
+    let psalms = book_chapters([psalms_book]);
     let twice = |v: &Vec<ChapterIdx>| v.iter().chain(v.iter()).copied().collect::<Vec<_>>();
-    let ps = |n: u16| Passage::whole(ChapterIdx(BookId(PSALMS).first_chapter().0 + n - 1));
+    let ps = |n: u16| Passage::whole(ChapterIdx(psalms_book.first_chapter().0 + n - 1));
     let mt = |c: u8, a: u8, b: u8| Passage {
-        chapter: ChapterIdx::new(BookId(MATTHEW), c).expect("Matthew"),
+        chapter: ChapterIdx::new(matthew, c).expect("Matthew"),
         verses: Some((a, b)),
     };
     vec![
@@ -130,7 +128,7 @@ fn build() -> Vec<Plan> {
                 .map(|d| {
                     let mut day: Vec<Passage> =
                         (0..5).map(|k| d + 30 * k).filter(|n| *n <= 150).map(ps).collect();
-                    day.push(Passage::whole(ChapterIdx::new(BookId(PROVERBS), d as u8).expect("Proverbs")));
+                    day.push(Passage::whole(ChapterIdx::new(proverbs, d as u8).expect("Proverbs")));
                     day
                 })
                 .collect(),
@@ -141,7 +139,7 @@ fn build() -> Vec<Plan> {
             meta: "365 days · ~3 chapters a day",
             description: "Genesis to Revelation, in order.",
             icon: PlanIcon::History,
-            days: spread(&ChapterIdx::all().collect::<Vec<_>>(), 365),
+            days: spread(&book_chapters(canon()), 365),
         },
         Plan {
             id: "sermon-mount",
@@ -165,7 +163,7 @@ fn build() -> Vec<Plan> {
             meta: "21 days · a chapter a day",
             description: "Slow reading, one chapter at a time.",
             icon: PlanIcon::Note,
-            days: spread(&book_chapters([JOHN]), 21),
+            days: spread(&book_chapters([john]), 21),
         },
     ]
 }
@@ -237,7 +235,7 @@ mod tests {
         let name = |b: BookId| b.name().to_string();
         assert_eq!(label(pp.day(1), name), "Psalms 1, 31, 61, 91, 121 · Proverbs 1");
         assert_eq!(label(get("sermon-mount").unwrap().day(1), name), "Matthew 5:1–16");
-        let luke5 = ChapterIdx::new(BookId(41), 5).unwrap();
+        let luke5 = ChapterIdx::new(BookId(56), 5).unwrap();
         let two = [Passage::whole(luke5), Passage::whole(ChapterIdx(luke5.0 + 1))];
         assert_eq!(label(&two, name), "Luke 5–6");
     }

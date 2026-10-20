@@ -92,7 +92,7 @@ final class ReaderView: UIScrollView, UIScrollViewDelegate, UIGestureRecognizerD
     /// Bumped when text, type or marks change, so work queued before is thrown away.
     private var generation = 0
 
-    static let chapterCount = 1189
+    static let chapterCount = 1364
 
     override init(frame: CGRect) {
         super.init(frame: frame)
