@@ -70,8 +70,9 @@ pub fn merge(store: &mut StudyStore, json: &str) -> Result<usize> {
     store.apply_changes(&newer)
 }
 
-/// Merges every other device's file in `dir` (made if missing), then writes this device's own.
-/// A file that can't be read is skipped and reported, not fatal.
+/// Merges every device's file in `dir` (made if missing), then writes this device's own. Its own
+/// file is read too: a device restored from an older backup gets back what it had sent since. A
+/// file that can't be read is skipped and reported, not fatal.
 pub fn sync_folder(store: &mut StudyStore, dir: &Path) -> Result<SyncReport> {
     std::fs::create_dir_all(dir).with_context(|| format!("creating {}", dir.display()))?;
     let own = format!("{}.json", store.device_id());
@@ -81,7 +82,7 @@ pub fn sync_folder(store: &mut StudyStore, dir: &Path) -> Result<SyncReport> {
     let mut names: Vec<String> = std::fs::read_dir(dir)
         .with_context(|| format!("reading {}", dir.display()))?
         .filter_map(|e| e.ok()?.file_name().into_string().ok())
-        .filter(|name| name.ends_with(".json") && !name.starts_with('.') && *name != own)
+        .filter(|name| name.ends_with(".json") && !name.starts_with('.'))
         .collect();
     names.sort();
     let mut report = SyncReport::default();
@@ -92,7 +93,7 @@ pub fn sync_folder(store: &mut StudyStore, dir: &Path) -> Result<SyncReport> {
         match merged {
             Ok(n) => {
                 report.applied += n;
-                report.devices += 1;
+                report.devices += usize::from(name != own);
             }
             Err(e) => report.skipped.push(format!("{name}: {e:#}")),
         }
@@ -336,32 +337,31 @@ mod tests {
     }
 
     #[test]
-    fn erasing_resets_only_this_device() {
+    fn erasing_reaches_the_other_device() {
         let (mut a, mut b) = (store(), store());
         a.set_highlight(jn316(), Some(HighlightColor::Pink)).unwrap();
-        a.set_note(jn316(), "kept elsewhere").unwrap();
+        a.set_note(jn316(), "erased everywhere").unwrap();
         a.set_bookmark(ps23(), Some("")).unwrap();
+        a.set_rule_done(20_000, "morning-prayers", true).unwrap();
         let mut rule = a.rule();
         rule.blocks.truncate(1);
         a.set_rule(&rule).unwrap();
         merge(&mut b, &export(&a).unwrap()).unwrap();
+        assert_eq!(b.counts(), (1, 1, 1));
 
-        // A deletion made before erasing still reaches the other device.
-        a.set_bookmark(ps23(), None).unwrap();
         a.erase_all().unwrap();
         assert_eq!(a.counts(), (0, 0, 0));
-        assert!(a.changes().unwrap().iter().any(|c| c.key == "setting:rule"), "the rule's change is kept");
-        assert_eq!(merge(&mut b, &export(&a).unwrap()).unwrap(), 1);
-        assert_eq!(b.counts(), (1, 1, 0));
-        assert_eq!(merge(&mut a, &export(&b).unwrap()).unwrap(), 2);
-        assert_eq!(a.note(jn316()).unwrap().body, "kept elsewhere");
-        assert!(!a.is_bookmarked(ps23()));
+        assert_eq!(merge(&mut b, &export(&a).unwrap()).unwrap(), 3);
+        assert_eq!(b.counts(), (0, 0, 0));
+        assert_eq!(b.rule(), rule, "the rule is kept");
+        assert!(b.rule_done(20_000).contains("morning-prayers"), "and so are its ticks");
+        assert_eq!(merge(&mut a, &export(&b).unwrap()).unwrap(), 0, "nothing comes back");
     }
 
     #[test]
     fn an_edit_after_erasing_beats_what_was_seen_before() {
-        // Another device, its clock two minutes ahead, wrote a note; this one saw it, erased,
-        // and wrote its own.
+        // Another device, its clock two minutes ahead, wrote a note; this one saw it, erased
+        // everything, and wrote its own.
         let ahead = now() + 120;
         let value = json!({"body": "old", "created": ahead, "updated": ahead}).to_string();
         let theirs = json!({"version": 1, "device": "b",
@@ -448,6 +448,31 @@ mod tests {
         ];
         expected.sort();
         assert_eq!(names, expected, "no temporary files left");
+        let _ = std::fs::remove_dir_all(&dir);
+    }
+
+    #[test]
+    fn a_device_restored_from_a_backup_gets_back_what_it_sent() {
+        let dir = temp_dir("restored");
+        let db = dir.join("db");
+        std::fs::create_dir_all(&db).unwrap();
+        let shared = dir.join("sync");
+        let mut a = StudyStore::open(&db.join("study.sqlite")).unwrap();
+        a.set_note(jn316(), "before the backup").unwrap();
+        sync_folder(&mut a, &shared).unwrap();
+        drop(a);
+        std::fs::copy(db.join("study.sqlite"), db.join("backup.sqlite")).unwrap();
+
+        let mut a = StudyStore::open(&db.join("study.sqlite")).unwrap();
+        a.set_note(jn316(), "after the backup").unwrap();
+        sync_folder(&mut a, &shared).unwrap();
+        drop(a);
+
+        // Same device id, older data: its own file brings the later note back.
+        let mut restored = StudyStore::open(&db.join("backup.sqlite")).unwrap();
+        let report = sync_folder(&mut restored, &shared).unwrap();
+        assert_eq!((report.applied, report.devices), (1, 0));
+        assert_eq!(restored.note(jn316()).unwrap().body, "after the backup");
         let _ = std::fs::remove_dir_all(&dir);
     }
 }

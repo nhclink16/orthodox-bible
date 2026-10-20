@@ -993,48 +993,39 @@ impl StudyStore {
         Ok((doc.highlights.len(), doc.notes.len(), doc.bookmarks.len()))
     }
 
-    /// Erases every highlight, note, bookmark, plan and the reading history.
-    ///
-    /// This resets this device only: it forgets their changes instead of logging deletions, so
-    /// other devices keep their copies and the next sync brings them back here. Deletions are
-    /// kept, so one made here before erasing still reaches the other devices.
+    /// Erases every highlight, note, bookmark, plan and the reading history, on every device:
+    /// each erased record is logged as deleted, so the next sync erases it elsewhere too (the apps
+    /// save a backup first). The prayer rule and its ticks are kept.
     pub fn erase_all(&mut self) -> Result<()> {
         let tx = self.conn.unchecked_transaction()?;
-        // The latest change this device had seen, so the next edit of a forgotten record still
-        // comes after it (see `log_change`).
-        let floor = self.sync_floor().max(tx.query_row("SELECT MAX(at) FROM changes", [], |r| r.get(0))?);
-        if let Some(floor) = floor {
-            tx.execute(
-                "INSERT OR REPLACE INTO settings(key, value) VALUES('sync-floor', ?1)",
-                [floor.to_string()],
-            )?;
-        }
+        let keys: Vec<String> = tx
+            .prepare(
+                "SELECT key FROM changes
+                 WHERE value IS NOT NULL AND key NOT LIKE 'rule-done:%' AND key <> 'setting:rule'",
+            )?
+            .query_map([], |r| r.get(0))?
+            .collect::<rusqlite::Result<_>>()?;
         tx.execute_batch(
             "DELETE FROM highlights; DELETE FROM notes; DELETE FROM bookmarks;
-             DELETE FROM plans; DELETE FROM plan_reads; DELETE FROM reading;
-             DELETE FROM changes
-               WHERE value IS NOT NULL AND key NOT LIKE 'rule-done:%' AND key <> 'setting:rule';",
+             DELETE FROM plans; DELETE FROM plan_reads; DELETE FROM reading;",
         )?;
+        for key in keys.iter().filter_map(|k| Record::parse(k)) {
+            self.log_change(&key)?;
+        }
         tx.commit()?;
         self.reload()
-    }
-
-    /// The latest change time [`StudyStore::erase_all`] forgot.
-    fn sync_floor(&self) -> Option<i64> {
-        self.setting("sync-floor")?.parse().ok()
     }
 
     /// Logs the record's current state (or its deletion) as this device's latest change to it.
     /// The time is at least a second past the change it replaces, so an edit made after a sync
     /// still wins when this device's clock is behind, or when two edits fall in the same second.
-    /// A record with no change (new, or forgotten by `erase_all`) goes past the erase's floor.
     fn log_change(&self, r: &Record) -> Result<()> {
         let key = r.key();
         let prev: Option<i64> = self
             .conn
             .query_row("SELECT at FROM changes WHERE key = ?1", [&key], |row| row.get(0))
             .optional()?;
-        let at = prev.or_else(|| self.sync_floor()).map_or(now(), |p| now().max(p + 1));
+        let at = prev.map_or(now(), |p| now().max(p + 1));
         self.put_change(&key, self.record_value(r)?.as_deref(), at, &self.device)
     }
 
