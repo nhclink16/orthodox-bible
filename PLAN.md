@@ -158,13 +158,24 @@ Built with Xcode 27.1 and XcodeGen 2.46 (`scripts/build-ios.sh`; `SIMULATOR="iPh
   - Settings has "Septuagint psalm numbers" and the church calendar.
 - Fixed for Xcode 27: the UI test target names its product, and the default test simulator is an iPhone 17.
 
-Not done: putting it on a real iPhone (needs Nicholas's development team in `apps/ios/Config/Local.xcconfig`), App Store or TestFlight.
+Since then: TestFlight. Every push to main that touches the iPhone app is built on the iMac's self-hosted runner, signed by Apple (cloud signing, which needs an Admin API key) and sent to the internal group "Nicholas" (`.github/workflows/testflight.yml`). The reader's scrolling stuck after a fling and is fixed.
 
 Original checklist:
 
 - The books and numbering come through the FFI automatically.
 - Hard-coded spots to fix: `ReaderView.swift:95` (`chapterCount = 1189`) and `ChapterLayout.swift:66` (`isPsalm` is book 18).
 - The Fathers panel: add `commentary(verse) -> [CommentaryQuote]` to `ffi/src/lib.rs`, a new `Sheet.commentary` case (`Store.swift:60-74`, `RootView.swift:64-75`) and a button in `SelectionBar`.
+
+## Phase 6: The prayer rule (in progress on `orthodox/rule`)
+
+The goal: one place that keeps Nicholas to a daily rule and helps him grow. No streaks or scores; the calendar only shows which days were kept.
+
+- **The rule** (`crates/core/src/rule.rs`): blocks through the day, each a list of items (prayers, the kathisma, a psalm, the readings, a plan, the Fathers, the Jesus Prayer, an examination of conscience). Items can be seasonal (Great Lent only) or optional. Stored as JSON in the settings; each day's ticks are rows in `rule_done`.
+- **The starter rule** is the one Nicholas set out: morning prayers and 10–15 minutes of Scripture at 7:00; the Lord's Prayer before meals; Psalm 90 at noon (the Jesus Prayer optional); prayers, the kathisma, the Fathers and an examination of conscience at 8:30 pm, with St Ephrem's prayer in Lent.
+- **Prayers** (`crates/core/src/prayers.rs`): public-domain texts only (Hapgood 1906, Blackmore 1845, Robinson 1916), checked against the scans. His own Pocket Prayer Book is under copyright, so the rule says "From your prayer book" instead of quoting it.
+- **Reading plans** (`crates/core/src/plans.rs`): the Psalter by kathisma in 20 days; the whole Orthodox Bible in 180, 365 or 730 days; the New Testament and Psalms in 180.
+- **Add to Note** for a Father's quote, on Mac and iPhone.
+- To do: the rule screens and reminders on both platforms, a month calendar, the daily Epistle and Gospel (our own lectionary), and Mac↔iPhone sync through iCloud Drive.
 
 ## More Orthodox features (research, 2026-10-20)
 
