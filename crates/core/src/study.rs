@@ -101,6 +101,9 @@ CREATE TABLE IF NOT EXISTS plans(
 CREATE TABLE IF NOT EXISTS plan_reads(
     plan TEXT NOT NULL, day INTEGER NOT NULL, passage INTEGER NOT NULL, at INTEGER NOT NULL,
     PRIMARY KEY(plan, day, passage));
+CREATE TABLE IF NOT EXISTS rule_done(
+    day INTEGER NOT NULL, item TEXT NOT NULL, at INTEGER NOT NULL,
+    PRIMARY KEY(day, item));
 ";
 
 /// A stretch of reading one chapter: when it started, for how long, and how far it got.
@@ -498,6 +501,59 @@ impl StudyStore {
                 "DELETE FROM plan_reads WHERE plan = ?1 AND day = ?2 AND passage = ?3",
                 params![id, day, passage],
             )?;
+        }
+        self.generation += 1;
+        Ok(())
+    }
+
+    /// The prayer rule; the starter rule until one has been saved.
+    pub fn rule(&self) -> crate::rule::Rule {
+        self.setting("rule")
+            .and_then(|json| serde_json::from_str(&json).ok())
+            .unwrap_or_else(crate::rule::Rule::starter)
+    }
+
+    pub fn set_rule(&mut self, rule: &crate::rule::Rule) -> Result<()> {
+        self.set_setting("rule", &serde_json::to_string(rule)?)?;
+        self.generation += 1;
+        Ok(())
+    }
+
+    /// The rule's items checked off on `day` (a [`crate::calendar::Day`]), by id.
+    pub fn rule_done(&self, day: i64) -> std::collections::HashSet<String> {
+        self.rule_done_between(day, day).remove(&day).unwrap_or_default()
+    }
+
+    /// Items checked off on each day from `from` to `to` (inclusive), for the calendar.
+    pub fn rule_done_between(
+        &self,
+        from: i64,
+        to: i64,
+    ) -> std::collections::BTreeMap<i64, std::collections::HashSet<String>> {
+        let mut out: std::collections::BTreeMap<i64, std::collections::HashSet<String>> = Default::default();
+        let Ok(mut st) =
+            self.conn.prepare_cached("SELECT day, item FROM rule_done WHERE day >= ?1 AND day <= ?2")
+        else {
+            return out;
+        };
+        if let Ok(rows) =
+            st.query_map(params![from, to], |r| Ok((r.get::<_, i64>(0)?, r.get::<_, String>(1)?)))
+        {
+            for (day, item) in rows.filter_map(|r| r.ok()) {
+                out.entry(day).or_default().insert(item);
+            }
+        }
+        out
+    }
+
+    pub fn set_rule_done(&mut self, day: i64, item: &str, done: bool) -> Result<()> {
+        if done {
+            self.conn.execute(
+                "INSERT OR REPLACE INTO rule_done(day, item, at) VALUES(?1, ?2, ?3)",
+                params![day, item, now()],
+            )?;
+        } else {
+            self.conn.execute("DELETE FROM rule_done WHERE day = ?1 AND item = ?2", params![day, item])?;
         }
         self.generation += 1;
         Ok(())
@@ -950,6 +1006,23 @@ mod plan_tests {
         assert_eq!(s.plans()[0].finished, Some(3_000));
         s.stop_plan("john-21").unwrap();
         assert!(s.plans().is_empty());
+    }
+
+    #[test]
+    fn rule_is_saved_and_days_are_ticked() {
+        let mut s = StudyStore::open_in_memory().unwrap();
+        assert_eq!(s.rule(), crate::rule::Rule::starter());
+        let mut rule = s.rule();
+        rule.blocks.truncate(1);
+        s.set_rule(&rule).unwrap();
+        assert_eq!(s.rule().blocks.len(), 1);
+        s.set_rule_done(20_000, "morning-prayers", true).unwrap();
+        s.set_rule_done(20_001, "morning-prayers", true).unwrap();
+        s.set_rule_done(20_001, "morning-reading", true).unwrap();
+        s.set_rule_done(20_001, "morning-reading", false).unwrap();
+        assert_eq!(s.rule_done(20_001).into_iter().collect::<Vec<_>>(), ["morning-prayers"]);
+        assert_eq!(s.rule_done_between(19_000, 21_000).len(), 2);
+        assert!(s.rule_done(19_999).is_empty());
     }
 }
 

@@ -79,6 +79,25 @@ fn streams(parts: &[Vec<ChapterIdx>], days: usize) -> Vec<Vec<Passage>> {
 }
 
 /// Plans keep to the 66 books.
+/// The grid chapters of Septuagint psalms `a` to `b`, each once (the Septuagint joins and splits
+/// some; see `crate::lxx`).
+fn psalms_lxx(a: u8, b: u8) -> Vec<ChapterIdx> {
+    let mut out: Vec<ChapterIdx> = Vec::new();
+    for n in a..=b {
+        // A Septuagint psalm covers the grid psalms its first and last verses fall in.
+        for v in [1u8, 200] {
+            if let Some((book, c, _)) = crate::lxx::from_lxx(n, v)
+                && let Some(idx) = ChapterIdx::new(book, c)
+                && !out.contains(&idx)
+            {
+                out.push(idx);
+            }
+        }
+    }
+    out.sort();
+    out
+}
+
 fn build() -> Vec<Plan> {
     let book = |code| BookId::from_code(code).expect("book code");
     let (psalms_book, proverbs, matthew, john) = (BookId::PSALMS, book("PRO"), book("MAT"), book("JHN"));
@@ -158,6 +177,55 @@ fn build() -> Vec<Plan> {
             ],
         },
         Plan {
+            id: "psalter-20",
+            title: "The Psalter in 20 Days",
+            meta: "20 days · a kathisma a day",
+            description: "The twenty kathismata in order, and Psalm 151 on the last day.",
+            icon: PlanIcon::Quote,
+            days: (1..=20u8)
+                .map(|k| {
+                    let (a, b) = crate::calendar::KATHISMATA[k as usize - 1];
+                    let mut day: Vec<Passage> = psalms_lxx(a, b).into_iter().map(Passage::whole).collect();
+                    if k == 20 {
+                        day.extend(book_chapters([book("PS2")]).into_iter().map(Passage::whole));
+                    }
+                    day
+                })
+                .collect(),
+        },
+        Plan {
+            id: "orthodox-bible-180",
+            title: "The Whole Bible in 6 Months",
+            meta: "180 days · ~8 chapters a day",
+            description: "Genesis to Revelation in Orthodox order, Tobit, Sirach and the Maccabees included.",
+            icon: PlanIcon::History,
+            days: spread(&ChapterIdx::all().collect::<Vec<_>>(), 180),
+        },
+        Plan {
+            id: "orthodox-bible-365",
+            title: "The Whole Bible in a Year",
+            meta: "365 days · ~4 chapters a day",
+            description: "Genesis to Revelation in Orthodox order, Tobit, Sirach and the Maccabees included.",
+            icon: PlanIcon::History,
+            days: spread(&ChapterIdx::all().collect::<Vec<_>>(), 365),
+        },
+        Plan {
+            id: "orthodox-bible-730",
+            title: "The Whole Bible in 2 Years",
+            meta: "730 days · ~2 chapters a day",
+            description: "Genesis to Revelation in Orthodox order, at a gentle pace.",
+            icon: PlanIcon::History,
+            days: spread(&ChapterIdx::all().collect::<Vec<_>>(), 730),
+        },
+        Plan {
+            id: "nt-psalter-180",
+            title: "New Testament and Psalter",
+            meta: "180 days · ~2 chapters a day",
+            description: "The New Testament once and the Psalter once, side by side.",
+            icon: PlanIcon::Calendar,
+            days: streams(&[nt.clone(), book_chapters([psalms_book, book("PS2")])], 180),
+        },
+        Plan {
             id: "john-21",
             title: "Gospel of John",
             meta: "21 days · a chapter a day",
@@ -186,7 +254,7 @@ pub fn label(passages: &[Passage], name: impl Fn(BookId) -> String) -> String {
         let p = passages[i];
         let book = p.chapter.book();
         if let Some((a, b)) = p.verses {
-            parts.push(format!("{} {}:{a}–{b}", name(book), p.chapter.chapter()));
+            parts.push(format!("{} {}:{a}–{b}", name(book), p.chapter.shown_number()));
             i += 1;
             continue;
         }
@@ -199,8 +267,9 @@ pub fn label(passages: &[Passage], name: impl Fn(BookId) -> String) -> String {
         {
             j += 1;
         }
-        let first = p.chapter.chapter();
-        let last = passages[j].chapter.chapter();
+        // Shown numbers: Septuagint psalm numbers when they're on.
+        let first = p.chapter.shown_number();
+        let last = passages[j].chapter.shown_number();
         let range = if j > i { format!("{first}–{last}") } else { first.to_string() };
         match parts.last_mut() {
             // Further runs of the same book join the previous part: "Psalms 1, 31".
@@ -229,6 +298,20 @@ mod tests {
         assert_eq!(year.len(), 365);
         assert_eq!(year.days.iter().map(Vec::len).sum::<usize>(), 779 + 2 * 260 + 2 * 150);
         assert_eq!(get("bible-year").unwrap().days.iter().map(Vec::len).sum::<usize>(), 1189);
+        // The Orthodox plans: every grid chapter, deuterocanonical books included.
+        for id in ["orthodox-bible-180", "orthodox-bible-365", "orthodox-bible-730"] {
+            let p = get(id).unwrap();
+            assert_eq!(p.days.iter().map(Vec::len).sum::<usize>(), crate::books::CHAPTER_COUNT, "{id}");
+        }
+        let psalter = get("psalter-20").unwrap();
+        assert_eq!(psalter.len(), 20);
+        let chapters: std::collections::HashSet<_> =
+            psalter.days.iter().flatten().map(|p| p.chapter).collect();
+        assert_eq!(chapters.len(), 151, "every psalm once, and Psalm 151");
+        let k17 = psalter.day(17);
+        assert_eq!((k17.len(), k17[0].chapter), (1, ChapterIdx::new(BookId::PSALMS, 119).unwrap()));
+        let nt_ps = get("nt-psalter-180").unwrap();
+        assert_eq!(nt_ps.days.iter().map(Vec::len).sum::<usize>(), 260 + 151);
         let pp = get("psalms-proverbs").unwrap();
         assert_eq!(pp.day(1).len(), 6);
         assert_eq!(pp.day(31).len(), 5);

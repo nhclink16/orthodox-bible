@@ -51,10 +51,10 @@ pub fn psalm_number(c: ChapterIdx) -> Option<u8> {
 /// A grid psalm verse in Septuagint numbering.
 pub fn to_lxx(chapter: u8, verse: u8) -> (u8, u8) {
     match chapter {
-        10 => (9, verse + 20),
+        10 => (9, verse.saturating_add(20)),
         11..=113 | 117..=146 => (chapter - 1, verse),
         114 => (113, verse),
-        115 => (113, verse + 8),
+        115 => (113, verse.saturating_add(8)),
         116 if verse <= 9 => (114, verse),
         116 => (115, verse - 9),
         147 if verse <= 11 => (146, verse),
@@ -74,9 +74,9 @@ pub fn from_lxx(chapter: u8, verse: u8) -> Option<(BookId, u8, u8)> {
         113 if verse > 8 => (115, verse - 8),
         113 => (114, verse),
         114 => (116, verse),
-        115 => (116, verse + 9),
+        115 => (116, verse.saturating_add(9)),
         146 => (147, verse),
-        147 => (147, verse + 11),
+        147 => (147, verse.saturating_add(11)),
         _ => (chapter, verse),
     };
     Some((BookId::PSALMS, c, v))
