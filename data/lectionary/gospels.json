@@ -1,0 +1,2798 @@
+{
+ "title": "Evangelion: the Gospel cycle after Pentecost, and the eothina",
+ "scope": "The Gospel of every day from the Tuesday after Pentecost to the Saturday before the Publican and the Pharisee, in two series: Matthew (week N ends with the Nth Sunday after Pentecost) and Luke (counted from the Lukan jump). Also the eleven Resurrection Gospels of Sunday Matins (series 'eothina', week = number).",
+ "licence": "Released with bible-rs under the MIT licence. The table holds Scripture references only: no Bible text and no prose from the sources. Notes are our own.",
+ "usage": "Antiochian Orthodox Christian Archdiocese of North America: Byzantine (Greek) usage, Revised Julian fixed feasts, Julian Paschalion. Slavic (OCA) and Greek (GOARCH) differences are kept in 'variants' and 'slavic' and never replace the main reading.",
+ "numbering": "English Bible (KJV/Hebrew) chapter and verse, the grid's numbering, with half-verse letters dropped. Each string in refs is one contiguous range ('Book C:V', 'Book C:V-V' or 'Book C:V-C:V', with the grid's book abbreviations); a reading's refs are read together, in order, as one lesson.",
+ "confidence": "high: an Antiochian-facing source agrees with at least one independent source. medium: the sources differ (usually by a verse at the start or end) or the reference rests on one source. low: no Antiochian or Greek source was found, or the yearly ordo decides.",
+ "sources": {
+  "ANT-OLG": "Antiochian Archdiocese, Department of Liturgics: Online Liturgical Guide service texts, 2023-2026 (antiochian.org/servicetexts). References only.",
+  "ANT-CHART": "Antiochian Archdiocese, Sunday Liturgical Readings Chart 2026 (antiochian.org/liturgicalinstructions).",
+  "ANT": "antiochian.org daily readings, 2018-2026 (the GOARCH Online Chapel feed, as harvested in orthocal-python's data/antiochian_raw).",
+  "GOA": "Greek Orthodox Archdiocese of America, Online Chapel daily readings, 2018-2030 (goarch.org; partly as harvested in orthocal-python).",
+  "GOA-DCS": "GOA Digital Chant Stand (dcs.goarch.org), 'Readings for the Day', 2026.",
+  "OCA": "Orthodox Church in America lectionary, via the orthocal.info API, 2010-2032. Slavic usage.",
+  "HAP": "Isabel F. Hapgood, Service Book of the Holy Orthodox-Catholic Apostolic (Greco-Russian) Church, 1906 (public domain; archive.org cu31924029363128): tables of Epistles and Gospels.",
+  "SCR": "F. H. Scrivener, A Plain Introduction to the Criticism of the New Testament, Cambridge 1861 (public domain; archive.org plainintroductio00scri): Synaxarion and Menologion of the Byzantine lectionary manuscripts.",
+  "GRE": "V. Grechulevich, Ukazatel tserkovnykh chtenii, St Petersburg 1853 (public domain): Slavic lectionary index with zachalo numbers.",
+  "MCI": "Metropolitan Cantor Institute (Byzantine Catholic Archeparchy of Pittsburgh), 'The Lectionary' (mci.archpitt.org). Slavic usage.",
+  "NLM": "New Liturgical Movement: descriptions of the Antiochian Paschal procession (2019) and the Royal Hours of Theophany (2017).",
+  "WIKI": "Wikipedia, articles on the Triodion and Holy Week (for Holy Week Old Testament readings only)."
+ },
+ "rules": [
+  "Matthew is read from Pentecost to the Sunday after the Elevation (the first Sunday after 14 September). The Monday after it starts Luke week 1, however many Matthew weeks were read (the Lukan jump). Only the Gospel jumps.",
+  "Luke weekdays count forward from the jump until the Nativity, and backward from the Triodion after Theophany: the last week before the Publican reads week 16, the one before week 15, then 14.",
+  "Luke Sundays from September to December: the Sunday 11-17 October reads the 4th, 30 October-5 November the 5th, 24-30 November the 13th, 1-3 December the 14th, 4-10 December the 10th, 11-17 December the 11th; other Sundays take 1, 2, 3, 6, 7, 8, 9 in order.",
+  "Sundays from Theophany to the Triodion: with n Sundays from the Sunday after Theophany to the Publican, the middle n-2 take the first n-2 of 12th, 15th and 14th of Luke, 16th and 15th of Matthew not read in the autumn (Luke first, ascending, then Matthew); the last is the Canaanite Woman (17th of Matthew) when n >= 4, otherwise Zacchaeus (15th of Luke).",
+  "Eothina: Sunday N after Pentecost (All Saints = 1) reads eothinon ((N - 1) mod 11) + 1, through the 5th Sunday of Lent."
+ ],
+ "entries": [
+  {
+   "series": "matthew",
+   "week": 1,
+   "day": "tue",
+   "name": "Tuesday of the 1st week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Matt 4:23-5:13"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "SCR"],
+   "variants": [
+    {"usage": "Slavic/OCA", "service": "Liturgy", "kind": "Epistle", "refs": ["Matt 4:25-5:13"]}
+   ],
+   "note": "Greek/Antiochian begin at Matt 4:23; Slavic/OCA begin at 4:25. Scrivener's manuscript table reads 4:25-5:11 (OCR)."
+  },
+  {
+   "series": "matthew",
+   "week": 1,
+   "day": "wed",
+   "name": "Wednesday of the 1st week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Matt 5:20-26"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "SCR"],
+   "note": "Scrivener's manuscripts read 5:20-30 (older division)."
+  },
+  {
+   "series": "matthew",
+   "week": 1,
+   "day": "thu",
+   "name": "Thursday of the 1st week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Matt 5:27-32"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "SCR"],
+   "note": "Scrivener's manuscripts read 5:31-41 (older division)."
+  },
+  {
+   "series": "matthew",
+   "week": 1,
+   "day": "fri",
+   "name": "Friday of the 1st week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Matt 5:33-41"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA"]
+  },
+  {
+   "series": "matthew",
+   "week": 1,
+   "day": "sat",
+   "name": "Saturday of the 1st week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Matt 5:42-48"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "SCR"]
+  },
+  {
+   "series": "matthew",
+   "week": 1,
+   "day": "sun",
+   "name": "1st Sunday of Matthew (All Saints)",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Matt 10:32-33", "Matt 10:37-38", "Matt 19:27-30"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "HAP", "SCR"],
+   "note": "Sunday of All Saints (1st Sunday after Pentecost). Antiochian charts call it '1st of Matthew'."
+  },
+  {
+   "series": "matthew",
+   "week": 2,
+   "day": "mon",
+   "name": "Monday of the 2nd week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Matt 6:31-34", "Matt 7:9-11"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "SCR"]
+  },
+  {
+   "series": "matthew",
+   "week": 2,
+   "day": "tue",
+   "name": "Tuesday of the 2nd week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Matt 7:15-21"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "SCR"]
+  },
+  {
+   "series": "matthew",
+   "week": 2,
+   "day": "wed",
+   "name": "Wednesday of the 2nd week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Matt 7:21-23"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "SCR"]
+  },
+  {
+   "series": "matthew",
+   "week": 2,
+   "day": "thu",
+   "name": "Thursday of the 2nd week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Matt 8:23-27"]}
+   ],
+   "confidence": "medium",
+   "sources": ["GOA", "OCA", "SCR"]
+  },
+  {
+   "series": "matthew",
+   "week": 2,
+   "day": "fri",
+   "name": "Friday of the 2nd week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Matt 9:14-17"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "SCR"]
+  },
+  {
+   "series": "matthew",
+   "week": 2,
+   "day": "sat",
+   "name": "Saturday of the 2nd week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Matt 7:1-8"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "SCR"]
+  },
+  {
+   "series": "matthew",
+   "week": 2,
+   "day": "sun",
+   "name": "2nd Sunday of Matthew (Call of the first disciples)",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Matt 4:18-23"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "HAP", "SCR"],
+   "note": "Antiochian keeps All Saints of Antioch on this Sunday (2026 chart: Epistle Acts 11:19-30); the Gospel stays Matt 4:18-23. Slavic/OCA adds All Saints of Russia readings (Matt 4:25-5:12) as a second Gospel."
+  },
+  {
+   "series": "matthew",
+   "week": 3,
+   "day": "mon",
+   "name": "Monday of the 3rd week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Matt 9:36-10:8"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "SCR"]
+  },
+  {
+   "series": "matthew",
+   "week": 3,
+   "day": "tue",
+   "name": "Tuesday of the 3rd week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Matt 10:9-15"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "SCR"]
+  },
+  {
+   "series": "matthew",
+   "week": 3,
+   "day": "wed",
+   "name": "Wednesday of the 3rd week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Matt 10:16-22"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "SCR"]
+  },
+  {
+   "series": "matthew",
+   "week": 3,
+   "day": "thu",
+   "name": "Thursday of the 3rd week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Matt 10:23-31"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "SCR"]
+  },
+  {
+   "series": "matthew",
+   "week": 3,
+   "day": "fri",
+   "name": "Friday of the 3rd week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Matt 10:32-36", "Matt 11:1"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "SCR"]
+  },
+  {
+   "series": "matthew",
+   "week": 3,
+   "day": "sat",
+   "name": "Saturday of the 3rd week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Matt 7:24-8:4"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "SCR"]
+  },
+  {
+   "series": "matthew",
+   "week": 3,
+   "day": "sun",
+   "name": "3rd Sunday of Matthew (The lamp of the body; seek first the kingdom)",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Matt 6:22-33"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "HAP", "SCR"]
+  },
+  {
+   "series": "matthew",
+   "week": 4,
+   "day": "mon",
+   "name": "Monday of the 4th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Matt 11:2-15"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "SCR"]
+  },
+  {
+   "series": "matthew",
+   "week": 4,
+   "day": "tue",
+   "name": "Tuesday of the 4th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Matt 11:16-20"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "SCR"]
+  },
+  {
+   "series": "matthew",
+   "week": 4,
+   "day": "wed",
+   "name": "Wednesday of the 4th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Matt 11:20-26"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "SCR"]
+  },
+  {
+   "series": "matthew",
+   "week": 4,
+   "day": "thu",
+   "name": "Thursday of the 4th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Matt 11:27-30"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "SCR"]
+  },
+  {
+   "series": "matthew",
+   "week": 4,
+   "day": "fri",
+   "name": "Friday of the 4th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Matt 12:1-8"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "SCR"]
+  },
+  {
+   "series": "matthew",
+   "week": 4,
+   "day": "sat",
+   "name": "Saturday of the 4th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Matt 8:14-23"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "SCR"]
+  },
+  {
+   "series": "matthew",
+   "week": 4,
+   "day": "sun",
+   "name": "4th Sunday of Matthew (The centurion's servant)",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Matt 8:5-13"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "HAP", "SCR"]
+  },
+  {
+   "series": "matthew",
+   "week": 5,
+   "day": "mon",
+   "name": "Monday of the 5th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Matt 12:9-13"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "SCR"]
+  },
+  {
+   "series": "matthew",
+   "week": 5,
+   "day": "tue",
+   "name": "Tuesday of the 5th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Matt 12:14-16", "Matt 12:22-30"]}
+   ],
+   "confidence": "medium",
+   "sources": ["GOA", "OCA", "SCR"]
+  },
+  {
+   "series": "matthew",
+   "week": 5,
+   "day": "wed",
+   "name": "Wednesday of the 5th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Matt 12:38-45"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "SCR"]
+  },
+  {
+   "series": "matthew",
+   "week": 5,
+   "day": "thu",
+   "name": "Thursday of the 5th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Matt 12:46-13:3"]}
+   ],
+   "confidence": "medium",
+   "sources": ["GOA", "OCA", "SCR"]
+  },
+  {
+   "series": "matthew",
+   "week": 5,
+   "day": "fri",
+   "name": "Friday of the 5th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Matt 13:3-9"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "SCR"]
+  },
+  {
+   "series": "matthew",
+   "week": 5,
+   "day": "sat",
+   "name": "Saturday of the 5th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Matt 9:9-13"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "SCR"]
+  },
+  {
+   "series": "matthew",
+   "week": 5,
+   "day": "sun",
+   "name": "5th Sunday of Matthew (The Gadarene demoniacs)",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Matt 8:28-9:1"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "HAP", "SCR"]
+  },
+  {
+   "series": "matthew",
+   "week": 6,
+   "day": "mon",
+   "name": "Monday of the 6th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Matt 13:10-23", "Matt 13:43"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "SCR"],
+   "variants": [
+    {"usage": "Slavic/OCA", "service": "Liturgy", "kind": "Epistle", "refs": ["Matt 13:10-23"]}
+   ],
+   "note": "Greek/Antiochian add verse 43; Slavic/OCA end at 13:23."
+  },
+  {
+   "series": "matthew",
+   "week": 6,
+   "day": "tue",
+   "name": "Tuesday of the 6th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Matt 13:24-30"]}
+   ],
+   "confidence": "medium",
+   "sources": ["GOA", "OCA", "SCR"]
+  },
+  {
+   "series": "matthew",
+   "week": 6,
+   "day": "wed",
+   "name": "Wednesday of the 6th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Matt 13:31-36"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "SCR"]
+  },
+  {
+   "series": "matthew",
+   "week": 6,
+   "day": "thu",
+   "name": "Thursday of the 6th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Matt 13:36-43"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "SCR"]
+  },
+  {
+   "series": "matthew",
+   "week": 6,
+   "day": "fri",
+   "name": "Friday of the 6th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Matt 13:44-54"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "SCR"]
+  },
+  {
+   "series": "matthew",
+   "week": 6,
+   "day": "sat",
+   "name": "Saturday of the 6th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Matt 9:18-26"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "SCR"]
+  },
+  {
+   "series": "matthew",
+   "week": 6,
+   "day": "sun",
+   "name": "6th Sunday of Matthew (The paralytic)",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Matt 9:1-8"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "HAP", "SCR"]
+  },
+  {
+   "series": "matthew",
+   "week": 7,
+   "day": "mon",
+   "name": "Monday of the 7th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Matt 13:54-58"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "SCR"]
+  },
+  {
+   "series": "matthew",
+   "week": 7,
+   "day": "tue",
+   "name": "Tuesday of the 7th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Matt 14:1-13"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "SCR"]
+  },
+  {
+   "series": "matthew",
+   "week": 7,
+   "day": "wed",
+   "name": "Wednesday of the 7th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Matt 14:35-15:11"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "SCR"]
+  },
+  {
+   "series": "matthew",
+   "week": 7,
+   "day": "thu",
+   "name": "Thursday of the 7th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Matt 15:12-21"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "SCR"]
+  },
+  {
+   "series": "matthew",
+   "week": 7,
+   "day": "fri",
+   "name": "Friday of the 7th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Matt 15:29-31"]}
+   ],
+   "confidence": "medium",
+   "sources": ["GOA", "OCA", "SCR"]
+  },
+  {
+   "series": "matthew",
+   "week": 7,
+   "day": "sat",
+   "name": "Saturday of the 7th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Matt 10:37-11:1"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "SCR"]
+  },
+  {
+   "series": "matthew",
+   "week": 7,
+   "day": "sun",
+   "name": "7th Sunday of Matthew (Two blind men and a mute demoniac)",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Matt 9:27-35"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "HAP", "SCR"]
+  },
+  {
+   "series": "matthew",
+   "week": 8,
+   "day": "mon",
+   "name": "Monday of the 8th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Matt 16:1-6"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "SCR"]
+  },
+  {
+   "series": "matthew",
+   "week": 8,
+   "day": "tue",
+   "name": "Tuesday of the 8th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Matt 16:6-12"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "SCR"]
+  },
+  {
+   "series": "matthew",
+   "week": 8,
+   "day": "wed",
+   "name": "Wednesday of the 8th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Matt 16:20-24"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "SCR"]
+  },
+  {
+   "series": "matthew",
+   "week": 8,
+   "day": "thu",
+   "name": "Thursday of the 8th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Matt 16:24-28"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "SCR"]
+  },
+  {
+   "series": "matthew",
+   "week": 8,
+   "day": "fri",
+   "name": "Friday of the 8th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Matt 17:10-18"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "SCR"]
+  },
+  {
+   "series": "matthew",
+   "week": 8,
+   "day": "sat",
+   "name": "Saturday of the 8th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Matt 12:30-37"]}
+   ],
+   "confidence": "medium",
+   "sources": ["GOA", "OCA", "SCR"]
+  },
+  {
+   "series": "matthew",
+   "week": 8,
+   "day": "sun",
+   "name": "8th Sunday of Matthew (Feeding of the five thousand)",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Matt 14:14-22"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "HAP", "SCR"]
+  },
+  {
+   "series": "matthew",
+   "week": 9,
+   "day": "mon",
+   "name": "Monday of the 9th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Matt 18:1-11"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "SCR"]
+  },
+  {
+   "series": "matthew",
+   "week": 9,
+   "day": "tue",
+   "name": "Tuesday of the 9th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Matt 18:18-22", "Matt 19:1-2", "Matt 19:13-15"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "SCR"],
+   "note": "Scrivener's manuscripts read 18:18-20 for the first part."
+  },
+  {
+   "series": "matthew",
+   "week": 9,
+   "day": "wed",
+   "name": "Wednesday of the 9th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Matt 20:1-16"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "SCR"]
+  },
+  {
+   "series": "matthew",
+   "week": 9,
+   "day": "thu",
+   "name": "Thursday of the 9th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Matt 20:17-28"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "SCR"]
+  },
+  {
+   "series": "matthew",
+   "week": 9,
+   "day": "fri",
+   "name": "Friday of the 9th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Matt 21:12-14", "Matt 21:17-20"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "SCR"]
+  },
+  {
+   "series": "matthew",
+   "week": 9,
+   "day": "sat",
+   "name": "Saturday of the 9th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Matt 15:32-39"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "SCR"]
+  },
+  {
+   "series": "matthew",
+   "week": 9,
+   "day": "sun",
+   "name": "9th Sunday of Matthew (Walking on the water)",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Matt 14:22-34"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "HAP", "SCR"]
+  },
+  {
+   "series": "matthew",
+   "week": 10,
+   "day": "mon",
+   "name": "Monday of the 10th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Matt 21:18-22"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "SCR"]
+  },
+  {
+   "series": "matthew",
+   "week": 10,
+   "day": "tue",
+   "name": "Tuesday of the 10th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Matt 21:23-27"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "SCR"]
+  },
+  {
+   "series": "matthew",
+   "week": 10,
+   "day": "wed",
+   "name": "Wednesday of the 10th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Matt 21:28-32"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "SCR"]
+  },
+  {
+   "series": "matthew",
+   "week": 10,
+   "day": "thu",
+   "name": "Thursday of the 10th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Matt 21:43-46"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "SCR"]
+  },
+  {
+   "series": "matthew",
+   "week": 10,
+   "day": "fri",
+   "name": "Friday of the 10th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Matt 22:23-33"]}
+   ],
+   "confidence": "medium",
+   "sources": ["GOA", "OCA", "SCR"]
+  },
+  {
+   "series": "matthew",
+   "week": 10,
+   "day": "sat",
+   "name": "Saturday of the 10th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Matt 17:24-18:4"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "SCR"],
+   "note": "Scrivener's manuscripts read 17:24-18:1 (OCR uncertain)."
+  },
+  {
+   "series": "matthew",
+   "week": 10,
+   "day": "sun",
+   "name": "10th Sunday of Matthew (The epileptic boy)",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Matt 17:14-23"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "HAP", "SCR"]
+  },
+  {
+   "series": "matthew",
+   "week": 11,
+   "day": "mon",
+   "name": "Monday of the 11th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Matt 23:13-22"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "SCR"]
+  },
+  {
+   "series": "matthew",
+   "week": 11,
+   "day": "tue",
+   "name": "Tuesday of the 11th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Matt 23:23-28"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "SCR"]
+  },
+  {
+   "series": "matthew",
+   "week": 11,
+   "day": "wed",
+   "name": "Wednesday of the 11th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Matt 23:29-39"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "SCR"]
+  },
+  {
+   "series": "matthew",
+   "week": 11,
+   "day": "thu",
+   "name": "Thursday of the 11th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Matt 24:13-28"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "SCR"]
+  },
+  {
+   "series": "matthew",
+   "week": 11,
+   "day": "fri",
+   "name": "Friday of the 11th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Matt 24:27-33", "Matt 24:42-51"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "SCR"],
+   "note": "Scrivener's manuscripts read 24:27-35, 42-51."
+  },
+  {
+   "series": "matthew",
+   "week": 11,
+   "day": "sat",
+   "name": "Saturday of the 11th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Matt 19:3-12"]}
+   ],
+   "confidence": "medium",
+   "sources": ["GOA", "OCA", "SCR"]
+  },
+  {
+   "series": "matthew",
+   "week": 11,
+   "day": "sun",
+   "name": "11th Sunday of Matthew (The unforgiving servant)",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Matt 18:23-35"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "HAP", "SCR"]
+  },
+  {
+   "series": "matthew",
+   "week": 12,
+   "day": "mon",
+   "name": "Monday of the 12th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Mark 1:9-15"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "SCR"]
+  },
+  {
+   "series": "matthew",
+   "week": 12,
+   "day": "tue",
+   "name": "Tuesday of the 12th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Mark 1:16-22"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "SCR"]
+  },
+  {
+   "series": "matthew",
+   "week": 12,
+   "day": "wed",
+   "name": "Wednesday of the 12th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Mark 1:23-28"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "SCR"]
+  },
+  {
+   "series": "matthew",
+   "week": 12,
+   "day": "thu",
+   "name": "Thursday of the 12th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Mark 1:29-35"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "SCR"]
+  },
+  {
+   "series": "matthew",
+   "week": 12,
+   "day": "fri",
+   "name": "Friday of the 12th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Mark 2:18-22"]}
+   ],
+   "confidence": "medium",
+   "sources": ["GOA", "OCA", "SCR"]
+  },
+  {
+   "series": "matthew",
+   "week": 12,
+   "day": "sat",
+   "name": "Saturday of the 12th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Matt 20:29-34"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "SCR"]
+  },
+  {
+   "series": "matthew",
+   "week": 12,
+   "day": "sun",
+   "name": "12th Sunday of Matthew (The rich young man)",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Matt 19:16-26"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "HAP", "SCR"]
+  },
+  {
+   "series": "matthew",
+   "week": 13,
+   "day": "mon",
+   "name": "Monday of the 13th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Mark 3:6-12"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "SCR"],
+   "note": "Read in place only in years when the Sunday after the Elevation is the 13th Sunday after Pentecost or later; otherwise dropped by the Lukan jump."
+  },
+  {
+   "series": "matthew",
+   "week": 13,
+   "day": "tue",
+   "name": "Tuesday of the 13th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Mark 3:13-21"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "SCR"],
+   "variants": [
+    {"usage": "Slavic/OCA", "service": "Liturgy", "kind": "Epistle", "refs": ["Mark 3:13-19"]}
+   ],
+   "note": "Greek/Antiochian Mark 3:13-21; Slavic/OCA Mark 3:13-19. Read in place only in years when the Sunday after the Elevation is the 13th Sunday after Pentecost or later; otherwise dropped by the Lukan jump."
+  },
+  {
+   "series": "matthew",
+   "week": 13,
+   "day": "wed",
+   "name": "Wednesday of the 13th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Mark 3:20-27"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "SCR"],
+   "variants": [
+    {"usage": "Slavic/OCA", "service": "Liturgy", "kind": "Epistle", "refs": ["Mark 3:19-27"]}
+   ],
+   "note": "Greek/Antiochian Mark 3:20-27; Slavic/OCA Mark 3:19-27. Read in place only in years when the Sunday after the Elevation is the 13th Sunday after Pentecost or later; otherwise dropped by the Lukan jump."
+  },
+  {
+   "series": "matthew",
+   "week": 13,
+   "day": "thu",
+   "name": "Thursday of the 13th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Mark 3:28-35"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "SCR"],
+   "note": "Read in place only in years when the Sunday after the Elevation is the 13th Sunday after Pentecost or later; otherwise dropped by the Lukan jump."
+  },
+  {
+   "series": "matthew",
+   "week": 13,
+   "day": "fri",
+   "name": "Friday of the 13th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Mark 4:1-9"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "SCR"],
+   "note": "Read in place only in years when the Sunday after the Elevation is the 13th Sunday after Pentecost or later; otherwise dropped by the Lukan jump."
+  },
+  {
+   "series": "matthew",
+   "week": 13,
+   "day": "sat",
+   "name": "Saturday of the 13th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Matt 22:15-22"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "SCR"],
+   "note": "Read in place only in years when the Sunday after the Elevation is the 13th Sunday after Pentecost or later; otherwise dropped by the Lukan jump."
+  },
+  {
+   "series": "matthew",
+   "week": 13,
+   "day": "sun",
+   "name": "13th Sunday of Matthew (The wicked tenants)",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Matt 21:33-42"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "HAP", "SCR"]
+  },
+  {
+   "series": "matthew",
+   "week": 14,
+   "day": "mon",
+   "name": "Monday of the 14th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Mark 4:10-23"]}
+   ],
+   "confidence": "medium",
+   "sources": ["GOA", "OCA", "SCR"],
+   "note": "Read in place only in years when the Sunday after the Elevation is the 14th Sunday after Pentecost or later; otherwise dropped by the Lukan jump."
+  },
+  {
+   "series": "matthew",
+   "week": 14,
+   "day": "tue",
+   "name": "Tuesday of the 14th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Mark 4:24-34"]}
+   ],
+   "confidence": "medium",
+   "sources": ["GOA", "OCA", "SCR"],
+   "note": "Read in place only in years when the Sunday after the Elevation is the 14th Sunday after Pentecost or later; otherwise dropped by the Lukan jump."
+  },
+  {
+   "series": "matthew",
+   "week": 14,
+   "day": "wed",
+   "name": "Wednesday of the 14th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Mark 4:35-41"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "SCR"],
+   "note": "Read in place only in years when the Sunday after the Elevation is the 14th Sunday after Pentecost or later; otherwise dropped by the Lukan jump."
+  },
+  {
+   "series": "matthew",
+   "week": 14,
+   "day": "thu",
+   "name": "Thursday of the 14th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Mark 5:1-20"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "SCR"],
+   "note": "Read in place only in years when the Sunday after the Elevation is the 14th Sunday after Pentecost or later; otherwise dropped by the Lukan jump."
+  },
+  {
+   "series": "matthew",
+   "week": 14,
+   "day": "fri",
+   "name": "Friday of the 14th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Mark 5:22-24", "Mark 5:35-6:1"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "SCR"],
+   "note": "Read in place only in years when the Sunday after the Elevation is the 14th Sunday after Pentecost or later; otherwise dropped by the Lukan jump."
+  },
+  {
+   "series": "matthew",
+   "week": 14,
+   "day": "sat",
+   "name": "Saturday of the 14th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Matt 23:1-12"]}
+   ],
+   "confidence": "low",
+   "sources": ["OCA", "SCR"],
+   "note": "Read in place only in years when the Sunday after the Elevation is the 14th Sunday after Pentecost or later; otherwise dropped by the Lukan jump."
+  },
+  {
+   "series": "matthew",
+   "week": 14,
+   "day": "sun",
+   "name": "14th Sunday of Matthew (The wedding feast)",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Matt 22:2-14"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "HAP", "SCR"],
+   "variants": [
+    {"usage": "Slavic/OCA", "service": "Liturgy", "kind": "Epistle", "refs": ["Matt 22:1-14"]}
+   ],
+   "note": "Slavic/OCA (and Hapgood 1906) begin at Matt 22:1; Greek/Antiochian begin at 22:2. In Greek usage this Sunday is often displaced by the Sunday before the Elevation."
+  },
+  {
+   "series": "matthew",
+   "week": 15,
+   "day": "mon",
+   "name": "Monday of the 15th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Mark 5:24-34"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "SCR"],
+   "note": "Read in place only in years when the Sunday after the Elevation is the 15th Sunday after Pentecost or later; otherwise dropped by the Lukan jump."
+  },
+  {
+   "series": "matthew",
+   "week": 15,
+   "day": "tue",
+   "name": "Tuesday of the 15th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Mark 6:1-7"]}
+   ],
+   "confidence": "medium",
+   "sources": ["GOA", "OCA", "SCR"],
+   "note": "Read in place only in years when the Sunday after the Elevation is the 15th Sunday after Pentecost or later; otherwise dropped by the Lukan jump."
+  },
+  {
+   "series": "matthew",
+   "week": 15,
+   "day": "wed",
+   "name": "Wednesday of the 15th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Mark 6:7-13"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "SCR"],
+   "note": "Read in place only in years when the Sunday after the Elevation is the 15th Sunday after Pentecost or later; otherwise dropped by the Lukan jump."
+  },
+  {
+   "series": "matthew",
+   "week": 15,
+   "day": "thu",
+   "name": "Thursday of the 15th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Mark 6:30-45"]}
+   ],
+   "confidence": "medium",
+   "sources": ["GOA", "OCA", "SCR"],
+   "note": "Read in place only in years when the Sunday after the Elevation is the 15th Sunday after Pentecost or later; otherwise dropped by the Lukan jump."
+  },
+  {
+   "series": "matthew",
+   "week": 15,
+   "day": "fri",
+   "name": "Friday of the 15th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Mark 6:45-53"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "SCR"],
+   "note": "Read in place only in years when the Sunday after the Elevation is the 15th Sunday after Pentecost or later; otherwise dropped by the Lukan jump."
+  },
+  {
+   "series": "matthew",
+   "week": 15,
+   "day": "sat",
+   "name": "Saturday of the 15th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Matt 24:1-13"]}
+   ],
+   "confidence": "low",
+   "sources": ["OCA", "SCR"],
+   "note": "Read in place only in years when the Sunday after the Elevation is the 15th Sunday after Pentecost or later; otherwise dropped by the Lukan jump."
+  },
+  {
+   "series": "matthew",
+   "week": 15,
+   "day": "sun",
+   "name": "15th Sunday of Matthew (The great commandment)",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Matt 22:35-46"]}
+   ],
+   "confidence": "high",
+   "sources": ["GOA", "OCA", "HAP", "SCR"],
+   "note": "In Greek/Antiochian usage this Sunday almost always falls on or after the Sunday before the Elevation, so it is rarely read in September. It is read after Theophany only in long winters (see rules). goarch.org read it on 2013-02-03 and 2024-02-04; antiochian.org read the 14th of Luke instead in 2024."
+  },
+  {
+   "series": "matthew",
+   "week": 16,
+   "day": "mon",
+   "name": "Monday of the 16th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Mark 6:54-7:8"]}
+   ],
+   "confidence": "low",
+   "sources": ["OCA", "SCR"],
+   "note": "Read in place only in years when the Sunday after the Elevation is the 16th Sunday after Pentecost or later; otherwise dropped by the Lukan jump."
+  },
+  {
+   "series": "matthew",
+   "week": 16,
+   "day": "tue",
+   "name": "Tuesday of the 16th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Mark 7:5-16"]}
+   ],
+   "confidence": "low",
+   "sources": ["OCA", "SCR"],
+   "note": "Read in place only in years when the Sunday after the Elevation is the 16th Sunday after Pentecost or later; otherwise dropped by the Lukan jump."
+  },
+  {
+   "series": "matthew",
+   "week": 16,
+   "day": "wed",
+   "name": "Wednesday of the 16th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Mark 7:14-24"]}
+   ],
+   "confidence": "low",
+   "sources": ["OCA", "SCR"],
+   "note": "Read in place only in years when the Sunday after the Elevation is the 16th Sunday after Pentecost or later; otherwise dropped by the Lukan jump."
+  },
+  {
+   "series": "matthew",
+   "week": 16,
+   "day": "thu",
+   "name": "Thursday of the 16th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Mark 7:24-30"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "SCR"],
+   "note": "Read in place only in years when the Sunday after the Elevation is the 16th Sunday after Pentecost or later; otherwise dropped by the Lukan jump."
+  },
+  {
+   "series": "matthew",
+   "week": 16,
+   "day": "fri",
+   "name": "Friday of the 16th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Mark 8:1-10"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "SCR"],
+   "note": "Read in place only in years when the Sunday after the Elevation is the 16th Sunday after Pentecost or later; otherwise dropped by the Lukan jump."
+  },
+  {
+   "series": "matthew",
+   "week": 16,
+   "day": "sat",
+   "name": "Saturday of the 16th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Matt 24:34-44"]}
+   ],
+   "confidence": "low",
+   "sources": ["OCA", "SCR"],
+   "note": "Matt 24:34-44 in OCA and orthocal; Scrivener's manuscripts read 24:34-37, 42-44. Usually displaced by the Saturday before or after the Elevation, so no antiochian.org or goarch.org observation in 2018-2027. Read in place only in years when the Sunday after the Elevation is the 16th Sunday after Pentecost or later; otherwise dropped by the Lukan jump."
+  },
+  {
+   "series": "matthew",
+   "week": 16,
+   "day": "sun",
+   "name": "16th Sunday of Matthew (The talents)",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Matt 25:14-30"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "HAP", "SCR"],
+   "note": "Usually displaced in September by the Sundays before/after the Elevation. In Greek/Antiochian usage it is read after Theophany in long winters (antiochian.org 2019-02-03, 2021-02-07, 2024-02-11; goarch.org also 2027-02-07)."
+  },
+  {
+   "series": "matthew",
+   "week": 17,
+   "day": "mon",
+   "name": "Monday of the 17th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Mark 10:46-52"]}
+   ],
+   "confidence": "low",
+   "sources": ["OCA"],
+   "note": "Matthew week 17 weekdays occur in place only when Pascha falls on or before April 6 (2010, 2037, 2048 in 1990-2099), because the Lukan jump comes first. Scrivener's Byzantine Synaxarion has no weekday lessons for this week. The reference given is the Slavic/OCA assignment (the same Mark pericopes as Luke week 15). antiochian.org used different readings under '17TH ... AFTER PENTECOST' labels in a winter surplus week (2019-02-04 Mark 5:24-34, 2019-02-05 Mark 6:1-7, 2019-02-07 Mark 6:30-45, i.e. the Matthew week 15 pericopes), while goarch.org read Luke week 15 on those days. Treat as unresolved for Antiochian usage."
+  },
+  {
+   "series": "matthew",
+   "week": 17,
+   "day": "tue",
+   "name": "Tuesday of the 17th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Mark 11:11-23"]}
+   ],
+   "confidence": "low",
+   "sources": ["OCA"],
+   "note": "Matthew week 17 weekdays occur in place only when Pascha falls on or before April 6 (2010, 2037, 2048 in 1990-2099), because the Lukan jump comes first. Scrivener's Byzantine Synaxarion has no weekday lessons for this week. The reference given is the Slavic/OCA assignment (the same Mark pericopes as Luke week 15). antiochian.org used different readings under '17TH ... AFTER PENTECOST' labels in a winter surplus week (2019-02-04 Mark 5:24-34, 2019-02-05 Mark 6:1-7, 2019-02-07 Mark 6:30-45, i.e. the Matthew week 15 pericopes), while goarch.org read Luke week 15 on those days. Treat as unresolved for Antiochian usage."
+  },
+  {
+   "series": "matthew",
+   "week": 17,
+   "day": "wed",
+   "name": "Wednesday of the 17th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Mark 11:22-26"]}
+   ],
+   "confidence": "low",
+   "sources": ["OCA"],
+   "note": "Matthew week 17 weekdays occur in place only when Pascha falls on or before April 6 (2010, 2037, 2048 in 1990-2099), because the Lukan jump comes first. Scrivener's Byzantine Synaxarion has no weekday lessons for this week. The reference given is the Slavic/OCA assignment (the same Mark pericopes as Luke week 15). antiochian.org used different readings under '17TH ... AFTER PENTECOST' labels in a winter surplus week (2019-02-04 Mark 5:24-34, 2019-02-05 Mark 6:1-7, 2019-02-07 Mark 6:30-45, i.e. the Matthew week 15 pericopes), while goarch.org read Luke week 15 on those days. Treat as unresolved for Antiochian usage."
+  },
+  {
+   "series": "matthew",
+   "week": 17,
+   "day": "thu",
+   "name": "Thursday of the 17th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Mark 11:27-33"]}
+   ],
+   "confidence": "low",
+   "sources": ["OCA"],
+   "note": "Matthew week 17 weekdays occur in place only when Pascha falls on or before April 6 (2010, 2037, 2048 in 1990-2099), because the Lukan jump comes first. Scrivener's Byzantine Synaxarion has no weekday lessons for this week. The reference given is the Slavic/OCA assignment (the same Mark pericopes as Luke week 15). antiochian.org used different readings under '17TH ... AFTER PENTECOST' labels in a winter surplus week (2019-02-04 Mark 5:24-34, 2019-02-05 Mark 6:1-7, 2019-02-07 Mark 6:30-45, i.e. the Matthew week 15 pericopes), while goarch.org read Luke week 15 on those days. Treat as unresolved for Antiochian usage."
+  },
+  {
+   "series": "matthew",
+   "week": 17,
+   "day": "fri",
+   "name": "Friday of the 17th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Mark 12:1-12"]}
+   ],
+   "confidence": "low",
+   "sources": ["OCA"],
+   "note": "Matthew week 17 weekdays occur in place only when Pascha falls on or before April 6 (2010, 2037, 2048 in 1990-2099), because the Lukan jump comes first. Scrivener's Byzantine Synaxarion has no weekday lessons for this week. The reference given is the Slavic/OCA assignment (the same Mark pericopes as Luke week 15). antiochian.org used different readings under '17TH ... AFTER PENTECOST' labels in a winter surplus week (2019-02-04 Mark 5:24-34, 2019-02-05 Mark 6:1-7, 2019-02-07 Mark 6:30-45, i.e. the Matthew week 15 pericopes), while goarch.org read Luke week 15 on those days. Treat as unresolved for Antiochian usage."
+  },
+  {
+   "series": "matthew",
+   "week": 17,
+   "day": "sat",
+   "name": "Saturday of the 17th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Matt 25:1-13"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "OCA", "SCR"],
+   "note": "Scrivener's table gives only this Saturday (and the Sunday) for the 17th week, with no weekday lessons."
+  },
+  {
+   "series": "matthew",
+   "week": 17,
+   "day": "sun",
+   "name": "17th Sunday of Matthew (The Canaanite woman)",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Matt 15:21-28"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "OCA", "HAP", "SCR"],
+   "note": "Sunday of the Canaanite Woman. Almost never read in September in Greek usage (only when Pascha is on or before April 6). In Greek/Antiochian usage it is read on the last Sunday before the Publican and Pharisee when there are four or more Sundays from the Sunday after Theophany to the Triodion (antiochian.org 2019-02-10, 2021-02-14, 2022-02-06, 2023-01-29, 2024-02-18). Wikipedia's Paschal-cycle article names the 11th Sunday before Pascha 'Sunday of the Canaanite' in Greek usage and 'Zacchaeus Sunday' in Slavic usage. Scrivener's medieval Synaxarion also lists it as a 17th Sunday of Luke."
+  },
+  {
+   "series": "luke",
+   "week": 1,
+   "day": "mon",
+   "name": "Monday of the 1st week of Luke",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Luke 3:19-22"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "SCR"]
+  },
+  {
+   "series": "luke",
+   "week": 1,
+   "day": "tue",
+   "name": "Tuesday of the 1st week of Luke",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Luke 3:23-4:1"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "SCR"],
+   "note": "Antiochian cites Luke 3:23-38; 4:1 (the genealogy), the same verses as Luke 3:23-4:1."
+  },
+  {
+   "series": "luke",
+   "week": 1,
+   "day": "wed",
+   "name": "Wednesday of the 1st week of Luke",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Luke 4:1-15"]}
+   ],
+   "confidence": "medium",
+   "sources": ["GOA", "OCA", "SCR"]
+  },
+  {
+   "series": "luke",
+   "week": 1,
+   "day": "thu",
+   "name": "Thursday of the 1st week of Luke",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Luke 4:16-22"]}
+   ],
+   "confidence": "medium",
+   "sources": ["GOA", "OCA", "SCR"]
+  },
+  {
+   "series": "luke",
+   "week": 1,
+   "day": "fri",
+   "name": "Friday of the 1st week of Luke",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Luke 4:22-30"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "SCR"]
+  },
+  {
+   "series": "luke",
+   "week": 1,
+   "day": "sat",
+   "name": "Saturday of the 1st week of Luke",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Luke 4:31-36"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "SCR"]
+  },
+  {
+   "series": "luke",
+   "week": 1,
+   "day": "sun",
+   "name": "1st Sunday of Luke (The great catch of fish)",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Luke 5:1-11"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "OCA", "HAP", "SCR"],
+   "note": "First Sunday of Luke: always the second Sunday after September 14 (Sept 22-28). Epistle is still that of the current Sunday after Pentecost."
+  },
+  {
+   "series": "luke",
+   "week": 2,
+   "day": "mon",
+   "name": "Monday of the 2nd week of Luke",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Luke 4:38-44"]}
+   ],
+   "confidence": "medium",
+   "sources": ["GOA", "OCA", "SCR"],
+   "variants": [
+    {"usage": "Slavic/OCA", "service": "Liturgy", "kind": "Epistle", "refs": ["Luke 4:37-44"]}
+   ],
+   "note": "Greek/Antiochian begin at Luke 4:38; Slavic/OCA begin at 4:37."
+  },
+  {
+   "series": "luke",
+   "week": 2,
+   "day": "tue",
+   "name": "Tuesday of the 2nd week of Luke",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Luke 5:12-16"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "SCR"]
+  },
+  {
+   "series": "luke",
+   "week": 2,
+   "day": "wed",
+   "name": "Wednesday of the 2nd week of Luke",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Luke 5:33-39"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "SCR"]
+  },
+  {
+   "series": "luke",
+   "week": 2,
+   "day": "thu",
+   "name": "Thursday of the 2nd week of Luke",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Luke 6:12-19"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "SCR"],
+   "note": "Scrivener's manuscripts appear to read 6:12-16 (OCR)."
+  },
+  {
+   "series": "luke",
+   "week": 2,
+   "day": "fri",
+   "name": "Friday of the 2nd week of Luke",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Luke 6:17-23"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "SCR"]
+  },
+  {
+   "series": "luke",
+   "week": 2,
+   "day": "sat",
+   "name": "Saturday of the 2nd week of Luke",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Luke 5:17-26"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "SCR"]
+  },
+  {
+   "series": "luke",
+   "week": 2,
+   "day": "sun",
+   "name": "2nd Sunday of Luke (Love your enemies)",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Luke 6:31-36"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "OCA", "HAP", "SCR"],
+   "note": "Read on the next free Sunday in sequence (usually Sept 29-Oct 5)."
+  },
+  {
+   "series": "luke",
+   "week": 3,
+   "day": "mon",
+   "name": "Monday of the 3rd week of Luke",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Luke 6:24-30"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "SCR"]
+  },
+  {
+   "series": "luke",
+   "week": 3,
+   "day": "tue",
+   "name": "Tuesday of the 3rd week of Luke",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Luke 6:37-45"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "SCR"]
+  },
+  {
+   "series": "luke",
+   "week": 3,
+   "day": "wed",
+   "name": "Wednesday of the 3rd week of Luke",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Luke 6:46-7:1"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "SCR"]
+  },
+  {
+   "series": "luke",
+   "week": 3,
+   "day": "thu",
+   "name": "Thursday of the 3rd week of Luke",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Luke 7:17-30"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "SCR"]
+  },
+  {
+   "series": "luke",
+   "week": 3,
+   "day": "fri",
+   "name": "Friday of the 3rd week of Luke",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Luke 7:31-35"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "SCR"]
+  },
+  {
+   "series": "luke",
+   "week": 3,
+   "day": "sat",
+   "name": "Saturday of the 3rd week of Luke",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Luke 5:27-32"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "SCR"]
+  },
+  {
+   "series": "luke",
+   "week": 3,
+   "day": "sun",
+   "name": "3rd Sunday of Luke (The widow's son at Nain)",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Luke 7:11-16"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "OCA", "HAP", "SCR"],
+   "note": "Sequential number. Because the 4th is fixed to Oct 11-17, the 3rd is sometimes read after the 4th (2025-10-19). It is lost for the year when the Sunday it falls on is taken by St Luke (Oct 18 on a Sunday, e.g. 2020, 2026)."
+  },
+  {
+   "series": "luke",
+   "week": 4,
+   "day": "mon",
+   "name": "Monday of the 4th week of Luke",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Luke 7:36-50"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "SCR"]
+  },
+  {
+   "series": "luke",
+   "week": 4,
+   "day": "tue",
+   "name": "Tuesday of the 4th week of Luke",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Luke 8:1-3"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "SCR"]
+  },
+  {
+   "series": "luke",
+   "week": 4,
+   "day": "wed",
+   "name": "Wednesday of the 4th week of Luke",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Luke 8:22-25"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "SCR"]
+  },
+  {
+   "series": "luke",
+   "week": 4,
+   "day": "thu",
+   "name": "Thursday of the 4th week of Luke",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Luke 9:7-11"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "SCR"]
+  },
+  {
+   "series": "luke",
+   "week": 4,
+   "day": "fri",
+   "name": "Friday of the 4th week of Luke",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Luke 9:12-18"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "SCR"]
+  },
+  {
+   "series": "luke",
+   "week": 4,
+   "day": "sat",
+   "name": "Saturday of the 4th week of Luke",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Luke 6:1-10"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "SCR"]
+  },
+  {
+   "series": "luke",
+   "week": 4,
+   "day": "sun",
+   "name": "4th Sunday of Luke (The sower)",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Luke 8:5-15"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "HAP", "SCR"],
+   "note": "Fixed: read on the Sunday of the Fathers of the 7th Ecumenical Council (the Sunday Oct 11-17), whatever its place in the count. antiochian.org labels that day with the Fathers, so the Luke label is hidden; the 2026 Antiochian chart says 'Fathers of 7th Ecumenical Council; 4th of Luke'."
+  },
+  {
+   "series": "luke",
+   "week": 5,
+   "day": "mon",
+   "name": "Monday of the 5th week of Luke",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Luke 9:18-22"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "SCR"]
+  },
+  {
+   "series": "luke",
+   "week": 5,
+   "day": "tue",
+   "name": "Tuesday of the 5th week of Luke",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Luke 9:23-27"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "SCR"]
+  },
+  {
+   "series": "luke",
+   "week": 5,
+   "day": "wed",
+   "name": "Wednesday of the 5th week of Luke",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Luke 9:44-50"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "SCR"],
+   "note": "Scrivener's manuscripts read 9:43-50."
+  },
+  {
+   "series": "luke",
+   "week": 5,
+   "day": "thu",
+   "name": "Thursday of the 5th week of Luke",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Luke 9:49-56"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "SCR"]
+  },
+  {
+   "series": "luke",
+   "week": 5,
+   "day": "fri",
+   "name": "Friday of the 5th week of Luke",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Luke 10:1-15"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "SCR"]
+  },
+  {
+   "series": "luke",
+   "week": 5,
+   "day": "sat",
+   "name": "Saturday of the 5th week of Luke",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Luke 7:1-10"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "SCR"]
+  },
+  {
+   "series": "luke",
+   "week": 5,
+   "day": "sun",
+   "name": "5th Sunday of Luke (The rich man and Lazarus)",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Luke 16:19-31"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "OCA", "HAP", "SCR"],
+   "note": "Fixed: read on the Sunday Oct 30-Nov 5."
+  },
+  {
+   "series": "luke",
+   "week": 6,
+   "day": "mon",
+   "name": "Monday of the 6th week of Luke",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Luke 10:22-24"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "SCR"]
+  },
+  {
+   "series": "luke",
+   "week": 6,
+   "day": "tue",
+   "name": "Tuesday of the 6th week of Luke",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Luke 11:1-10"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "SCR"],
+   "note": "Scrivener's manuscripts read 11:1-9."
+  },
+  {
+   "series": "luke",
+   "week": 6,
+   "day": "wed",
+   "name": "Wednesday of the 6th week of Luke",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Luke 11:9-13"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "SCR"]
+  },
+  {
+   "series": "luke",
+   "week": 6,
+   "day": "thu",
+   "name": "Thursday of the 6th week of Luke",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Luke 11:14-23"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "SCR"]
+  },
+  {
+   "series": "luke",
+   "week": 6,
+   "day": "fri",
+   "name": "Friday of the 6th week of Luke",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Luke 11:23-26"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "SCR"]
+  },
+  {
+   "series": "luke",
+   "week": 6,
+   "day": "sat",
+   "name": "Saturday of the 6th week of Luke",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Luke 8:16-21"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "SCR"]
+  },
+  {
+   "series": "luke",
+   "week": 6,
+   "day": "sun",
+   "name": "6th Sunday of Luke (The Gerasene demoniac)",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Luke 8:26-39"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "OCA", "HAP", "SCR"],
+   "note": "Sequential number (usually Oct 18-29)."
+  },
+  {
+   "series": "luke",
+   "week": 7,
+   "day": "mon",
+   "name": "Monday of the 7th week of Luke",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Luke 11:29-33"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "SCR"]
+  },
+  {
+   "series": "luke",
+   "week": 7,
+   "day": "tue",
+   "name": "Tuesday of the 7th week of Luke",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Luke 11:34-41"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "SCR"]
+  },
+  {
+   "series": "luke",
+   "week": 7,
+   "day": "wed",
+   "name": "Wednesday of the 7th week of Luke",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Luke 11:42-46"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "SCR"]
+  },
+  {
+   "series": "luke",
+   "week": 7,
+   "day": "thu",
+   "name": "Thursday of the 7th week of Luke",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Luke 11:47-12:1"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "SCR"]
+  },
+  {
+   "series": "luke",
+   "week": 7,
+   "day": "fri",
+   "name": "Friday of the 7th week of Luke",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Luke 12:2-12"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "SCR"]
+  },
+  {
+   "series": "luke",
+   "week": 7,
+   "day": "sat",
+   "name": "Saturday of the 7th week of Luke",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Luke 9:1-6"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "SCR"]
+  },
+  {
+   "series": "luke",
+   "week": 7,
+   "day": "sun",
+   "name": "7th Sunday of Luke (Jairus's daughter)",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Luke 8:41-56"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "OCA", "HAP", "SCR"],
+   "note": "Sequential number (usually Oct 27-Nov 12)."
+  },
+  {
+   "series": "luke",
+   "week": 8,
+   "day": "mon",
+   "name": "Monday of the 8th week of Luke",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Luke 12:13-15", "Luke 12:22-31"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "SCR"]
+  },
+  {
+   "series": "luke",
+   "week": 8,
+   "day": "tue",
+   "name": "Tuesday of the 8th week of Luke",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Luke 12:42-48"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "SCR"]
+  },
+  {
+   "series": "luke",
+   "week": 8,
+   "day": "wed",
+   "name": "Wednesday of the 8th week of Luke",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Luke 12:48-59"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "SCR"]
+  },
+  {
+   "series": "luke",
+   "week": 8,
+   "day": "thu",
+   "name": "Thursday of the 8th week of Luke",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Luke 13:1-9"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "SCR"]
+  },
+  {
+   "series": "luke",
+   "week": 8,
+   "day": "fri",
+   "name": "Friday of the 8th week of Luke",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Luke 13:31-35"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "SCR"]
+  },
+  {
+   "series": "luke",
+   "week": 8,
+   "day": "sat",
+   "name": "Saturday of the 8th week of Luke",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Luke 9:37-43"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "SCR"]
+  },
+  {
+   "series": "luke",
+   "week": 8,
+   "day": "sun",
+   "name": "8th Sunday of Luke (The good Samaritan)",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Luke 10:25-37"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "OCA", "HAP", "SCR"],
+   "note": "Sequential number. Lost when Nov 16 (St Matthew) is a Sunday and this number falls due then."
+  },
+  {
+   "series": "luke",
+   "week": 9,
+   "day": "mon",
+   "name": "Monday of the 9th week of Luke",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Luke 14:1", "Luke 14:12-15"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "SCR"],
+   "variants": [
+    {"usage": "Slavic/OCA", "service": "Liturgy", "kind": "Epistle", "refs": ["Luke 14:12-15"]}
+   ],
+   "note": "Greek/Antiochian prefix Luke 14:1; Slavic/OCA read 14:12-15 only."
+  },
+  {
+   "series": "luke",
+   "week": 9,
+   "day": "tue",
+   "name": "Tuesday of the 9th week of Luke",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Luke 14:25-35"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "SCR"]
+  },
+  {
+   "series": "luke",
+   "week": 9,
+   "day": "wed",
+   "name": "Wednesday of the 9th week of Luke",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Luke 15:1-10"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "SCR"]
+  },
+  {
+   "series": "luke",
+   "week": 9,
+   "day": "thu",
+   "name": "Thursday of the 9th week of Luke",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Luke 16:1-9"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "SCR"]
+  },
+  {
+   "series": "luke",
+   "week": 9,
+   "day": "fri",
+   "name": "Friday of the 9th week of Luke",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Luke 16:15-18", "Luke 17:1-4"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "SCR"]
+  },
+  {
+   "series": "luke",
+   "week": 9,
+   "day": "sat",
+   "name": "Saturday of the 9th week of Luke",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Luke 9:57-62"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "SCR"]
+  },
+  {
+   "series": "luke",
+   "week": 9,
+   "day": "sun",
+   "name": "9th Sunday of Luke (The rich fool)",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Luke 12:16-21"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "OCA", "HAP", "SCR"],
+   "note": "Sequential number. Displaced by the Entrance of the Theotokos when Nov 21 is a Sunday (2021)."
+  },
+  {
+   "series": "luke",
+   "week": 10,
+   "day": "mon",
+   "name": "Monday of the 10th week of Luke",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Luke 17:20-25"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "SCR"]
+  },
+  {
+   "series": "luke",
+   "week": 10,
+   "day": "tue",
+   "name": "Tuesday of the 10th week of Luke",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Luke 17:26-37", "Luke 18:8"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "SCR"],
+   "variants": [
+    {"usage": "Slavic/OCA", "service": "Liturgy", "kind": "Epistle", "refs": ["Luke 17:26-37"]}
+   ],
+   "note": "Greek/Antiochian add Luke 18:8; Slavic/OCA end at 17:37."
+  },
+  {
+   "series": "luke",
+   "week": 10,
+   "day": "wed",
+   "name": "Wednesday of the 10th week of Luke",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Luke 18:15-17", "Luke 18:26-30"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "SCR"]
+  },
+  {
+   "series": "luke",
+   "week": 10,
+   "day": "thu",
+   "name": "Thursday of the 10th week of Luke",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Luke 18:31-34"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "SCR"]
+  },
+  {
+   "series": "luke",
+   "week": 10,
+   "day": "fri",
+   "name": "Friday of the 10th week of Luke",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Luke 19:12-28"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "SCR"]
+  },
+  {
+   "series": "luke",
+   "week": 10,
+   "day": "sat",
+   "name": "Saturday of the 10th week of Luke",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Luke 10:19-21"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "SCR"]
+  },
+  {
+   "series": "luke",
+   "week": 10,
+   "day": "sun",
+   "name": "10th Sunday of Luke (The bent woman healed on the Sabbath)",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Luke 13:10-17"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "OCA", "HAP", "SCR"],
+   "note": "Fixed: read on the Sunday Dec 4-10."
+  },
+  {
+   "series": "luke",
+   "week": 11,
+   "day": "mon",
+   "name": "Monday of the 11th week of Luke",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Luke 19:37-44"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "SCR"]
+  },
+  {
+   "series": "luke",
+   "week": 11,
+   "day": "tue",
+   "name": "Tuesday of the 11th week of Luke",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Luke 19:45-48"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "SCR"]
+  },
+  {
+   "series": "luke",
+   "week": 11,
+   "day": "wed",
+   "name": "Wednesday of the 11th week of Luke",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Luke 20:1-8"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "SCR"]
+  },
+  {
+   "series": "luke",
+   "week": 11,
+   "day": "thu",
+   "name": "Thursday of the 11th week of Luke",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Luke 20:9-18"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "SCR"]
+  },
+  {
+   "series": "luke",
+   "week": 11,
+   "day": "fri",
+   "name": "Friday of the 11th week of Luke",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Luke 20:19-26"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "SCR"]
+  },
+  {
+   "series": "luke",
+   "week": 11,
+   "day": "sat",
+   "name": "Saturday of the 11th week of Luke",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Luke 12:32-40"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "SCR"]
+  },
+  {
+   "series": "luke",
+   "week": 11,
+   "day": "sun",
+   "name": "11th Sunday of Luke (The great supper)",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Luke 14:16-24"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "OCA", "HAP", "SCR"],
+   "note": "Fixed: the Sunday of the Forefathers (Dec 11-17)."
+  },
+  {
+   "series": "luke",
+   "week": 12,
+   "day": "mon",
+   "name": "Monday of the 12th week of Luke",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Luke 20:27-44"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "SCR"]
+  },
+  {
+   "series": "luke",
+   "week": 12,
+   "day": "tue",
+   "name": "Tuesday of the 12th week of Luke",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Luke 21:12-19"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "SCR"]
+  },
+  {
+   "series": "luke",
+   "week": 12,
+   "day": "wed",
+   "name": "Wednesday of the 12th week of Luke",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Luke 21:5-8", "Luke 21:10-11", "Luke 21:20-24"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "SCR"],
+   "variants": [
+    {"usage": "Slavic/OCA", "service": "Liturgy", "kind": "Epistle", "refs": ["Luke 21:5-7", "Luke 21:10-11", "Luke 21:20-24"]}
+   ],
+   "note": "Greek/Antiochian 21:5-8; Slavic/OCA 21:5-7 for the first part."
+  },
+  {
+   "series": "luke",
+   "week": 12,
+   "day": "thu",
+   "name": "Thursday of the 12th week of Luke",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Luke 21:28-33"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "SCR"]
+  },
+  {
+   "series": "luke",
+   "week": 12,
+   "day": "fri",
+   "name": "Friday of the 12th week of Luke",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Luke 21:37-22:8"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "SCR"]
+  },
+  {
+   "series": "luke",
+   "week": 12,
+   "day": "sat",
+   "name": "Saturday of the 12th week of Luke",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Luke 13:19-29"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "SCR"],
+   "variants": [
+    {"usage": "Slavic/OCA", "service": "Liturgy", "kind": "Epistle", "refs": ["Luke 13:18-29"]}
+   ],
+   "note": "Greek/Antiochian begin at 13:19; Slavic/OCA begin at 13:18."
+  },
+  {
+   "series": "luke",
+   "week": 12,
+   "day": "sun",
+   "name": "12th Sunday of Luke (The ten lepers)",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Luke 17:12-19"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "HAP", "SCR"],
+   "note": "Never read in the autumn in Greek usage. It is the first Sunday Gospel read after the Sunday after Theophany (antiochian.org every year 2019-2026)."
+  },
+  {
+   "series": "luke",
+   "week": 13,
+   "day": "mon",
+   "name": "Monday of the 13th week of Luke",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Mark 8:11-21"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "SCR"],
+   "note": "Usually read in mid-December. Weeks 13-16 of Luke read Mark on weekdays and Luke on Saturday."
+  },
+  {
+   "series": "luke",
+   "week": 13,
+   "day": "tue",
+   "name": "Tuesday of the 13th week of Luke",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Mark 8:22-26"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "SCR"],
+   "note": "Usually read in mid-December. Weeks 13-16 of Luke read Mark on weekdays and Luke on Saturday."
+  },
+  {
+   "series": "luke",
+   "week": 13,
+   "day": "wed",
+   "name": "Wednesday of the 13th week of Luke",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Mark 8:30-34"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "SCR"],
+   "note": "Usually read in mid-December. Weeks 13-16 of Luke read Mark on weekdays and Luke on Saturday."
+  },
+  {
+   "series": "luke",
+   "week": 13,
+   "day": "thu",
+   "name": "Thursday of the 13th week of Luke",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Mark 9:10-15"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "SCR"],
+   "variants": [
+    {"usage": "Slavic/OCA", "service": "Liturgy", "kind": "Epistle", "refs": ["Mark 9:10-16"]}
+   ],
+   "note": "Greek/Antiochian end at Mark 9:15; Slavic/OCA (and Scrivener) end at 9:16. Usually read in mid-December. Weeks 13-16 of Luke read Mark on weekdays and Luke on Saturday."
+  },
+  {
+   "series": "luke",
+   "week": 13,
+   "day": "fri",
+   "name": "Friday of the 13th week of Luke",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Mark 9:33-41"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "SCR"],
+   "note": "Usually read in mid-December. Weeks 13-16 of Luke read Mark on weekdays and Luke on Saturday."
+  },
+  {
+   "series": "luke",
+   "week": 13,
+   "day": "sat",
+   "name": "Saturday of the 13th week of Luke",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Luke 14:1-11"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "SCR"],
+   "note": "Usually read in mid-December. Weeks 13-16 of Luke read Mark on weekdays and Luke on Saturday."
+  },
+  {
+   "series": "luke",
+   "week": 13,
+   "day": "sun",
+   "name": "13th Sunday of Luke (The rich ruler)",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Luke 18:18-27"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "OCA", "HAP", "SCR"],
+   "note": "Fixed: read on the Sunday Nov 24-30. Lost when Nov 30 (St Andrew) is a Sunday (2025)."
+  },
+  {
+   "series": "luke",
+   "week": 14,
+   "day": "mon",
+   "name": "Monday of the 14th week of Luke",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Mark 9:42-10:1"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "SCR"],
+   "note": "After Theophany this week is fixed by counting back from the Triodion: Luke week 14 is read in the third-last week before the Publican and Pharisee."
+  },
+  {
+   "series": "luke",
+   "week": 14,
+   "day": "tue",
+   "name": "Tuesday of the 14th week of Luke",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Mark 10:2-12"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "SCR"],
+   "note": "Scrivener's manuscripts end at 10:11. After Theophany this week is fixed by counting back from the Triodion: Luke week 14 is read in the third-last week before the Publican and Pharisee."
+  },
+  {
+   "series": "luke",
+   "week": 14,
+   "day": "wed",
+   "name": "Wednesday of the 14th week of Luke",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Mark 10:11-16"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "SCR"],
+   "note": "After Theophany this week is fixed by counting back from the Triodion: Luke week 14 is read in the third-last week before the Publican and Pharisee."
+  },
+  {
+   "series": "luke",
+   "week": 14,
+   "day": "thu",
+   "name": "Thursday of the 14th week of Luke",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Mark 10:17-27"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "SCR"],
+   "note": "After Theophany this week is fixed by counting back from the Triodion: Luke week 14 is read in the third-last week before the Publican and Pharisee."
+  },
+  {
+   "series": "luke",
+   "week": 14,
+   "day": "fri",
+   "name": "Friday of the 14th week of Luke",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Mark 10:24-32"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "SCR"],
+   "variants": [
+    {"usage": "Slavic/OCA", "service": "Liturgy", "kind": "Epistle", "refs": ["Mark 10:23-32"]}
+   ],
+   "note": "Greek/Antiochian begin at Mark 10:24; Slavic/OCA begin at 10:23. After Theophany this week is fixed by counting back from the Triodion: Luke week 14 is read in the third-last week before the Publican and Pharisee."
+  },
+  {
+   "series": "luke",
+   "week": 14,
+   "day": "sat",
+   "name": "Saturday of the 14th week of Luke",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Luke 16:10-15"]}
+   ],
+   "confidence": "medium",
+   "sources": ["GOA", "OCA", "SCR"],
+   "note": "After Theophany this week is fixed by counting back from the Triodion: Luke week 14 is read in the third-last week before the Publican and Pharisee."
+  },
+  {
+   "series": "luke",
+   "week": 14,
+   "day": "sun",
+   "name": "14th Sunday of Luke (The blind man near Jericho)",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Luke 18:35-43"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "HAP", "SCR"],
+   "note": "Fixed to a Sunday Dec 1-3 when there is one (years whose Sunday after the Elevation is Sept 15-17). Otherwise it is read after Theophany when the winter is long enough (antiochian.org 2021-01-24, 2022-01-23; in 2024 antiochian.org read it after Theophany as well although it had been read on 2023-12-03)."
+  },
+  {
+   "series": "luke",
+   "week": 15,
+   "day": "mon",
+   "name": "Monday of the 15th week of Luke",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Mark 10:46-52"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "SCR"],
+   "note": "After Theophany this week is fixed by counting back from the Triodion: Luke week 15 is read in the second-last week before the Publican and Pharisee."
+  },
+  {
+   "series": "luke",
+   "week": 15,
+   "day": "tue",
+   "name": "Tuesday of the 15th week of Luke",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Mark 11:11-23"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "SCR"],
+   "note": "After Theophany this week is fixed by counting back from the Triodion: Luke week 15 is read in the second-last week before the Publican and Pharisee."
+  },
+  {
+   "series": "luke",
+   "week": 15,
+   "day": "wed",
+   "name": "Wednesday of the 15th week of Luke",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Mark 11:22-26"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "SCR"],
+   "note": "Greek/Antiochian and OCA read Mark 11:22-26; some Slavic-usage tables print 11:23-26. After Theophany this week is fixed by counting back from the Triodion: Luke week 15 is read in the second-last week before the Publican and Pharisee."
+  },
+  {
+   "series": "luke",
+   "week": 15,
+   "day": "thu",
+   "name": "Thursday of the 15th week of Luke",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Mark 11:27-33"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "SCR"],
+   "note": "After Theophany this week is fixed by counting back from the Triodion: Luke week 15 is read in the second-last week before the Publican and Pharisee."
+  },
+  {
+   "series": "luke",
+   "week": 15,
+   "day": "fri",
+   "name": "Friday of the 15th week of Luke",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Mark 12:1-12"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "SCR"],
+   "note": "After Theophany this week is fixed by counting back from the Triodion: Luke week 15 is read in the second-last week before the Publican and Pharisee."
+  },
+  {
+   "series": "luke",
+   "week": 15,
+   "day": "sat",
+   "name": "Saturday of the 15th week of Luke",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Luke 17:3-10"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "SCR"],
+   "note": "After Theophany this week is fixed by counting back from the Triodion: Luke week 15 is read in the second-last week before the Publican and Pharisee."
+  },
+  {
+   "series": "luke",
+   "week": 15,
+   "day": "sun",
+   "name": "15th Sunday of Luke (Zacchaeus)",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Luke 19:1-10"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "HAP", "SCR"],
+   "note": "Zacchaeus. Read after Theophany. It is the last Sunday before the Triodion only when there are three or fewer Sundays from the Sunday after Theophany to the Triodion (antiochian.org 2018-01-21, 2026-01-25); in longer winters the Canaanite Woman follows it. Slavic/OCA always puts Zacchaeus on the Sunday before the Publican and Pharisee."
+  },
+  {
+   "series": "luke",
+   "week": 16,
+   "day": "mon",
+   "name": "Monday of the 16th week of Luke",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Mark 12:13-17"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "SCR"],
+   "note": "After Theophany this week is fixed by counting back from the Triodion: Luke week 16 is read in the last week before the Publican and Pharisee."
+  },
+  {
+   "series": "luke",
+   "week": 16,
+   "day": "tue",
+   "name": "Tuesday of the 16th week of Luke",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Mark 12:18-27"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "SCR"],
+   "note": "After Theophany this week is fixed by counting back from the Triodion: Luke week 16 is read in the last week before the Publican and Pharisee."
+  },
+  {
+   "series": "luke",
+   "week": 16,
+   "day": "wed",
+   "name": "Wednesday of the 16th week of Luke",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Mark 12:28-37"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "SCR"],
+   "note": "Scrivener's manuscripts end at 12:34. After Theophany this week is fixed by counting back from the Triodion: Luke week 16 is read in the last week before the Publican and Pharisee."
+  },
+  {
+   "series": "luke",
+   "week": 16,
+   "day": "thu",
+   "name": "Thursday of the 16th week of Luke",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Mark 12:38-44"]}
+   ],
+   "confidence": "medium",
+   "sources": ["GOA", "OCA", "SCR"],
+   "note": "After Theophany this week is fixed by counting back from the Triodion: Luke week 16 is read in the last week before the Publican and Pharisee."
+  },
+  {
+   "series": "luke",
+   "week": 16,
+   "day": "fri",
+   "name": "Friday of the 16th week of Luke",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Mark 13:1-8"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "SCR"],
+   "note": "Scrivener's manuscripts end at 13:9. After Theophany this week is fixed by counting back from the Triodion: Luke week 16 is read in the last week before the Publican and Pharisee."
+  },
+  {
+   "series": "luke",
+   "week": 16,
+   "day": "sat",
+   "name": "Saturday of the 16th week of Luke",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Luke 18:2-8"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "SCR"],
+   "note": "Saturday before the Publican and Pharisee. Scrivener's manuscripts read 18:1-8. After Theophany this week is fixed by counting back from the Triodion: Luke week 16 is read in the last week before the Publican and Pharisee."
+  },
+  {
+   "series": "eothina",
+   "week": 1,
+   "day": "sun",
+   "name": "Eothinon 1 (Resurrection Gospel at Sunday Matins)",
+   "readings": [
+    {"service": "Matins", "kind": "Gospel", "refs": ["Matt 28:16-20"], "title": "Eothinon 1"}
+   ],
+   "confidence": "high",
+   "sources": ["HAP", "ANT-CHART", "OCA"]
+  },
+  {
+   "series": "eothina",
+   "week": 2,
+   "day": "sun",
+   "name": "Eothinon 2 (Resurrection Gospel at Sunday Matins)",
+   "readings": [
+    {"service": "Matins", "kind": "Gospel", "refs": ["Mark 16:1-8"], "title": "Eothinon 2"}
+   ],
+   "confidence": "high",
+   "sources": ["HAP", "ANT-CHART", "OCA"]
+  },
+  {
+   "series": "eothina",
+   "week": 3,
+   "day": "sun",
+   "name": "Eothinon 3 (Resurrection Gospel at Sunday Matins)",
+   "readings": [
+    {"service": "Matins", "kind": "Gospel", "refs": ["Mark 16:9-20"], "title": "Eothinon 3"}
+   ],
+   "confidence": "high",
+   "sources": ["HAP", "ANT-CHART", "OCA"]
+  },
+  {
+   "series": "eothina",
+   "week": 4,
+   "day": "sun",
+   "name": "Eothinon 4 (Resurrection Gospel at Sunday Matins)",
+   "readings": [
+    {"service": "Matins", "kind": "Gospel", "refs": ["Luke 24:1-12"], "title": "Eothinon 4"}
+   ],
+   "confidence": "high",
+   "sources": ["HAP", "ANT-CHART", "OCA"]
+  },
+  {
+   "series": "eothina",
+   "week": 5,
+   "day": "sun",
+   "name": "Eothinon 5 (Resurrection Gospel at Sunday Matins)",
+   "readings": [
+    {"service": "Matins", "kind": "Gospel", "refs": ["Luke 24:12-35"], "title": "Eothinon 5"}
+   ],
+   "confidence": "high",
+   "sources": ["HAP", "ANT-CHART", "OCA"]
+  },
+  {
+   "series": "eothina",
+   "week": 6,
+   "day": "sun",
+   "name": "Eothinon 6 (Resurrection Gospel at Sunday Matins)",
+   "readings": [
+    {"service": "Matins", "kind": "Gospel", "refs": ["Luke 24:36-53"], "title": "Eothinon 6"}
+   ],
+   "confidence": "high",
+   "sources": ["HAP", "ANT-CHART", "OCA"]
+  },
+  {
+   "series": "eothina",
+   "week": 7,
+   "day": "sun",
+   "name": "Eothinon 7 (Resurrection Gospel at Sunday Matins)",
+   "readings": [
+    {"service": "Matins", "kind": "Gospel", "refs": ["John 20:1-10"], "title": "Eothinon 7"}
+   ],
+   "confidence": "high",
+   "sources": ["HAP", "ANT-CHART", "OCA"]
+  },
+  {
+   "series": "eothina",
+   "week": 8,
+   "day": "sun",
+   "name": "Eothinon 8 (Resurrection Gospel at Sunday Matins)",
+   "readings": [
+    {"service": "Matins", "kind": "Gospel", "refs": ["John 20:11-18"], "title": "Eothinon 8"}
+   ],
+   "confidence": "high",
+   "sources": ["HAP", "ANT-CHART", "OCA"]
+  },
+  {
+   "series": "eothina",
+   "week": 9,
+   "day": "sun",
+   "name": "Eothinon 9 (Resurrection Gospel at Sunday Matins)",
+   "readings": [
+    {"service": "Matins", "kind": "Gospel", "refs": ["John 20:19-31"], "title": "Eothinon 9"}
+   ],
+   "confidence": "high",
+   "sources": ["HAP", "ANT-CHART", "OCA"]
+  },
+  {
+   "series": "eothina",
+   "week": 10,
+   "day": "sun",
+   "name": "Eothinon 10 (Resurrection Gospel at Sunday Matins)",
+   "readings": [
+    {"service": "Matins", "kind": "Gospel", "refs": ["John 21:1-14"], "title": "Eothinon 10"}
+   ],
+   "confidence": "high",
+   "sources": ["HAP", "ANT-CHART", "OCA"]
+  },
+  {
+   "series": "eothina",
+   "week": 11,
+   "day": "sun",
+   "name": "Eothinon 11 (Resurrection Gospel at Sunday Matins)",
+   "readings": [
+    {"service": "Matins", "kind": "Gospel", "refs": ["John 21:15-25"], "title": "Eothinon 11"}
+   ],
+   "confidence": "high",
+   "sources": ["HAP", "ANT-CHART", "OCA"]
+  }
+ ]
+}

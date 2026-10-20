@@ -9,6 +9,7 @@ pub mod copy;
 pub mod fathers;
 pub mod format;
 pub mod import;
+pub mod lectionary;
 pub mod library;
 pub mod lxx;
 pub mod model;

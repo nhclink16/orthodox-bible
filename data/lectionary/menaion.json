@@ -1,0 +1,3893 @@
+{
+ "title": "Menaion: fixed feasts and saints, 1 September to 31 August",
+ "scope": "Readings proper to fixed-date commemorations (date: month-day, on the church's calendar) and to the Saturdays and Sundays defined by dates around the great feasts (range: that weekday falling between from and to).",
+ "licence": "Released with bible-rs under the MIT licence. The table holds Scripture references only: no Bible text and no prose from the sources. Notes are our own.",
+ "usage": "Antiochian Orthodox Christian Archdiocese of North America: Byzantine (Greek) usage, Revised Julian fixed feasts, Julian Paschalion. Slavic (OCA) and Greek (GOARCH) differences are kept in 'variants' and 'slavic' and never replace the main reading.",
+ "numbering": "English Bible (KJV/Hebrew) chapter and verse, the grid's numbering, with half-verse letters dropped. Each string in refs is one contiguous range ('Book C:V', 'Book C:V-V' or 'Book C:V-C:V', with the grid's book abbreviations); a reading's refs are read together, in order, as one lesson.",
+ "confidence": "high: an Antiochian-facing source agrees with at least one independent source. medium: the sources differ (usually by a verse at the start or end) or the reference rests on one source. low: no Antiochian or Greek source was found, or the yearly ordo decides.",
+ "sources": {
+  "ANT-OLG": "Antiochian Archdiocese, Department of Liturgics: Online Liturgical Guide service texts, 2023-2026 (antiochian.org/servicetexts). References only.",
+  "ANT-CHART": "Antiochian Archdiocese, Sunday Liturgical Readings Chart 2026 (antiochian.org/liturgicalinstructions).",
+  "ANT": "antiochian.org daily readings, 2018-2026 (the GOARCH Online Chapel feed, as harvested in orthocal-python's data/antiochian_raw).",
+  "GOA": "Greek Orthodox Archdiocese of America, Online Chapel daily readings, 2018-2030 (goarch.org; partly as harvested in orthocal-python).",
+  "GOA-DCS": "GOA Digital Chant Stand (dcs.goarch.org), 'Readings for the Day', 2026.",
+  "OCA": "Orthodox Church in America lectionary, via the orthocal.info API, 2010-2032. Slavic usage.",
+  "HAP": "Isabel F. Hapgood, Service Book of the Holy Orthodox-Catholic Apostolic (Greco-Russian) Church, 1906 (public domain; archive.org cu31924029363128): tables of Epistles and Gospels.",
+  "SCR": "F. H. Scrivener, A Plain Introduction to the Criticism of the New Testament, Cambridge 1861 (public domain; archive.org plainintroductio00scri): Synaxarion and Menologion of the Byzantine lectionary manuscripts.",
+  "GRE": "V. Grechulevich, Ukazatel tserkovnykh chtenii, St Petersburg 1853 (public domain): Slavic lectionary index with zachalo numbers.",
+  "MCI": "Metropolitan Cantor Institute (Byzantine Catholic Archeparchy of Pittsburgh), 'The Lectionary' (mci.archpitt.org). Slavic usage.",
+  "NLM": "New Liturgical Movement: descriptions of the Antiochian Paschal procession (2019) and the Royal Hours of Theophany (2017).",
+  "WIKI": "Wikipedia, articles on the Triodion and Holy Week (for Holy Week Old Testament readings only)."
+ },
+ "rules": [
+  "weekday: what the entry does on a weekday. replaces = its Epistle and Gospel are read instead of the day's; epistle / gospel = only that one replaces the day's; own = the entry is the day (great feasts, eves, the Saturdays and Sundays around the feasts); optional = read only where the saint is kept (not shown by default).",
+  "sunday: feast = it replaces the Sunday readings; epistle = its Epistle with the Sunday Gospel; sunday = the Sunday readings only; special = see the note.",
+  "matins_on_sunday: feast = the feast's Matins Gospel replaces the Sunday eothinon (the Twelve Great Feasts).",
+  "Saturdays follow the weekday rule. On a Saturday with its own readings (before or after the Elevation, the Nativity and Theophany) a saint yields unless saturday says otherwise: epistle = its Epistle with the Saturday's Gospel; gospel = the Saturday's Epistle with its Gospel. On a Sunday with its own readings the sunday rule applies as on any Sunday.",
+  "Vespers readings belong to the Great Vespers served the evening before the date (on the eves of the Nativity and Theophany, the Vespers joined to the Liturgy).",
+  "In Great Lent only the Annunciation, the Forty Martyrs and the Finding of the Forerunner's Head are read on weekdays; in Holy Week and on Pascha only the Annunciation. In Bright Week only an entry with bright reads, and only that reading (Epistle or Gospel) with the day's other. St George moves to Bright Monday when 23 April falls on or before Pascha; the other bright entries that fall from Palm Sunday to Pascha move to the next Bright Week days."
+ ],
+ "entries": [
+  {
+   "id": "0901.indiction",
+   "date": "09-01",
+   "rank": "feast",
+   "weekday": "replaces",
+   "sunday": "feast",
+   "name": "Beginning of the Church Year (Indiction); St Symeon the Stylite",
+   "readings": [
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["Isa 61:1-10"], "served": "evening before"},
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["Lev 26:3-12", "Lev 26:14-17", "Lev 26:19-20", "Lev 26:22", "Lev 26:33", "Lev 26:40-41"], "served": "evening before"},
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["Wis 4:7-15"], "served": "evening before"},
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["1 Tim 2:1-7"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Luke 4:16-22"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT", "GOA", "GOA-DCS", "OCA", "SCR"],
+   "note": "Greek/Antiochian books read only the Indiction readings at the Liturgy; St Symeon (a saint of the Antiochian Church) is commemorated in the hymns.",
+   "slavic": "Slavic books add St Symeon: Col 3:12-16; Matt 11:27-30, read after the Indiction readings. OCA gives the first Vespers reading as Isa 61:1-9."
+  },
+  {
+   "id": "0902.mamas",
+   "date": "09-02",
+   "rank": "martyr",
+   "weekday": "epistle",
+   "sunday": "sunday",
+   "name": "Martyr Mamas; St John the Faster",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Rom 8:28-39"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT", "GOA", "GOA-DCS", "OCA"],
+   "note": "The Gospel is the day's. GOA DCS also prints a martyr's Gospel (John 15:1-11) that the published calendars do not use."
+  },
+  {
+   "id": "0903.anthimus",
+   "date": "09-03",
+   "rank": "hieromartyr",
+   "weekday": "optional",
+   "name": "Hieromartyr Anthimus, Bishop of Nicomedia",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Heb 13:7-16"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Matt 11:27-30"]}
+   ],
+   "confidence": "medium",
+   "sources": ["ANT-OLG", "GOA", "GOA-DCS"],
+   "note": "The service books print these readings (GOA DCS 2026, headed \"For the Hieromartyr\"), but the published Antiochian and Greek calendars read the day's readings. Use them only when this commemoration is celebrated, e.g. as a patronal feast."
+  },
+  {
+   "id": "0903.nektarios_relics",
+   "date": "09-03",
+   "rank": "hierarch",
+   "weekday": "optional",
+   "name": "Translation of the Relics of St Nektarios of Aegina",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Eph 5:8-19"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Matt 4:25-5:12"]}
+   ],
+   "confidence": "medium",
+   "sources": ["ANT-OLG", "GOA", "GOA-DCS"],
+   "note": "The service books print these readings (GOA DCS 2026, headed \"For the Saint\"), but the published Antiochian and Greek calendars read the day's readings. Use them only when this commemoration is celebrated, e.g. as a patronal feast."
+  },
+  {
+   "id": "0904.babylas",
+   "date": "09-04",
+   "rank": "hieromartyr",
+   "weekday": "optional",
+   "name": "Hieromartyr Babylas, Bishop of Antioch; Prophet Moses the God-seer",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Heb 11:33-12:2"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Matt 10:32-36", "Matt 11:1"]}
+   ],
+   "confidence": "medium",
+   "sources": ["ANT-OLG", "GOA", "GOA-DCS"],
+   "note": "The service books print these readings (GOA DCS 2026, headed \"For the Hieromartyr\"), but the published Antiochian and Greek calendars read the day's readings. Use them only when this commemoration is celebrated, e.g. as a patronal feast. A bishop of Antioch, honoured by the Antiochian Church."
+  },
+  {
+   "id": "0905.zacharias",
+   "date": "09-05",
+   "rank": "prophet",
+   "weekday": "gospel",
+   "sunday": "sunday",
+   "name": "Prophet Zacharias and Righteous Elizabeth, parents of the Forerunner",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Matt 23:29-39"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT", "GOA", "GOA-DCS", "OCA"],
+   "note": "The Epistle is the day's. GOA DCS also prints a prophet's Epistle (Heb 6:13-20) that the published calendars do not use."
+  },
+  {
+   "id": "0906.chonae",
+   "date": "09-06",
+   "rank": "archangel",
+   "weekday": "replaces",
+   "sunday": "sunday",
+   "name": "Miracle of the Archangel Michael at Colossae (Chonae)",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Heb 2:2-10"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Luke 10:16-21"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "GOA", "GOA-DCS", "OCA"]
+  },
+  {
+   "id": "0907.kassiani",
+   "date": "09-07",
+   "rank": "venerable",
+   "weekday": "optional",
+   "name": "Venerable Kassiani the Hymnographer",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Gal 3:23-4:5"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Mark 5:24-34"]}
+   ],
+   "confidence": "medium",
+   "sources": ["ANT-OLG", "GOA", "GOA-DCS"],
+   "note": "The service books print these readings (GOA DCS 2026, headed \"For the Devout Woman; For the Holy Woman\"), but the published Antiochian and Greek calendars read the day's readings. Use them only when this commemoration is celebrated, e.g. as a patronal feast."
+  },
+  {
+   "id": "0907.sozon",
+   "date": "09-07",
+   "rank": "martyr",
+   "weekday": "optional",
+   "name": "Forefeast of the Nativity of the Theotokos; Martyr Sozon",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Luke 21:12-19"]}
+   ],
+   "confidence": "medium",
+   "sources": ["ANT-OLG", "GOA", "GOA-DCS"],
+   "note": "The service books print these readings (GOA DCS 2026, headed \"For the Martyr\"), but the published Antiochian and Greek calendars read the day's readings. Use them only when this commemoration is celebrated, e.g. as a patronal feast."
+  },
+  {
+   "id": "float.sat_before_elevation",
+   "range": {"day": "sat", "from": "09-07", "to": "09-13"},
+   "rank": "festal_saturday",
+   "weekday": "own",
+   "name": "Saturday before the Elevation of the Cross",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["1 Cor 2:6-9"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Matt 10:37-11:1"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA"],
+   "note": "If this Saturday is 8 September, the Nativity of the Theotokos is read and these readings are omitted (goarch.org 2018). If it is 13 September, the Gospel of the Dedication (Matt 16:13-19) is read with this Epistle (goarch.org, antiochian.org 2025).",
+   "slavic": "OCA moves these readings to 13 September when the Saturday is 8 September."
+  },
+  {
+   "id": "float.sun_before_elevation",
+   "range": {"day": "sun", "from": "09-07", "to": "09-13"},
+   "rank": "festal_sunday",
+   "weekday": "own",
+   "name": "Sunday before the Elevation of the Cross",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Gal 6:11-18"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["John 3:13-17"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-CHART", "ANT", "GOA", "OCA"],
+   "note": "These readings replace the Sunday of the Matthew cycle. They are kept even when the Sunday is 8 September (goarch.org 2019, 2024) or 13 September."
+  },
+  {
+   "id": "0908.nativity_theotokos",
+   "date": "09-08",
+   "rank": "great_feast_theotokos",
+   "weekday": "own",
+   "sunday": "special",
+   "matins_on_sunday": "feast",
+   "name": "Nativity of the Most Holy Theotokos",
+   "readings": [
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["Gen 28:10-17"], "served": "evening before"},
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["Ezek 43:27-44:4"], "served": "evening before"},
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["Prov 9:1-11"], "served": "evening before"},
+    {"service": "Matins", "kind": "Gospel", "refs": ["Luke 1:39-49", "Luke 1:56"]},
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Phil 2:5-11"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Luke 10:38-42", "Luke 11:27-28"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT", "GOA", "GOA-DCS", "OCA", "HAP", "SCR"],
+   "note": "When 8 September is a Sunday it is also the Sunday before the Elevation. The Greek calendars then read the Sunday-before-the-Elevation Epistle and Gospel (Gal 6:11-18; John 3:13-17) at the Liturgy and keep the feast's Matins Gospel (observed goarch.org 2019 and 2024). No Antiochian calendar for such a year was available to confirm. If the Saturday before the Elevation falls on 8 September, the feast is read and the Saturday readings are omitted (goarch.org 2018). Feast readings are repeated at the Leave-taking only in Slavic use; Greek use reads the forefeast-of-the-Cross Gospel on 12 September.",
+   "slavic": "Same readings. On a Sunday, Slavic use reads the Sunday readings and then the feast's."
+  },
+  {
+   "id": "0909.joachim_anna",
+   "date": "09-09",
+   "rank": "righteous",
+   "weekday": "replaces",
+   "sunday": "sunday",
+   "name": "Righteous Ancestors of God Joachim and Anna",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Gal 4:22-27"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Luke 8:16-21"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT", "GOA", "GOA-DCS", "OCA"],
+   "note": "On a Sunday this is always the Sunday before the Elevation, whose readings are read (goarch.org 2018).",
+   "slavic": "OCA ends the Epistle at Gal 4:31 for related Theotokos feasts; for 9 September OCA uses Gal 4:22-31."
+  },
+  {
+   "id": "0910.forefeast_cross1",
+   "date": "09-10",
+   "rank": "forefeast",
+   "weekday": "gospel",
+   "sunday": "sunday",
+   "name": "Forefeast of the Elevation (Martyrs Menodora, Metrodora and Nymphodora)",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["John 3:16-21"], "title": "forefeast of the Cross"}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT", "GOA", "GOA-DCS", "OCA"],
+   "note": "Greek use only. The Epistle is the day's. On a Sunday the Sunday before the Elevation is read (goarch.org 2023).",
+   "slavic": "Not used; the daily readings are kept."
+  },
+  {
+   "id": "0911.forefeast_cross2",
+   "date": "09-11",
+   "rank": "forefeast",
+   "weekday": "gospel",
+   "sunday": "sunday",
+   "name": "Forefeast of the Elevation (St Theodora of Alexandria)",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["John 12:19-36"], "title": "forefeast of the Cross"}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT", "GOA", "GOA-DCS", "OCA"],
+   "note": "Greek use only. The Epistle is the day's.",
+   "slavic": "Not used."
+  },
+  {
+   "id": "0912.forefeast_cross3",
+   "date": "09-12",
+   "rank": "forefeast",
+   "weekday": "gospel",
+   "sunday": "sunday",
+   "name": "Leave-taking of the Nativity of the Theotokos; forefeast of the Elevation (Hieromartyr Autonomus)",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["John 11:47-54"], "title": "forefeast of the Cross"}
+   ],
+   "confidence": "medium",
+   "sources": ["ANT-OLG", "GOA", "GOA-DCS", "OCA"],
+   "note": "Greek use only. The Epistle is the day's. If this day is the Saturday before the Elevation, that Saturday's readings are read.",
+   "slavic": "Slavic use repeats the Nativity of the Theotokos readings at the Leave-taking."
+  },
+  {
+   "id": "0913.encaenia",
+   "date": "09-13",
+   "rank": "feast",
+   "weekday": "replaces",
+   "sunday": "sunday",
+   "saturday": "gospel",
+   "saturday_note": "If 13 September is the Saturday before the Elevation: 1 Cor 2:6-9 (Saturday) with Matt 16:13-19 (Dedication) (goarch.org and antiochian.org 2025).",
+   "name": "Dedication (Encaenia) of the Church of the Resurrection in Jerusalem; forefeast of the Elevation",
+   "readings": [
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["1 Kgs 8:22-23", "1 Kgs 8:27-30"], "note": "GOA DCS 2026 printed Deut 1:8-11, 15-17 here instead.", "served": "evening before"},
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["Prov 3:19-34"], "served": "evening before"},
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["Prov 9:1-11"], "served": "evening before"},
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Heb 3:1-4"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Matt 16:13-19"]}
+   ],
+   "confidence": "medium",
+   "sources": ["ANT-OLG", "GOA", "GOA-DCS", "OCA"],
+   "note": "On a Sunday it is the Sunday before the Elevation, whose readings are read (goarch.org 2020, 2026).",
+   "slavic": "Gospel ends at Matt 16:18."
+  },
+  {
+   "id": "0914.elevation",
+   "date": "09-14",
+   "rank": "great_feast_lord",
+   "weekday": "own",
+   "sunday": "feast",
+   "matins_on_sunday": "feast",
+   "name": "Universal Elevation (Exaltation) of the Precious and Life-giving Cross",
+   "readings": [
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["Exod 15:22-16:1"], "served": "evening before"},
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["Prov 3:11-18"], "served": "evening before"},
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["Isa 60:11-16"], "served": "evening before"},
+    {"service": "Matins", "kind": "Gospel", "refs": ["John 12:28-36"]},
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["1 Cor 1:18-24"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["John 19:6-11", "John 19:13-20", "John 19:25-28", "John 19:30"], "note": "Greek and Antiochian books end at v.30; Slavic books and Hapgood (1906) read 19:30-35."}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT", "GOA", "GOA-DCS", "OCA", "HAP", "SCR"],
+   "note": "Strict fast day whatever the weekday.",
+   "slavic": "Gospel John 19:6-11, 13-20, 25-28, 30-35."
+  },
+  {
+   "id": "0915.nikitas",
+   "date": "09-15",
+   "rank": "great_martyr",
+   "weekday": "replaces",
+   "sunday": "sunday",
+   "saturday": "epistle",
+   "saturday_note": "If this is the Saturday after the Elevation: Col 1:24-2:1 with John 8:21-30 (goarch.org 2018).",
+   "name": "Great Martyr Nikitas the Goth",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Col 1:24-2:1"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Matt 10:16-22"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT", "GOA", "GOA-DCS", "OCA"],
+   "note": "On a Sunday it is the Sunday after the Elevation, which is read."
+  },
+  {
+   "id": "float.sat_after_elevation",
+   "range": {"day": "sat", "from": "09-15", "to": "09-21"},
+   "rank": "festal_saturday",
+   "weekday": "own",
+   "name": "Saturday after the Elevation of the Cross",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["1 Cor 1:26-2:5"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["John 8:21-30"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA"],
+   "note": "When the Saturday is a saint's day with a proper Epistle (Nikitas 15 Sept, Euphemia 16 Sept, Eustathius 20 Sept), the saint's Epistle is read with John 8:21-30 (goarch.org 2018, 2023, 2025).",
+   "slavic": "Epistle 1 Cor 1:26-29."
+  },
+  {
+   "id": "float.sun_after_elevation",
+   "range": {"day": "sun", "from": "09-15", "to": "09-21"},
+   "rank": "festal_sunday",
+   "weekday": "own",
+   "name": "Sunday after the Elevation of the Cross",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Gal 2:16-20"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Mark 8:34-9:1"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-CHART", "ANT", "GOA", "OCA"],
+   "note": "Always read, even over Nikitas, Euphemia or Eustathius. The Monday after this Sunday begins the Gospel of Luke in Greek and Antiochian use (the \"Lukan jump\"); that rule belongs to the daily cycle."
+  },
+  {
+   "id": "0916.euphemia",
+   "date": "09-16",
+   "rank": "great_martyr",
+   "weekday": "replaces",
+   "sunday": "sunday",
+   "saturday": "epistle",
+   "saturday_note": "If this is the Saturday after the Elevation: 2 Cor 6:1-10 with John 8:21-30 (goarch.org, antiochian.org 2023).",
+   "name": "Great Martyr Euphemia the All-praised",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["2 Cor 6:1-10"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Luke 7:36-50"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT", "GOA", "GOA-DCS", "OCA"],
+   "note": "On a Sunday it is the Sunday after the Elevation, which is read (goarch.org 2018)."
+  },
+  {
+   "id": "0917.sophia",
+   "date": "09-17",
+   "rank": "martyr",
+   "weekday": "optional",
+   "name": "Martyrs Sophia and her daughters Faith, Hope and Love",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Heb 10:32-38"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Matt 10:32-36", "Matt 11:1"]}
+   ],
+   "confidence": "medium",
+   "sources": ["ANT-OLG", "GOA", "GOA-DCS"],
+   "note": "The service books print these readings (GOA DCS 2026, headed \"For the Martyrs\"), but the published Antiochian and Greek calendars read the day's readings. Use them only when this commemoration is celebrated, e.g. as a patronal feast. GOA DCS also prints Vespers readings: Isa 43:9-14; Wis 3:1-9; Wis 5:15-6:3."
+  },
+  {
+   "id": "0920.eustathius",
+   "date": "09-20",
+   "rank": "great_martyr",
+   "weekday": "replaces",
+   "sunday": "sunday",
+   "saturday": "epistle",
+   "saturday_note": "If this is the Saturday after the Elevation: Eph 6:10-17 with John 8:21-30 (goarch.org, antiochian.org 2025).",
+   "name": "Great Martyr Eustathius (Placidas) and his family",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Eph 6:10-17"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Luke 21:12-19"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "GOA", "GOA-DCS", "OCA"],
+   "note": "On a Sunday it is the Sunday after the Elevation, which is read (goarch.org 2020, 2026)."
+  },
+  {
+   "id": "0922.phocas",
+   "date": "09-22",
+   "rank": "hieromartyr",
+   "weekday": "optional",
+   "name": "Hieromartyr Phocas, Bishop of Sinope",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["2 Tim 1:8-18"]}
+   ],
+   "confidence": "medium",
+   "sources": ["ANT-OLG", "GOA", "GOA-DCS"],
+   "note": "The service books print these readings (GOA DCS 2026, headed \"For the Hieromartyr\"), but the published Antiochian and Greek calendars read the day's readings. Use them only when this commemoration is celebrated, e.g. as a patronal feast."
+  },
+  {
+   "id": "0923.conception_forerunner",
+   "date": "09-23",
+   "rank": "forerunner_feast",
+   "weekday": "replaces",
+   "sunday": "epistle",
+   "name": "Conception of St John the Forerunner",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Gal 4:22-27"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Luke 1:5-25"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT", "GOA", "GOA-DCS", "OCA"],
+   "slavic": "Epistle Gal 4:22-31."
+  },
+  {
+   "id": "0924.thekla",
+   "date": "09-24",
+   "rank": "great_martyr",
+   "weekday": "replaces",
+   "sunday": "epistle",
+   "name": "Protomartyr Thekla, Equal to the Apostles; Theotokos \"Myrtidiotissa\"",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["2 Tim 3:10-15"], "title": "St Thekla"},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Luke 10:38-42", "Luke 11:27-28"], "title": "Theotokos Myrtidiotissa", "note": "Gospel printed by goarch.org every year and by antiochian.org from 2022."},
+    {"service": "Matins", "kind": "Gospel", "refs": ["Luke 1:39-49", "Luke 1:56"], "note": "Of the Myrtidiotissa icon (goarch.org)."}
+   ],
+   "confidence": "medium",
+   "sources": ["ANT-OLG", "ANT", "GOA", "GOA-DCS", "OCA"],
+   "note": "St Thekla is especially venerated in the Antiochian Church (Maaloula, Syria). antiochian.org printed St Thekla's Epistle with the day's Gospel in 2019-2021 and with the Theotokos Gospel from 2022.",
+   "variants": [
+    {"usage": "St Thekla kept as the main feast (GOA DCS)", "service": "Liturgy", "kind": "Gospel", "refs": ["Matt 25:1-13"], "note": "GOA DCS 2026. Use when St Thekla is kept as the main feast, e.g. a patronal feast."}
+   ]
+  },
+  {
+   "id": "0926.john_theologian",
+   "date": "09-26",
+   "rank": "apostle_evangelist",
+   "weekday": "replaces",
+   "sunday": "feast",
+   "name": "Repose of the Holy Apostle and Evangelist John the Theologian",
+   "readings": [
+    {"service": "Vespers", "kind": "Epistle", "refs": ["1 John 3:21-4:6"], "served": "evening before"},
+    {"service": "Vespers", "kind": "Epistle", "refs": ["1 John 4:11-16"], "served": "evening before"},
+    {"service": "Vespers", "kind": "Epistle", "refs": ["1 John 4:20-5:5"], "served": "evening before"},
+    {"service": "Matins", "kind": "Gospel", "refs": ["John 21:14-25"]},
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["1 John 4:12-19"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["John 19:25-27", "John 21:24-25"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT", "GOA", "GOA-DCS", "OCA", "SCR"],
+   "note": "The three Vespers readings are from OCA; GOA DCS 2026 printed none for this day.",
+   "slavic": "Matins Gospel John 21:15-25."
+  },
+  {
+   "id": "0927.callistratus",
+   "date": "09-27",
+   "rank": "martyr",
+   "weekday": "optional",
+   "name": "Martyr Callistratus and his companions",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Gal 6:11-18"]}
+   ],
+   "confidence": "medium",
+   "sources": ["ANT-OLG", "GOA", "GOA-DCS"],
+   "note": "The service books print these readings (GOA DCS 2026, headed \"For the Martyr\"), but the published Antiochian and Greek calendars read the day's readings. Use them only when this commemoration is celebrated, e.g. as a patronal feast."
+  },
+  {
+   "id": "0928.chariton",
+   "date": "09-28",
+   "rank": "venerable",
+   "weekday": "replaces",
+   "sunday": "sunday",
+   "name": "Venerable Chariton the Confessor",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["2 Cor 4:6-15"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Luke 6:17-23"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "GOA", "GOA-DCS", "OCA"]
+  },
+  {
+   "id": "0929.kyriakos",
+   "date": "09-29",
+   "rank": "venerable",
+   "weekday": "epistle",
+   "sunday": "sunday",
+   "name": "Venerable Kyriakos the Anchorite",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Gal 5:22-6:2"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT", "GOA", "GOA-DCS", "OCA"]
+  },
+  {
+   "id": "0930.gregory_armenia",
+   "date": "09-30",
+   "rank": "hieromartyr",
+   "weekday": "replaces",
+   "sunday": "sunday",
+   "name": "Hieromartyr Gregory, Enlightener of Armenia",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["1 Cor 16:13-24"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Matt 24:42-47"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT", "GOA", "GOA-DCS", "OCA"]
+  },
+  {
+   "id": "1001.ananias",
+   "date": "10-01",
+   "rank": "apostle",
+   "weekday": "epistle",
+   "sunday": "sunday",
+   "name": "Apostle Ananias of the Seventy; St Romanos the Melodist",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Acts 9:10-19"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT", "GOA", "GOA-DCS", "OCA"],
+   "note": "GOA DCS also prints an apostle's Gospel (Luke 10:16-21) not used by the published calendars. St Romanos the Melodist (a deacon of Beirut) has no proper readings."
+  },
+  {
+   "id": "1001.protection_slavic",
+   "date": "10-01",
+   "rank": "theotokos_feast",
+   "weekday": "optional",
+   "sunday": "epistle",
+   "name": "Protection (Pokrov) of the Most Holy Theotokos — Slavic date",
+   "readings": [
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["Gen 28:10-17"], "served": "evening before"},
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["Ezek 43:27-44:4"], "served": "evening before"},
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["Prov 9:1-11"], "served": "evening before"},
+    {"service": "Matins", "kind": "Gospel", "refs": ["Luke 1:39-49", "Luke 1:56"]},
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Heb 9:1-7"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Luke 10:38-42", "Luke 11:27-28"]}
+   ],
+   "confidence": "medium",
+   "sources": ["ANT-OLG", "ANT", "GOA", "GOA-DCS", "OCA"],
+   "note": "The Antiochian and Greek calendars keep the Protection on 28 October (see that entry); on 1 October antiochian.org lists the Protection among the commemorations but prints Ananias's Epistle with the day's Gospel. Use this entry only where a parish keeps the Protection on 1 October (Slavic custom). GOA DCS 2026 printed Num 9:15-23; Exod 40 (Septuagint numbering); Ezek 43:27-44:4 as Vespers readings for this day.",
+   "slavic": "OCA: these readings on 1 October; on a Sunday read after the Sunday readings."
+  },
+  {
+   "id": "1002.cyprian_justina",
+   "date": "10-02",
+   "rank": "hieromartyr",
+   "weekday": "epistle",
+   "sunday": "sunday",
+   "name": "Hieromartyr Cyprian and Virgin Martyr Justina",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["1 Tim 1:12-17"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT", "GOA", "GOA-DCS", "OCA"],
+   "note": "GOA DCS also prints John 10:9-16, not used by the published calendars."
+  },
+  {
+   "id": "1003.dionysius",
+   "date": "10-03",
+   "rank": "hieromartyr",
+   "weekday": "epistle",
+   "sunday": "sunday",
+   "name": "Hieromartyr Dionysius the Areopagite",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Acts 17:16-34"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT", "GOA", "GOA-DCS", "OCA", "SCR"],
+   "note": "GOA DCS also prints Matt 13:44-54 (Scrivener's 19th-century table: Matt 13:45-54), not used by the published calendars."
+  },
+  {
+   "id": "1006.thomas",
+   "date": "10-06",
+   "rank": "apostle",
+   "weekday": "replaces",
+   "sunday": "sunday",
+   "name": "Holy Apostle Thomas",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["1 Cor 4:9-16"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["John 20:19-31"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT", "GOA", "GOA-DCS", "OCA", "SCR"],
+   "note": "On a Sunday the Sunday readings were read (goarch.org 2019, 2024)."
+  },
+  {
+   "id": "1007.sergius_bacchus",
+   "date": "10-07",
+   "rank": "martyr",
+   "weekday": "optional",
+   "name": "Martyrs Sergius and Bacchus of Syria",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Heb 11:33-12:2"]}
+   ],
+   "confidence": "medium",
+   "sources": ["ANT-OLG", "GOA", "GOA-DCS"],
+   "note": "The service books print these readings (GOA DCS 2026, headed \"For the Martyrs\"), but the published Antiochian and Greek calendars read the day's readings. Use them only when this commemoration is celebrated, e.g. as a patronal feast. Martyrs of Syria, honoured by the Antiochian Church."
+  },
+  {
+   "id": "1008.pelagia",
+   "date": "10-08",
+   "rank": "venerable",
+   "weekday": "optional",
+   "name": "Venerable Pelagia the Penitent; Virgin Martyr Pelagia of Antioch",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Eph 5:8-19"]}
+   ],
+   "confidence": "medium",
+   "sources": ["ANT-OLG", "GOA", "GOA-DCS"],
+   "note": "The service books print these readings (GOA DCS 2026, headed \"For the Devout Woman\"), but the published Antiochian and Greek calendars read the day's readings. Use them only when this commemoration is celebrated, e.g. as a patronal feast."
+  },
+  {
+   "id": "1009.james_alphaeus",
+   "date": "10-09",
+   "rank": "apostle",
+   "weekday": "replaces",
+   "sunday": "sunday",
+   "name": "Holy Apostle James, son of Alphaeus",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["1 Cor 4:9-16"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Matt 9:36-10:8"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT", "GOA", "GOA-DCS", "OCA"]
+  },
+  {
+   "id": "1010.eulampius",
+   "date": "10-10",
+   "rank": "martyr",
+   "weekday": "optional",
+   "name": "Martyrs Eulampius and Eulampia",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Rom 8:28-39"]}
+   ],
+   "confidence": "medium",
+   "sources": ["ANT-OLG", "GOA", "GOA-DCS"],
+   "note": "The service books print these readings (GOA DCS 2026, headed \"For the Martyrs\"), but the published Antiochian and Greek calendars read the day's readings. Use them only when this commemoration is celebrated, e.g. as a patronal feast."
+  },
+  {
+   "id": "1011.philip_deacon",
+   "date": "10-11",
+   "rank": "apostle",
+   "weekday": "epistle",
+   "sunday": "sunday",
+   "name": "Holy Apostle Philip of the Seventy, one of the Seven Deacons",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Acts 8:26-39"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "GOA", "GOA-DCS", "OCA"],
+   "note": "On a Sunday between 11 and 17 October the Fathers of the Seventh Council are read instead."
+  },
+  {
+   "id": "float.fathers_7th_council",
+   "range": {"day": "sun", "from": "10-11", "to": "10-17"},
+   "rank": "festal_sunday",
+   "weekday": "own",
+   "name": "Sunday of the Holy Fathers of the Seventh Ecumenical Council",
+   "readings": [
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["Gen 14:14-20"], "served": "evening before"},
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["Deut 1:8-11", "Deut 1:15-17"], "served": "evening before"},
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["Deut 10:14-18", "Deut 10:20-21"], "served": "evening before"},
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Titus 3:8-15"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Luke 8:5-15"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT-CHART", "ANT", "GOA", "GOA-DCS", "OCA"],
+   "note": "The Gospel is the parable of the Sower, which Greek use fixes to this Sunday; it replaces the Luke-cycle Gospel of the Sunday.",
+   "slavic": "OCA reads the Sunday Epistle and Gospel and adds Heb 13:7-16; John 17:1-13 for the Fathers."
+  },
+  {
+   "id": "1012.probus",
+   "date": "10-12",
+   "rank": "martyr",
+   "weekday": "optional",
+   "name": "Martyrs Probus, Tarachus and Andronicus; St Symeon the New Theologian",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Eph 6:10-17"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Luke 21:12-19"]}
+   ],
+   "confidence": "medium",
+   "sources": ["ANT-OLG", "GOA", "GOA-DCS"],
+   "note": "The service books print these readings (GOA DCS 2026, headed \"For the Martyrs\"), but the published Antiochian and Greek calendars read the day's readings. Use them only when this commemoration is celebrated, e.g. as a patronal feast."
+  },
+  {
+   "id": "1013.carpus",
+   "date": "10-13",
+   "rank": "martyr",
+   "weekday": "optional",
+   "name": "Martyrs Carpus, Papylus, Agathodorus and Agathonica",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Eph 6:10-17"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Matt 7:12-21"]}
+   ],
+   "confidence": "medium",
+   "sources": ["ANT-OLG", "GOA", "GOA-DCS"],
+   "note": "The service books print these readings (GOA DCS 2026, headed \"For the Martyrs\"), but the published Antiochian and Greek calendars read the day's readings. Use them only when this commemoration is celebrated, e.g. as a patronal feast."
+  },
+  {
+   "id": "1014.nazarius",
+   "date": "10-14",
+   "rank": "martyr",
+   "weekday": "optional",
+   "name": "Martyrs Nazarius, Gervasius, Protasius and Celsus; St Cosmas the Hymnographer",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Eph 6:10-17"]}
+   ],
+   "confidence": "medium",
+   "sources": ["ANT-OLG", "GOA", "GOA-DCS"],
+   "note": "The service books print these readings (GOA DCS 2026, headed \"For the Martyrs\"), but the published Antiochian and Greek calendars read the day's readings. Use them only when this commemoration is celebrated, e.g. as a patronal feast."
+  },
+  {
+   "id": "1015.lucian",
+   "date": "10-15",
+   "rank": "hieromartyr",
+   "weekday": "optional",
+   "name": "Hieromartyr Lucian, Presbyter of Antioch",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["2 Tim 1:8-18"]}
+   ],
+   "confidence": "medium",
+   "sources": ["ANT-OLG", "GOA", "GOA-DCS"],
+   "note": "The service books print these readings (GOA DCS 2026, headed \"For the Hieromartyr\"), but the published Antiochian and Greek calendars read the day's readings. Use them only when this commemoration is celebrated, e.g. as a patronal feast. A martyr of Antioch."
+  },
+  {
+   "id": "1016.longinus",
+   "date": "10-16",
+   "rank": "martyr",
+   "weekday": "gospel",
+   "sunday": "sunday",
+   "name": "Martyr Longinus the Centurion",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Matt 27:33-54"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT", "GOA", "GOA-DCS", "OCA"],
+   "note": "GOA DCS also prints 2 Tim 2:1-10, not used by the published calendars."
+  },
+  {
+   "id": "1017.hosea",
+   "date": "10-17",
+   "rank": "prophet",
+   "weekday": "epistle",
+   "sunday": "sunday",
+   "name": "Prophet Hosea; Venerable Martyr Andrew of Crete",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Rom 9:18-33"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT", "GOA", "GOA-DCS", "OCA"]
+  },
+  {
+   "id": "1018.luke",
+   "date": "10-18",
+   "rank": "apostle_evangelist",
+   "weekday": "replaces",
+   "sunday": "feast",
+   "name": "Holy Apostle and Evangelist Luke",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Col 4:5-11", "Col 4:14-18"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Luke 10:16-21"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT-CHART", "ANT", "GOA", "GOA-DCS", "OCA", "SCR"],
+   "note": "On a Sunday both readings of the Evangelist are read (goarch.org 2020; goarch.org and antiochian.org 2026).",
+   "slavic": "Epistle Col 4:5-9, 14, 18."
+  },
+  {
+   "id": "1019.joel",
+   "date": "10-19",
+   "rank": "prophet",
+   "weekday": "epistle",
+   "sunday": "sunday",
+   "name": "Prophet Joel; Martyr Varus",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Acts 2:14-21"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT", "GOA", "GOA-DCS", "OCA"]
+  },
+  {
+   "id": "1020.artemius",
+   "date": "10-20",
+   "rank": "great_martyr",
+   "weekday": "epistle",
+   "sunday": "sunday",
+   "name": "Great Martyr Artemius of Antioch; St Gerasimos of Kefalonia",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["2 Tim 2:1-10"], "title": "St Artemius"}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT", "GOA", "GOA-DCS", "OCA"],
+   "note": "GOA DCS also prints, for St Gerasimos of Kefalonia, Vespers Wis 3:1-9, Wis 5:15-6:3, Wis 4:7-15 and Gal 5:22-6:2; Matt 11:27-30 (Greek local feast)."
+  },
+  {
+   "id": "1021.hilarion",
+   "date": "10-21",
+   "rank": "venerable",
+   "weekday": "epistle",
+   "sunday": "sunday",
+   "name": "Venerable Hilarion the Great",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["2 Cor 9:6-11"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT", "GOA", "GOA-DCS", "OCA"],
+   "note": "GOA DCS also prints Luke 6:17-23, not used by the published calendars."
+  },
+  {
+   "id": "1022.abercius",
+   "date": "10-22",
+   "rank": "hierarch",
+   "weekday": "optional",
+   "name": "St Abercius, Equal to the Apostles, Bishop of Hierapolis",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Heb 7:26-8:2"]}
+   ],
+   "confidence": "medium",
+   "sources": ["ANT-OLG", "GOA", "GOA-DCS"],
+   "note": "The service books print these readings (GOA DCS 2026, headed \"For the Saint\"), but the published Antiochian and Greek calendars read the day's readings. Use them only when this commemoration is celebrated, e.g. as a patronal feast."
+  },
+  {
+   "id": "1023.james_brother",
+   "date": "10-23",
+   "rank": "apostle",
+   "weekday": "replaces",
+   "sunday": "epistle",
+   "name": "Holy Apostle James, Brother of the Lord, first Bishop of Jerusalem",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Gal 1:11-19"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Matt 13:54-58"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT", "GOA", "GOA-DCS", "OCA"]
+  },
+  {
+   "id": "1024.arethas",
+   "date": "10-24",
+   "rank": "great_martyr",
+   "weekday": "optional",
+   "name": "Great Martyr Arethas and those with him",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Heb 11:33-12:2"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Luke 12:32-40"]}
+   ],
+   "confidence": "medium",
+   "sources": ["ANT-OLG", "GOA", "GOA-DCS"],
+   "note": "The service books print these readings (GOA DCS 2026, headed \"For the Martyr\"), but the published Antiochian and Greek calendars read the day's readings. Use them only when this commemoration is celebrated, e.g. as a patronal feast."
+  },
+  {
+   "id": "1025.marcian_martyrius",
+   "date": "10-25",
+   "rank": "martyr",
+   "weekday": "optional",
+   "name": "Martyrs Marcian and Martyrius the Notaries",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Col 3:4-11"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Luke 12:2-12"]}
+   ],
+   "confidence": "medium",
+   "sources": ["ANT-OLG", "GOA", "GOA-DCS"],
+   "note": "The service books print these readings (GOA DCS 2026, headed \"For the Martyrs\"), but the published Antiochian and Greek calendars read the day's readings. Use them only when this commemoration is celebrated, e.g. as a patronal feast."
+  },
+  {
+   "id": "1026.demetrius",
+   "date": "10-26",
+   "rank": "great_martyr",
+   "weekday": "replaces",
+   "sunday": "epistle",
+   "name": "Great Martyr Demetrius the Myrrh-streamer",
+   "readings": [
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["Isa 63:15-64:5", "Isa 64:8-9"], "note": "English numbering; the Greek books print Isa 63:15-20; 64:1-4, 7-8 (Septuagint).", "served": "evening before"},
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["Jer 2:1-12"], "note": "OCA: Jer 2:2-12.", "served": "evening before"},
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["Wis 3:1-9"], "note": "OCA: Wis 4:7-15.", "served": "evening before"},
+    {"service": "Matins", "kind": "Gospel", "refs": ["Luke 21:12-19"]},
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["2 Tim 2:1-10"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["John 15:17-16:2"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT", "GOA", "GOA-DCS", "OCA"],
+   "slavic": "Matins Gospel Matt 10:16-22."
+  },
+  {
+   "id": "1028.protection",
+   "date": "10-28",
+   "rank": "theotokos_feast",
+   "weekday": "replaces",
+   "sunday": "epistle",
+   "name": "Holy Protection of the Theotokos (Greek and Antiochian date)",
+   "readings": [
+    {"service": "Matins", "kind": "Gospel", "refs": ["Luke 1:39-49", "Luke 1:56"]},
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Heb 9:1-7"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Luke 10:38-42", "Luke 11:27-28"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT", "GOA", "GOA-DCS", "OCA"],
+   "note": "Kept on 28 October by the Greek calendar and printed so by antiochian.org; some Antiochian parishes keep it on 1 October (see that entry)."
+  },
+  {
+   "id": "1031.apostles_70",
+   "date": "10-31",
+   "rank": "apostle",
+   "weekday": "epistle",
+   "sunday": "sunday",
+   "name": "Apostles of the Seventy Stachys, Amplias, Urban, Narcissus, Apelles and Aristobulus",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Rom 16:1-16"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT", "GOA", "GOA-DCS", "OCA"]
+  },
+  {
+   "id": "1101.cosmas_damian",
+   "date": "11-01",
+   "rank": "unmercenary",
+   "weekday": "replaces",
+   "sunday": "epistle",
+   "name": "Holy Unmercenaries Cosmas and Damian of Asia",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["1 Cor 12:27-13:8"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Matt 10:1", "Matt 10:5-8"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT-CHART", "ANT", "GOA", "GOA-DCS", "OCA"]
+  },
+  {
+   "id": "float.raphael_brooklyn",
+   "range": {"day": "sat", "from": "11-01", "to": "11-07"},
+   "rank": "hierarch",
+   "weekday": "optional",
+   "name": "St Raphael (Hawaweeny), Bishop of Brooklyn (Antiochian Archdiocese: first Saturday of November)",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Heb 7:26-8:2"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["John 10:9-16"]}
+   ],
+   "confidence": "low",
+   "sources": ["ANT", "OCA"],
+   "note": "Antiochian feast. antiochian.org printed these hierarch readings on the first Saturday of November only in 2020; in other years it printed the Saturday readings. OCA keeps St Raphael on 27 February with Heb 13:17-21; John 10:9-16."
+  },
+  {
+   "id": "1102.acindynus",
+   "date": "11-02",
+   "rank": "martyr",
+   "weekday": "optional",
+   "name": "Martyrs Acindynus, Pegasius, Aphthonius, Elpidephorus and Anempodistus",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Heb 12:1-10"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Luke 21:12-19"]}
+   ],
+   "confidence": "medium",
+   "sources": ["ANT-OLG", "GOA", "GOA-DCS"],
+   "note": "The service books print these readings (GOA DCS 2026, headed \"For the Martyrs\"), but the published Antiochian and Greek calendars read the day's readings. Use them only when this commemoration is celebrated, e.g. as a patronal feast."
+  },
+  {
+   "id": "1103.george_lydda",
+   "date": "11-03",
+   "rank": "martyr",
+   "weekday": "optional",
+   "name": "Dedication of the Church of the Great Martyr George in Lydda; Martyrs Acepsimas, Joseph and Aithalas",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Eph 2:4-10"]}
+   ],
+   "confidence": "medium",
+   "sources": ["ANT-OLG", "GOA", "GOA-DCS"],
+   "note": "The service books print these readings (GOA DCS 2026, headed \"For the Martyrs\"), but the published Antiochian and Greek calendars read the day's readings. Use them only when this commemoration is celebrated, e.g. as a patronal feast. GOA DCS also prints Vespers readings: Isa 43:9-14; Wis 3:1-9; Wis 5:15-6:3."
+  },
+  {
+   "id": "1104.ioannikios",
+   "date": "11-04",
+   "rank": "venerable",
+   "weekday": "optional",
+   "name": "Venerable Ioannikios the Great",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["2 Cor 9:6-11"]}
+   ],
+   "confidence": "medium",
+   "sources": ["ANT-OLG", "GOA", "GOA-DCS"],
+   "note": "The service books print these readings (GOA DCS 2026, headed \"For the Devout Man\"), but the published Antiochian and Greek calendars read the day's readings. Use them only when this commemoration is celebrated, e.g. as a patronal feast."
+  },
+  {
+   "id": "1105.galaktion",
+   "date": "11-05",
+   "rank": "martyr",
+   "weekday": "optional",
+   "name": "Martyrs Galaktion and Episteme of Emesa (Homs)",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Heb 10:32-38"]}
+   ],
+   "confidence": "medium",
+   "sources": ["ANT-OLG", "GOA", "GOA-DCS"],
+   "note": "The service books print these readings (GOA DCS 2026, headed \"For the Martyrs\"), but the published Antiochian and Greek calendars read the day's readings. Use them only when this commemoration is celebrated, e.g. as a patronal feast. Martyrs of Emesa (Homs, Syria)."
+  },
+  {
+   "id": "1106.paul_confessor",
+   "date": "11-06",
+   "rank": "hieromartyr",
+   "weekday": "replaces",
+   "sunday": "sunday",
+   "name": "St Paul the Confessor, Archbishop of Constantinople",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Heb 8:1-6"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Luke 12:8-12"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT", "GOA", "GOA-DCS", "OCA"]
+  },
+  {
+   "id": "1107.melitene",
+   "date": "11-07",
+   "rank": "martyr",
+   "weekday": "optional",
+   "name": "The 33 Martyrs of Melitene; St Lazarus the Wonderworker",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Heb 11:33-12:2"]}
+   ],
+   "confidence": "medium",
+   "sources": ["ANT-OLG", "GOA", "GOA-DCS"],
+   "note": "The service books print these readings (GOA DCS 2026, headed \"For the Martyrs\"), but the published Antiochian and Greek calendars read the day's readings. Use them only when this commemoration is celebrated, e.g. as a patronal feast. antiochian.org lists St Raphael of Brooklyn here in 2026 (see the first-Saturday-of-November entry)."
+  },
+  {
+   "id": "1108.archangels",
+   "date": "11-08",
+   "rank": "archangel",
+   "weekday": "replaces",
+   "sunday": "epistle",
+   "name": "Synaxis of the Archangel Michael and the other Bodiless Powers",
+   "readings": [
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["Josh 5:13-15"], "served": "evening before"},
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["Judg 6:2", "Judg 6:6", "Judg 6:11-24"], "served": "evening before"},
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["Dan 10:1-21"], "served": "evening before"},
+    {"service": "Matins", "kind": "Gospel", "refs": ["Matt 18:10-20"]},
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Heb 2:2-10"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Luke 10:16-21"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT-CHART", "ANT", "GOA", "GOA-DCS", "OCA", "SCR"],
+   "slavic": "Vespers: Josh 5:13-15; Judg 6:2, 7, 11-24; Isa 14:7-20. Matins Gospel Matt 13:24-30, 36-43."
+  },
+  {
+   "id": "1109.nektarios",
+   "date": "11-09",
+   "rank": "hierarch",
+   "weekday": "replaces",
+   "sunday": "sunday",
+   "name": "St Nektarios of Pentapolis, Wonderworker of Aegina",
+   "readings": [
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["Prov 10:7", "Prov 10:6", "Prov 3:13-16", "Prov 3:18", "Prov 8:32", "Prov 8:34", "Prov 8:4", "Prov 8:12", "Prov 8:14", "Prov 8:17", "Prov 8:5-9", "Prov 22:24", "Prov 22:22", "Prov 15:4"], "composite": true, "note": "Composite of Proverbs verses beginning \"The memory of the righteous is praised\". Order as in the Greek books (GOA DCS 2026). The opening verses are Prov 10:7 and 10:6 in English Bibles (the Greek books print 10:8a, 7a); the remaining verse numbers are as printed there (Septuagint numbering) and may not match English Bibles exactly. Slavic books: same composite (OCA \"Composite 2\").", "served": "evening before"},
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["Wis 4:7-15"], "served": "evening before"},
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["Prov 10:32", "Prov 11:2", "Prov 11:5-6", "Prov 11:18", "Prov 13:2", "Prov 13:9", "Prov 15:2", "Prov 14:34", "Prov 22:12", "Wis 6:12-16", "Wis 7:30", "Wis 8:2-4", "Wis 8:7-8", "Wis 8:17-18", "Wis 8:21", "Wis 9:1-5", "Wis 9:10-11", "Wis 9:14"], "composite": true, "note": "Composite of Proverbs and Wisdom verses beginning \"The mouth of the righteous drops wisdom\". Order as in the Greek books (GOA DCS 2026); verse numbers follow the Septuagint, and the Greek books also cite a Prov 10:33 that does not exist in English Bibles (omitted here). The Slavic books read Prov 10:31-11:12 instead.", "served": "evening before"},
+    {"service": "Matins", "kind": "Gospel", "refs": ["Matt 24:42-47"]},
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Eph 5:8-19"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Matt 4:25-5:12"]}
+   ],
+   "confidence": "medium",
+   "sources": ["ANT-OLG", "ANT", "GOA", "GOA-DCS", "OCA"],
+   "note": "On a Sunday the Sunday readings were read (goarch.org 2025). The Matins Gospel and the Liturgy readings are those printed every year by goarch.org and antiochian.org; they are not the usual hierarch readings."
+  },
+  {
+   "id": "1110.apostles_70",
+   "date": "11-10",
+   "rank": "apostle",
+   "weekday": "epistle",
+   "sunday": "sunday",
+   "name": "Apostles of the Seventy Erastus, Olympas, Rodion, Sosipater, Quartus and Tertius",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["1 Cor 4:9-16"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT", "GOA", "GOA-DCS", "OCA"]
+  },
+  {
+   "id": "1111.menas",
+   "date": "11-11",
+   "rank": "martyr",
+   "weekday": "epistle",
+   "sunday": "epistle",
+   "name": "Martyrs Menas, Victor and Vincent; St Theodore the Studite",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["2 Cor 4:6-15"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT", "GOA", "GOA-DCS", "OCA"],
+   "note": "On a Sunday the martyr's Epistle was read with the Sunday Gospel (goarch.org and antiochian.org 2018)."
+  },
+  {
+   "id": "1112.john_merciful",
+   "date": "11-12",
+   "rank": "hierarch",
+   "weekday": "replaces",
+   "sunday": "epistle",
+   "name": "St John the Merciful, Patriarch of Alexandria; St Nilus of Sinai",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["2 Cor 9:6-11"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Matt 5:14-19"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT", "GOA", "GOA-DCS", "OCA"]
+  },
+  {
+   "id": "1113.chrysostom",
+   "date": "11-13",
+   "rank": "hierarch",
+   "weekday": "replaces",
+   "sunday": "epistle",
+   "name": "St John Chrysostom, Archbishop of Constantinople",
+   "readings": [
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["Prov 10:7", "Prov 10:6", "Prov 3:13-16", "Prov 3:18", "Prov 8:32", "Prov 8:34", "Prov 8:4", "Prov 8:12", "Prov 8:14", "Prov 8:17", "Prov 8:5-9", "Prov 22:24", "Prov 22:22", "Prov 15:4"], "composite": true, "note": "Composite of Proverbs verses beginning \"The memory of the righteous is praised\". Order as in the Greek books (GOA DCS 2026). The opening verses are Prov 10:7 and 10:6 in English Bibles (the Greek books print 10:8a, 7a); the remaining verse numbers are as printed there (Septuagint numbering) and may not match English Bibles exactly. Slavic books: same composite (OCA \"Composite 2\").", "served": "evening before"},
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["Wis 4:7-15"], "served": "evening before"},
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["Prov 10:32", "Prov 11:2", "Prov 11:5-6", "Prov 11:18", "Prov 13:2", "Prov 13:9", "Prov 15:2", "Prov 14:34", "Prov 22:12", "Wis 6:12-16", "Wis 7:30", "Wis 8:2-4", "Wis 8:7-8", "Wis 8:17-18", "Wis 8:21", "Wis 9:1-5", "Wis 9:10-11", "Wis 9:14"], "composite": true, "note": "Composite of Proverbs and Wisdom verses beginning \"The mouth of the righteous drops wisdom\". Order as in the Greek books (GOA DCS 2026); verse numbers follow the Septuagint, and the Greek books also cite a Prov 10:33 that does not exist in English Bibles (omitted here). The Slavic books read Prov 10:31-11:12 instead.", "served": "evening before"},
+    {"service": "Matins", "kind": "Gospel", "refs": ["John 10:1-9"]},
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Heb 7:26-8:2"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["John 10:9-16"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT", "GOA", "GOA-DCS", "OCA", "SCR"],
+   "slavic": "Same Liturgy readings; Vespers: the same three Wisdom/Proverbs composites."
+  },
+  {
+   "id": "1114.gregory_palamas",
+   "date": "11-14",
+   "rank": "hierarch",
+   "weekday": "optional",
+   "name": "St Gregory Palamas, Archbishop of Thessalonica",
+   "readings": [
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["Prov 10:7", "Prov 10:6", "Prov 3:13-16", "Prov 3:18", "Prov 8:32", "Prov 8:34", "Prov 8:4", "Prov 8:12", "Prov 8:14", "Prov 8:17", "Prov 8:5-9", "Prov 22:24", "Prov 22:22", "Prov 15:4"], "composite": true, "note": "Composite of Proverbs verses beginning \"The memory of the righteous is praised\". Order as in the Greek books (GOA DCS 2026). The opening verses are Prov 10:7 and 10:6 in English Bibles (the Greek books print 10:8a, 7a); the remaining verse numbers are as printed there (Septuagint numbering) and may not match English Bibles exactly. Slavic books: same composite (OCA \"Composite 2\").", "served": "evening before"},
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["Prov 10:32", "Prov 11:2", "Prov 11:5-6", "Prov 11:18", "Prov 13:2", "Prov 13:9", "Prov 15:2", "Prov 14:34", "Prov 22:12", "Wis 6:12-16", "Wis 7:30", "Wis 8:2-4", "Wis 8:7-8", "Wis 8:17-18", "Wis 8:21", "Wis 9:1-5", "Wis 9:10-11", "Wis 9:14"], "composite": true, "note": "Composite of Proverbs and Wisdom verses beginning \"The mouth of the righteous drops wisdom\". Order as in the Greek books (GOA DCS 2026); verse numbers follow the Septuagint, and the Greek books also cite a Prov 10:33 that does not exist in English Bibles (omitted here). The Slavic books read Prov 10:31-11:12 instead.", "served": "evening before"},
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["Prov 29:2", "Wis 4:1", "Wis 4:14", "Wis 6:11", "Wis 6:18", "Wis 6:21-22", "Wis 7:15-16", "Wis 7:21-22", "Wis 7:26-27", "Wis 7:29", "Wis 10:9-10", "Wis 10:12", "Wis 7:30", "Wis 1:8", "Wis 2:1", "Wis 2:10-17", "Wis 2:19-22", "Wis 16:13", "Sir 2:11", "Wis 16:8", "Prov 3:34"], "composite": true, "note": "Composite beginning \"When the righteous man is praised, the people rejoice\" (OCA \"Composite 5\"). Order as in the Greek books (GOA DCS 2026), which cite Prov 29:2; Wis 4:1, 14; 6:11, 18, 21-22; 7:15-16, 21-22, 26-27, 29; 10:9-10, 12; 7:30; 1:8; 2:1, 10-17, 19-22; 16:13; Sir 2:11; Wis 16:8; Prov 3:37 (Septuagint; = Prov 3:34 in English Bibles).", "served": "evening before"},
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["1 Cor 12:7-11"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["John 10:9-16"]}
+   ],
+   "confidence": "medium",
+   "sources": ["ANT-OLG", "GOA", "GOA-DCS"],
+   "note": "Second commemoration of the day; the Apostle Philip's readings are read. Use only where St Gregory is kept as the main feast. St Gregory is also kept on the Second Sunday of Great Lent (Triodion; not in this table)."
+  },
+  {
+   "id": "1114.philip",
+   "date": "11-14",
+   "rank": "apostle",
+   "weekday": "replaces",
+   "sunday": "epistle",
+   "name": "Holy Apostle Philip",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["1 Cor 4:9-16"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["John 1:43-51"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT", "GOA", "GOA-DCS", "OCA"],
+   "note": "Scrivener's 19th-century table (from older manuscripts) gives Acts 8:26-39; John 1:44-55 — modern books use the readings above."
+  },
+  {
+   "id": "1115.edessa",
+   "date": "11-15",
+   "rank": "martyr",
+   "weekday": "optional",
+   "name": "Martyrs and Confessors Gurias, Samonas and Abibus of Edessa",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Eph 6:10-17"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Luke 20:46-21:4"]}
+   ],
+   "confidence": "medium",
+   "sources": ["ANT-OLG", "GOA", "GOA-DCS"],
+   "note": "The service books print these readings (GOA DCS 2026, headed \"For the Martyrs\"), but the published Antiochian and Greek calendars read the day's readings. Use them only when this commemoration is celebrated, e.g. as a patronal feast. The Nativity Fast begins."
+  },
+  {
+   "id": "1116.matthew",
+   "date": "11-16",
+   "rank": "apostle_evangelist",
+   "weekday": "replaces",
+   "sunday": "feast",
+   "name": "Holy Apostle and Evangelist Matthew",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Rom 10:11-11:2"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Matt 9:9-13"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT", "GOA", "GOA-DCS", "OCA", "SCR"],
+   "note": "On a Sunday both readings of the Evangelist are read (goarch.org 2025).",
+   "slavic": "Epistle 1 Cor 4:9-16."
+  },
+  {
+   "id": "1117.gregory_wonderworker",
+   "date": "11-17",
+   "rank": "hierarch",
+   "weekday": "epistle",
+   "sunday": "sunday",
+   "name": "St Gregory the Wonderworker, Bishop of Neocaesarea",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["1 Cor 12:7-11"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT", "GOA", "GOA-DCS", "OCA"],
+   "note": "GOA DCS also prints Matt 10:1, 5-8, not used by the published calendars."
+  },
+  {
+   "id": "1118.plato",
+   "date": "11-18",
+   "rank": "martyr",
+   "weekday": "optional",
+   "name": "Martyrs Plato of Ancyra and Romanus",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["2 Tim 2:1-10"]}
+   ],
+   "confidence": "medium",
+   "sources": ["ANT-OLG", "GOA", "GOA-DCS"],
+   "note": "The service books print these readings (GOA DCS 2026, headed \"For the Martyrs\"), but the published Antiochian and Greek calendars read the day's readings. Use them only when this commemoration is celebrated, e.g. as a patronal feast."
+  },
+  {
+   "id": "1120.gregory_decapolite",
+   "date": "11-20",
+   "rank": "hierarch",
+   "weekday": "optional",
+   "name": "Forefeast of the Entry; Venerable Gregory of Decapolis; St Proclus of Constantinople",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Heb 7:26-8:2"]}
+   ],
+   "confidence": "medium",
+   "sources": ["ANT-OLG", "GOA", "GOA-DCS"],
+   "note": "The service books print these readings (GOA DCS 2026, headed \"For the Saint\"), but the published Antiochian and Greek calendars read the day's readings. Use them only when this commemoration is celebrated, e.g. as a patronal feast."
+  },
+  {
+   "id": "1121.entry",
+   "date": "11-21",
+   "rank": "great_feast_theotokos",
+   "weekday": "own",
+   "sunday": "feast",
+   "matins_on_sunday": "feast",
+   "name": "Entry of the Most Holy Theotokos into the Temple",
+   "readings": [
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["Exod 40:1-5", "Exod 40:9-10", "Exod 40:16", "Exod 40:34-35"], "note": "English numbering; the Greek books print Exod 40:1-5, 8-9, 14, 28-29 (Septuagint).", "served": "evening before"},
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["1 Kgs 8:1-11"], "note": "Greek books (GOA DCS) read 3 Kingdoms 8:1-11 whole; Slavic books and Hapgood (1906) read 1 Kgs 8:1, 3-7, 9-11.", "served": "evening before"},
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["Ezek 43:27-44:4"], "served": "evening before"},
+    {"service": "Matins", "kind": "Gospel", "refs": ["Luke 1:39-49", "Luke 1:56"]},
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Heb 9:1-7"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Luke 10:38-42", "Luke 11:27-28"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT", "GOA", "GOA-DCS", "OCA", "HAP"],
+   "note": "On a Sunday the feast's readings replace the Sunday's (goarch.org 2021, 2027; antiochian.org 2021).",
+   "slavic": "On a Sunday Slavic use reads the Sunday readings and then the feast's."
+  },
+  {
+   "id": "1122.philemon",
+   "date": "11-22",
+   "rank": "apostle",
+   "weekday": "epistle",
+   "sunday": "sunday",
+   "name": "Apostles of the Seventy Philemon, Archippus, Apphia and Onesimus",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Phlm 1:1-25"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT", "GOA", "GOA-DCS", "OCA"]
+  },
+  {
+   "id": "1123.amphilochius",
+   "date": "11-23",
+   "rank": "hierarch",
+   "weekday": "optional",
+   "name": "Sts Amphilochius of Iconium and Gregory of Agrigentum",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Heb 13:7-16"]}
+   ],
+   "confidence": "medium",
+   "sources": ["ANT-OLG", "GOA", "GOA-DCS"],
+   "note": "The service books print these readings (GOA DCS 2026, headed \"For the Saints\"), but the published Antiochian and Greek calendars read the day's readings. Use them only when this commemoration is celebrated, e.g. as a patronal feast."
+  },
+  {
+   "id": "1124.clement_peter",
+   "date": "11-24",
+   "rank": "hieromartyr",
+   "weekday": "epistle",
+   "sunday": "sunday",
+   "name": "Hieromartyrs Clement of Rome and Peter of Alexandria",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Phil 3:20-4:3"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT", "GOA", "GOA-DCS", "OCA", "SCR"],
+   "note": "GOA DCS also prints John 15:17-16:2 (Scrivener's table: John 15:17-16:1 for St Clement), not used by the published calendars."
+  },
+  {
+   "id": "1125.catherine",
+   "date": "11-25",
+   "rank": "great_martyr",
+   "weekday": "replaces",
+   "sunday": "epistle",
+   "name": "Great Martyr Catherine of Alexandria; Leave-taking of the Entry; Great Martyr Mercurius",
+   "readings": [
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["Isa 43:9-14"], "served": "evening before"},
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["Wis 3:1-9"], "served": "evening before"},
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["Wis 5:15-6:3"], "served": "evening before"},
+    {"service": "Matins", "kind": "Gospel", "refs": ["Matt 25:1-13"]},
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Gal 3:23-4:5"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Mark 5:24-34"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT", "GOA", "GOA-DCS", "OCA"],
+   "slavic": "OCA reads the Entry readings (Heb 9:1-7; Luke 10:38-42, 11:27-28) for the Leave-taking; St Catherine's readings are read with them where she is kept."
+  },
+  {
+   "id": "1126.alypius",
+   "date": "11-26",
+   "rank": "venerable",
+   "weekday": "optional",
+   "name": "Venerable Alypius the Stylite",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["2 Cor 4:6-15"]}
+   ],
+   "confidence": "medium",
+   "sources": ["ANT-OLG", "GOA", "GOA-DCS"],
+   "note": "The service books print these readings (GOA DCS 2026, headed \"For the Devout Man\"), but the published Antiochian and Greek calendars read the day's readings. Use them only when this commemoration is celebrated, e.g. as a patronal feast."
+  },
+  {
+   "id": "1126.stylianos",
+   "date": "11-26",
+   "rank": "venerable",
+   "weekday": "optional",
+   "name": "Venerable Stylianos of Paphlagonia",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Gal 5:22-6:2"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Matt 11:27-30"]}
+   ],
+   "confidence": "medium",
+   "sources": ["ANT-OLG", "GOA", "GOA-DCS"],
+   "note": "The service books print these readings (GOA DCS 2026, headed \"For the Saint\"), but the published Antiochian and Greek calendars read the day's readings. Use them only when this commemoration is celebrated, e.g. as a patronal feast. The Gospel (Matt 11:27-30) is printed without a heading after this Epistle in GOA DCS 2026."
+  },
+  {
+   "id": "1127.james_persian",
+   "date": "11-27",
+   "rank": "great_martyr",
+   "weekday": "optional",
+   "name": "Great Martyr James the Persian",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["2 Tim 2:1-10"]}
+   ],
+   "confidence": "medium",
+   "sources": ["ANT-OLG", "GOA", "GOA-DCS"],
+   "note": "The service books print these readings (GOA DCS 2026, headed \"For the Martyr\"), but the published Antiochian and Greek calendars read the day's readings. Use them only when this commemoration is celebrated, e.g. as a patronal feast."
+  },
+  {
+   "id": "1128.stephen_new",
+   "date": "11-28",
+   "rank": "martyr",
+   "weekday": "optional",
+   "name": "Venerable Martyr Stephen the New",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["2 Tim 1:8-18"]}
+   ],
+   "confidence": "medium",
+   "sources": ["ANT-OLG", "GOA", "GOA-DCS"],
+   "note": "The service books print these readings (GOA DCS 2026, headed \"For the Devout Martyr\"), but the published Antiochian and Greek calendars read the day's readings. Use them only when this commemoration is celebrated, e.g. as a patronal feast."
+  },
+  {
+   "id": "1129.paramonus",
+   "date": "11-29",
+   "rank": "martyr",
+   "weekday": "optional",
+   "name": "Martyrs Paramonus and Philoumenus",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Rom 8:14-21"]}
+   ],
+   "confidence": "medium",
+   "sources": ["ANT-OLG", "GOA", "GOA-DCS"],
+   "note": "The service books print these readings (GOA DCS 2026, headed \"For the Martyrs\"), but the published Antiochian and Greek calendars read the day's readings. Use them only when this commemoration is celebrated, e.g. as a patronal feast."
+  },
+  {
+   "id": "1130.andrew",
+   "date": "11-30",
+   "rank": "apostle",
+   "weekday": "replaces",
+   "sunday": "feast",
+   "name": "Holy Apostle Andrew the First-called",
+   "readings": [
+    {"service": "Matins", "kind": "Gospel", "refs": ["Matt 4:18-23"]},
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["1 Cor 4:9-16"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["John 1:35-51"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT", "GOA", "GOA-DCS", "OCA", "SCR"],
+   "note": "GOA DCS ends the Gospel at John 1:52 (Scrivener's table too); goarch.org and antiochian.org print John 1:35-51."
+  },
+  {
+   "id": "1201.nahum",
+   "date": "12-01",
+   "rank": "prophet",
+   "weekday": "optional",
+   "name": "Prophet Nahum; St Philaret the Merciful",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["1 Cor 14:20-25"]}
+   ],
+   "confidence": "medium",
+   "sources": ["ANT-OLG", "GOA", "GOA-DCS"],
+   "note": "The service books print these readings (GOA DCS 2026, headed \"For the Prophet\"), but the published Antiochian and Greek calendars read the day's readings. Use them only when this commemoration is celebrated, e.g. as a patronal feast."
+  },
+  {
+   "id": "1202.habakkuk",
+   "date": "12-02",
+   "rank": "prophet",
+   "weekday": "optional",
+   "name": "Prophet Habakkuk",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Rom 11:2-12"]}
+   ],
+   "confidence": "medium",
+   "sources": ["ANT-OLG", "GOA", "GOA-DCS"],
+   "note": "The service books print these readings (GOA DCS 2026, headed \"For the Prophet\"), but the published Antiochian and Greek calendars read the day's readings. Use them only when this commemoration is celebrated, e.g. as a patronal feast."
+  },
+  {
+   "id": "1202.porphyrios",
+   "date": "12-02",
+   "rank": "venerable",
+   "weekday": "optional",
+   "name": "Venerable Porphyrios of Kafsokalyvia",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Heb 13:17-21"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Luke 6:17-23"]}
+   ],
+   "confidence": "medium",
+   "sources": ["ANT-OLG", "GOA", "GOA-DCS"],
+   "note": "The service books print these readings (GOA DCS 2026, headed \"For the Devout Man\"), but the published Antiochian and Greek calendars read the day's readings. Use them only when this commemoration is celebrated, e.g. as a patronal feast. A recent Greek commemoration; GOA DCS also prints Wisdom readings for Vespers."
+  },
+  {
+   "id": "1203.zephaniah",
+   "date": "12-03",
+   "rank": "prophet",
+   "weekday": "optional",
+   "name": "Prophet Zephaniah",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Rom 10:11-11:2"]}
+   ],
+   "confidence": "medium",
+   "sources": ["ANT-OLG", "GOA", "GOA-DCS"],
+   "note": "The service books print these readings (GOA DCS 2026, headed \"For the Prophet\"), but the published Antiochian and Greek calendars read the day's readings. Use them only when this commemoration is celebrated, e.g. as a patronal feast."
+  },
+  {
+   "id": "1204.barbara",
+   "date": "12-04",
+   "rank": "great_martyr",
+   "weekday": "replaces",
+   "sunday": "epistle",
+   "name": "Great Martyr Barbara; St John of Damascus",
+   "readings": [
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["Isa 43:9-14"], "served": "evening before"},
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["Wis 3:1-9"], "served": "evening before"},
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["Wis 4:7-15"], "served": "evening before"},
+    {"service": "Matins", "kind": "Gospel", "refs": ["Matt 25:1-13"]},
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Gal 3:23-4:5"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Mark 5:24-34"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT", "GOA", "GOA-DCS", "OCA"],
+   "note": "St John of Damascus, a monk of the Antiochian Patriarchate, shares the day; no separate readings are printed for him."
+  },
+  {
+   "id": "1205.sabbas",
+   "date": "12-05",
+   "rank": "venerable",
+   "weekday": "replaces",
+   "sunday": "epistle",
+   "name": "Venerable Sabbas the Sanctified",
+   "readings": [
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["Wis 3:1-9"], "served": "evening before"},
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["Wis 5:15-6:3"], "served": "evening before"},
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["Wis 4:7-15"], "served": "evening before"},
+    {"service": "Matins", "kind": "Gospel", "refs": ["Luke 6:17-23"]},
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Gal 5:22-6:2"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Matt 11:27-30"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT", "GOA", "GOA-DCS", "OCA"]
+  },
+  {
+   "id": "1206.nicholas",
+   "date": "12-06",
+   "rank": "hierarch",
+   "weekday": "replaces",
+   "sunday": "epistle",
+   "name": "St Nicholas the Wonderworker, Archbishop of Myra in Lycia",
+   "readings": [
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["Prov 10:7", "Prov 10:6", "Prov 3:13-16", "Prov 3:18", "Prov 8:32", "Prov 8:34", "Prov 8:4", "Prov 8:12", "Prov 8:14", "Prov 8:17", "Prov 8:5-9", "Prov 22:24", "Prov 22:22", "Prov 15:4"], "composite": true, "note": "Composite of Proverbs verses beginning \"The memory of the righteous is praised\". Order as in the Greek books (GOA DCS 2026). The opening verses are Prov 10:7 and 10:6 in English Bibles (the Greek books print 10:8a, 7a); the remaining verse numbers are as printed there (Septuagint numbering) and may not match English Bibles exactly. Slavic books: same composite (OCA \"Composite 2\").", "served": "evening before"},
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["Prov 10:31-11:12"], "note": "The Greek books print Prov 10:31-32; 11:1-10 (Septuagint); same passage.", "served": "evening before"},
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["Wis 4:7-15"], "served": "evening before"},
+    {"service": "Matins", "kind": "Gospel", "refs": ["John 10:1-9"]},
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Heb 13:17-21"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Luke 6:17-23"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT-CHART", "ANT", "GOA", "GOA-DCS", "OCA"],
+   "note": "On a Sunday: Heb 13:17-21 with the Sunday Gospel (goarch.org and antiochian.org 2020, 2026).",
+   "slavic": "On a Sunday OCA reads the Sunday readings and then St Nicholas's."
+  },
+  {
+   "id": "1207.ambrose",
+   "date": "12-07",
+   "rank": "hierarch",
+   "weekday": "optional",
+   "name": "St Ambrose, Bishop of Milan",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["2 Thess 2:13-3:5"]}
+   ],
+   "confidence": "medium",
+   "sources": ["ANT-OLG", "GOA", "GOA-DCS"],
+   "note": "The service books print these readings (GOA DCS 2026, headed \"For the Saint\"), but the published Antiochian and Greek calendars read the day's readings. Use them only when this commemoration is celebrated, e.g. as a patronal feast."
+  },
+  {
+   "id": "1208.patapius",
+   "date": "12-08",
+   "rank": "venerable",
+   "weekday": "optional",
+   "name": "Forefeast of the Conception of the Theotokos; Venerable Patapius; Apostles Sosthenes, Apollos, Cephas, Tychicus, Epaphroditus, Caesar and Onesiphorus",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["2 Thess 2:13-3:5"]}
+   ],
+   "confidence": "medium",
+   "sources": ["ANT-OLG", "GOA", "GOA-DCS"],
+   "note": "The service books print these readings (GOA DCS 2026, headed \"For the Devout Man\"), but the published Antiochian and Greek calendars read the day's readings. Use them only when this commemoration is celebrated, e.g. as a patronal feast."
+  },
+  {
+   "id": "1209.conception_theotokos",
+   "date": "12-09",
+   "rank": "theotokos_feast",
+   "weekday": "replaces",
+   "sunday": "epistle",
+   "name": "Conception of the Most Holy Theotokos by St Anna",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Gal 4:22-27"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Luke 8:16-21"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT", "GOA", "GOA-DCS", "OCA"],
+   "slavic": "Epistle Gal 4:22-31."
+  },
+  {
+   "id": "1210.menas_hermogenes",
+   "date": "12-10",
+   "rank": "martyr",
+   "weekday": "optional",
+   "name": "Martyrs Menas, Hermogenes and Eugraphus",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Eph 6:10-17"]}
+   ],
+   "confidence": "medium",
+   "sources": ["ANT-OLG", "GOA", "GOA-DCS"],
+   "note": "The service books print these readings (GOA DCS 2026, headed \"For the Martyrs\"), but the published Antiochian and Greek calendars read the day's readings. Use them only when this commemoration is celebrated, e.g. as a patronal feast."
+  },
+  {
+   "id": "1211.daniel_stylite",
+   "date": "12-11",
+   "rank": "venerable",
+   "weekday": "optional",
+   "name": "Venerable Daniel the Stylite",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Gal 5:22-6:2"]}
+   ],
+   "confidence": "medium",
+   "sources": ["ANT-OLG", "GOA", "GOA-DCS"],
+   "note": "The service books print these readings (GOA DCS 2026, headed \"For the Devout Man\"), but the published Antiochian and Greek calendars read the day's readings. Use them only when this commemoration is celebrated, e.g. as a patronal feast."
+  },
+  {
+   "id": "float.forefathers",
+   "range": {"day": "sun", "from": "12-11", "to": "12-17"},
+   "rank": "festal_sunday",
+   "weekday": "own",
+   "name": "Sunday of the Holy Forefathers",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Col 3:4-11"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Luke 14:16-24"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT-CHART", "ANT", "GOA", "GOA-DCS", "OCA"],
+   "note": "If the Sunday is the day of a saint whose Epistle is read on Sundays (St Spyridon 12 Dec, St Eleutherius 15 Dec), that Epistle replaces Col 3:4-11 and Luke 14:16-24 is kept (goarch.org 2019, 2021, 2024, 2027; antiochian.org 2021, 2024)."
+  },
+  {
+   "id": "1212.spyridon",
+   "date": "12-12",
+   "rank": "hierarch",
+   "weekday": "replaces",
+   "sunday": "epistle",
+   "name": "St Spyridon the Wonderworker, Bishop of Trimythous",
+   "readings": [
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["Prov 10:7", "Prov 10:6", "Prov 3:13-16", "Prov 3:18", "Prov 8:32", "Prov 8:34", "Prov 8:4", "Prov 8:12", "Prov 8:14", "Prov 8:17", "Prov 8:5-9", "Prov 22:24", "Prov 22:22", "Prov 15:4"], "composite": true, "note": "Composite of Proverbs verses beginning \"The memory of the righteous is praised\". Order as in the Greek books (GOA DCS 2026). The opening verses are Prov 10:7 and 10:6 in English Bibles (the Greek books print 10:8a, 7a); the remaining verse numbers are as printed there (Septuagint numbering) and may not match English Bibles exactly. Slavic books: same composite (OCA \"Composite 2\").", "served": "evening before"},
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["Prov 10:31-11:12"], "served": "evening before"},
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["Wis 4:7-15"], "served": "evening before"},
+    {"service": "Matins", "kind": "Gospel", "refs": ["John 10:1-9"]},
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Eph 5:8-19"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["John 10:9-16"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT", "GOA", "GOA-DCS", "OCA"],
+   "note": "When 12 December is the Sunday of the Forefathers: Eph 5:8-19 with Luke 14:16-24 (goarch.org and antiochian.org 2021)."
+  },
+  {
+   "id": "1213.eustratius",
+   "date": "12-13",
+   "rank": "martyr",
+   "weekday": "optional",
+   "name": "Martyrs Eustratius, Auxentius, Eugene, Mardarius and Orestes; Virgin Martyr Lucy",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Eph 6:10-17"]}
+   ],
+   "confidence": "medium",
+   "sources": ["ANT-OLG", "GOA", "GOA-DCS"],
+   "note": "The service books print these readings (GOA DCS 2026, headed \"For the Martyrs\"), but the published Antiochian and Greek calendars read the day's readings. Use them only when this commemoration is celebrated, e.g. as a patronal feast. OCA keeps St Herman of Alaska today."
+  },
+  {
+   "id": "1214.thyrsus",
+   "date": "12-14",
+   "rank": "martyr",
+   "weekday": "optional",
+   "name": "Martyrs Thyrsus, Leucius and Callinicus",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Eph 6:10-17"]}
+   ],
+   "confidence": "medium",
+   "sources": ["ANT-OLG", "GOA", "GOA-DCS"],
+   "note": "The service books print these readings (GOA DCS 2026, headed \"For the Martyrs\"), but the published Antiochian and Greek calendars read the day's readings. Use them only when this commemoration is celebrated, e.g. as a patronal feast."
+  },
+  {
+   "id": "1215.eleutherius",
+   "date": "12-15",
+   "rank": "hieromartyr",
+   "weekday": "replaces",
+   "sunday": "epistle",
+   "name": "Hieromartyr Eleutherius and his mother Anthia",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["2 Tim 1:8-18"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Mark 2:23-3:5"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT", "GOA", "GOA-DCS", "OCA"],
+   "note": "When 15 December is the Sunday of the Forefathers: 2 Tim 1:8-18 with Luke 14:16-24 (goarch.org 2019; goarch.org and antiochian.org 2024)."
+  },
+  {
+   "id": "1216.haggai",
+   "date": "12-16",
+   "rank": "prophet",
+   "weekday": "optional",
+   "name": "Prophet Haggai; St Theophano the Empress; St Modestus of Jerusalem",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Heb 7:26-8:2"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["John 10:9-16"]}
+   ],
+   "confidence": "medium",
+   "sources": ["ANT-OLG", "GOA", "GOA-DCS"],
+   "note": "The service books print these readings (GOA DCS 2026, headed \"For the Saint\"), but the published Antiochian and Greek calendars read the day's readings. Use them only when this commemoration is celebrated, e.g. as a patronal feast. The readings are labelled \"for the saint\" (a hierarch)."
+  },
+  {
+   "id": "1217.daniel",
+   "date": "12-17",
+   "rank": "prophet",
+   "weekday": "epistle",
+   "sunday": "sunday",
+   "name": "Prophet Daniel and the Three Holy Youths",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Heb 11:33-12:2"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT", "GOA", "GOA-DCS", "OCA"],
+   "note": "GOA DCS also prints readings for St Dionysios of Zakynthos (Greek local feast)."
+  },
+  {
+   "id": "float.sat_before_nativity",
+   "range": {"day": "sat", "from": "12-18", "to": "12-24"},
+   "rank": "festal_saturday",
+   "weekday": "own",
+   "name": "Saturday before the Nativity of Christ",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Gal 3:8-12"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Luke 13:19-29"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT", "GOA", "GOA-DCS", "OCA"],
+   "note": "Read even when the Saturday is 24 December (goarch.org and antiochian.org 2022); the Royal Hours are then on Friday 23 December.",
+   "slavic": "Gospel Luke 13:18-29."
+  },
+  {
+   "id": "float.sun_before_nativity",
+   "range": {"day": "sun", "from": "12-18", "to": "12-24"},
+   "rank": "festal_sunday",
+   "weekday": "own",
+   "name": "Sunday before the Nativity of Christ (Holy Fathers; the Genealogy)",
+   "readings": [
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["Gen 14:14-20"], "served": "evening before"},
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["Deut 1:8-11", "Deut 1:15-17"], "served": "evening before"},
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["Deut 10:14-18", "Deut 10:20-21"], "served": "evening before"},
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Heb 11:9-10", "Heb 11:32-40"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Matt 1:1-25"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT-CHART", "ANT", "GOA", "GOA-DCS", "OCA"],
+   "note": "Read even when the Sunday is 24 December (goarch.org and antiochian.org 2023). Vespers readings are those printed by GOA DCS 2026 for this Sunday.",
+   "slavic": "Epistle Heb 11:9-10, 17-23, 32-40."
+  },
+  {
+   "id": "1220.ignatius",
+   "date": "12-20",
+   "rank": "hieromartyr",
+   "weekday": "replaces",
+   "sunday": "sunday",
+   "name": "Hieromartyr Ignatius the God-bearer, Bishop of Antioch; forefeast of the Nativity",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Heb 10:32-38"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Mark 9:33-41"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT", "GOA", "GOA-DCS", "OCA", "SCR"],
+   "note": "Patron of the Antiochian Church (third bishop of Antioch). On a Sunday it is the Sunday before the Nativity, which is read (goarch.org 2020, 2026).",
+   "slavic": "Epistle Heb 4:14-5:6 (also in Scrivener's 19th-century table)."
+  },
+  {
+   "id": "1222.anastasia",
+   "date": "12-22",
+   "rank": "great_martyr",
+   "weekday": "optional",
+   "name": "Great Martyr Anastasia the Deliverer from Potions",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Gal 3:23-4:5"]}
+   ],
+   "confidence": "medium",
+   "sources": ["ANT-OLG", "GOA", "GOA-DCS"],
+   "note": "The service books print these readings (GOA DCS 2026, headed \"For the Holy Woman\"), but the published Antiochian and Greek calendars read the day's readings. Use them only when this commemoration is celebrated, e.g. as a patronal feast."
+  },
+  {
+   "id": "1224.royal_hours",
+   "date": "12-24",
+   "when": "24 December is Monday to Friday; otherwise on the Friday before (22 or 23 December)",
+   "rank": "eve",
+   "weekday": "own",
+   "name": "Royal (Great) Hours of the Nativity",
+   "readings": [
+    {"service": "Royal Hours", "kind": "Old Testament", "refs": ["Mic 5:2-4"], "title": "First Hour", "note": "English numbering; Greek books print Mic 5:1-3."},
+    {"service": "Royal Hours", "kind": "Epistle", "refs": ["Heb 1:1-12"], "title": "First Hour"},
+    {"service": "Royal Hours", "kind": "Gospel", "refs": ["Matt 1:18-25"], "title": "First Hour"},
+    {"service": "Royal Hours", "kind": "Old Testament", "refs": ["Bar 3:35-4:4"], "title": "Third Hour", "note": "Read under the name of Jeremiah. English Apocrypha numbering; the Septuagint (and Hapgood 1906) print Bar 3:36-4:4."},
+    {"service": "Royal Hours", "kind": "Epistle", "refs": ["Gal 3:23-4:5"], "title": "Third Hour", "note": "Greek books (GOA DCS); Slavic books and Hapgood (1906): Gal 3:23-29."},
+    {"service": "Royal Hours", "kind": "Gospel", "refs": ["Luke 2:1-20"], "title": "Third Hour"},
+    {"service": "Royal Hours", "kind": "Old Testament", "refs": ["Isa 7:10-16", "Isa 8:1-4", "Isa 8:8-10"], "title": "Sixth Hour", "note": "Greek books begin at the second half of v.8; Slavic books and Hapgood read Isa 8:9-10."},
+    {"service": "Royal Hours", "kind": "Epistle", "refs": ["Heb 1:10-2:3"], "title": "Sixth Hour"},
+    {"service": "Royal Hours", "kind": "Gospel", "refs": ["Matt 2:1-12"], "title": "Sixth Hour"},
+    {"service": "Royal Hours", "kind": "Old Testament", "refs": ["Isa 9:6-7"], "title": "Ninth Hour", "note": "English numbering; Greek books print Isa 9:5-6."},
+    {"service": "Royal Hours", "kind": "Epistle", "refs": ["Heb 2:11-18"], "title": "Ninth Hour"},
+    {"service": "Royal Hours", "kind": "Gospel", "refs": ["Matt 2:13-23"], "title": "Ninth Hour"}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "GOA", "GOA-DCS", "OCA", "HAP"],
+   "note": "If 24 December is a Saturday or Sunday, the Royal Hours are read on Friday 22 or 23 December (the Friday before)."
+  },
+  {
+   "id": "1224.vesperal_liturgy",
+   "date": "12-24",
+   "when": "24 December is Monday to Friday",
+   "rank": "eve",
+   "weekday": "own",
+   "name": "Eve of the Nativity of Christ: Vespers with the Divine Liturgy of St Basil",
+   "readings": [
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["Gen 1:1-13"], "served": "joined to the Liturgy of St Basil"},
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["Num 24:2-3", "Num 24:5-9", "Num 24:17-18"], "served": "joined to the Liturgy of St Basil"},
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["Mic 4:6-7", "Mic 5:2-4"], "note": "English numbering; Greek books print Mic 5:1-3.", "served": "joined to the Liturgy of St Basil"},
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["Isa 11:1-10"], "served": "joined to the Liturgy of St Basil"},
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["Bar 3:35-4:4"], "note": "Septuagint/Hapgood: Bar 3:36-4:4.", "served": "joined to the Liturgy of St Basil"},
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["Dan 2:31-36", "Dan 2:44-45"], "served": "joined to the Liturgy of St Basil"},
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["Isa 9:6-7"], "note": "English numbering; Greek books print Isa 9:5-6.", "served": "joined to the Liturgy of St Basil"},
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["Isa 7:10-16", "Isa 8:1-4", "Isa 8:8-10"], "note": "Slavic books and Hapgood: Isa 8:9-10.", "served": "joined to the Liturgy of St Basil"},
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Heb 1:1-12"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Luke 2:1-20"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT", "GOA", "GOA-DCS", "OCA", "HAP", "SCR"],
+   "note": "If 24 December is a Saturday or Sunday: the Liturgy of St John Chrysostom is served on 24 December with the readings of the Saturday or Sunday before the Nativity; Vespers with these eight Old Testament readings is served in the evening without the Liturgy; and the Liturgy of St Basil is served on 25 December with the Nativity readings (goarch.org and antiochian.org 2022, 2023). Parishes may shorten the Old Testament readings; the full eight are listed.",
+   "slavic": "Same; OCA ends the Baruch reading at 4:4 and begins it at 3:35."
+  },
+  {
+   "id": "1225.nativity",
+   "date": "12-25",
+   "rank": "great_feast_lord",
+   "weekday": "own",
+   "sunday": "feast",
+   "matins_on_sunday": "feast",
+   "name": "Nativity According to the Flesh of our Lord, God and Saviour Jesus Christ",
+   "readings": [
+    {"service": "Matins", "kind": "Gospel", "refs": ["Matt 1:18-25"]},
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Gal 4:4-7"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Matt 2:1-12"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT", "GOA", "GOA-DCS", "OCA", "HAP", "SCR"],
+   "note": "The Vespers readings belong to the eve (see the Vesperal Liturgy entry). If the eve fell on a Saturday or Sunday, the Liturgy of St Basil is served today with these readings."
+  },
+  {
+   "id": "1226.synaxis_theotokos",
+   "date": "12-26",
+   "rank": "theotokos_feast",
+   "weekday": "replaces",
+   "sunday": "sunday",
+   "saturday_note": "If 26 December is a Saturday, the Saturday after the Nativity is read (goarch.org and antiochian.org 2020, 2026).",
+   "name": "Synaxis of the Most Holy Theotokos",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Heb 2:11-18"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Matt 2:13-23"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT", "GOA", "GOA-DCS", "OCA", "SCR"],
+   "note": "If 26 December is a Sunday, the Sunday after the Nativity is read (goarch.org and antiochian.org 2021)."
+  },
+  {
+   "id": "float.sat_after_nativity",
+   "range": {"day": "sat", "from": "12-26", "to": "12-30"},
+   "rank": "festal_saturday",
+   "weekday": "own",
+   "name": "Saturday after the Nativity of Christ",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["1 Tim 6:11-16"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Matt 12:15-21"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT", "GOA", "GOA-DCS", "OCA", "SCR"],
+   "note": "The Saturday falling 26-30 December. If that Saturday is 27 December, St Stephen's Epistle is read with Matt 12:15-21. If the first Saturday after the Nativity is 31 December, the Saturday before Theophany is read instead (goarch.org and antiochian.org 2022). If the Nativity is itself a Saturday, the next Saturday is 1 January and these readings are omitted (goarch.org and antiochian.org 2021-2022).",
+   "slavic": "OCA moves these readings to 31 December when the Nativity is a Saturday, and combines them with the Saturday before Theophany when one Saturday is both."
+  },
+  {
+   "id": "float.sun_after_nativity",
+   "range": {"day": "sun", "from": "12-26", "to": "12-30"},
+   "rank": "festal_sunday",
+   "weekday": "own",
+   "name": "Sunday after the Nativity of Christ (Joseph the Betrothed, David the King, James the Brother of the Lord)",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Gal 1:11-19"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Matt 2:13-23"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT-CHART", "ANT", "GOA", "GOA-DCS", "OCA"],
+   "note": "The Sunday falling 26-30 December. If it is 27 December, St Stephen's Epistle replaces Gal 1:11-19 (goarch.org and antiochian.org 2020, 2026). If the first Sunday after the Nativity is 31 December, the Sunday before Theophany is read instead (goarch.org 2023). If the Nativity is itself a Sunday, the next Sunday is 1 January and these readings are omitted (goarch.org and antiochian.org 2022-2023).",
+   "slavic": "OCA reads these readings on 31 December too, and moves them to 26 December when the Nativity is a Sunday."
+  },
+  {
+   "id": "1227.stephen",
+   "date": "12-27",
+   "rank": "apostle",
+   "weekday": "replaces",
+   "sunday": "epistle",
+   "saturday": "epistle",
+   "saturday_note": "If 27 December is a Saturday: Acts 6:8-7:5, 47-60 with the Saturday-after-the-Nativity Gospel Matt 12:15-21 (goarch.org and antiochian.org 2025).",
+   "name": "Holy Protomartyr and Archdeacon Stephen",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Acts 6:8-7:5", "Acts 7:47-60"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Matt 21:33-42"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT-CHART", "ANT", "GOA", "GOA-DCS", "OCA"],
+   "note": "If 27 December is a Sunday: Acts 6:8-7:5, 47-60 with the Sunday-after-the-Nativity Gospel Matt 2:13-23 (goarch.org and antiochian.org 2020, 2026; Antiochian 2026 chart)."
+  },
+  {
+   "id": "1228.nicomedia",
+   "date": "12-28",
+   "rank": "martyr",
+   "weekday": "gospel",
+   "sunday": "sunday",
+   "name": "The 20,000 Martyrs burned in Nicomedia",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Luke 14:25-35"]}
+   ],
+   "confidence": "medium",
+   "sources": ["ANT", "GOA", "OCA"]
+  },
+  {
+   "id": "1229.innocents",
+   "date": "12-29",
+   "rank": "martyr",
+   "weekday": "replaces",
+   "sunday": "sunday",
+   "name": "The 14,000 Holy Infants slain by Herod in Bethlehem",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Heb 2:11-18"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Matt 2:13-23"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT", "GOA", "GOA-DCS", "OCA"],
+   "note": "On a Sunday it is the Sunday after the Nativity, which is read (goarch.org 2019, 2024)."
+  },
+  {
+   "id": "float.sat_before_theophany",
+   "range": {"day": "sat", "from": "12-31", "to": "01-05", "except": "01-01"},
+   "rank": "festal_saturday",
+   "weekday": "own",
+   "name": "Saturday before Theophany",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["1 Tim 3:13-4:5"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Matt 3:1-6"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT", "GOA", "GOA-DCS", "OCA", "SCR"],
+   "note": "The Saturday in the six days before Theophany (31 December to 5 January). If that Saturday is 1 January (Circumcision), or if Theophany is itself a Saturday (so the Saturday before is 30 December and is kept as the Saturday after the Nativity), these readings are read on 3 January instead (goarch.org 2018, 2022, 2024; antiochian.org 2022). In 2024 antiochian.org printed the 3 January readings instead. If the Saturday is 5 January, the Liturgy of St John Chrysostom is served with these readings and the Royal Hours are on Friday 4 January.",
+   "slavic": "Epistle 1 Tim 3:14-4:5; Gospel Matt 3:1-11."
+  },
+  {
+   "id": "float.sun_before_theophany",
+   "range": {"day": "sun", "from": "12-31", "to": "01-05", "except": "01-01"},
+   "rank": "festal_sunday",
+   "weekday": "own",
+   "name": "Sunday before Theophany",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["2 Tim 4:5-8"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Mark 1:1-8"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT-CHART", "ANT", "GOA", "GOA-DCS", "OCA", "SCR"],
+   "note": "The Sunday in the six days before Theophany (31 December to 5 January). If it is 31 December it replaces the Sunday after the Nativity (goarch.org 2023). If that Sunday is 1 January (Circumcision), or if Theophany is itself a Sunday (so the Sunday before is 30 December and is kept as the Sunday after the Nativity), these readings are read on 3 January instead (goarch.org 2019, 2023; antiochian.org 2023). If the Sunday is 5 January, the Liturgy of St John Chrysostom is served with these readings and the Royal Hours are on Friday 3 January."
+  },
+  {
+   "id": "0101.circumcision_basil",
+   "date": "01-01",
+   "rank": "feast_lord",
+   "weekday": "own",
+   "sunday": "feast",
+   "name": "Circumcision of our Lord according to the Flesh; St Basil the Great",
+   "readings": [
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["Gen 17:1-2", "Gen 17:4-7", "Gen 17:3", "Gen 17:9-12", "Gen 17:14"], "note": "Verse order as in the Greek books (GOA DCS 2026). OCA: Gen 17:1-2, 4-12, 14.", "served": "evening before"},
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["Prov 8:22-30"], "note": "The Greek books print Prov 8:23-30 (Septuagint); same passage.", "served": "evening before"},
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["Prov 10:32", "Prov 11:2", "Prov 11:5-6", "Prov 11:18", "Prov 13:2", "Prov 13:9", "Prov 15:2", "Prov 14:34", "Prov 22:12", "Wis 6:12-16", "Wis 7:30", "Wis 8:2-4", "Wis 8:7-8", "Wis 8:17-18", "Wis 8:21", "Wis 9:1-5", "Wis 9:10-11", "Wis 9:14"], "composite": true, "note": "Composite of Proverbs and Wisdom verses beginning \"The mouth of the righteous drops wisdom\". Order as in the Greek books (GOA DCS 2026); verse numbers follow the Septuagint, and the Greek books also cite a Prov 10:33 that does not exist in English Bibles (omitted here). The Slavic books read Prov 10:31-11:12 instead.", "served": "evening before"},
+    {"service": "Matins", "kind": "Gospel", "refs": ["John 10:1-9"], "note": "Of St Basil (goarch.org). OCA: John 10:9-16."},
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Col 2:8-12"], "title": "Circumcision"},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Luke 2:20-21", "Luke 2:40-52"], "title": "Circumcision"}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT", "GOA", "GOA-DCS", "OCA", "HAP"],
+   "note": "The Liturgy of St Basil is served. Greek and Antiochian calendars read only the Circumcision readings at the Liturgy (goarch.org every year; antiochian.org 2021-2026). On a Sunday the feast replaces the Sunday readings; the Matins Gospel is the Sunday Eothinon (goarch.org and antiochian.org 2023).",
+   "slavic": "Slavic use adds St Basil: Heb 7:26-8:2; Luke 6:17-23, and reads Prov 10:31-11:12 as the third Vespers reading."
+  },
+  {
+   "id": "0102.forefeast_sylvester",
+   "date": "01-02",
+   "rank": "forefeast",
+   "weekday": "replaces",
+   "sunday": "sunday",
+   "saturday_note": "If 2 January is the Saturday before Theophany, that Saturday is read.",
+   "name": "Forefeast of Theophany; St Sylvester, Pope of Rome",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Heb 5:4-10"], "title": "St Sylvester"},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["John 3:1-15"], "title": "forefeast"}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT", "GOA", "GOA-DCS", "OCA"],
+   "note": "Greek use: the daily cycle is suspended in the forefeast and afterfeast of Theophany; each day has fixed readings.",
+   "slavic": "OCA keeps the daily readings and adds St Seraphim of Sarov (Gal 5:22-6:2; Luke 6:17-23)."
+  },
+  {
+   "id": "0103.forefeast_malachi",
+   "date": "01-03",
+   "rank": "forefeast",
+   "weekday": "replaces",
+   "sunday": "sunday",
+   "name": "Forefeast of Theophany; Prophet Malachi; Martyr Gordius",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Acts 10:44-11:10"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["John 1:18-28"]}
+   ],
+   "confidence": "low",
+   "sources": ["ANT", "GOA", "OCA"],
+   "note": "Often displaced: 3 January is the day to which the Saturday or Sunday before Theophany is moved when it cannot be kept on its own day (see those entries). These readings are those printed when 3 January was free (goarch.org 2020, 2025; antiochian.org 2024, 2025). GOA DCS 2026 prints none for this day."
+  },
+  {
+   "id": "0104.seventy_apostles",
+   "date": "01-04",
+   "rank": "apostle",
+   "weekday": "replaces",
+   "sunday": "sunday",
+   "saturday_note": "If 4 January is the Saturday before Theophany, that Saturday is read.",
+   "name": "Synaxis of the Seventy Apostles; forefeast of Theophany",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["1 Cor 4:9-16"], "title": "Seventy Apostles"},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["John 1:18-28"], "title": "forefeast"}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT", "GOA", "GOA-DCS", "OCA"]
+  },
+  {
+   "id": "0105.royal_hours",
+   "date": "01-05",
+   "when": "5 January is Monday to Friday; otherwise on the Friday before (3 or 4 January)",
+   "rank": "eve",
+   "weekday": "own",
+   "name": "Royal (Great) Hours of Theophany",
+   "readings": [
+    {"service": "Royal Hours", "kind": "Old Testament", "refs": ["Isa 35:1-10"], "title": "First Hour"},
+    {"service": "Royal Hours", "kind": "Epistle", "refs": ["Acts 13:25-32"], "title": "First Hour", "note": "Slavic books: Acts 13:25-33."},
+    {"service": "Royal Hours", "kind": "Gospel", "refs": ["Matt 3:1-6"], "title": "First Hour", "note": "Slavic books: Matt 3:1-11 (Hapgood 1906: Matt 3:1-12)."},
+    {"service": "Royal Hours", "kind": "Old Testament", "refs": ["Isa 1:16-20"], "title": "Third Hour"},
+    {"service": "Royal Hours", "kind": "Epistle", "refs": ["Acts 19:1-8"], "title": "Third Hour"},
+    {"service": "Royal Hours", "kind": "Gospel", "refs": ["Mark 1:1-8"], "title": "Third Hour"},
+    {"service": "Royal Hours", "kind": "Old Testament", "refs": ["Isa 12:3-6"], "title": "Sixth Hour"},
+    {"service": "Royal Hours", "kind": "Epistle", "refs": ["Rom 6:3-11"], "title": "Sixth Hour"},
+    {"service": "Royal Hours", "kind": "Gospel", "refs": ["Mark 1:9-11"], "title": "Sixth Hour", "note": "Slavic books and Hapgood: Mark 1:9-15."},
+    {"service": "Royal Hours", "kind": "Old Testament", "refs": ["Isa 49:8-15"], "title": "Ninth Hour"},
+    {"service": "Royal Hours", "kind": "Epistle", "refs": ["Titus 2:11-14", "Titus 3:4-7"], "title": "Ninth Hour"},
+    {"service": "Royal Hours", "kind": "Gospel", "refs": ["Luke 3:1-18"], "title": "Ninth Hour", "note": "Greek books (GOA DCS 2026; also New Liturgical Movement 2017). Slavic books and Hapgood: Matt 3:13-17."}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "GOA", "GOA-DCS", "OCA", "HAP", "NLM"],
+   "note": "If 5 January is a Saturday or Sunday, the Royal Hours are read on the Friday before (4 or 3 January)."
+  },
+  {
+   "id": "0105.vesperal_liturgy",
+   "date": "01-05",
+   "when": "5 January is Monday to Friday",
+   "rank": "eve",
+   "weekday": "own",
+   "name": "Eve of Theophany: Vespers with the Divine Liturgy of St Basil, and the Great Blessing of Waters",
+   "readings": [
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["Gen 1:1-13"], "served": "joined to the Liturgy of St Basil"},
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["Exod 14:15-18", "Exod 14:21-23", "Exod 14:27-29"], "served": "joined to the Liturgy of St Basil"},
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["Exod 15:22-16:1"], "served": "joined to the Liturgy of St Basil"},
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["Josh 3:7-8", "Josh 3:15-17"], "served": "joined to the Liturgy of St Basil"},
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["2 Kgs 2:6-14"], "served": "joined to the Liturgy of St Basil"},
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["2 Kgs 5:9-14"], "served": "joined to the Liturgy of St Basil"},
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["Isa 1:16-20"], "served": "joined to the Liturgy of St Basil"},
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["Gen 32:1-10"], "note": "English numbering; the Greek books print Gen 32:2-10 (Septuagint).", "served": "joined to the Liturgy of St Basil"},
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["Exod 2:5-10"], "served": "joined to the Liturgy of St Basil"},
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["Judg 6:36-40"], "served": "joined to the Liturgy of St Basil"},
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["1 Kgs 18:30-39"], "served": "joined to the Liturgy of St Basil"},
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["2 Kgs 2:19-22"], "served": "joined to the Liturgy of St Basil"},
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["Isa 49:8-15"], "served": "joined to the Liturgy of St Basil"},
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["1 Cor 9:19-27"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Luke 3:1-18"]},
+    {"service": "Great Blessing of Waters", "kind": "Old Testament", "refs": ["Isa 35:1-10"]},
+    {"service": "Great Blessing of Waters", "kind": "Old Testament", "refs": ["Isa 55:1-13"]},
+    {"service": "Great Blessing of Waters", "kind": "Old Testament", "refs": ["Isa 12:3-6"]},
+    {"service": "Great Blessing of Waters", "kind": "Epistle", "refs": ["1 Cor 10:1-4"]},
+    {"service": "Great Blessing of Waters", "kind": "Gospel", "refs": ["Mark 1:9-11"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT", "GOA", "GOA-DCS", "OCA", "HAP", "SCR"],
+   "note": "If 5 January is a Saturday or Sunday: the Liturgy of St John Chrysostom is served on 5 January with the readings of the Saturday or Sunday before Theophany (goarch.org 2019, 2020, 2025); Vespers with these thirteen Old Testament readings is served without the Liturgy, followed by the Great Blessing of Waters; and the Liturgy of St Basil is served on 6 January. Many Greek and Antiochian parishes also perform the Great Blessing of Waters on 6 January after the Liturgy, with the same readings.",
+   "slavic": "Same readings; Hapgood (1906) joins the Epistle as 1 Cor 9:19-27, 10:1-4."
+  },
+  {
+   "id": "0106.theophany",
+   "date": "01-06",
+   "rank": "great_feast_lord",
+   "weekday": "own",
+   "sunday": "feast",
+   "matins_on_sunday": "feast",
+   "name": "Holy Theophany of our Lord, God and Saviour Jesus Christ",
+   "readings": [
+    {"service": "Matins", "kind": "Gospel", "refs": ["Mark 1:9-11"]},
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Titus 2:11-14", "Titus 3:4-7"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Matt 3:13-17"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT", "GOA", "GOA-DCS", "OCA", "HAP", "SCR"],
+   "note": "Liturgy of St John Chrysostom, or of St Basil if the eve fell on a Saturday or Sunday."
+  },
+  {
+   "id": "0107.synaxis_forerunner",
+   "date": "01-07",
+   "rank": "forerunner_feast",
+   "weekday": "replaces",
+   "sunday": "feast",
+   "saturday_note": "Kept on a Saturday too; the Saturday after Theophany then moves to 14 January (goarch.org 2023).",
+   "name": "Synaxis of St John the Baptist and Forerunner",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Acts 19:1-8"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["John 1:29-34"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT", "GOA", "GOA-DCS", "OCA", "SCR"],
+   "note": "On a Sunday the Synaxis replaces the Sunday readings, and the Sunday after Theophany moves to 14 January (goarch.org 2018, 2024; antiochian.org 2024)."
+  },
+  {
+   "id": "0108.afterfeast",
+   "date": "01-08",
+   "rank": "afterfeast",
+   "weekday": "replaces",
+   "sunday": "sunday",
+   "saturday_note": "If this day is the Saturday after Theophany, that Saturday is read.",
+   "name": "Afterfeast of Theophany; St George the Chozebite, St Domnica",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Rom 6:3-11"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["John 3:22-33"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT", "GOA", "GOA-DCS", "OCA"],
+   "note": "Greek use: fixed afterfeast readings replace the daily cycle until the Leave-taking on 14 January. On a Sunday the Sunday after Theophany is read.",
+   "slavic": "Slavic use keeps the daily readings on these days."
+  },
+  {
+   "id": "float.sat_after_theophany",
+   "range": {"day": "sat", "from": "01-08", "to": "01-14"},
+   "rank": "festal_saturday",
+   "weekday": "own",
+   "name": "Saturday after Theophany",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Eph 6:10-17"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Matt 4:1-11"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT", "GOA", "GOA-DCS", "OCA", "SCR"],
+   "note": "The first Saturday after the Synaxis of the Forerunner (8-14 January). If it is 11 January, St Theodosius's Epistle (Heb 13:7-16) is read with Matt 4:1-11 (goarch.org 2020).",
+   "slavic": "OCA counts the Saturday from 7 January."
+  },
+  {
+   "id": "float.sun_after_theophany",
+   "range": {"day": "sun", "from": "01-08", "to": "01-14"},
+   "rank": "festal_sunday",
+   "weekday": "own",
+   "name": "Sunday after Theophany",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Eph 4:7-13"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Matt 4:12-17"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT-CHART", "ANT", "GOA", "GOA-DCS", "OCA", "SCR"],
+   "note": "The first Sunday after the Synaxis of the Forerunner (8-14 January). If it is 11 January, St Theodosius's Epistle (Heb 13:7-16) is read with Matt 4:12-17 (goarch.org and antiochian.org 2026).",
+   "slavic": "OCA counts the Sunday from 7 January."
+  },
+  {
+   "id": "0109.afterfeast_polyeuctus",
+   "date": "01-09",
+   "rank": "afterfeast",
+   "weekday": "replaces",
+   "sunday": "sunday",
+   "saturday_note": "If this day is the Saturday after Theophany, that Saturday is read.",
+   "name": "Afterfeast of Theophany; Martyr Polyeuctus",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["2 Tim 2:1-10"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Mark 1:9-15"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT", "GOA", "GOA-DCS", "OCA"],
+   "note": "Greek use: fixed afterfeast readings replace the daily cycle until the Leave-taking on 14 January. On a Sunday the Sunday after Theophany is read.",
+   "slavic": "Slavic use keeps the daily readings on these days."
+  },
+  {
+   "id": "0110.afterfeast_gregory_nyssa",
+   "date": "01-10",
+   "rank": "afterfeast",
+   "weekday": "replaces",
+   "sunday": "sunday",
+   "saturday_note": "If this day is the Saturday after Theophany, that Saturday is read.",
+   "name": "Afterfeast of Theophany; St Gregory of Nyssa",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Eph 4:7-13"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Luke 3:19-22"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT", "GOA", "GOA-DCS", "OCA"],
+   "note": "Greek use: fixed afterfeast readings replace the daily cycle until the Leave-taking on 14 January. On a Sunday the Sunday after Theophany is read.",
+   "slavic": "Slavic use keeps the daily readings on these days."
+  },
+  {
+   "id": "0111.theodosius",
+   "date": "01-11",
+   "rank": "venerable",
+   "weekday": "replaces",
+   "sunday": "epistle",
+   "saturday": "epistle",
+   "saturday_note": "If 11 January is the Saturday after Theophany: Heb 13:7-16 with Matt 4:1-11 (goarch.org 2020).",
+   "name": "Venerable Theodosius the Cenobiarch; afterfeast of Theophany",
+   "readings": [
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["Wis 3:1-9"], "served": "evening before"},
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["Wis 5:15-6:3"], "served": "evening before"},
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["Wis 4:7-15"], "served": "evening before"},
+    {"service": "Matins", "kind": "Gospel", "refs": ["Luke 6:17-23"]},
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Heb 13:7-16"], "title": "St Theodosius"},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Luke 4:1-15"], "title": "afterfeast"}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT-CHART", "ANT", "GOA", "GOA-DCS", "OCA"],
+   "note": "If 11 January is the Sunday after Theophany: Heb 13:7-16 with Matt 4:12-17 (goarch.org and antiochian.org 2026; Antiochian 2026 chart).",
+   "slavic": "OCA: 2 Cor 4:6-15; Matt 11:27-30."
+  },
+  {
+   "id": "0112.afterfeast_tatiana",
+   "date": "01-12",
+   "rank": "afterfeast",
+   "weekday": "replaces",
+   "sunday": "sunday",
+   "saturday_note": "If this day is the Saturday after Theophany, that Saturday is read.",
+   "name": "Afterfeast of Theophany; Martyr Tatiana",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Acts 18:22-28"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["John 10:39-42"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT", "GOA", "GOA-DCS", "OCA"],
+   "note": "Greek use: fixed afterfeast readings replace the daily cycle until the Leave-taking on 14 January. On a Sunday the Sunday after Theophany is read.",
+   "slavic": "Slavic use keeps the daily readings on these days."
+  },
+  {
+   "id": "0113.afterfeast_hermylus",
+   "date": "01-13",
+   "rank": "afterfeast",
+   "weekday": "replaces",
+   "sunday": "sunday",
+   "saturday_note": "If this day is the Saturday after Theophany, that Saturday is read.",
+   "name": "Afterfeast of Theophany; Martyrs Hermylus and Stratonicus",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Gal 3:23-4:5"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Luke 20:1-8"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT", "GOA", "GOA-DCS", "OCA"],
+   "note": "Greek use: fixed afterfeast readings replace the daily cycle until the Leave-taking on 14 January. On a Sunday the Sunday after Theophany is read.",
+   "slavic": "Slavic use keeps the daily readings on these days."
+  },
+  {
+   "id": "0114.leavetaking_theophany",
+   "date": "01-14",
+   "rank": "leavetaking",
+   "weekday": "replaces",
+   "sunday": "sunday",
+   "saturday_note": "If 14 January is the Saturday after Theophany (when 7 January was a Saturday), that Saturday is read (goarch.org 2023).",
+   "name": "Leave-taking of Theophany; Holy Fathers slain at Sinai and Raithu",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Acts 2:38-43"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Luke 4:1-15"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT", "GOA", "GOA-DCS", "OCA"],
+   "note": "If 14 January is the Sunday after Theophany (when 7 January was a Sunday), that Sunday is read (goarch.org 2018, 2024). GOA DCS also prints readings for the Fathers of Sinai and Raithu (Heb 10:32-38; Luke 12:32-40), not used by the published calendars.",
+   "slavic": "Slavic use keeps the daily readings."
+  },
+  {
+   "id": "0115.paul_thebes",
+   "date": "01-15",
+   "rank": "venerable",
+   "weekday": "replaces",
+   "sunday": "sunday",
+   "name": "Venerable Paul of Thebes and John the Hut-dweller",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Gal 5:22-6:2"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Luke 12:32-40"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT", "GOA", "GOA-DCS", "OCA"]
+  },
+  {
+   "id": "0116.chains_peter",
+   "date": "01-16",
+   "rank": "apostle",
+   "weekday": "replaces",
+   "sunday": "sunday",
+   "name": "Veneration of the Precious Chains of the Apostle Peter",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Acts 12:1-11"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["John 21:14-25"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT", "GOA", "GOA-DCS", "OCA"],
+   "slavic": "Gospel John 21:15-25."
+  },
+  {
+   "id": "0117.anthony",
+   "date": "01-17",
+   "rank": "venerable",
+   "weekday": "replaces",
+   "sunday": "epistle",
+   "name": "Venerable Anthony the Great",
+   "readings": [
+    {"service": "Matins", "kind": "Gospel", "refs": ["Matt 11:27-30"]},
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Heb 13:17-21"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Luke 6:17-23"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT", "GOA", "GOA-DCS", "OCA"]
+  },
+  {
+   "id": "0118.athanasius_cyril",
+   "date": "01-18",
+   "rank": "hierarch",
+   "weekday": "replaces",
+   "sunday": "epistle",
+   "name": "Sts Athanasius the Great and Cyril, Patriarchs of Alexandria",
+   "readings": [
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["Deut 1:8-11", "Deut 1:15-17"], "served": "evening before"},
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["Deut 10:14-18", "Deut 10:20-21"], "served": "evening before"},
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["Wis 3:1-9"], "served": "evening before"},
+    {"service": "Matins", "kind": "Gospel", "refs": ["John 10:1-9"]},
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Heb 13:7-16"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Matt 5:14-19"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT-CHART", "ANT", "GOA", "GOA-DCS", "OCA"],
+   "note": "On a Sunday: Heb 13:7-16 with the Sunday Gospel (goarch.org and antiochian.org 2026; Antiochian 2026 chart)."
+  },
+  {
+   "id": "0119.macarius",
+   "date": "01-19",
+   "rank": "venerable",
+   "weekday": "epistle",
+   "sunday": "sunday",
+   "name": "Venerable Macarius the Great of Egypt; St Mark of Ephesus",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Gal 5:22-6:2"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA"]
+  },
+  {
+   "id": "0120.euthymius",
+   "date": "01-20",
+   "rank": "venerable",
+   "weekday": "replaces",
+   "sunday": "epistle",
+   "name": "Venerable Euthymius the Great",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["2 Cor 4:6-15"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Luke 6:17-23"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT", "GOA", "GOA-DCS", "OCA"],
+   "slavic": "OCA: Heb 13:17-21; Luke 6:17-23."
+  },
+  {
+   "id": "0121.maximus",
+   "date": "01-21",
+   "rank": "venerable",
+   "weekday": "replaces",
+   "sunday": "sunday",
+   "name": "Venerable Maximus the Confessor",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Phil 1:12-20"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Luke 12:8-12"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT", "GOA", "GOA-DCS", "OCA"]
+  },
+  {
+   "id": "0122.timothy",
+   "date": "01-22",
+   "rank": "apostle",
+   "weekday": "replaces",
+   "sunday": "sunday",
+   "name": "Apostle Timothy of the Seventy; Venerable Martyr Anastasius the Persian",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["2 Tim 1:3-8"], "note": "GOA DCS: 2 Tim 1:3-9."},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Matt 10:32-33", "Matt 10:37-38", "Matt 19:27-30"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT", "GOA", "GOA-DCS", "OCA", "SCR"]
+  },
+  {
+   "id": "0123.clement_ancyra",
+   "date": "01-23",
+   "rank": "hieromartyr",
+   "weekday": "replaces",
+   "sunday": "sunday",
+   "name": "Hieromartyr Clement of Ancyra and Martyr Agathangelus",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Phil 3:20-4:3"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Mark 2:23-3:5"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT", "GOA", "GOA-DCS", "OCA"]
+  },
+  {
+   "id": "0124.xenia",
+   "date": "01-24",
+   "rank": "venerable",
+   "weekday": "epistle",
+   "sunday": "sunday",
+   "name": "Venerable Xenia of Rome",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Gal 5:22-6:2"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT", "GOA", "GOA-DCS", "OCA"]
+  },
+  {
+   "id": "0125.gregory_theologian",
+   "date": "01-25",
+   "rank": "hierarch",
+   "weekday": "replaces",
+   "sunday": "epistle",
+   "name": "St Gregory the Theologian, Archbishop of Constantinople",
+   "readings": [
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["Prov 10:7", "Prov 10:6", "Prov 3:13-16", "Prov 3:18", "Prov 8:32", "Prov 8:34", "Prov 8:4", "Prov 8:12", "Prov 8:14", "Prov 8:17", "Prov 8:5-9", "Prov 22:24", "Prov 22:22", "Prov 15:4"], "composite": true, "note": "Composite of Proverbs verses beginning \"The memory of the righteous is praised\". Order as in the Greek books (GOA DCS 2026). The opening verses are Prov 10:7 and 10:6 in English Bibles (the Greek books print 10:8a, 7a); the remaining verse numbers are as printed there (Septuagint numbering) and may not match English Bibles exactly. Slavic books: same composite (OCA \"Composite 2\").", "served": "evening before"},
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["Wis 4:7-15"], "served": "evening before"},
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["Prov 10:32", "Prov 11:2", "Prov 11:5-6", "Prov 11:18", "Prov 13:2", "Prov 13:9", "Prov 15:2", "Prov 14:34", "Prov 22:12", "Wis 6:12-16", "Wis 7:30", "Wis 8:2-4", "Wis 8:7-8", "Wis 8:17-18", "Wis 8:21", "Wis 9:1-5", "Wis 9:10-11", "Wis 9:14"], "composite": true, "note": "Composite of Proverbs and Wisdom verses beginning \"The mouth of the righteous drops wisdom\". Order as in the Greek books (GOA DCS 2026); verse numbers follow the Septuagint, and the Greek books also cite a Prov 10:33 that does not exist in English Bibles (omitted here). The Slavic books read Prov 10:31-11:12 instead.", "served": "evening before"},
+    {"service": "Matins", "kind": "Gospel", "refs": ["John 10:1-9"]},
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Heb 7:26-8:2"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["John 10:9-16"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT-CHART", "ANT", "GOA", "GOA-DCS", "OCA"],
+   "note": "On a Sunday: Heb 7:26-8:2 with the Sunday Gospel (goarch.org and antiochian.org 2026; Antiochian 2026 chart).",
+   "slavic": "OCA: 1 Cor 12:7-11; John 10:9-16."
+  },
+  {
+   "id": "0127.chrysostom_relics",
+   "date": "01-27",
+   "rank": "hierarch",
+   "weekday": "replaces",
+   "sunday": "epistle",
+   "name": "Translation of the Relics of St John Chrysostom",
+   "readings": [
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["Prov 10:7", "Prov 10:6", "Prov 3:13-16", "Prov 3:18", "Prov 8:32", "Prov 8:34", "Prov 8:4", "Prov 8:12", "Prov 8:14", "Prov 8:17", "Prov 8:5-9", "Prov 22:24", "Prov 22:22", "Prov 15:4"], "composite": true, "note": "Composite of Proverbs verses beginning \"The memory of the righteous is praised\". Order as in the Greek books (GOA DCS 2026). The opening verses are Prov 10:7 and 10:6 in English Bibles (the Greek books print 10:8a, 7a); the remaining verse numbers are as printed there (Septuagint numbering) and may not match English Bibles exactly. Slavic books: same composite (OCA \"Composite 2\").", "served": "evening before"},
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["Prov 29:2", "Wis 4:1", "Wis 4:14", "Wis 6:11", "Wis 6:18", "Wis 6:21-22", "Wis 7:15-16", "Wis 7:21-22", "Wis 7:26-27", "Wis 7:29", "Wis 10:9-10", "Wis 10:12", "Wis 7:30", "Wis 1:8", "Wis 2:1", "Wis 2:10-17", "Wis 2:19-22", "Wis 16:13", "Sir 2:11", "Wis 16:8", "Prov 3:34"], "composite": true, "note": "Composite beginning \"When the righteous man is praised, the people rejoice\" (OCA \"Composite 5\"). Order as in the Greek books (GOA DCS 2026), which cite Prov 29:2; Wis 4:1, 14; 6:11, 18, 21-22; 7:15-16, 21-22, 26-27, 29; 10:9-10, 12; 7:30; 1:8; 2:1, 10-17, 19-22; 16:13; Sir 2:11; Wis 16:8; Prov 3:37 (Septuagint; = Prov 3:34 in English Bibles).", "served": "evening before"},
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["Prov 10:32", "Prov 11:2", "Prov 11:5-6", "Prov 11:18", "Prov 13:2", "Prov 13:9", "Prov 15:2", "Prov 14:34", "Prov 22:12", "Wis 6:12-16", "Wis 7:30", "Wis 8:2-4", "Wis 8:7-8", "Wis 8:17-18", "Wis 8:21", "Wis 9:1-5", "Wis 9:10-11", "Wis 9:14"], "composite": true, "note": "Composite of Proverbs and Wisdom verses beginning \"The mouth of the righteous drops wisdom\". Order as in the Greek books (GOA DCS 2026); verse numbers follow the Septuagint, and the Greek books also cite a Prov 10:33 that does not exist in English Bibles (omitted here). The Slavic books read Prov 10:31-11:12 instead.", "served": "evening before"},
+    {"service": "Matins", "kind": "Gospel", "refs": ["John 10:1-9"]},
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Heb 7:26-8:2"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["John 10:9-16"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT", "GOA", "GOA-DCS", "OCA"]
+  },
+  {
+   "id": "0128.ephraim",
+   "date": "01-28",
+   "rank": "venerable",
+   "weekday": "replaces",
+   "sunday": "sunday",
+   "name": "Venerable Ephraim the Syrian; Venerable Isaac the Syrian",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Gal 5:22-6:2"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Luke 6:17-23"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT", "GOA", "GOA-DCS", "OCA"],
+   "note": "Saints of the Syriac-speaking East, especially honoured in the Antiochian Church."
+  },
+  {
+   "id": "0129.ignatius_relics",
+   "date": "01-29",
+   "rank": "hieromartyr",
+   "weekday": "replaces",
+   "sunday": "sunday",
+   "name": "Translation of the Relics of Hieromartyr Ignatius the God-bearer of Antioch",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Heb 10:32-38"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Mark 9:33-41"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT", "GOA", "GOA-DCS", "OCA"]
+  },
+  {
+   "id": "0130.three_hierarchs",
+   "date": "01-30",
+   "rank": "hierarch",
+   "weekday": "replaces",
+   "sunday": "epistle",
+   "name": "Synaxis of the Three Hierarchs: Basil the Great, Gregory the Theologian and John Chrysostom",
+   "readings": [
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["Deut 1:8-11", "Deut 1:15-17"], "served": "evening before"},
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["Deut 10:14-18", "Deut 10:20-21"], "served": "evening before"},
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["Wis 3:1-9"], "served": "evening before"},
+    {"service": "Matins", "kind": "Gospel", "refs": ["John 10:9-16"]},
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Heb 13:7-16"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Matt 5:14-19"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT", "GOA", "GOA-DCS", "OCA"],
+   "note": "On a Sunday antiochian.org printed Heb 13:7-16 with the Sunday Gospel (2022), while goarch.org printed both readings of the feast; this table follows the Antiochian practice.",
+   "slavic": "Vespers third reading as above; OCA joins the second as Deut 10:14-21."
+  },
+  {
+   "id": "0131.cyrus_john",
+   "date": "01-31",
+   "rank": "unmercenary",
+   "weekday": "replaces",
+   "sunday": "sunday",
+   "name": "Holy Unmercenaries Cyrus and John",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["1 Cor 12:27-13:8"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Matt 10:1", "Matt 10:5-8"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT", "GOA", "GOA-DCS", "OCA"]
+  },
+  {
+   "id": "0201.tryphon",
+   "date": "02-01",
+   "rank": "martyr",
+   "weekday": "replaces",
+   "sunday": "sunday",
+   "name": "Forefeast of the Meeting of the Lord; Martyr Tryphon",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Rom 8:28-39"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Luke 10:19-21"]}
+   ],
+   "confidence": "medium",
+   "sources": ["ANT", "GOA", "OCA"],
+   "note": "On a Sunday goarch.org printed the martyr's Epistle with the Sunday Gospel (2026, Sunday of the Publican), but antiochian.org kept both Sunday readings (2 Tim 3:10-15; Luke 18:10-14). This table follows antiochian.org: Sunday readings only."
+  },
+  {
+   "id": "0202.meeting",
+   "date": "02-02",
+   "rank": "great_feast_lord",
+   "weekday": "own",
+   "sunday": "feast",
+   "matins_on_sunday": "feast",
+   "name": "Meeting (Presentation) of our Lord in the Temple",
+   "readings": [
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["Exod 12:51-13:3", "Exod 13:10-12", "Exod 13:14-16", "Lev 12:1-4", "Lev 12:6", "Lev 12:8", "Num 8:16-17"], "composite": true, "note": "One reading joined from three books (OCA \"Composite 6\"). Hapgood (1906): Exod 12:51, 13:1-3, 11-12, 14-16; Lev 12:2-4, 6, 8.", "served": "evening before"},
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["Isa 6:1-12"], "served": "evening before"},
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["Isa 19:1", "Isa 19:3-5", "Isa 19:12", "Isa 19:16", "Isa 19:19-21"], "served": "evening before"},
+    {"service": "Matins", "kind": "Gospel", "refs": ["Luke 2:25-32"]},
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Heb 7:7-17"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Luke 2:22-40"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT", "GOA", "OCA", "HAP", "SCR"],
+   "note": "On a Sunday, including a Sunday of the Triodion, the feast replaces the Sunday readings (goarch.org 2020, 2025; antiochian.org 2025). GOA DCS 2026 pages for this date were empty; the Vespers readings rest on OCA and Hapgood."
+  },
+  {
+   "id": "0203.symeon_anna",
+   "date": "02-03",
+   "rank": "righteous",
+   "weekday": "replaces",
+   "sunday": "sunday",
+   "name": "Synaxis of the Righteous Symeon the God-receiver and Anna the Prophetess",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Heb 9:11-14"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Luke 2:25-38"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "SCR"]
+  },
+  {
+   "id": "0206.photios_julian",
+   "date": "02-06",
+   "rank": "hierarch",
+   "weekday": "replaces",
+   "sunday": "sunday",
+   "name": "St Photios the Great, Patriarch of Constantinople; Martyr Julian of Homs",
+   "readings": [
+    {"service": "Matins", "kind": "Gospel", "refs": ["John 10:1-9"]},
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Heb 7:26-8:2"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["John 10:9-16"]}
+   ],
+   "confidence": "medium",
+   "sources": ["ANT", "GOA", "OCA"],
+   "note": "antiochian.org lists St Julian (Elian) of Homs, a martyr of Syria, first; the readings are St Photios's hierarch readings. On a Sunday goarch.org printed the hierarch's Epistle with the Sunday Gospel (2022), but antiochian.org kept both Sunday readings (Sunday of Zacchaeus). This table follows antiochian.org. In 2026 antiochian.org printed St Julian's martyr readings instead (see variants); the table keeps St Photios's, read in 2019-2025.",
+   "variants": [
+    {"usage": "St Julian of Homs (antiochian.org 2026)", "service": "Liturgy", "kind": "Epistle", "refs": ["2 Tim 2:1-10"]},
+    {"usage": "St Julian of Homs (antiochian.org 2026)", "service": "Liturgy", "kind": "Gospel", "refs": ["John 15:17-16:2"]}
+   ]
+  },
+  {
+   "id": "0208.theodore_stratelates",
+   "date": "02-08",
+   "rank": "great_martyr",
+   "weekday": "replaces",
+   "sunday": "sunday",
+   "name": "Great Martyr Theodore the General; Prophet Zechariah",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Eph 2:4-10"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Matt 10:16-22"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA"]
+  },
+  {
+   "id": "0210.haralambos",
+   "date": "02-10",
+   "rank": "hieromartyr",
+   "weekday": "replaces",
+   "sunday": "epistle",
+   "name": "Hieromartyr Haralambos",
+   "readings": [
+    {"service": "Matins", "kind": "Gospel", "refs": ["Luke 21:12-19"]},
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["2 Tim 2:1-10"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["John 15:17-16:2"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA"]
+  },
+  {
+   "id": "0211.blaise",
+   "date": "02-11",
+   "rank": "hieromartyr",
+   "weekday": "replaces",
+   "sunday": "sunday",
+   "name": "Hieromartyr Blaise of Sebaste",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Heb 4:14-5:6"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Matt 10:1", "Matt 10:5-8"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA"]
+  },
+  {
+   "id": "0215.onesimus",
+   "date": "02-15",
+   "rank": "apostle",
+   "weekday": "epistle",
+   "sunday": "sunday",
+   "name": "Apostle Onesimus of the Seventy",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Phlm 1:1-25"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA"]
+  },
+  {
+   "id": "0217.theodore_tyro",
+   "date": "02-17",
+   "rank": "great_martyr",
+   "weekday": "replaces",
+   "sunday": "sunday",
+   "name": "Great Martyr Theodore the Recruit (Tyro)",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["2 Tim 2:1-10"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Luke 20:46-21:4"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA"],
+   "note": "St Theodore is also commemorated on the first Saturday of Great Lent (Triodion; not in this table)."
+  },
+  {
+   "id": "0224.head_forerunner_1_2",
+   "date": "02-24",
+   "rank": "forerunner_feast",
+   "weekday": "replaces",
+   "sunday": "epistle",
+   "name": "First and Second Finding of the Head of St John the Forerunner",
+   "readings": [
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["Isa 40:1-5", "Isa 40:9", "Isa 41:17-18", "Isa 45:8", "Isa 48:20-21", "Isa 54:1"], "composite": true, "served": "evening before"},
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["Mal 3:1-3", "Mal 3:5-7", "Mal 3:12", "Mal 3:17-18", "Mal 4:4-6"], "composite": true, "note": "English numbering; the Greek books print the last verses as Mal 3:24, 22-23 (Septuagint).", "served": "evening before"},
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["Wis 4:7", "Wis 4:16-17", "Wis 4:19-20", "Wis 5:1-7"], "composite": true, "served": "evening before"},
+    {"service": "Matins", "kind": "Gospel", "refs": ["Luke 7:17-30"]},
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["2 Cor 4:6-15"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Matt 11:2-15"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT", "GOA", "GOA-DCS", "OCA"],
+   "note": "In Great Lent this feast is kept even on weekdays (Presanctified Liturgy), and its readings are printed every year (goarch.org). Vespers readings: OCA (composites 8, 9 and 3) and GOA DCS for the parallel feasts of 25 May and 29 August."
+  },
+  {
+   "id": "0309.forty_martyrs",
+   "date": "03-09",
+   "rank": "martyr",
+   "weekday": "replaces",
+   "sunday": "epistle",
+   "name": "Holy Forty Martyrs of Sebaste",
+   "readings": [
+    {"service": "Matins", "kind": "Gospel", "refs": ["Luke 21:12-19"]},
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Heb 12:1-10"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Matt 20:1-16"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT", "GOA", "GOA-DCS", "OCA"],
+   "note": "Almost always in Great Lent. On a Lenten weekday the Presanctified Liturgy is served and these readings are read (printed every year by goarch.org). On a Sunday of Lent: Heb 12:1-10 with the Sunday Gospel (goarch.org and antiochian.org 2025, Sunday of Orthodoxy)."
+  },
+  {
+   "id": "0325.annunciation",
+   "date": "03-25",
+   "rank": "great_feast_theotokos",
+   "weekday": "own",
+   "sunday": "feast",
+   "matins_on_sunday": "feast",
+   "name": "Annunciation of our Most Holy Lady the Theotokos",
+   "readings": [
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["Gen 28:10-17"], "served": "evening before"},
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["Ezek 43:27-44:4"], "served": "evening before"},
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["Prov 9:1-11"], "served": "evening before"},
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["Exod 3:1-8"], "served": "evening of the feast, in Lent only", "note": "Read only when the feast falls on a Lenten weekday, after the Lenten Genesis and Proverbs readings, at the Vespers joined to the Liturgy (Slavic) or at Vespers on the evening of the feast (Greek; GOA DCS 2026). Hapgood (1906) gives the same."},
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["Prov 8:22-30"], "served": "evening of the feast, in Lent only", "note": "As above."},
+    {"service": "Matins", "kind": "Gospel", "refs": ["Luke 1:39-49", "Luke 1:56"]},
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Heb 2:11-18"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Luke 1:24-38"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT", "GOA", "GOA-DCS", "OCA", "HAP", "SCR"],
+   "note": "The feast is never moved. On a Lenten weekday the Liturgy of St John Chrysostom is served. On a Saturday or Sunday of Lent the feast's Epistle and Gospel replace the day's (goarch.org 2018 Sunday, 2023 Saturday). When the Annunciation falls in Holy Week or on Pascha, special rules of the Typikon apply; they are not covered here.",
+   "slavic": "On a Sunday of Lent Slavic use reads the Sunday readings and then the feast's."
+  },
+  {
+   "id": "0326.synaxis_gabriel",
+   "date": "03-26",
+   "rank": "archangel",
+   "weekday": "optional",
+   "name": "Synaxis of the Archangel Gabriel",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Heb 2:2-10"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Luke 10:16-21"]}
+   ],
+   "confidence": "medium",
+   "sources": ["ANT-OLG", "GOA", "GOA-DCS"],
+   "note": "Normally in Great Lent, when no Liturgy is served on weekdays; on a Saturday or Sunday the Triodion readings are kept."
+  },
+  {
+   "id": "0423.george",
+   "date": "04-23",
+   "transfer": "If 23 April falls before Pascha (in Great Lent or Holy Week), the feast is kept on Bright Monday.",
+   "rank": "great_martyr",
+   "weekday": "replaces",
+   "sunday": "epistle",
+   "bright": "epistle",
+   "name": "Great Martyr George the Trophy-bearer",
+   "readings": [
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["Isa 43:9-14"], "served": "evening before"},
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["Wis 3:1-9"], "served": "evening before"},
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["Wis 5:15-6:3"], "served": "evening before"},
+    {"service": "Matins", "kind": "Gospel", "refs": ["Luke 21:12-19"]},
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Acts 12:1-11"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["John 15:17-16:2"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT", "GOA", "GOA-DCS", "OCA"],
+   "note": "Transferred to Bright Monday when 23 April falls before Pascha: Acts 12:1-11 with the Bright Monday Gospel John 1:18-28 (goarch.org 2019, 2021, 2022, 2024, 2027; antiochian.org 2022). In Bright Week (Tuesday to Saturday): Acts 12:1-11 with the Gospel of the day (goarch.org and antiochian.org 2025). On a Sunday: Acts 12:1-11 with the Sunday Gospel (goarch.org 2023, Thomas Sunday).",
+   "slavic": "Third Vespers reading Wis 4:7-15; Matins Gospel Luke 12:2-12. Slavic use moves the feast only from Holy Week or Pascha; OCA kept it on 23 April 2024, a Lenten weekday."
+  },
+  {
+   "id": "0425.mark",
+   "date": "04-25",
+   "rank": "apostle_evangelist",
+   "weekday": "replaces",
+   "sunday": "epistle",
+   "bright": "gospel",
+   "name": "Holy Apostle and Evangelist Mark",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["1 Pet 5:6-14"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Luke 10:16-21"]}
+   ],
+   "confidence": "medium",
+   "sources": ["ANT-OLG", "ANT", "GOA", "GOA-DCS", "OCA"],
+   "note": "Always in Great Lent, Holy Week or the Paschal season. The published calendars printed both readings on most free weekdays (antiochian.org 2020, 2023, 2024, 2026) but sometimes kept the Paschal-season readings (goarch.org 2023; Bright Friday 2025: day's Epistle with Luke 10:16-21). On Palm Sunday, Pascha or in Holy Week the day's readings are read.",
+   "slavic": "Gospel Mark 6:7-13. OCA Vespers: Jas 1:1-12; 1:13-27; 2:1-13."
+  },
+  {
+   "id": "0429.jason_sosipater",
+   "date": "04-29",
+   "rank": "apostle",
+   "weekday": "optional",
+   "name": "Apostles of the Seventy Jason and Sosipater",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["1 Cor 4:9-16"]}
+   ],
+   "confidence": "medium",
+   "sources": ["ANT-OLG", "GOA", "GOA-DCS"],
+   "note": "The service books print these readings (GOA DCS 2026, headed \"For the Apostles\"), but the published Antiochian and Greek calendars read the day's readings. Use them only when this commemoration is celebrated, e.g. as a patronal feast."
+  },
+  {
+   "id": "0430.james_zebedee",
+   "date": "04-30",
+   "rank": "apostle",
+   "weekday": "replaces",
+   "sunday": "sunday",
+   "name": "Holy Apostle James, son of Zebedee, brother of John the Theologian",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Acts 12:1-11"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Luke 9:1-6"]}
+   ],
+   "confidence": "medium",
+   "sources": ["ANT-OLG", "ANT", "GOA", "GOA-DCS", "OCA", "SCR"],
+   "note": "Usually in the Paschal season; in Holy Week and Bright Week the day's readings are read. On a Sunday the Sunday readings were read (goarch.org 2023).",
+   "slavic": "Gospel Luke 5:1-11. Scrivener's table (older manuscripts): Matt 10:1-7."
+  },
+  {
+   "id": "0501.jeremiah",
+   "date": "05-01",
+   "rank": "prophet",
+   "weekday": "optional",
+   "name": "Prophet Jeremiah",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["2 Cor 11:5-21"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Luke 4:22-30"]}
+   ],
+   "confidence": "low",
+   "sources": ["ANT-OLG", "GOA", "GOA-DCS"],
+   "note": "The service books print these readings (GOA DCS 2026, headed \"For the Prophet\"), but the published Antiochian and Greek calendars read the day's readings. Use them only when this commemoration is celebrated, e.g. as a patronal feast. Usually in the Paschal season, when the day's readings are kept."
+  },
+  {
+   "id": "0502.athanasius_relics",
+   "date": "05-02",
+   "rank": "hierarch",
+   "weekday": "replaces",
+   "sunday": "sunday",
+   "bright": "epistle",
+   "name": "Translation of the Relics of St Athanasius the Great",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Heb 13:7-16"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Matt 5:14-19"]}
+   ],
+   "confidence": "medium",
+   "sources": ["ANT-OLG", "ANT", "GOA", "GOA-DCS", "OCA"],
+   "note": "In the Paschal season the published calendars sometimes kept the Gospel of the day (goarch.org 2018, 2019)."
+  },
+  {
+   "id": "0507.cross_jerusalem",
+   "date": "05-07",
+   "rank": "feast",
+   "weekday": "epistle",
+   "sunday": "sunday",
+   "name": "Apparition of the Precious Cross in the Sky over Jerusalem (351)",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Acts 26:1", "Acts 26:12-20"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT", "GOA", "GOA-DCS", "OCA"]
+  },
+  {
+   "id": "0508.john_theologian",
+   "date": "05-08",
+   "rank": "apostle_evangelist",
+   "weekday": "replaces",
+   "sunday": "epistle",
+   "bright": "gospel",
+   "name": "Holy Apostle and Evangelist John the Theologian",
+   "readings": [
+    {"service": "Vespers", "kind": "Epistle", "refs": ["1 John 3:21-4:6"], "served": "evening before"},
+    {"service": "Vespers", "kind": "Epistle", "refs": ["1 John 4:11-16"], "served": "evening before"},
+    {"service": "Vespers", "kind": "Epistle", "refs": ["1 John 4:20-5:5"], "served": "evening before"},
+    {"service": "Matins", "kind": "Gospel", "refs": ["John 21:15-25"]},
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["1 John 1:1-7"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["John 19:25-28", "John 21:24-25"], "note": "As printed by antiochian.org and goarch.org. GOA DCS, OCA and Scrivener end the first part at John 19:27, as on 26 September."}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT", "GOA", "GOA-DCS", "OCA", "SCR"],
+   "note": "On a Saturday of the Paschal season goarch.org kept the Epistle of the day (2021, 2027). Vespers readings: OCA."
+  },
+  {
+   "id": "0509.isaiah_christopher",
+   "date": "05-09",
+   "rank": "prophet",
+   "weekday": "optional",
+   "name": "Prophet Isaiah; Martyr Christopher",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["2 Cor 11:5-21"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Luke 4:22-30"]}
+   ],
+   "confidence": "low",
+   "sources": ["ANT-OLG", "GOA", "GOA-DCS"],
+   "note": "The service books print these readings (GOA DCS 2026, headed \"For the Prophet\"), but the published Antiochian and Greek calendars read the day's readings. Use them only when this commemoration is celebrated, e.g. as a patronal feast. Slavic use keeps the Translation of the Relics of St Nicholas today (OCA: Heb 13:17-21; Luke 6:17-23)."
+  },
+  {
+   "id": "0510.simon_zealot",
+   "date": "05-10",
+   "rank": "apostle",
+   "weekday": "replaces",
+   "sunday": "sunday",
+   "name": "Holy Apostle Simon the Zealot",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["1 Cor 4:9-16"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Luke 6:12-19"]}
+   ],
+   "confidence": "medium",
+   "sources": ["ANT-OLG", "ANT", "GOA", "GOA-DCS", "OCA"],
+   "note": "On Paschal-season feasts (Bright Week, Mid-Pentecost) the day's readings are read (goarch.org 2023, 2024).",
+   "slavic": "OCA: 1 Cor 4:9-16; Matt 13:54-58."
+  },
+  {
+   "id": "0511.mocius",
+   "date": "05-11",
+   "rank": "hieromartyr",
+   "weekday": "optional",
+   "name": "Hieromartyr Mocius; Founding of Constantinople; Sts Cyril and Methodius, Enlighteners of the Slavs",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Col 3:12-16"]}
+   ],
+   "confidence": "medium",
+   "sources": ["ANT-OLG", "GOA", "GOA-DCS"],
+   "note": "The service books print these readings (GOA DCS 2026, headed \"For the Hieromartyr\"), but the published Antiochian and Greek calendars read the day's readings. Use them only when this commemoration is celebrated, e.g. as a patronal feast. The Epistle is for St Mocius. OCA reads Heb 7:26-8:2; Matt 5:14-19 for Sts Cyril and Methodius."
+  },
+  {
+   "id": "0515.pachomius",
+   "date": "05-15",
+   "rank": "venerable",
+   "weekday": "optional",
+   "name": "Venerable Pachomius the Great",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Gal 5:22-6:2"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Matt 4:23-5:13"]}
+   ],
+   "confidence": "medium",
+   "sources": ["ANT-OLG", "GOA", "GOA-DCS"],
+   "note": "The service books print these readings (GOA DCS 2026, headed \"For the Devout Man\"), but the published Antiochian and Greek calendars read the day's readings. Use them only when this commemoration is celebrated, e.g. as a patronal feast."
+  },
+  {
+   "id": "0521.constantine_helen",
+   "date": "05-21",
+   "rank": "equal_to_apostles",
+   "weekday": "replaces",
+   "sunday": "epistle",
+   "name": "Holy Equals-to-the-Apostles Constantine and Helen",
+   "readings": [
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["1 Kgs 8:22-23", "1 Kgs 8:27-30"], "served": "evening before"},
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["Isa 61:10-62:5"], "served": "evening before"},
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["Isa 60:1-16"], "served": "evening before"},
+    {"service": "Matins", "kind": "Gospel", "refs": ["John 10:9-16"]},
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Acts 26:1", "Acts 26:12-20"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["John 10:1-9"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT", "GOA", "GOA-DCS", "OCA"],
+   "note": "Vespers readings: OCA (the GOA DCS 2026 page merged them with the Ascension, which fell on 21 May 2026). On a Sunday: Acts 26:1, 12-20 with the Sunday Gospel (goarch.org 2023). If 21 May is the Ascension, the feast of the Lord prevails; goarch.org and antiochian.org 2026 printed the saints' Epistle with the Ascension Gospel, which this table does not follow."
+  },
+  {
+   "id": "0524.symeon_wondrous_mountain",
+   "date": "05-24",
+   "rank": "venerable",
+   "weekday": "optional",
+   "name": "Venerable Symeon the Stylite of the Wondrous Mountain (near Antioch)",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Col 3:12-16"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Matt 5:14-19"]}
+   ],
+   "confidence": "medium",
+   "sources": ["ANT-OLG", "GOA", "GOA-DCS"],
+   "note": "The service books print these readings (GOA DCS 2026, headed \"For the Devout Man\"), but the published Antiochian and Greek calendars read the day's readings. Use them only when this commemoration is celebrated, e.g. as a patronal feast. A saint of the Antiochian Church."
+  },
+  {
+   "id": "0525.head_forerunner_3",
+   "date": "05-25",
+   "rank": "forerunner_feast",
+   "weekday": "replaces",
+   "sunday": "epistle",
+   "name": "Third Finding of the Head of St John the Forerunner",
+   "readings": [
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["Isa 40:1-5", "Isa 40:9", "Isa 41:17-18", "Isa 45:8", "Isa 48:20-21", "Isa 54:1"], "composite": true, "served": "evening before"},
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["Mal 3:1-3", "Mal 3:5-7", "Mal 3:12", "Mal 3:17-18", "Mal 4:4-6"], "composite": true, "note": "English numbering; the Greek books print the last verses as Mal 3:24, 22-23 (Septuagint).", "served": "evening before"},
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["Wis 4:7", "Wis 4:16-17", "Wis 4:19-20", "Wis 5:1-7"], "composite": true, "served": "evening before"},
+    {"service": "Matins", "kind": "Gospel", "refs": ["Luke 7:17-30"]},
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["2 Cor 4:6-15"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Matt 11:2-15"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT", "GOA", "GOA-DCS", "OCA"]
+  },
+  {
+   "id": "0602.nikephoros",
+   "date": "06-02",
+   "rank": "hierarch",
+   "weekday": "optional",
+   "name": "St Nikephoros the Confessor, Patriarch of Constantinople",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Heb 8:1-6"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Luke 12:8-12"]}
+   ],
+   "confidence": "medium",
+   "sources": ["ANT-OLG", "GOA", "GOA-DCS"],
+   "note": "The service books print these readings (GOA DCS 2026, headed \"For the Saint\"), but the published Antiochian and Greek calendars read the day's readings. Use them only when this commemoration is celebrated, e.g. as a patronal feast."
+  },
+  {
+   "id": "0604.metrophanes",
+   "date": "06-04",
+   "rank": "hierarch",
+   "weekday": "replaces",
+   "sunday": "sunday",
+   "name": "St Metrophanes, first Patriarch of Constantinople",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Heb 7:26-8:2"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["John 10:1-9"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT", "GOA", "GOA-DCS", "OCA"]
+  },
+  {
+   "id": "0608.theodore_relics",
+   "date": "06-08",
+   "rank": "great_martyr",
+   "weekday": "replaces",
+   "sunday": "sunday",
+   "name": "Translation of the Relics of Great Martyr Theodore the General",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Eph 2:4-10"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Matt 10:16-22"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT", "GOA", "GOA-DCS", "OCA"]
+  },
+  {
+   "id": "0609.cyril_alexandria",
+   "date": "06-09",
+   "rank": "hierarch",
+   "weekday": "optional",
+   "name": "St Cyril, Archbishop of Alexandria",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Heb 7:26-8:2"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Matt 5:14-19"]}
+   ],
+   "confidence": "medium",
+   "sources": ["ANT-OLG", "GOA", "GOA-DCS"],
+   "note": "The service books print these readings (GOA DCS 2026, headed \"For the Saint\"), but the published Antiochian and Greek calendars read the day's readings. Use them only when this commemoration is celebrated, e.g. as a patronal feast."
+  },
+  {
+   "id": "0611.bartholomew_barnabas",
+   "date": "06-11",
+   "rank": "apostle",
+   "weekday": "replaces",
+   "sunday": "sunday",
+   "name": "Holy Apostles Bartholomew and Barnabas",
+   "readings": [
+    {"service": "Matins", "kind": "Gospel", "refs": ["Luke 10:16-21"]},
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Acts 11:19-30"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Luke 10:16-21"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT", "GOA", "GOA-DCS", "OCA"],
+   "note": "Barnabas preached in Antioch (Acts 11:19-30). On the Saturday of Souls and on All Saints Sunday those days' readings are read (goarch.org 2022, 2023).",
+   "slavic": "Epistle Acts 11:19-26, 29-30. Scrivener's table (older manuscripts) gives Mark 6:7-13 as the Gospel."
+  },
+  {
+   "id": "0612.onuphrius",
+   "date": "06-12",
+   "rank": "venerable",
+   "weekday": "optional",
+   "name": "Venerable Onuphrius the Great and Peter of Athos",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Rom 8:14-21"]}
+   ],
+   "confidence": "medium",
+   "sources": ["ANT-OLG", "GOA", "GOA-DCS"],
+   "note": "The service books print these readings (GOA DCS 2026, headed \"For the Devout Saints\"), but the published Antiochian and Greek calendars read the day's readings. Use them only when this commemoration is celebrated, e.g. as a patronal feast."
+  },
+  {
+   "id": "0614.elisha",
+   "date": "06-14",
+   "rank": "prophet",
+   "weekday": "gospel",
+   "name": "Prophet Elisha; St Methodius, Patriarch of Constantinople",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Jas 5:10-20"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Luke 4:22-30"]}
+   ],
+   "confidence": "medium",
+   "sources": ["ANT-OLG", "GOA", "GOA-DCS"],
+   "note": "The service books print these readings (GOA DCS 2026, headed \"For the Prophet\"), but the published Antiochian and Greek calendars read the day's readings. Use them only when this commemoration is celebrated, e.g. as a patronal feast. antiochian.org printed Luke 4:22-30 with the day's Epistle in 3 of 5 years. antiochian.org printed the Prophet's Gospel with the day's Epistle on every free weekday (2019, 2021, 2023); goarch.org keeps the day's Gospel."
+  },
+  {
+   "id": "0617.isaurus",
+   "date": "06-17",
+   "rank": "martyr",
+   "weekday": "optional",
+   "name": "Martyrs Isaurus and his companions of Athens",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Eph 6:10-17"]}
+   ],
+   "confidence": "medium",
+   "sources": ["ANT-OLG", "GOA", "GOA-DCS"],
+   "note": "The service books print these readings (GOA DCS 2026, headed \"For the Martyrs\"), but the published Antiochian and Greek calendars read the day's readings. Use them only when this commemoration is celebrated, e.g. as a patronal feast."
+  },
+  {
+   "id": "0619.jude",
+   "date": "06-19",
+   "rank": "apostle",
+   "weekday": "replaces",
+   "sunday": "sunday",
+   "name": "Holy Apostle Jude (Thaddeus), Brother of the Lord",
+   "readings": [
+    {"service": "Vespers", "kind": "Epistle", "refs": ["Jude 1:1-10"], "note": "At Vespers the Greek books read the Epistle of Jude in three parts (GOA DCS 2026).", "served": "evening before"},
+    {"service": "Vespers", "kind": "Epistle", "refs": ["Jude 1:11-16"], "served": "evening before"},
+    {"service": "Vespers", "kind": "Epistle", "refs": ["Jude 1:17-25"], "served": "evening before"},
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Jude 1:1-25"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["John 14:21-24"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT", "GOA", "GOA-DCS", "OCA"],
+   "slavic": "Epistle Jude 1:1-10."
+  },
+  {
+   "id": "0624.nativity_forerunner",
+   "date": "06-24",
+   "rank": "great_feast",
+   "weekday": "own",
+   "sunday": "feast",
+   "name": "Nativity of the Holy Prophet, Forerunner and Baptist John",
+   "readings": [
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["Gen 17:15-17", "Gen 17:19", "Gen 18:11-14", "Gen 21:1-2", "Gen 21:4-8"], "served": "evening before"},
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["Judg 13:2-8", "Judg 13:13-14", "Judg 13:17-18", "Judg 13:21"], "served": "evening before"},
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["Isa 40:1-5", "Isa 40:9", "Isa 41:17-18", "Isa 45:8", "Isa 48:20-21", "Isa 54:1"], "composite": true, "served": "evening before"},
+    {"service": "Matins", "kind": "Gospel", "refs": ["Luke 1:24-25", "Luke 1:57-68", "Luke 1:76", "Luke 1:80"]},
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Rom 13:11-14:4"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Luke 1:1-25", "Luke 1:57-68", "Luke 1:76", "Luke 1:80"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT", "GOA", "GOA-DCS", "OCA", "SCR"],
+   "note": "On a Sunday the feast replaces the Sunday readings; the Matins Gospel is the Sunday Eothinon (goarch.org 2018).",
+   "slavic": "OCA joins Gen 21:1-8 and gives the Gospel ends as above."
+  },
+  {
+   "id": "0625.febronia",
+   "date": "06-25",
+   "rank": "martyr",
+   "weekday": "optional",
+   "name": "Venerable Martyr Febronia",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Heb 10:32-38"]}
+   ],
+   "confidence": "medium",
+   "sources": ["ANT-OLG", "GOA", "GOA-DCS"],
+   "note": "The service books print these readings (GOA DCS 2026, headed \"For the Holy Woman\"), but the published Antiochian and Greek calendars read the day's readings. Use them only when this commemoration is celebrated, e.g. as a patronal feast."
+  },
+  {
+   "id": "0626.david_thessalonica",
+   "date": "06-26",
+   "rank": "venerable",
+   "weekday": "optional",
+   "name": "Venerable David of Thessalonica",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Gal 5:22-6:2"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Luke 6:17-23"]}
+   ],
+   "confidence": "medium",
+   "sources": ["ANT-OLG", "GOA", "GOA-DCS"],
+   "note": "The service books print these readings (GOA DCS 2026, headed \"For the Devout Man\"), but the published Antiochian and Greek calendars read the day's readings. Use them only when this commemoration is celebrated, e.g. as a patronal feast."
+  },
+  {
+   "id": "0627.samson",
+   "date": "06-27",
+   "rank": "venerable",
+   "weekday": "optional",
+   "name": "Venerable Samson the Hospitable",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["2 Cor 9:6-11"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Luke 12:32-40"]}
+   ],
+   "confidence": "medium",
+   "sources": ["ANT-OLG", "GOA", "GOA-DCS"],
+   "note": "The service books print these readings (GOA DCS 2026, headed \"For the Devout Man\"), but the published Antiochian and Greek calendars read the day's readings. Use them only when this commemoration is celebrated, e.g. as a patronal feast."
+  },
+  {
+   "id": "0628.cyrus_john_relics",
+   "date": "06-28",
+   "rank": "unmercenary",
+   "weekday": "optional",
+   "name": "Translation of the Relics of the Unmercenaries Cyrus and John",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["1 Cor 12:7-11"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Matt 10:1", "Matt 10:5-8"]}
+   ],
+   "confidence": "medium",
+   "sources": ["ANT-OLG", "GOA", "GOA-DCS"],
+   "note": "The service books print these readings (GOA DCS 2026, headed \"For the Saints\"), but the published Antiochian and Greek calendars read the day's readings. Use them only when this commemoration is celebrated, e.g. as a patronal feast."
+  },
+  {
+   "id": "0629.peter_paul",
+   "date": "06-29",
+   "rank": "great_feast",
+   "weekday": "own",
+   "sunday": "feast",
+   "name": "Holy, Glorious and All-praised Leaders of the Apostles Peter and Paul",
+   "readings": [
+    {"service": "Vespers", "kind": "Epistle", "refs": ["1 Pet 1:3-9"], "served": "evening before"},
+    {"service": "Vespers", "kind": "Epistle", "refs": ["1 Pet 1:13-19"], "served": "evening before"},
+    {"service": "Vespers", "kind": "Epistle", "refs": ["1 Pet 2:11-24"], "served": "evening before"},
+    {"service": "Matins", "kind": "Gospel", "refs": ["John 21:14-25"]},
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["2 Cor 11:21-12:9"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Matt 16:13-19"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT", "GOA", "GOA-DCS", "OCA", "SCR"],
+   "note": "Patrons of the Church of Antioch. On a Sunday the feast replaces the Sunday readings (goarch.org and antiochian.org 2025). The Apostles' Fast ends on this day.",
+   "slavic": "Matins Gospel John 21:15-25."
+  },
+  {
+   "id": "0630.twelve_apostles",
+   "date": "06-30",
+   "rank": "apostle",
+   "weekday": "replaces",
+   "sunday": "feast",
+   "name": "Synaxis of the Holy, Glorious and All-praised Twelve Apostles",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["1 Cor 4:9-16"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Matt 9:36", "Matt 10:1-8"], "note": "GOA DCS: Matt 9:36-38; 10:1-8. goarch.org and antiochian.org print it as Matt 9:36; 10:1-8."}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT", "GOA", "GOA-DCS", "OCA"],
+   "note": "On a Sunday both readings of the feast are read (goarch.org and antiochian.org 2019). On All Saints Sunday goarch.org printed the All Saints Epistle with this Gospel (2024).",
+   "slavic": "Gospel Mark 3:13-19."
+  },
+  {
+   "id": "0701.cosmas_damian_rome",
+   "date": "07-01",
+   "rank": "unmercenary",
+   "weekday": "replaces",
+   "sunday": "epistle",
+   "name": "Holy Unmercenaries Cosmas and Damian of Rome",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["1 Cor 12:27-13:8"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Matt 10:1", "Matt 10:5-8"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT", "GOA", "GOA-DCS", "OCA"]
+  },
+  {
+   "id": "0702.robe",
+   "date": "07-02",
+   "rank": "theotokos_feast",
+   "weekday": "replaces",
+   "sunday": "epistle",
+   "name": "Placing of the Precious Robe of the Theotokos in Blachernae",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Heb 9:1-7"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Luke 1:39-49", "Luke 1:56"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT", "GOA", "GOA-DCS", "OCA"],
+   "slavic": "OCA prints no proper readings for this day; Hapgood's general service of the Theotokos gives Heb 9:1-7 with Luke 10:38-42, 11:27-28."
+  },
+  {
+   "id": "0704.andrew_crete",
+   "date": "07-04",
+   "rank": "hierarch",
+   "weekday": "optional",
+   "name": "St Andrew of Crete, author of the Great Canon",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Gal 5:22-6:2"]}
+   ],
+   "confidence": "medium",
+   "sources": ["ANT-OLG", "GOA", "GOA-DCS"],
+   "note": "The service books print these readings (GOA DCS 2026, headed \"For the Saint\"), but the published Antiochian and Greek calendars read the day's readings. Use them only when this commemoration is celebrated, e.g. as a patronal feast."
+  },
+  {
+   "id": "0705.athanasius_athos",
+   "date": "07-05",
+   "rank": "venerable",
+   "weekday": "replaces",
+   "sunday": "epistle",
+   "name": "Venerable Athanasius of Mount Athos",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Gal 5:22-6:2"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Matt 11:27-30"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT-CHART", "ANT", "GOA", "GOA-DCS", "OCA"],
+   "note": "On a Sunday: Gal 5:22-6:2 with the Sunday Gospel (goarch.org and antiochian.org 2020, 2026; Antiochian 2026 chart)."
+  },
+  {
+   "id": "0707.kyriake",
+   "date": "07-07",
+   "rank": "great_martyr",
+   "weekday": "replaces",
+   "sunday": "epistle",
+   "name": "Great Martyr Kyriake",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Gal 3:23-4:5"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Mark 5:24-34"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT", "GOA", "GOA-DCS", "OCA"]
+  },
+  {
+   "id": "0708.procopius",
+   "date": "07-08",
+   "rank": "great_martyr",
+   "weekday": "replaces",
+   "sunday": "sunday",
+   "name": "Great Martyr Procopius",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["1 Tim 4:9-15"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Luke 6:17-19", "Luke 9:1-2", "Luke 10:16-21"], "note": "GOA DCS ends at Luke 10:22."}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT", "GOA", "GOA-DCS", "OCA"]
+  },
+  {
+   "id": "0709.pancratius",
+   "date": "07-09",
+   "rank": "hieromartyr",
+   "weekday": "optional",
+   "name": "Hieromartyr Pancratius of Taormina",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Heb 7:26-8:2"]}
+   ],
+   "confidence": "medium",
+   "sources": ["ANT-OLG", "GOA", "GOA-DCS"],
+   "note": "The service books print these readings (GOA DCS 2026, headed \"For the Hieromartyr\"), but the published Antiochian and Greek calendars read the day's readings. Use them only when this commemoration is celebrated, e.g. as a patronal feast."
+  },
+  {
+   "id": "0711.euphemia",
+   "date": "07-11",
+   "rank": "great_martyr",
+   "weekday": "replaces",
+   "sunday": "epistle",
+   "name": "Great Martyr Euphemia (miracle at Chalcedon); St Olga of Kiev",
+   "readings": [
+    {"service": "Matins", "kind": "Gospel", "refs": ["Mark 5:24-34"]},
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["2 Cor 6:1-10"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Luke 7:36-50"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT", "GOA", "GOA-DCS", "OCA"]
+  },
+  {
+   "id": "0712.paisios",
+   "date": "07-12",
+   "rank": "venerable",
+   "weekday": "optional",
+   "name": "Venerable Paisios the Athonite; Martyrs Proclus and Hilary",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Gal 5:22-6:2"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Luke 6:17-23"]}
+   ],
+   "confidence": "medium",
+   "sources": ["ANT-OLG", "GOA", "GOA-DCS"],
+   "note": "The service books print these readings (GOA DCS 2026, headed \"For the Devout Man\"), but the published Antiochian and Greek calendars read the day's readings. Use them only when this commemoration is celebrated, e.g. as a patronal feast. A recent Greek commemoration."
+  },
+  {
+   "id": "0713.synaxis_gabriel",
+   "date": "07-13",
+   "rank": "archangel",
+   "weekday": "replaces",
+   "sunday": "sunday",
+   "name": "Synaxis of the Archangel Gabriel",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Heb 2:2-10"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Luke 10:16-21"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT", "GOA", "GOA-DCS", "OCA"],
+   "note": "On a Sunday it is the Sunday of the Fathers of the Fourth Council, which is read (goarch.org 2025)."
+  },
+  {
+   "id": "float.fathers_4th_council",
+   "range": {"day": "sun", "from": "07-13", "to": "07-19"},
+   "rank": "festal_sunday",
+   "weekday": "own",
+   "name": "Sunday of the Holy Fathers of the Fourth Ecumenical Council",
+   "readings": [
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["Gen 14:14-20"], "served": "evening before"},
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["Deut 1:8-11", "Deut 1:15-17"], "served": "evening before"},
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["Deut 10:14-18", "Deut 10:20-21"], "served": "evening before"},
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Titus 3:8-15"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Matt 5:14-19"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT-CHART", "ANT", "GOA", "GOA-DCS", "OCA"],
+   "note": "The Sunday nearest 16 July (13-19 July).",
+   "slavic": "OCA keeps the Fathers of the First Six Councils on this Sunday and reads Heb 13:7-16; John 17:1-13 after the Sunday readings."
+  },
+  {
+   "id": "0714.aquila",
+   "date": "07-14",
+   "rank": "apostle",
+   "weekday": "epistle",
+   "sunday": "sunday",
+   "name": "Holy Apostle Aquila of the Seventy",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Rom 16:1-16"], "note": "Printed by goarch.org and antiochian.org; GOA DCS prints 1 Cor 4:9-16."}
+   ],
+   "confidence": "medium",
+   "sources": ["ANT-OLG", "ANT", "GOA", "GOA-DCS", "OCA"]
+  },
+  {
+   "id": "0715.cyricus_julitta",
+   "date": "07-15",
+   "rank": "martyr",
+   "weekday": "replaces",
+   "sunday": "sunday",
+   "name": "Martyrs Cyricus and his mother Julitta; St Vladimir of Kiev",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["1 Cor 13:11-14:5"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Matt 17:24-18:4"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT", "GOA", "GOA-DCS", "OCA"]
+  },
+  {
+   "id": "0717.marina",
+   "date": "07-17",
+   "rank": "great_martyr",
+   "weekday": "replaces",
+   "sunday": "sunday",
+   "name": "Great Martyr Marina (Margaret) of Antioch in Pisidia",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Gal 3:23-4:5"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Mark 5:24-34"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT", "GOA", "GOA-DCS", "OCA"]
+  },
+  {
+   "id": "0718.emilian",
+   "date": "07-18",
+   "rank": "martyr",
+   "weekday": "optional",
+   "name": "Martyr Emilian of Durostorum",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Rom 8:28-39"]}
+   ],
+   "confidence": "medium",
+   "sources": ["ANT-OLG", "GOA", "GOA-DCS"],
+   "note": "The service books print these readings (GOA DCS 2026, headed \"For the Saint\"), but the published Antiochian and Greek calendars read the day's readings. Use them only when this commemoration is celebrated, e.g. as a patronal feast."
+  },
+  {
+   "id": "0720.elias",
+   "date": "07-20",
+   "rank": "prophet",
+   "weekday": "replaces",
+   "sunday": "epistle",
+   "name": "Holy Glorious Prophet Elias (Elijah)",
+   "readings": [
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["1 Kgs 17:1-24"], "note": "OCA: 1 Kgs 17:1-23.", "served": "evening before"},
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["1 Kgs 18:1", "1 Kgs 18:17-27", "1 Kgs 18:29-41", "1 Kgs 18:44", "1 Kgs 18:42", "1 Kgs 18:45", "1 Kgs 19:1-10", "1 Kgs 19:15-16"], "composite": true, "note": "Verse order as in the Greek books (GOA DCS 2026).", "served": "evening before"},
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["1 Kgs 19:19-21", "2 Kgs 2:1", "2 Kgs 2:6-14"], "composite": true, "served": "evening before"},
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Jas 5:10-20"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Luke 4:22-30"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT", "GOA", "GOA-DCS", "OCA"],
+   "slavic": "OCA gives Luke 4:22-30 as the Matins Gospel too."
+  },
+  {
+   "id": "0721.symeon_fool",
+   "date": "07-21",
+   "rank": "venerable",
+   "weekday": "optional",
+   "name": "Venerable Symeon the Fool for Christ and John his companion",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["1 Cor 3:18-23"]}
+   ],
+   "confidence": "medium",
+   "sources": ["ANT-OLG", "GOA", "GOA-DCS"],
+   "note": "The service books print these readings (GOA DCS 2026, headed \"For the Devout Saints\"), but the published Antiochian and Greek calendars read the day's readings. Use them only when this commemoration is celebrated, e.g. as a patronal feast."
+  },
+  {
+   "id": "0722.mary_magdalene",
+   "date": "07-22",
+   "rank": "equal_to_apostles",
+   "weekday": "replaces",
+   "sunday": "sunday",
+   "name": "Holy Myrrh-bearer Mary Magdalene, Equal to the Apostles",
+   "readings": [
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["Wis 5:15-6:3"], "served": "evening before"},
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["Wis 3:1-9"], "served": "evening before"},
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["Prov 31:10", "Prov 31:12-19", "Prov 31:25"], "served": "evening before"},
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["1 Cor 9:2-12"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Luke 8:1-3"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT", "GOA", "GOA-DCS", "OCA"],
+   "note": "GOA DCS also prints readings for the Virgin Martyr Markella of Chios (Gal 3:23-4:5; Mark 5:24-34)."
+  },
+  {
+   "id": "0724.christina",
+   "date": "07-24",
+   "rank": "great_martyr",
+   "weekday": "optional",
+   "name": "Great Martyr Christina of Tyre",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["2 Thess 2:13-3:5"]}
+   ],
+   "confidence": "medium",
+   "sources": ["ANT-OLG", "GOA", "GOA-DCS"],
+   "note": "The service books print these readings (GOA DCS 2026, headed \"For the Holy Woman\"), but the published Antiochian and Greek calendars read the day's readings. Use them only when this commemoration is celebrated, e.g. as a patronal feast."
+  },
+  {
+   "id": "0725.anna",
+   "date": "07-25",
+   "rank": "righteous",
+   "weekday": "replaces",
+   "sunday": "epistle",
+   "name": "Dormition of the Righteous Anna, mother of the Theotokos",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Gal 4:22-27"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Luke 8:16-21"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT", "GOA", "GOA-DCS", "OCA"],
+   "slavic": "Epistle Gal 4:22-31."
+  },
+  {
+   "id": "0726.paraskevi",
+   "date": "07-26",
+   "rank": "martyr",
+   "weekday": "replaces",
+   "sunday": "epistle",
+   "name": "Venerable Martyr Paraskevi of Rome; Hieromartyr Hermolaus",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Gal 3:23-4:5"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Mark 5:24-34"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT-CHART", "ANT", "GOA", "GOA-DCS", "OCA"],
+   "note": "On a Sunday: Gal 3:23-4:5 with the Sunday Gospel (goarch.org 2020; goarch.org and antiochian.org 2026; Antiochian 2026 chart)."
+  },
+  {
+   "id": "0727.panteleimon",
+   "date": "07-27",
+   "rank": "great_martyr",
+   "weekday": "replaces",
+   "sunday": "epistle",
+   "name": "Great Martyr and Healer Panteleimon",
+   "readings": [
+    {"service": "Matins", "kind": "Gospel", "refs": ["Luke 21:12-19"]},
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["2 Tim 2:1-10"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["John 15:17-16:2"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT", "GOA", "GOA-DCS", "OCA"]
+  },
+  {
+   "id": "0728.prochorus",
+   "date": "07-28",
+   "rank": "apostle",
+   "weekday": "epistle",
+   "sunday": "sunday",
+   "name": "Apostles and Deacons Prochorus, Nicanor, Timon and Parmenas",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Acts 6:1-7"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT", "GOA", "GOA-DCS", "OCA"]
+  },
+  {
+   "id": "0729.callinicus",
+   "date": "07-29",
+   "rank": "martyr",
+   "weekday": "optional",
+   "name": "Martyr Callinicus",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Rom 8:28-39"]}
+   ],
+   "confidence": "medium",
+   "sources": ["ANT-OLG", "GOA", "GOA-DCS"],
+   "note": "The service books print these readings (GOA DCS 2026, headed \"For the Martyr\"), but the published Antiochian and Greek calendars read the day's readings. Use them only when this commemoration is celebrated, e.g. as a patronal feast."
+  },
+  {
+   "id": "0730.silas",
+   "date": "07-30",
+   "rank": "apostle",
+   "weekday": "epistle",
+   "sunday": "sunday",
+   "name": "Apostles of the Seventy Silas, Silvanus, Crescens, Epaenetus and Andronicus",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Acts 15:35-41"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT", "GOA", "GOA-DCS", "OCA"]
+  },
+  {
+   "id": "0731.eudocimus",
+   "date": "07-31",
+   "rank": "righteous",
+   "weekday": "optional",
+   "name": "Forefeast of the Procession of the Cross; Righteous Eudocimus",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Rom 8:14-21"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Luke 8:16-21"]}
+   ],
+   "confidence": "medium",
+   "sources": ["ANT-OLG", "GOA", "GOA-DCS"],
+   "note": "The service books print these readings (GOA DCS 2026, headed \"For the Saint\"), but the published Antiochian and Greek calendars read the day's readings. Use them only when this commemoration is celebrated, e.g. as a patronal feast."
+  },
+  {
+   "id": "0801.procession_maccabees",
+   "date": "08-01",
+   "rank": "martyr",
+   "weekday": "replaces",
+   "sunday": "sunday",
+   "name": "Procession of the Precious Cross; Holy Seven Maccabees, their mother Solomonia and their teacher Eleazar",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Heb 11:33-12:2"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Matt 10:16-22"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT", "GOA", "GOA-DCS", "OCA"],
+   "note": "The Dormition Fast begins. A Lesser Blessing of Waters is customary.",
+   "slavic": "OCA reads the Cross readings (1 Cor 1:18-24; John 19:6-11, 13-20, 25-28, 30-35) and the Maccabees (Heb 11:33-12:2; Matt 10:32-36, 11:1); at the Lesser Blessing of Waters: Heb 2:11-18; John 5:1-4."
+  },
+  {
+   "id": "0802.stephen_relics",
+   "date": "08-02",
+   "rank": "apostle",
+   "weekday": "replaces",
+   "sunday": "sunday",
+   "name": "Translation of the Relics of the Protomartyr Stephen",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Acts 6:8-7:5", "Acts 7:47-60"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Mark 12:1-12"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "GOA", "GOA-DCS", "OCA"]
+  },
+  {
+   "id": "0803.isaac_dalmatus",
+   "date": "08-03",
+   "rank": "venerable",
+   "weekday": "optional",
+   "name": "Venerable Isaac, Dalmatus and Faustus",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Gal 5:22-6:2"]}
+   ],
+   "confidence": "medium",
+   "sources": ["ANT-OLG", "GOA", "GOA-DCS"],
+   "note": "The service books print these readings (GOA DCS 2026, headed \"For the Devout Saints\"), but the published Antiochian and Greek calendars read the day's readings. Use them only when this commemoration is celebrated, e.g. as a patronal feast."
+  },
+  {
+   "id": "0805.forefeast_transfiguration",
+   "date": "08-05",
+   "rank": "forefeast",
+   "weekday": "epistle",
+   "sunday": "sunday",
+   "name": "Forefeast of the Transfiguration; Martyr Eusignius of Antioch",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["1 Pet 1:1-2:10"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT", "GOA", "GOA-DCS", "OCA"]
+  },
+  {
+   "id": "0806.transfiguration",
+   "date": "08-06",
+   "rank": "great_feast_lord",
+   "weekday": "own",
+   "sunday": "feast",
+   "matins_on_sunday": "feast",
+   "name": "Holy Transfiguration of our Lord, God and Saviour Jesus Christ",
+   "readings": [
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["Exod 24:12-18"], "served": "evening before"},
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["Exod 33:11-23", "Exod 34:4-6", "Exod 34:8"], "served": "evening before"},
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["1 Kgs 19:3-9", "1 Kgs 19:11-13", "1 Kgs 19:15-16"], "served": "evening before"},
+    {"service": "Matins", "kind": "Gospel", "refs": ["Luke 9:28-36"]},
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["2 Pet 1:10-19"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Matt 17:1-9"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT", "GOA", "GOA-DCS", "OCA", "HAP", "SCR"],
+   "note": "Grapes and other fruits are blessed after the Liturgy."
+  },
+  {
+   "id": "0807.afterfeast_transfiguration",
+   "date": "08-07",
+   "rank": "afterfeast",
+   "weekday": "gospel",
+   "sunday": "sunday",
+   "name": "Afterfeast of the Transfiguration; Venerable Martyr Dometius",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Mark 9:2-9"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT", "GOA", "GOA-DCS", "OCA"],
+   "note": "GOA DCS also prints 2 Tim 1:8-18 for St Dometius, not used by the published calendars."
+  },
+  {
+   "id": "0809.matthias",
+   "date": "08-09",
+   "rank": "apostle",
+   "weekday": "epistle",
+   "sunday": "sunday",
+   "name": "Holy Apostle Matthias",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Acts 1:12-17", "Acts 1:21-26"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "GOA", "GOA-DCS", "OCA"],
+   "note": "GOA DCS also prints Luke 10:16-21, not used by the published calendars."
+  },
+  {
+   "id": "0810.laurence",
+   "date": "08-10",
+   "rank": "martyr",
+   "weekday": "optional",
+   "name": "Martyr Laurence, Archdeacon of Rome",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["2 Tim 2:1-10"]}
+   ],
+   "confidence": "medium",
+   "sources": ["ANT-OLG", "GOA", "GOA-DCS"],
+   "note": "The service books print these readings (GOA DCS 2026, headed \"For the Martyr\"), but the published Antiochian and Greek calendars read the day's readings. Use them only when this commemoration is celebrated, e.g. as a patronal feast."
+  },
+  {
+   "id": "0811.euplus",
+   "date": "08-11",
+   "rank": "martyr",
+   "weekday": "optional",
+   "name": "Martyr Euplus, Archdeacon of Catania",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Rom 8:28-39"]}
+   ],
+   "confidence": "medium",
+   "sources": ["ANT-OLG", "GOA", "GOA-DCS"],
+   "note": "The service books print these readings (GOA DCS 2026, headed \"For the Martyr\"), but the published Antiochian and Greek calendars read the day's readings. Use them only when this commemoration is celebrated, e.g. as a patronal feast."
+  },
+  {
+   "id": "0813.maximus_relics",
+   "date": "08-13",
+   "rank": "venerable",
+   "weekday": "optional",
+   "name": "Leave-taking of the Transfiguration; Translation of the Relics of St Maximus the Confessor",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Eph 6:10-17"]}
+   ],
+   "confidence": "medium",
+   "sources": ["ANT-OLG", "GOA", "GOA-DCS"],
+   "note": "The service books print these readings (GOA DCS 2026, headed \"For the Devout Man\"), but the published Antiochian and Greek calendars read the day's readings. Use them only when this commemoration is celebrated, e.g. as a patronal feast."
+  },
+  {
+   "id": "0815.dormition",
+   "date": "08-15",
+   "rank": "great_feast_theotokos",
+   "weekday": "own",
+   "sunday": "feast",
+   "matins_on_sunday": "feast",
+   "name": "Dormition of our Most Holy Lady the Theotokos and Ever-Virgin Mary",
+   "readings": [
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["Gen 28:10-17"], "served": "evening before"},
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["Ezek 43:27-44:4"], "served": "evening before"},
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["Prov 9:1-11"], "served": "evening before"},
+    {"service": "Matins", "kind": "Gospel", "refs": ["Luke 1:39-49", "Luke 1:56"]},
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Phil 2:5-11"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Luke 10:38-42", "Luke 11:27-28"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT", "GOA", "GOA-DCS", "OCA", "HAP"],
+   "note": "On a Sunday the feast replaces the Sunday readings (goarch.org 2021, 2027).",
+   "slavic": "On a Sunday Slavic use reads the Sunday readings and then the feast's."
+  },
+  {
+   "id": "0816.mandylion",
+   "date": "08-16",
+   "rank": "feast_lord",
+   "weekday": "replaces",
+   "sunday": "sunday",
+   "name": "Translation of the Icon of Christ Not Made by Hands (the Holy Mandylion)",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["1 Tim 3:13-4:5"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Luke 9:51-57", "Luke 10:22-24", "Luke 13:22"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT", "GOA", "GOA-DCS", "OCA"],
+   "slavic": "Col 1:12-18; Luke 9:51-56, 10:22-24."
+  },
+  {
+   "id": "0818.florus_laurus",
+   "date": "08-18",
+   "rank": "martyr",
+   "weekday": "optional",
+   "name": "Martyrs Florus and Laurus",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Col 1:24-2:1"]}
+   ],
+   "confidence": "medium",
+   "sources": ["ANT-OLG", "GOA", "GOA-DCS"],
+   "note": "The service books print these readings (GOA DCS 2026, headed \"For the Martyrs\"), but the published Antiochian and Greek calendars read the day's readings. Use them only when this commemoration is celebrated, e.g. as a patronal feast."
+  },
+  {
+   "id": "0820.samuel",
+   "date": "08-20",
+   "rank": "prophet",
+   "weekday": "optional",
+   "name": "Prophet Samuel",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["1 Cor 14:20-25"]}
+   ],
+   "confidence": "medium",
+   "sources": ["ANT-OLG", "GOA", "GOA-DCS"],
+   "note": "The service books print these readings (GOA DCS 2026, headed \"For the Prophet\"), but the published Antiochian and Greek calendars read the day's readings. Use them only when this commemoration is celebrated, e.g. as a patronal feast."
+  },
+  {
+   "id": "0821.thaddeus",
+   "date": "08-21",
+   "rank": "apostle",
+   "weekday": "gospel",
+   "sunday": "sunday",
+   "name": "Holy Apostle Thaddeus of the Seventy; Martyr Bassa",
+   "readings": [
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Mark 3:13-21"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT", "GOA", "GOA-DCS", "OCA"]
+  },
+  {
+   "id": "0823.leavetaking_dormition",
+   "date": "08-23",
+   "rank": "leavetaking",
+   "weekday": "replaces",
+   "sunday": "sunday",
+   "name": "Leave-taking of the Dormition of the Theotokos",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Phil 2:5-11"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Luke 10:38-42", "Luke 11:27-28"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT", "GOA", "GOA-DCS", "OCA"],
+   "note": "Greek use repeats the feast's readings; on a Sunday the Sunday readings are read (goarch.org and antiochian.org 2020, 2026)."
+  },
+  {
+   "id": "0824.eutyches_kosmas",
+   "date": "08-24",
+   "rank": "hieromartyr",
+   "weekday": "optional",
+   "name": "Hieromartyr Eutyches; St Kosmas of Aitolia, Equal to the Apostles",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Eph 4:7-13"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Matt 10:1", "Matt 10:5-8"]}
+   ],
+   "confidence": "medium",
+   "sources": ["ANT-OLG", "GOA", "GOA-DCS"],
+   "note": "The service books print these readings (GOA DCS 2026, headed \"For the Hieromartyr\"), but the published Antiochian and Greek calendars read the day's readings. Use them only when this commemoration is celebrated, e.g. as a patronal feast."
+  },
+  {
+   "id": "0825.bartholomew_titus",
+   "date": "08-25",
+   "rank": "apostle",
+   "weekday": "replaces",
+   "sunday": "sunday",
+   "name": "Return of the Relics of the Apostle Bartholomew; Apostle Titus of the Seventy",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Titus 1:1-5", "Titus 2:15-3:2", "Titus 3:12-15"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Matt 5:14-19"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT", "GOA", "GOA-DCS", "OCA"]
+  },
+  {
+   "id": "0826.adrian_natalia",
+   "date": "08-26",
+   "rank": "martyr",
+   "weekday": "epistle",
+   "sunday": "sunday",
+   "name": "Martyrs Adrian and Natalia",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Heb 10:32-38"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT", "GOA", "GOA-DCS", "OCA"],
+   "note": "antiochian.org printed Heb 6:9-12 in 2019-2021 and Heb 10:32-38 from 2022."
+  },
+  {
+   "id": "0827.phanourios",
+   "date": "08-27",
+   "rank": "great_martyr",
+   "weekday": "optional",
+   "name": "Great Martyr Phanourios",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Rom 8:28-39"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["John 15:17-16:2"]}
+   ],
+   "confidence": "medium",
+   "sources": ["ANT-OLG", "GOA", "GOA-DCS"],
+   "note": "The service books print these readings (GOA DCS 2026, headed \"For the Martyr; For the Saint\"), but the published Antiochian and Greek calendars read the day's readings. Use them only when this commemoration is celebrated, e.g. as a patronal feast. A Greek local feast; GOA DCS prints the Gospel under a separate heading."
+  },
+  {
+   "id": "0827.pimen",
+   "date": "08-27",
+   "rank": "venerable",
+   "weekday": "optional",
+   "name": "Venerable Pimen (Poemen) the Great",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Gal 5:22-6:2"]}
+   ],
+   "confidence": "medium",
+   "sources": ["ANT-OLG", "GOA", "GOA-DCS"],
+   "note": "The service books print these readings (GOA DCS 2026, headed \"For the Devout Man\"), but the published Antiochian and Greek calendars read the day's readings. Use them only when this commemoration is celebrated, e.g. as a patronal feast."
+  },
+  {
+   "id": "0829.beheading",
+   "date": "08-29",
+   "rank": "great_feast",
+   "weekday": "own",
+   "sunday": "feast",
+   "name": "Beheading of the Holy Glorious Prophet, Forerunner and Baptist John",
+   "readings": [
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["Isa 40:1-5", "Isa 40:9", "Isa 41:17-18", "Isa 45:8", "Isa 48:20-21", "Isa 54:1"], "composite": true, "served": "evening before"},
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["Mal 3:1-3", "Mal 3:5-7", "Mal 3:12", "Mal 3:17-18", "Mal 4:4-6"], "composite": true, "note": "English numbering; the Greek books print the last verses as Mal 3:24, 22-23 (Septuagint).", "served": "evening before"},
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["Wis 4:7", "Wis 4:16-17", "Wis 4:19-20", "Wis 5:1-7"], "composite": true, "served": "evening before"},
+    {"service": "Matins", "kind": "Gospel", "refs": ["Matt 14:1-13"]},
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Acts 13:25-33"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Mark 6:14-30"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT", "GOA", "GOA-DCS", "OCA", "SCR"],
+   "note": "Strict fast day whatever the weekday. On a Sunday the feast replaces the Sunday readings (goarch.org 2021, 2027).",
+   "slavic": "Same; Scrivener's table ends the Epistle at Acts 13:32."
+  },
+  {
+   "id": "0831.sash",
+   "date": "08-31",
+   "rank": "theotokos_feast",
+   "weekday": "replaces",
+   "sunday": "epistle",
+   "name": "Placing of the Precious Sash (Belt) of the Theotokos",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Heb 9:1-7"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Luke 10:38-42", "Luke 11:27-28"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT", "GOA", "GOA-DCS", "OCA"]
+  }
+ ]
+}

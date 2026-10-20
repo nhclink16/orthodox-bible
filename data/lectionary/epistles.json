@@ -1,0 +1,2418 @@
+{
+ "title": "Apostol: the Epistle cycle after Pentecost",
+ "scope": "The Epistle of every day from the Tuesday after Pentecost to the Saturday before the Publican and the Pharisee, keyed by week after Pentecost (week N ends with the Nth Sunday; week 1 is Pentecost week) and day.",
+ "licence": "Released with bible-rs under the MIT licence. The table holds Scripture references only: no Bible text and no prose from the sources. Notes are our own.",
+ "usage": "Antiochian Orthodox Christian Archdiocese of North America: Byzantine (Greek) usage, Revised Julian fixed feasts, Julian Paschalion. Slavic (OCA) and Greek (GOARCH) differences are kept in 'variants' and 'slavic' and never replace the main reading.",
+ "numbering": "English Bible (KJV/Hebrew) chapter and verse, the grid's numbering, with half-verse letters dropped. Each string in refs is one contiguous range ('Book C:V', 'Book C:V-V' or 'Book C:V-C:V', with the grid's book abbreviations); a reading's refs are read together, in order, as one lesson.",
+ "confidence": "high: an Antiochian-facing source agrees with at least one independent source. medium: the sources differ (usually by a verse at the start or end) or the reference rests on one source. low: no Antiochian or Greek source was found, or the yearly ordo decides.",
+ "sources": {
+  "ANT-OLG": "Antiochian Archdiocese, Department of Liturgics: Online Liturgical Guide service texts, 2023-2026 (antiochian.org/servicetexts). References only.",
+  "ANT-CHART": "Antiochian Archdiocese, Sunday Liturgical Readings Chart 2026 (antiochian.org/liturgicalinstructions).",
+  "ANT": "antiochian.org daily readings, 2018-2026 (the GOARCH Online Chapel feed, as harvested in orthocal-python's data/antiochian_raw).",
+  "GOA": "Greek Orthodox Archdiocese of America, Online Chapel daily readings, 2018-2030 (goarch.org; partly as harvested in orthocal-python).",
+  "GOA-DCS": "GOA Digital Chant Stand (dcs.goarch.org), 'Readings for the Day', 2026.",
+  "OCA": "Orthodox Church in America lectionary, via the orthocal.info API, 2010-2032. Slavic usage.",
+  "HAP": "Isabel F. Hapgood, Service Book of the Holy Orthodox-Catholic Apostolic (Greco-Russian) Church, 1906 (public domain; archive.org cu31924029363128): tables of Epistles and Gospels.",
+  "SCR": "F. H. Scrivener, A Plain Introduction to the Criticism of the New Testament, Cambridge 1861 (public domain; archive.org plainintroductio00scri): Synaxarion and Menologion of the Byzantine lectionary manuscripts.",
+  "GRE": "V. Grechulevich, Ukazatel tserkovnykh chtenii, St Petersburg 1853 (public domain): Slavic lectionary index with zachalo numbers.",
+  "MCI": "Metropolitan Cantor Institute (Byzantine Catholic Archeparchy of Pittsburgh), 'The Lectionary' (mci.archpitt.org). Slavic usage.",
+  "NLM": "New Liturgical Movement: descriptions of the Antiochian Paschal procession (2019) and the Royal Hours of Theophany (2017).",
+  "WIKI": "Wikipedia, articles on the Triodion and Holy Week (for Holy Week Old Testament readings only)."
+ },
+ "rules": [
+  "Monday to Friday read through Romans to Jude; Saturdays and Sundays have their own series.",
+  "The Epistle never jumps: the week is always counted from Pentecost.",
+  "P, the Publican's number counted from Pentecost, is 33, 34, 37 or 38. Weeks 1-32 are read in order; later weeks count back from the Publican: week w reads week 33 - (P - w). Week 33 is always the six days before the Publican.",
+  "Sundays up to the Forefathers take their own number. From Theophany to the Triodion the Sunday Epistle follows the Gospel read: the Nth of Luke takes Sunday N+17, the Nth of Matthew Sunday N.",
+  "The Antiochian Archdiocese keeps the 2nd Sunday as All Saints of Antioch (Acts 11:19-30); the cycle Epistle Rom 2:10-16 is under variants."
+ ],
+ "entries": [
+  {
+   "week": 1,
+   "day": "tue",
+   "name": "Tuesday of the 1st week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Rom 1:1-7", "Rom 1:13-17"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "GOA-DCS", "OCA", "GRE"],
+   "note": "Pentecost week: also covered by the Pentecostarion section; listed here because the weekday Romans series starts on this Tuesday."
+  },
+  {
+   "week": 1,
+   "day": "wed",
+   "name": "Wednesday of the 1st week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Rom 1:18-27"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "GOA-DCS", "OCA", "GRE"],
+   "note": "Pentecost week: also covered by the Pentecostarion section; listed here because the weekday Romans series starts on this Tuesday."
+  },
+  {
+   "week": 1,
+   "day": "thu",
+   "name": "Thursday of the 1st week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Rom 1:28-2:9"]}
+   ],
+   "confidence": "high",
+   "sources": ["GOA", "GOA-DCS", "OCA", "GRE"],
+   "note": "Pentecost week: also covered by the Pentecostarion section; listed here because the weekday Romans series starts on this Tuesday."
+  },
+  {
+   "week": 1,
+   "day": "fri",
+   "name": "Friday of the 1st week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Rom 2:14-28"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "GOA-DCS", "OCA", "GRE"],
+   "variants": [
+    {"usage": "Slavic/OCA", "service": "Liturgy", "kind": "Epistle", "refs": ["Rom 2:14-29"]}
+   ],
+   "note": "Pentecost week: also covered by the Pentecostarion section; listed here because the weekday Romans series starts on this Tuesday."
+  },
+  {
+   "week": 1,
+   "day": "sat",
+   "name": "Saturday of the 1st week after Pentecost (leave-taking of Pentecost)",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Rom 1:7-12"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "GOA-DCS", "OCA", "GRE"],
+   "note": "Pentecost week: also covered by the Pentecostarion section; listed here because the weekday Romans series starts on this Tuesday."
+  },
+  {
+   "week": 1,
+   "day": "sun",
+   "name": "Sunday of All Saints (1st Sunday after Pentecost)",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Heb 11:33-12:2"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT", "GOA", "GOA-DCS", "OCA", "HAP", "GRE"],
+   "note": "Pentecost week: also covered by the Pentecostarion section; listed here because the weekday Romans series starts on this Tuesday."
+  },
+  {
+   "week": 2,
+   "day": "mon",
+   "name": "Monday of the 2nd week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Rom 2:28-3:18"]}
+   ],
+   "confidence": "high",
+   "sources": ["GOA", "GOA-DCS", "OCA", "GRE"]
+  },
+  {
+   "week": 2,
+   "day": "tue",
+   "name": "Tuesday of the 2nd week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Rom 4:4-12"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "GOA-DCS", "OCA", "GRE"]
+  },
+  {
+   "week": 2,
+   "day": "wed",
+   "name": "Wednesday of the 2nd week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Rom 4:13-25"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "GOA-DCS", "OCA", "GRE"]
+  },
+  {
+   "week": 2,
+   "day": "thu",
+   "name": "Thursday of the 2nd week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Rom 5:10-16"]}
+   ],
+   "confidence": "high",
+   "sources": ["GOA", "GOA-DCS", "OCA", "GRE"]
+  },
+  {
+   "week": 2,
+   "day": "fri",
+   "name": "Friday of the 2nd week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Rom 5:17-6:2"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "GOA-DCS", "OCA", "GRE"]
+  },
+  {
+   "week": 2,
+   "day": "sat",
+   "name": "Saturday of the 2nd week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Rom 3:19-26"]}
+   ],
+   "confidence": "medium",
+   "sources": ["ANT", "GOA", "GOA-DCS", "OCA", "GRE"],
+   "variants": [
+    {"usage": "antiochian.org display", "service": "Liturgy", "kind": "Epistle", "refs": ["Rom 3:19-24"]}
+   ]
+  },
+  {
+   "week": 2,
+   "day": "sun",
+   "name": "2nd Sunday after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Acts 11:19-30"], "note": "Sunday of All Saints of Antioch (and of North America)"}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT", "GOA", "GOA-DCS", "OCA", "HAP", "GRE"],
+   "variants": [
+    {"usage": "Cycle Epistle of the 2nd Sunday (GOA, OCA, 1853 index, Hapgood 1906; Antiochian service text 2023)", "service": "Liturgy", "kind": "Epistle", "refs": ["Rom 2:10-16"]}
+   ],
+   "note": "Antiochian usage: since 2025 the Archdiocese keeps the 2nd Sunday after Pentecost as the Sunday of All Saints of Antioch and of North America, reading Acts 11:19-30 in place of the cycle Epistle Rom 2:10-16. In 2023 its service text read Rom 2:10-16; in 2024 St Kyriaki (July 7) took the day. Use Rom 2:10-16 where the Antiochian commemoration is not kept."
+  },
+  {
+   "week": 3,
+   "day": "mon",
+   "name": "Monday of the 3rd week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Rom 7:1-13"]}
+   ],
+   "confidence": "medium",
+   "sources": ["ANT", "GOA", "GOA-DCS", "OCA", "GRE"],
+   "variants": [
+    {"usage": "antiochian.org display", "service": "Liturgy", "kind": "Epistle", "refs": ["Rom 7:1-14"]}
+   ]
+  },
+  {
+   "week": 3,
+   "day": "tue",
+   "name": "Tuesday of the 3rd week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Rom 7:14-8:2"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "GOA-DCS", "OCA", "GRE"]
+  },
+  {
+   "week": 3,
+   "day": "wed",
+   "name": "Wednesday of the 3rd week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Rom 8:2-13"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "GOA-DCS", "OCA", "GRE"]
+  },
+  {
+   "week": 3,
+   "day": "thu",
+   "name": "Thursday of the 3rd week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Rom 8:22-27"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "GOA-DCS", "OCA", "GRE"]
+  },
+  {
+   "week": 3,
+   "day": "fri",
+   "name": "Friday of the 3rd week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Rom 9:6-19"]}
+   ],
+   "confidence": "high",
+   "sources": ["GOA", "GOA-DCS", "OCA", "GRE"]
+  },
+  {
+   "week": 3,
+   "day": "sat",
+   "name": "Saturday of the 3rd week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Rom 3:28-4:3"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "GOA-DCS", "OCA", "GRE"]
+  },
+  {
+   "week": 3,
+   "day": "sun",
+   "name": "3rd Sunday after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Rom 5:1-10"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT", "GOA", "GOA-DCS", "OCA", "HAP", "GRE"]
+  },
+  {
+   "week": 4,
+   "day": "mon",
+   "name": "Monday of the 4th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Rom 9:18-33"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "GOA-DCS", "OCA", "GRE"]
+  },
+  {
+   "week": 4,
+   "day": "tue",
+   "name": "Tuesday of the 4th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Rom 10:11-11:2"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "GOA-DCS", "OCA", "GRE"]
+  },
+  {
+   "week": 4,
+   "day": "wed",
+   "name": "Wednesday of the 4th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Rom 11:2-12"]}
+   ],
+   "confidence": "high",
+   "sources": ["GOA", "GOA-DCS", "OCA", "GRE"]
+  },
+  {
+   "week": 4,
+   "day": "thu",
+   "name": "Thursday of the 4th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Rom 11:13-24"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "GOA-DCS", "OCA", "GRE"]
+  },
+  {
+   "week": 4,
+   "day": "fri",
+   "name": "Friday of the 4th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Rom 11:25-36"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "GOA-DCS", "OCA", "GRE"]
+  },
+  {
+   "week": 4,
+   "day": "sat",
+   "name": "Saturday of the 4th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Rom 6:11-17"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "GOA-DCS", "OCA", "GRE"]
+  },
+  {
+   "week": 4,
+   "day": "sun",
+   "name": "4th Sunday after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Rom 6:18-23"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT", "GOA", "GOA-DCS", "OCA", "HAP", "GRE"]
+  },
+  {
+   "week": 5,
+   "day": "mon",
+   "name": "Monday of the 5th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Rom 12:4-5", "Rom 12:15-21"]}
+   ],
+   "confidence": "high",
+   "sources": ["GOA", "GOA-DCS", "OCA", "GRE"]
+  },
+  {
+   "week": 5,
+   "day": "tue",
+   "name": "Tuesday of the 5th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Rom 14:9-18"]}
+   ],
+   "confidence": "high",
+   "sources": ["GOA", "GOA-DCS", "OCA", "GRE"]
+  },
+  {
+   "week": 5,
+   "day": "wed",
+   "name": "Wednesday of the 5th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Rom 15:7-16"]}
+   ],
+   "confidence": "high",
+   "sources": ["GOA", "GOA-DCS", "OCA", "GRE"]
+  },
+  {
+   "week": 5,
+   "day": "thu",
+   "name": "Thursday of the 5th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Rom 15:17-29"]}
+   ],
+   "confidence": "high",
+   "sources": ["GOA", "GOA-DCS", "OCA", "GRE"]
+  },
+  {
+   "week": 5,
+   "day": "fri",
+   "name": "Friday of the 5th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Rom 16:1-16"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "GOA-DCS", "OCA", "GRE"]
+  },
+  {
+   "week": 5,
+   "day": "sat",
+   "name": "Saturday of the 5th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Rom 8:14-21"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "GOA-DCS", "OCA", "GRE"]
+  },
+  {
+   "week": 5,
+   "day": "sun",
+   "name": "5th Sunday after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Rom 10:1-10"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "GOA", "GOA-DCS", "OCA", "HAP", "GRE"]
+  },
+  {
+   "week": 6,
+   "day": "mon",
+   "name": "Monday of the 6th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Rom 16:17-24"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "GOA-DCS", "OCA", "GRE"]
+  },
+  {
+   "week": 6,
+   "day": "tue",
+   "name": "Tuesday of the 6th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["1 Cor 1:1-9"]}
+   ],
+   "confidence": "high",
+   "sources": ["GOA", "GOA-DCS", "OCA", "GRE"]
+  },
+  {
+   "week": 6,
+   "day": "wed",
+   "name": "Wednesday of the 6th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["1 Cor 2:9-3:8"]}
+   ],
+   "confidence": "high",
+   "sources": ["GOA", "GOA-DCS", "OCA", "GRE"]
+  },
+  {
+   "week": 6,
+   "day": "thu",
+   "name": "Thursday of the 6th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["1 Cor 3:18-23"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "GOA-DCS", "OCA", "GRE"]
+  },
+  {
+   "week": 6,
+   "day": "fri",
+   "name": "Friday of the 6th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["1 Cor 4:5-8"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "GOA-DCS", "OCA", "GRE"]
+  },
+  {
+   "week": 6,
+   "day": "sat",
+   "name": "Saturday of the 6th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Rom 9:1-5"]}
+   ],
+   "confidence": "high",
+   "sources": ["GOA", "GOA-DCS", "OCA", "GRE"]
+  },
+  {
+   "week": 6,
+   "day": "sun",
+   "name": "6th Sunday after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Rom 12:6-14"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT", "GOA", "GOA-DCS", "OCA", "HAP", "GRE"]
+  },
+  {
+   "week": 7,
+   "day": "mon",
+   "name": "Monday of the 7th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["1 Cor 5:9-6:11"]}
+   ],
+   "confidence": "high",
+   "sources": ["GOA", "GOA-DCS", "OCA", "GRE"]
+  },
+  {
+   "week": 7,
+   "day": "tue",
+   "name": "Tuesday of the 7th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["1 Cor 6:20-7:12"]}
+   ],
+   "confidence": "high",
+   "sources": ["GOA", "GOA-DCS", "OCA", "GRE"]
+  },
+  {
+   "week": 7,
+   "day": "wed",
+   "name": "Wednesday of the 7th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["1 Cor 7:12-24"]}
+   ],
+   "confidence": "high",
+   "sources": ["GOA", "GOA-DCS", "OCA", "GRE"]
+  },
+  {
+   "week": 7,
+   "day": "thu",
+   "name": "Thursday of the 7th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["1 Cor 7:24-35"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "GOA-DCS", "OCA", "GRE"]
+  },
+  {
+   "week": 7,
+   "day": "fri",
+   "name": "Friday of the 7th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["1 Cor 7:35-8:7"]}
+   ],
+   "confidence": "high",
+   "sources": ["GOA", "GOA-DCS", "OCA", "GRE"]
+  },
+  {
+   "week": 7,
+   "day": "sat",
+   "name": "Saturday of the 7th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Rom 12:1-3"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "GOA-DCS", "OCA", "GRE"]
+  },
+  {
+   "week": 7,
+   "day": "sun",
+   "name": "7th Sunday after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Rom 15:1-7"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT", "GOA", "OCA", "HAP", "GRE"],
+   "note": "In 2026 the GOA Chant Stand gives only the Fathers of the Fourth Council (Titus 3:8-15) for this Sunday."
+  },
+  {
+   "week": 8,
+   "day": "mon",
+   "name": "Monday of the 8th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["1 Cor 9:13-18"]}
+   ],
+   "confidence": "high",
+   "sources": ["GOA", "GOA-DCS", "OCA", "GRE"]
+  },
+  {
+   "week": 8,
+   "day": "tue",
+   "name": "Tuesday of the 8th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["1 Cor 10:5-12"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "GOA-DCS", "OCA", "GRE"]
+  },
+  {
+   "week": 8,
+   "day": "wed",
+   "name": "Wednesday of the 8th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["1 Cor 10:12-22"]}
+   ],
+   "confidence": "high",
+   "sources": ["GOA", "GOA-DCS", "OCA", "GRE"]
+  },
+  {
+   "week": 8,
+   "day": "thu",
+   "name": "Thursday of the 8th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["1 Cor 10:28-11:8"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "GOA-DCS", "OCA", "GRE"],
+   "variants": [
+    {"usage": "Slavic/OCA", "service": "Liturgy", "kind": "Epistle", "refs": ["1 Cor 10:28-11:7"]}
+   ]
+  },
+  {
+   "week": 8,
+   "day": "fri",
+   "name": "Friday of the 8th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["1 Cor 11:8-23"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "GOA-DCS", "OCA", "GRE"],
+   "variants": [
+    {"usage": "Slavic/OCA", "service": "Liturgy", "kind": "Epistle", "refs": ["1 Cor 11:8-22"]}
+   ]
+  },
+  {
+   "week": 8,
+   "day": "sat",
+   "name": "Saturday of the 8th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Rom 13:1-10"]}
+   ],
+   "confidence": "high",
+   "sources": ["GOA", "GOA-DCS", "OCA", "GRE"]
+  },
+  {
+   "week": 8,
+   "day": "sun",
+   "name": "8th Sunday after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["1 Cor 1:10-17"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT", "GOA", "GOA-DCS", "OCA", "HAP", "GRE"],
+   "variants": [
+    {"usage": "Slavic/OCA", "service": "Liturgy", "kind": "Epistle", "refs": ["1 Cor 1:10-18"]}
+   ]
+  },
+  {
+   "week": 9,
+   "day": "mon",
+   "name": "Monday of the 9th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["1 Cor 11:31-12:6"]}
+   ],
+   "confidence": "high",
+   "sources": ["GOA", "GOA-DCS", "OCA", "GRE"]
+  },
+  {
+   "week": 9,
+   "day": "tue",
+   "name": "Tuesday of the 9th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["1 Cor 12:12-26"]}
+   ],
+   "confidence": "high",
+   "sources": ["GOA", "GOA-DCS", "OCA", "GRE"]
+  },
+  {
+   "week": 9,
+   "day": "wed",
+   "name": "Wednesday of the 9th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["1 Cor 13:4-14:5"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "GOA-DCS", "OCA", "GRE"]
+  },
+  {
+   "week": 9,
+   "day": "thu",
+   "name": "Thursday of the 9th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["1 Cor 14:6-19"]}
+   ],
+   "confidence": "high",
+   "sources": ["GOA", "GOA-DCS", "OCA", "GRE"]
+  },
+  {
+   "week": 9,
+   "day": "fri",
+   "name": "Friday of the 9th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["1 Cor 14:26-40"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "GOA-DCS", "OCA", "GRE"]
+  },
+  {
+   "week": 9,
+   "day": "sat",
+   "name": "Saturday of the 9th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Rom 14:6-9"]}
+   ],
+   "confidence": "high",
+   "sources": ["GOA", "GOA-DCS", "OCA", "GRE"]
+  },
+  {
+   "week": 9,
+   "day": "sun",
+   "name": "9th Sunday after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["1 Cor 3:9-17"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT", "GOA", "GOA-DCS", "OCA", "HAP", "GRE"]
+  },
+  {
+   "week": 10,
+   "day": "mon",
+   "name": "Monday of the 10th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["1 Cor 15:12-19"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "GOA-DCS", "OCA", "GRE"]
+  },
+  {
+   "week": 10,
+   "day": "tue",
+   "name": "Tuesday of the 10th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["1 Cor 15:29-38"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "GOA-DCS", "OCA", "GRE"]
+  },
+  {
+   "week": 10,
+   "day": "wed",
+   "name": "Wednesday of the 10th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["1 Cor 16:4-12"]}
+   ],
+   "confidence": "high",
+   "sources": ["GOA", "GOA-DCS", "OCA", "GRE"]
+  },
+  {
+   "week": 10,
+   "day": "thu",
+   "name": "Thursday of the 10th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["2 Cor 1:1-7"]}
+   ],
+   "confidence": "high",
+   "sources": ["GOA", "GOA-DCS", "OCA", "GRE"]
+  },
+  {
+   "week": 10,
+   "day": "fri",
+   "name": "Friday of the 10th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["2 Cor 1:12-20"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "GOA-DCS", "OCA", "GRE"]
+  },
+  {
+   "week": 10,
+   "day": "sat",
+   "name": "Saturday of the 10th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Rom 15:30-33"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "GOA-DCS", "OCA", "GRE"]
+  },
+  {
+   "week": 10,
+   "day": "sun",
+   "name": "10th Sunday after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["1 Cor 4:9-16"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT", "GOA", "GOA-DCS", "OCA", "HAP", "GRE"]
+  },
+  {
+   "week": 11,
+   "day": "mon",
+   "name": "Monday of the 11th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["2 Cor 2:3-15"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "GOA-DCS", "OCA", "GRE"]
+  },
+  {
+   "week": 11,
+   "day": "tue",
+   "name": "Tuesday of the 11th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["2 Cor 2:14-3:3"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "GOA-DCS", "OCA", "GRE"]
+  },
+  {
+   "week": 11,
+   "day": "wed",
+   "name": "Wednesday of the 11th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["2 Cor 3:4-11"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "GOA-DCS", "OCA", "GRE"]
+  },
+  {
+   "week": 11,
+   "day": "thu",
+   "name": "Thursday of the 11th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["2 Cor 4:1-12"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "GOA-DCS", "OCA", "GRE"],
+   "variants": [
+    {"usage": "Slavic/OCA", "service": "Liturgy", "kind": "Epistle", "refs": ["2 Cor 4:1-6"]}
+   ]
+  },
+  {
+   "week": 11,
+   "day": "fri",
+   "name": "Friday of the 11th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["2 Cor 4:13-18"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "GOA-DCS", "OCA", "GRE"]
+  },
+  {
+   "week": 11,
+   "day": "sat",
+   "name": "Saturday of the 11th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["1 Cor 1:3-9"]}
+   ],
+   "confidence": "high",
+   "sources": ["GOA", "GOA-DCS", "OCA", "GRE"]
+  },
+  {
+   "week": 11,
+   "day": "sun",
+   "name": "11th Sunday after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["1 Cor 9:2-12"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT", "GOA", "GOA-DCS", "OCA", "HAP", "GRE"]
+  },
+  {
+   "week": 12,
+   "day": "mon",
+   "name": "Monday of the 12th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["2 Cor 5:10-15"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "GOA-DCS", "OCA", "GRE"]
+  },
+  {
+   "week": 12,
+   "day": "tue",
+   "name": "Tuesday of the 12th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["2 Cor 5:15-21"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "GOA-DCS", "OCA", "GRE"]
+  },
+  {
+   "week": 12,
+   "day": "wed",
+   "name": "Wednesday of the 12th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["2 Cor 6:11-16"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "GOA-DCS", "OCA", "GRE"]
+  },
+  {
+   "week": 12,
+   "day": "thu",
+   "name": "Thursday of the 12th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["2 Cor 7:1-10"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "GOA-DCS", "OCA", "GRE"]
+  },
+  {
+   "week": 12,
+   "day": "fri",
+   "name": "Friday of the 12th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["2 Cor 7:10-16"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "GOA-DCS", "OCA", "GRE"]
+  },
+  {
+   "week": 12,
+   "day": "sat",
+   "name": "Saturday of the 12th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["1 Cor 1:26-2:5"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "GOA-DCS", "OCA", "GRE"],
+   "variants": [
+    {"usage": "Slavic/OCA", "service": "Liturgy", "kind": "Epistle", "refs": ["1 Cor 1:26-29"]}
+   ]
+  },
+  {
+   "week": 12,
+   "day": "sun",
+   "name": "12th Sunday after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["1 Cor 15:1-11"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT", "GOA", "GOA-DCS", "OCA", "HAP", "GRE"]
+  },
+  {
+   "week": 13,
+   "day": "mon",
+   "name": "Monday of the 13th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["2 Cor 8:7-15"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "GOA-DCS", "OCA", "GRE"]
+  },
+  {
+   "week": 13,
+   "day": "tue",
+   "name": "Tuesday of the 13th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["2 Cor 8:16-9:5"]}
+   ],
+   "confidence": "high",
+   "sources": ["GOA", "GOA-DCS", "OCA", "GRE"]
+  },
+  {
+   "week": 13,
+   "day": "wed",
+   "name": "Wednesday of the 13th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["2 Cor 9:12-10:7"]}
+   ],
+   "confidence": "high",
+   "sources": ["GOA", "GOA-DCS", "OCA", "GRE"]
+  },
+  {
+   "week": 13,
+   "day": "thu",
+   "name": "Thursday of the 13th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["2 Cor 10:7-18"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "GOA-DCS", "OCA", "GRE"]
+  },
+  {
+   "week": 13,
+   "day": "fri",
+   "name": "Friday of the 13th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["2 Cor 11:5-21"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "GOA-DCS", "OCA", "GRE"]
+  },
+  {
+   "week": 13,
+   "day": "sat",
+   "name": "Saturday of the 13th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["1 Cor 2:6-9"]}
+   ],
+   "confidence": "high",
+   "sources": ["GOA", "GOA-DCS", "OCA", "GRE"]
+  },
+  {
+   "week": 13,
+   "day": "sun",
+   "name": "13th Sunday after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["1 Cor 16:13-24"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT", "GOA", "GOA-DCS", "OCA", "HAP", "GRE"]
+  },
+  {
+   "week": 14,
+   "day": "mon",
+   "name": "Monday of the 14th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["2 Cor 12:10-19"]}
+   ],
+   "confidence": "high",
+   "sources": ["GOA", "GOA-DCS", "OCA", "GRE"]
+  },
+  {
+   "week": 14,
+   "day": "tue",
+   "name": "Tuesday of the 14th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["2 Cor 12:20-13:2"]}
+   ],
+   "confidence": "high",
+   "sources": ["GOA", "GOA-DCS", "OCA", "GRE"]
+  },
+  {
+   "week": 14,
+   "day": "wed",
+   "name": "Wednesday of the 14th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["2 Cor 13:3-14"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "GOA-DCS", "OCA", "GRE"]
+  },
+  {
+   "week": 14,
+   "day": "thu",
+   "name": "Thursday of the 14th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Gal 1:1-3", "Gal 1:20-2:5"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "GOA-DCS", "OCA", "GRE"],
+   "variants": [
+    {"usage": "Slavic/OCA", "service": "Liturgy", "kind": "Epistle", "refs": ["Gal 1:1-10", "Gal 1:20-2:5"]}
+   ]
+  },
+  {
+   "week": 14,
+   "day": "fri",
+   "name": "Friday of the 14th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Gal 2:6-10"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "GOA-DCS", "OCA", "GRE"]
+  },
+  {
+   "week": 14,
+   "day": "sat",
+   "name": "Saturday of the 14th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["1 Cor 4:1-5"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "GOA-DCS", "OCA", "GRE"]
+  },
+  {
+   "week": 14,
+   "day": "sun",
+   "name": "14th Sunday after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["2 Cor 1:21-2:4"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT", "GOA", "GOA-DCS", "OCA", "HAP", "GRE"]
+  },
+  {
+   "week": 15,
+   "day": "mon",
+   "name": "Monday of the 15th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Gal 2:11-16"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "GOA-DCS", "OCA", "GRE"]
+  },
+  {
+   "week": 15,
+   "day": "tue",
+   "name": "Tuesday of the 15th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Gal 2:21-3:7"]}
+   ],
+   "confidence": "high",
+   "sources": ["GOA", "GOA-DCS", "OCA", "GRE"]
+  },
+  {
+   "week": 15,
+   "day": "wed",
+   "name": "Wednesday of the 15th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Gal 3:15-22"]}
+   ],
+   "confidence": "high",
+   "sources": ["GOA", "GOA-DCS", "OCA", "GRE"]
+  },
+  {
+   "week": 15,
+   "day": "thu",
+   "name": "Thursday of the 15th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Gal 3:23-4:5"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "GOA-DCS", "OCA", "GRE"]
+  },
+  {
+   "week": 15,
+   "day": "fri",
+   "name": "Friday of the 15th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Gal 4:8-21"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "GOA-DCS", "OCA", "GRE"]
+  },
+  {
+   "week": 15,
+   "day": "sat",
+   "name": "Saturday of the 15th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["1 Cor 4:17-5:5"]}
+   ],
+   "confidence": "high",
+   "sources": ["GOA", "GOA-DCS", "OCA", "GRE"]
+  },
+  {
+   "week": 15,
+   "day": "sun",
+   "name": "15th Sunday after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["2 Cor 4:6-15"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "GOA", "GOA-DCS", "OCA", "HAP", "GRE"]
+  },
+  {
+   "week": 16,
+   "day": "mon",
+   "name": "Monday of the 16th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Gal 4:28-5:10"]}
+   ],
+   "confidence": "high",
+   "sources": ["GOA", "GOA-DCS", "OCA", "GRE"]
+  },
+  {
+   "week": 16,
+   "day": "tue",
+   "name": "Tuesday of the 16th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Gal 5:11-21"]}
+   ],
+   "confidence": "high",
+   "sources": ["GOA", "GOA-DCS", "OCA", "GRE"]
+  },
+  {
+   "week": 16,
+   "day": "wed",
+   "name": "Wednesday of the 16th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Gal 6:2-10"]}
+   ],
+   "confidence": "high",
+   "sources": ["GOA", "GOA-DCS", "OCA", "GRE"]
+  },
+  {
+   "week": 16,
+   "day": "thu",
+   "name": "Thursday of the 16th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Eph 1:1-9"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "GOA-DCS", "OCA", "GRE"]
+  },
+  {
+   "week": 16,
+   "day": "fri",
+   "name": "Friday of the 16th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Eph 1:7-17"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "GOA-DCS", "OCA", "GRE"]
+  },
+  {
+   "week": 16,
+   "day": "sat",
+   "name": "Saturday of the 16th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["1 Cor 10:23-28"]}
+   ],
+   "confidence": "high",
+   "sources": ["GOA", "GOA-DCS", "OCA", "GRE"]
+  },
+  {
+   "week": 16,
+   "day": "sun",
+   "name": "16th Sunday after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["2 Cor 6:1-10"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "GOA", "GOA-DCS", "OCA", "HAP", "GRE"]
+  },
+  {
+   "week": 17,
+   "day": "mon",
+   "name": "Monday of the 17th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Eph 1:22-2:3"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "GOA-DCS", "OCA", "GRE"]
+  },
+  {
+   "week": 17,
+   "day": "tue",
+   "name": "Tuesday of the 17th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Eph 2:19-3:7"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "GOA-DCS", "OCA", "GRE"]
+  },
+  {
+   "week": 17,
+   "day": "wed",
+   "name": "Wednesday of the 17th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Eph 3:8-21"]}
+   ],
+   "confidence": "high",
+   "sources": ["GOA", "GOA-DCS", "OCA", "GRE"]
+  },
+  {
+   "week": 17,
+   "day": "thu",
+   "name": "Thursday of the 17th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Eph 4:14-17"]}
+   ],
+   "confidence": "medium",
+   "sources": ["GOA", "GOA-DCS", "OCA", "GRE"],
+   "variants": [
+    {"usage": "Slavic/OCA", "service": "Liturgy", "kind": "Epistle", "refs": ["Eph 4:14-19"]}
+   ]
+  },
+  {
+   "week": 17,
+   "day": "fri",
+   "name": "Friday of the 17th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Eph 4:17-25"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "GOA-DCS", "OCA", "GRE"]
+  },
+  {
+   "week": 17,
+   "day": "sat",
+   "name": "Saturday of the 17th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["1 Cor 14:20-25"]}
+   ],
+   "confidence": "high",
+   "sources": ["GOA", "GOA-DCS", "OCA", "GRE"]
+  },
+  {
+   "week": 17,
+   "day": "sun",
+   "name": "17th Sunday after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["2 Cor 6:16-7:1"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT", "GOA", "GOA-DCS", "OCA", "HAP", "GRE"]
+  },
+  {
+   "week": 18,
+   "day": "mon",
+   "name": "Monday of the 18th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Eph 4:25-32"]}
+   ],
+   "confidence": "high",
+   "sources": ["GOA", "GOA-DCS", "OCA", "GRE"]
+  },
+  {
+   "week": 18,
+   "day": "tue",
+   "name": "Tuesday of the 18th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Eph 5:20-25"]}
+   ],
+   "confidence": "medium",
+   "sources": ["GOA", "GOA-DCS", "OCA", "GRE"],
+   "variants": [
+    {"usage": "Slavic/OCA", "service": "Liturgy", "kind": "Epistle", "refs": ["Eph 5:20-26"]}
+   ]
+  },
+  {
+   "week": 18,
+   "day": "wed",
+   "name": "Wednesday of the 18th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Eph 5:25-33"]}
+   ],
+   "confidence": "high",
+   "sources": ["GOA", "GOA-DCS", "OCA", "GRE"]
+  },
+  {
+   "week": 18,
+   "day": "thu",
+   "name": "Thursday of the 18th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Eph 5:33-6:9"]}
+   ],
+   "confidence": "high",
+   "sources": ["GOA", "GOA-DCS", "OCA", "GRE"]
+  },
+  {
+   "week": 18,
+   "day": "fri",
+   "name": "Friday of the 18th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Eph 6:18-24"]}
+   ],
+   "confidence": "high",
+   "sources": ["GOA", "GOA-DCS", "OCA", "GRE"]
+  },
+  {
+   "week": 18,
+   "day": "sat",
+   "name": "Saturday of the 18th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["1 Cor 15:39-45"]}
+   ],
+   "confidence": "high",
+   "sources": ["GOA", "GOA-DCS", "OCA", "GRE"]
+  },
+  {
+   "week": 18,
+   "day": "sun",
+   "name": "18th Sunday after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["2 Cor 9:6-11"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT", "GOA", "GOA-DCS", "OCA", "HAP", "GRE"]
+  },
+  {
+   "week": 19,
+   "day": "mon",
+   "name": "Monday of the 19th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Phil 1:1-7"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "GOA-DCS", "OCA", "GRE"]
+  },
+  {
+   "week": 19,
+   "day": "tue",
+   "name": "Tuesday of the 19th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Phil 1:8-14"]}
+   ],
+   "confidence": "high",
+   "sources": ["GOA", "GOA-DCS", "OCA", "GRE"]
+  },
+  {
+   "week": 19,
+   "day": "wed",
+   "name": "Wednesday of the 19th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Phil 1:12-20"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "GOA-DCS", "OCA", "GRE"]
+  },
+  {
+   "week": 19,
+   "day": "thu",
+   "name": "Thursday of the 19th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Phil 1:20-27"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "GOA-DCS", "OCA", "GRE"]
+  },
+  {
+   "week": 19,
+   "day": "fri",
+   "name": "Friday of the 19th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Phil 1:27-2:4"]}
+   ],
+   "confidence": "high",
+   "sources": ["GOA", "GOA-DCS", "OCA", "GRE"]
+  },
+  {
+   "week": 19,
+   "day": "sat",
+   "name": "Saturday of the 19th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["1 Cor 15:58-16:3"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "GOA-DCS", "OCA", "GRE"]
+  },
+  {
+   "week": 19,
+   "day": "sun",
+   "name": "19th Sunday after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["2 Cor 11:31-12:9"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "GOA", "GOA-DCS", "OCA", "HAP", "GRE"]
+  },
+  {
+   "week": 20,
+   "day": "mon",
+   "name": "Monday of the 20th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Phil 2:12-16"]}
+   ],
+   "confidence": "medium",
+   "sources": ["ANT", "GOA", "GOA-DCS", "OCA", "GRE"],
+   "variants": [
+    {"usage": "antiochian.org display", "service": "Liturgy", "kind": "Epistle", "refs": ["Phil 2:12-15"]}
+   ]
+  },
+  {
+   "week": 20,
+   "day": "tue",
+   "name": "Tuesday of the 20th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Phil 2:16-23"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "GOA-DCS", "OCA", "GRE"]
+  },
+  {
+   "week": 20,
+   "day": "wed",
+   "name": "Wednesday of the 20th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Phil 2:24-30"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "GOA-DCS", "OCA", "GRE"]
+  },
+  {
+   "week": 20,
+   "day": "thu",
+   "name": "Thursday of the 20th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Phil 3:1-8"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "GOA-DCS", "OCA", "GRE"]
+  },
+  {
+   "week": 20,
+   "day": "fri",
+   "name": "Friday of the 20th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Phil 3:8-19"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "GOA-DCS", "OCA", "GRE"]
+  },
+  {
+   "week": 20,
+   "day": "sat",
+   "name": "Saturday of the 20th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["2 Cor 1:8-11"]}
+   ],
+   "confidence": "high",
+   "sources": ["GOA", "GOA-DCS", "OCA", "GRE"]
+  },
+  {
+   "week": 20,
+   "day": "sun",
+   "name": "20th Sunday after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Gal 1:11-19"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "GOA", "GOA-DCS", "OCA", "HAP", "GRE"]
+  },
+  {
+   "week": 21,
+   "day": "mon",
+   "name": "Monday of the 21st week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Phil 4:10-23"]}
+   ],
+   "confidence": "high",
+   "sources": ["GOA", "GOA-DCS", "OCA", "GRE"]
+  },
+  {
+   "week": 21,
+   "day": "tue",
+   "name": "Tuesday of the 21st week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Col 1:1-3", "Col 1:6-11"]}
+   ],
+   "confidence": "medium",
+   "sources": ["ANT", "GOA", "GOA-DCS", "OCA", "GRE"],
+   "variants": [
+    {"usage": "antiochian.org display", "service": "Liturgy", "kind": "Epistle", "refs": ["Col 1:1-3", "Col 1:7-11"]},
+    {"usage": "Slavic/OCA", "service": "Liturgy", "kind": "Epistle", "refs": ["Col 1:1-2", "Col 1:7-11"]}
+   ]
+  },
+  {
+   "week": 21,
+   "day": "wed",
+   "name": "Wednesday of the 21st week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Col 1:18-23"]}
+   ],
+   "confidence": "high",
+   "sources": ["GOA", "GOA-DCS", "OCA", "GRE"]
+  },
+  {
+   "week": 21,
+   "day": "thu",
+   "name": "Thursday of the 21st week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Col 1:24-2:1"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "GOA-DCS", "OCA", "GRE"],
+   "variants": [
+    {"usage": "Slavic/OCA", "service": "Liturgy", "kind": "Epistle", "refs": ["Col 1:24-29"]}
+   ]
+  },
+  {
+   "week": 21,
+   "day": "fri",
+   "name": "Friday of the 21st week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Col 2:1-7"]}
+   ],
+   "confidence": "high",
+   "sources": ["GOA", "GOA-DCS", "OCA", "GRE"]
+  },
+  {
+   "week": 21,
+   "day": "sat",
+   "name": "Saturday of the 21st week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["2 Cor 3:12-18"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "GOA-DCS", "OCA", "GRE"]
+  },
+  {
+   "week": 21,
+   "day": "sun",
+   "name": "21st Sunday after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Gal 2:16-20"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT", "GOA", "GOA-DCS", "OCA", "HAP", "GRE"]
+  },
+  {
+   "week": 22,
+   "day": "mon",
+   "name": "Monday of the 22nd week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Col 2:13-20"]}
+   ],
+   "confidence": "high",
+   "sources": ["GOA", "GOA-DCS", "OCA", "GRE"]
+  },
+  {
+   "week": 22,
+   "day": "tue",
+   "name": "Tuesday of the 22nd week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Col 2:20-3:3"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "GOA-DCS", "OCA", "GRE"]
+  },
+  {
+   "week": 22,
+   "day": "wed",
+   "name": "Wednesday of the 22nd week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Col 3:17-4:1"]}
+   ],
+   "confidence": "high",
+   "sources": ["GOA", "GOA-DCS", "OCA", "GRE"]
+  },
+  {
+   "week": 22,
+   "day": "thu",
+   "name": "Thursday of the 22nd week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Col 4:2-9"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "GOA-DCS", "OCA", "GRE"]
+  },
+  {
+   "week": 22,
+   "day": "fri",
+   "name": "Friday of the 22nd week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Col 4:10-18"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "GOA-DCS", "OCA", "GRE"]
+  },
+  {
+   "week": 22,
+   "day": "sat",
+   "name": "Saturday of the 22nd week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["2 Cor 5:1-10"]}
+   ],
+   "confidence": "high",
+   "sources": ["GOA", "GOA-DCS", "OCA", "GRE"]
+  },
+  {
+   "week": 22,
+   "day": "sun",
+   "name": "22nd Sunday after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Gal 6:11-18"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "GOA", "GOA-DCS", "OCA", "HAP", "GRE"]
+  },
+  {
+   "week": 23,
+   "day": "mon",
+   "name": "Monday of the 23rd week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["1 Thess 1:1-5"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "GOA-DCS", "OCA", "GRE"]
+  },
+  {
+   "week": 23,
+   "day": "tue",
+   "name": "Tuesday of the 23rd week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["1 Thess 1:6-10"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "GOA-DCS", "OCA", "GRE"]
+  },
+  {
+   "week": 23,
+   "day": "wed",
+   "name": "Wednesday of the 23rd week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["1 Thess 2:1-8"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "GOA-DCS", "OCA", "GRE"]
+  },
+  {
+   "week": 23,
+   "day": "thu",
+   "name": "Thursday of the 23rd week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["1 Thess 2:9-14"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "GOA-DCS", "OCA", "GRE"]
+  },
+  {
+   "week": 23,
+   "day": "fri",
+   "name": "Friday of the 23rd week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["1 Thess 2:14-20"]}
+   ],
+   "confidence": "medium",
+   "sources": ["GOA", "GOA-DCS", "OCA", "GRE"],
+   "variants": [
+    {"usage": "Slavic/OCA", "service": "Liturgy", "kind": "Epistle", "refs": ["1 Thess 2:14-19"]}
+   ]
+  },
+  {
+   "week": 23,
+   "day": "sat",
+   "name": "Saturday of the 23rd week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["2 Cor 8:1-5"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "GOA-DCS", "OCA", "GRE"]
+  },
+  {
+   "week": 23,
+   "day": "sun",
+   "name": "23rd Sunday after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Eph 2:4-10"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "GOA", "GOA-DCS", "OCA", "HAP", "GRE"]
+  },
+  {
+   "week": 24,
+   "day": "mon",
+   "name": "Monday of the 24th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["1 Thess 2:20-3:8"]}
+   ],
+   "confidence": "high",
+   "sources": ["GOA", "GOA-DCS", "OCA", "GRE"]
+  },
+  {
+   "week": 24,
+   "day": "tue",
+   "name": "Tuesday of the 24th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["1 Thess 3:8-13"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "GOA-DCS", "OCA", "GRE"],
+   "variants": [
+    {"usage": "Slavic/OCA", "service": "Liturgy", "kind": "Epistle", "refs": ["1 Thess 3:9-13"]}
+   ]
+  },
+  {
+   "week": 24,
+   "day": "wed",
+   "name": "Wednesday of the 24th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["1 Thess 4:1-12"]}
+   ],
+   "confidence": "high",
+   "sources": ["GOA", "GOA-DCS", "OCA", "GRE"]
+  },
+  {
+   "week": 24,
+   "day": "thu",
+   "name": "Thursday of the 24th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["1 Thess 4:18-5:10"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "GOA-DCS", "OCA", "GRE"],
+   "variants": [
+    {"usage": "Slavic/OCA", "service": "Liturgy", "kind": "Epistle", "refs": ["1 Thess 5:1-8"]}
+   ]
+  },
+  {
+   "week": 24,
+   "day": "fri",
+   "name": "Friday of the 24th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["1 Thess 5:9-13", "1 Thess 5:24-28"]}
+   ],
+   "confidence": "high",
+   "sources": ["GOA", "GOA-DCS", "OCA", "GRE"]
+  },
+  {
+   "week": 24,
+   "day": "sat",
+   "name": "Saturday of the 24th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["2 Cor 11:1-6"]}
+   ],
+   "confidence": "high",
+   "sources": ["GOA", "GOA-DCS", "OCA", "GRE"]
+  },
+  {
+   "week": 24,
+   "day": "sun",
+   "name": "24th Sunday after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Eph 2:14-22"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT", "GOA", "GOA-DCS", "OCA", "HAP", "GRE"]
+  },
+  {
+   "week": 25,
+   "day": "mon",
+   "name": "Monday of the 25th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["2 Thess 1:1-10"]}
+   ],
+   "confidence": "high",
+   "sources": ["GOA", "GOA-DCS", "OCA", "GRE"]
+  },
+  {
+   "week": 25,
+   "day": "tue",
+   "name": "Tuesday of the 25th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["2 Thess 1:10-2:2"]}
+   ],
+   "confidence": "high",
+   "sources": ["GOA", "GOA-DCS", "OCA", "GRE"]
+  },
+  {
+   "week": 25,
+   "day": "wed",
+   "name": "Wednesday of the 25th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["2 Thess 2:1-12"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "GOA-DCS", "OCA", "GRE"]
+  },
+  {
+   "week": 25,
+   "day": "thu",
+   "name": "Thursday of the 25th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["2 Thess 2:13-3:5"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "GOA-DCS", "OCA", "GRE"]
+  },
+  {
+   "week": 25,
+   "day": "fri",
+   "name": "Friday of the 25th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["2 Thess 3:6-18"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "GOA-DCS", "OCA", "GRE"]
+  },
+  {
+   "week": 25,
+   "day": "sat",
+   "name": "Saturday of the 25th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Gal 1:3-10"]}
+   ],
+   "confidence": "high",
+   "sources": ["GOA", "GOA-DCS", "OCA", "GRE"]
+  },
+  {
+   "week": 25,
+   "day": "sun",
+   "name": "25th Sunday after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Eph 4:1-7"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT", "GOA", "GOA-DCS", "OCA", "HAP", "GRE"],
+   "variants": [
+    {"usage": "Slavic/OCA", "service": "Liturgy", "kind": "Epistle", "refs": ["Eph 4:1-6"]}
+   ]
+  },
+  {
+   "week": 26,
+   "day": "mon",
+   "name": "Monday of the 26th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["1 Tim 1:1-7"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "GOA-DCS", "OCA", "GRE"]
+  },
+  {
+   "week": 26,
+   "day": "tue",
+   "name": "Tuesday of the 26th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["1 Tim 1:8-14"]}
+   ],
+   "confidence": "high",
+   "sources": ["GOA", "GOA-DCS", "OCA", "GRE"]
+  },
+  {
+   "week": 26,
+   "day": "wed",
+   "name": "Wednesday of the 26th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["1 Tim 1:18-20", "1 Tim 2:8-15"]}
+   ],
+   "confidence": "high",
+   "sources": ["GOA", "GOA-DCS", "OCA", "GRE"]
+  },
+  {
+   "week": 26,
+   "day": "thu",
+   "name": "Thursday of the 26th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["1 Tim 3:1-13"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "GOA-DCS", "OCA", "GRE"]
+  },
+  {
+   "week": 26,
+   "day": "fri",
+   "name": "Friday of the 26th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["1 Tim 4:4-8", "1 Tim 4:16"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "GOA-DCS", "OCA", "GRE"]
+  },
+  {
+   "week": 26,
+   "day": "sat",
+   "name": "Saturday of the 26th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Gal 3:8-12"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "GOA-DCS", "OCA", "GRE"]
+  },
+  {
+   "week": 26,
+   "day": "sun",
+   "name": "26th Sunday after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Eph 5:8-19"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT", "GOA", "GOA-DCS", "OCA", "HAP", "GRE"],
+   "variants": [
+    {"usage": "Slavic (Russian books, Hapgood 1906)", "service": "Liturgy", "kind": "Epistle", "refs": ["Eph 5:9-19"]}
+   ]
+  },
+  {
+   "week": 27,
+   "day": "mon",
+   "name": "Monday of the 27th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["1 Tim 5:1-10"]}
+   ],
+   "confidence": "high",
+   "sources": ["GOA", "GOA-DCS", "OCA", "GRE"]
+  },
+  {
+   "week": 27,
+   "day": "tue",
+   "name": "Tuesday of the 27th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["1 Tim 5:11-21"]}
+   ],
+   "confidence": "high",
+   "sources": ["GOA", "GOA-DCS", "OCA", "GRE"]
+  },
+  {
+   "week": 27,
+   "day": "wed",
+   "name": "Wednesday of the 27th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["1 Tim 5:22-6:11"]}
+   ],
+   "confidence": "high",
+   "sources": ["GOA", "GOA-DCS", "OCA", "GRE"]
+  },
+  {
+   "week": 27,
+   "day": "thu",
+   "name": "Thursday of the 27th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["1 Tim 6:17-21"]}
+   ],
+   "confidence": "high",
+   "sources": ["GOA", "GOA-DCS", "OCA", "GRE"]
+  },
+  {
+   "week": 27,
+   "day": "fri",
+   "name": "Friday of the 27th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["2 Tim 1:1-2", "2 Tim 1:8-18"]}
+   ],
+   "confidence": "high",
+   "sources": ["GOA", "GOA-DCS", "OCA", "GRE"]
+  },
+  {
+   "week": 27,
+   "day": "sat",
+   "name": "Saturday of the 27th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Gal 5:22-6:2"]}
+   ],
+   "confidence": "high",
+   "sources": ["GOA", "GOA-DCS", "OCA", "GRE"]
+  },
+  {
+   "week": 27,
+   "day": "sun",
+   "name": "27th Sunday after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Eph 6:10-17"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "GOA", "GOA-DCS", "OCA", "HAP", "GRE"]
+  },
+  {
+   "week": 28,
+   "day": "mon",
+   "name": "Monday of the 28th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["2 Tim 2:20-26"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "GOA-DCS", "OCA", "GRE"]
+  },
+  {
+   "week": 28,
+   "day": "tue",
+   "name": "Tuesday of the 28th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["2 Tim 3:16-4:4"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "GOA-DCS", "OCA", "GRE"]
+  },
+  {
+   "week": 28,
+   "day": "wed",
+   "name": "Wednesday of the 28th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["2 Tim 4:9-22"]}
+   ],
+   "confidence": "high",
+   "sources": ["GOA", "GOA-DCS", "OCA", "GRE"]
+  },
+  {
+   "week": 28,
+   "day": "thu",
+   "name": "Thursday of the 28th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Titus 1:5-14"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "GOA-DCS", "OCA", "GRE"],
+   "variants": [
+    {"usage": "Slavic/OCA", "service": "Liturgy", "kind": "Epistle", "refs": ["Titus 1:5-2:1"]}
+   ]
+  },
+  {
+   "week": 28,
+   "day": "fri",
+   "name": "Friday of the 28th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Titus 1:15-2:10"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "GOA-DCS", "OCA", "GRE"]
+  },
+  {
+   "week": 28,
+   "day": "sat",
+   "name": "Saturday of the 28th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Eph 1:16-23"]}
+   ],
+   "confidence": "high",
+   "sources": ["GOA", "GOA-DCS", "OCA", "GRE"]
+  },
+  {
+   "week": 28,
+   "day": "sun",
+   "name": "28th Sunday after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Col 1:12-18"]}
+   ],
+   "confidence": "medium",
+   "sources": ["OCA", "HAP", "GRE"],
+   "note": "Usually displaced by the Sunday of the Forefathers (Dec 11-17) or the Sundays around Nativity and Theophany. Greek-usage verse range not observed."
+  },
+  {
+   "week": 29,
+   "day": "mon",
+   "name": "Monday of the 29th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Heb 3:5-11", "Heb 3:17-19"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "GOA-DCS", "OCA", "GRE"]
+  },
+  {
+   "week": 29,
+   "day": "tue",
+   "name": "Tuesday of the 29th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Heb 4:1-13"]}
+   ],
+   "confidence": "high",
+   "sources": ["GOA", "GOA-DCS", "OCA", "GRE"]
+  },
+  {
+   "week": 29,
+   "day": "wed",
+   "name": "Wednesday of the 29th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Heb 5:11-6:8"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "GOA-DCS", "OCA", "GRE"]
+  },
+  {
+   "week": 29,
+   "day": "thu",
+   "name": "Thursday of the 29th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Heb 7:1-6"]}
+   ],
+   "confidence": "high",
+   "sources": ["GOA", "GOA-DCS", "OCA", "GRE"]
+  },
+  {
+   "week": 29,
+   "day": "fri",
+   "name": "Friday of the 29th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Heb 7:18-25"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "GOA-DCS", "OCA", "GRE"]
+  },
+  {
+   "week": 29,
+   "day": "sat",
+   "name": "Saturday of the 29th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Eph 2:11-13"]}
+   ],
+   "confidence": "medium",
+   "sources": ["OCA", "GRE"],
+   "note": "Usually displaced by the Saturdays before or after Nativity or Theophany. Greek-usage verse range not observed."
+  },
+  {
+   "week": 29,
+   "day": "sun",
+   "name": "29th Sunday after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Col 3:4-11"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT", "GOA", "GOA-DCS", "HAP", "GRE"],
+   "note": "Also the fixed Epistle of the Sunday of the Forefathers."
+  },
+  {
+   "week": 30,
+   "day": "mon",
+   "name": "Monday of the 30th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Heb 8:7-13"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "GOA-DCS", "OCA", "GRE"]
+  },
+  {
+   "week": 30,
+   "day": "tue",
+   "name": "Tuesday of the 30th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Heb 9:8-23"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "GOA-DCS", "OCA", "GRE"],
+   "variants": [
+    {"usage": "Slavic/OCA", "service": "Liturgy", "kind": "Epistle", "refs": ["Heb 9:8-10", "Heb 9:15-23"]}
+   ]
+  },
+  {
+   "week": 30,
+   "day": "wed",
+   "name": "Wednesday of the 30th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Heb 10:1-18"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "GOA-DCS", "OCA", "GRE"]
+  },
+  {
+   "week": 30,
+   "day": "thu",
+   "name": "Thursday of the 30th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Heb 10:35-11:7"]}
+   ],
+   "confidence": "high",
+   "sources": ["GOA", "GOA-DCS", "OCA", "GRE"]
+  },
+  {
+   "week": 30,
+   "day": "fri",
+   "name": "Friday of the 30th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Heb 11:8-16"]}
+   ],
+   "confidence": "medium",
+   "sources": ["GOA", "GOA-DCS", "OCA", "GRE"],
+   "variants": [
+    {"usage": "Slavic/OCA", "service": "Liturgy", "kind": "Epistle", "refs": ["Heb 11:8", "Heb 11:11-16"]}
+   ]
+  },
+  {
+   "week": 30,
+   "day": "sat",
+   "name": "Saturday of the 30th week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Eph 5:1-8"]}
+   ],
+   "confidence": "high",
+   "sources": ["GOA", "GOA-DCS", "OCA", "GRE"]
+  },
+  {
+   "week": 30,
+   "day": "sun",
+   "name": "30th Sunday after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Col 3:12-16"]}
+   ],
+   "confidence": "medium",
+   "sources": ["OCA", "HAP", "GRE"],
+   "note": "Usually displaced by the Sundays around Nativity and Theophany. Greek-usage verse range not observed."
+  },
+  {
+   "week": 31,
+   "day": "mon",
+   "name": "Monday of the 31st week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Heb 11:17-31"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "GOA-DCS", "OCA", "GRE"],
+   "variants": [
+    {"usage": "Slavic/OCA", "service": "Liturgy", "kind": "Epistle", "refs": ["Heb 11:17-23", "Heb 11:27-31"]}
+   ]
+  },
+  {
+   "week": 31,
+   "day": "tue",
+   "name": "Tuesday of the 31st week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Heb 12:25-27", "Heb 13:22-25"]}
+   ],
+   "confidence": "medium",
+   "sources": ["GOA", "GOA-DCS", "OCA", "GRE"],
+   "variants": [
+    {"usage": "Slavic/OCA", "service": "Liturgy", "kind": "Epistle", "refs": ["Heb 12:25-26", "Heb 13:22-25"]}
+   ]
+  },
+  {
+   "week": 31,
+   "day": "wed",
+   "name": "Wednesday of the 31st week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Jas 1:1-18"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "GOA-DCS", "OCA", "GRE"]
+  },
+  {
+   "week": 31,
+   "day": "thu",
+   "name": "Thursday of the 31st week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Jas 1:19-27"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "GOA-DCS", "OCA", "GRE"]
+  },
+  {
+   "week": 31,
+   "day": "fri",
+   "name": "Friday of the 31st week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Jas 2:1-13"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "GRE"]
+  },
+  {
+   "week": 31,
+   "day": "sat",
+   "name": "Saturday of the 31st week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Col 1:3-6"]}
+   ],
+   "confidence": "medium",
+   "sources": ["OCA", "GRE"],
+   "note": "Greek-usage verse range not observed."
+  },
+  {
+   "week": 31,
+   "day": "sun",
+   "name": "31st Sunday after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["1 Tim 1:15-17"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT", "GOA", "OCA", "HAP", "GRE"]
+  },
+  {
+   "week": 32,
+   "day": "mon",
+   "name": "Monday of the 32nd week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Jas 2:14-26"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "GRE"]
+  },
+  {
+   "week": 32,
+   "day": "tue",
+   "name": "Tuesday of the 32nd week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Jas 3:1-10"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "GRE"]
+  },
+  {
+   "week": 32,
+   "day": "wed",
+   "name": "Wednesday of the 32nd week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Jas 3:11-4:6"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "GRE"]
+  },
+  {
+   "week": 32,
+   "day": "thu",
+   "name": "Thursday of the 32nd week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Jas 4:7-5:9"]}
+   ],
+   "confidence": "medium",
+   "sources": ["OCA", "GRE"],
+   "note": "Greek-usage verse range not observed (every Thursday checked fell on a saint with proper readings)."
+  },
+  {
+   "week": 32,
+   "day": "fri",
+   "name": "Friday of the 32nd week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["1 Pet 1:1-2:10"]}
+   ],
+   "confidence": "medium",
+   "sources": ["ANT", "GOA", "OCA", "GRE"],
+   "variants": [
+    {"usage": "Slavic/OCA", "service": "Liturgy", "kind": "Epistle", "refs": ["1 Pet 1:1-2", "1 Pet 1:10-12", "1 Pet 2:6-10"]}
+   ],
+   "note": "Slavic/OCA and 1853 read only 1 Pet 1:1-2, 10-12; 2:6-10 (zachalo 58). The website may be printing the whole span; check a printed Greek Apostolos."
+  },
+  {
+   "week": 32,
+   "day": "sat",
+   "name": "Saturday of the 32nd week after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["1 Thess 5:14-23"]}
+   ],
+   "confidence": "medium",
+   "sources": ["OCA", "GRE"],
+   "note": "Greek-usage verse range not observed."
+  },
+  {
+   "week": 32,
+   "day": "sun",
+   "name": "32nd Sunday after Pentecost",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["1 Tim 4:9-15"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT", "GOA", "GOA-DCS", "HAP", "GRE"],
+   "note": "The Epistle of Zacchaeus Sunday."
+  },
+  {
+   "week": 33,
+   "day": "mon",
+   "name": "Monday of the 33rd week (the week before the Publican and the Pharisee)",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["1 Pet 2:21-3:9"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "GOA-DCS", "OCA", "GRE"]
+  },
+  {
+   "week": 33,
+   "day": "tue",
+   "name": "Tuesday of the 33rd week (the week before the Publican and the Pharisee)",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["1 Pet 3:10-22"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "GRE"]
+  },
+  {
+   "week": 33,
+   "day": "wed",
+   "name": "Wednesday of the 33rd week (the week before the Publican and the Pharisee)",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["1 Pet 4:1-11"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "GRE"]
+  },
+  {
+   "week": 33,
+   "day": "thu",
+   "name": "Thursday of the 33rd week (the week before the Publican and the Pharisee)",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["1 Pet 4:12-5:5"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "GRE"]
+  },
+  {
+   "week": 33,
+   "day": "fri",
+   "name": "Friday of the 33rd week (the week before the Publican and the Pharisee)",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["2 Pet 1:1-10"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA", "GRE"]
+  },
+  {
+   "week": 33,
+   "day": "sat",
+   "name": "Saturday of the 33rd week (the week before the Publican and the Pharisee)",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["2 Tim 2:11-19"]}
+   ],
+   "confidence": "medium",
+   "sources": ["OCA", "GRE"],
+   "note": "Greek-usage verse range not observed (falls on saints in every year checked)."
+  }
+ ]
+}
