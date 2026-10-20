@@ -35,7 +35,7 @@ jobs:
     runs-on: [self-hosted, macOS, ARM64, orthodox]
     timeout-minutes: 60
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           # The build number is the commit count, so it needs the whole history.
           fetch-depth: 0

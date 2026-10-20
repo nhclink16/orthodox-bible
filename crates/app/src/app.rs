@@ -2499,6 +2499,13 @@ impl eframe::App for BibleApp {
                 match fathers.show(&mut child, p, self.fathers_db.as_ref()) {
                     crate::fathers_panel::Outcome::Stay => {}
                     crate::fathers_panel::Outcome::Close => self.fathers = None,
+                    crate::fathers_panel::Outcome::AddToNote(note) => {
+                        let v = fathers.verse;
+                        match self.study.append_note(v, &note) {
+                            Ok(()) => actions.push(Action::Toast(format!("Added to your note on {v}"))),
+                            Err(e) => actions.push(Action::Toast(format!("Couldn't add the quote: {e:#}"))),
+                        }
+                    }
                     crate::fathers_panel::Outcome::Install(src) => {
                         let dest = self.data_dir.join(bible_core::fathers::FILE);
                         match bible_core::fathers::install(&src, &dest) {
