@@ -68,7 +68,9 @@ struct RootView: View {
                 case .search: SearchView(theme: theme)
                 case .settings: SettingsView(theme: theme)
                 case .study: StudyView(theme: theme)
+                case .today: TodayView(theme: theme)
                 case .note(let ref): NoteEditor(ref: ref, theme: theme)
+                case .fathers(let ref): FathersView(ref: ref, theme: theme)
                 }
             }
             .environment(store)
@@ -145,6 +147,7 @@ struct TopBar: View {
             Spacer(minLength: 0)
 
             HStack(spacing: 0) {
+                tool("calendar", "Today in the Church", id: "today") { store.sheet = .today }
                 tool("magnifyingglass", "Search", id: "search") { store.sheet = .search }
                 tool("textformat.size", "Text and theme", id: "settings") { store.sheet = .settings }
                 tool("bookmark", "Bookmarks, highlights and notes", id: "study") { store.sheet = .study }

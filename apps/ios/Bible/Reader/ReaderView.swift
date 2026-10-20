@@ -30,7 +30,8 @@ struct ChapterSource: Sendable {
 
     static func typeset(_ source: ChapterSource?, _ index: Int, _ style: Typography) -> ChapterLayout {
         let content = source?.content(index) ?? ChapterContent(
-            index: UInt16(index), book: 0, chapter: 1, status: .missing, bookName: "", bookTitle: "", blocks: [])
+            index: UInt16(index), book: 0, chapter: 1, shownChapter: 1, status: .missing, bookName: "", bookTitle: "",
+            blocks: [])
         let layout = ChapterLayout(content: content, typography: style)
         layout.marks = source?.marksByVerse(index) ?? [:]
         return layout

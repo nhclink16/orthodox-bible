@@ -1,7 +1,7 @@
 import XCTest
 
 /// The main flows, driven through the interface. Each test starts the app with no saved data
-/// (`--uitest`), so it opens at John 1 in the KJV.
+/// (`--uitest`), so it opens at John 1 in the Septuagint (whose New Testament is the KJV's).
 final class BibleUITests: XCTestCase {
     private var app: XCUIApplication!
 
@@ -87,10 +87,11 @@ final class BibleUITests: XCTestCase {
         let field = app.searchFields.firstMatch
         XCTAssertTrue(field.waitForExistence(timeout: 3))
         field.tap()
-        field.typeText("ps 23\n")
-        expectChapter("Psalm 23")
-        XCTAssertTrue(verse("Psalm 23:1").waitForExistence(timeout: 3))
-        XCTAssertTrue(verse("Psalm 23:1").label.contains("shepherd"))
+        // Psalms are numbered as the Septuagint numbers them: the Shepherd psalm is 22.
+        field.typeText("ps 22\n")
+        expectChapter("Psalm 22")
+        XCTAssertTrue(verse("Psalm 22:1").waitForExistence(timeout: 3))
+        XCTAssertTrue(verse("Psalm 22:1").label.contains("shepherd"))
     }
 
     func testSwitchesTranslation() {
@@ -199,6 +200,23 @@ final class BibleUITests: XCTestCase {
         slider.adjust(toNormalizedSliderPosition: 0.9)
         app.buttons["Done"].tap()
         XCTAssertTrue(verse("John 1:1").exists)
+    }
+
+    func testTodayShowsTheChurchDayAndOpensTheKathisma() {
+        app.buttons["today"].tap()
+        let kathisma = app.buttons.matching(NSPredicate(format: "label CONTAINS 'Kathisma'")).firstMatch
+        XCTAssertTrue(kathisma.waitForExistence(timeout: 3))
+        XCTAssertTrue(app.staticTexts["Fasting"].exists || app.staticTexts["FASTING"].exists)
+        kathisma.tap()
+        let psalm = NSPredicate(format: "label BEGINSWITH 'Psalm'")
+        XCTAssertEqual(XCTWaiter.wait(for: [XCTNSPredicateExpectation(predicate: psalm, object: reference)], timeout: 5), .completed, reference.label)
+    }
+
+    func testFathersAskToBeInstalledFirst() {
+        verse("John 1:1").tap()
+        app.selectionAction("Fathers").tap()
+        XCTAssertTrue(app.staticTexts["Quotes from the Fathers aren't installed yet."].waitForExistence(timeout: 3))
+        XCTAssertTrue(app.buttons["Install from Files…"].exists)
     }
 
     func testScrollingDoesNotHitch() {

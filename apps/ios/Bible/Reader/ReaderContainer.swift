@@ -29,7 +29,9 @@ struct ReaderContainer: UIViewRepresentable {
             content: { bible.chapter(translation: translation, index: UInt16($0), options: options) },
             marks: { bible.marks(translation: translation, chapter: UInt16($0)) })
         view.readingLine = readingLine
-        view.configure(style: style, theme: theme, key: translation)
+        // Psalm numbers change with the numbering setting, so the chapters are typeset again.
+        let numbering = store.settings.septuagintPsalms ? "" : "#hebrew"
+        view.configure(style: style, theme: theme, key: translation + numbering)
         view.selection = selection
         if c.marksVersion != marksVersion {
             c.marksVersion = marksVersion

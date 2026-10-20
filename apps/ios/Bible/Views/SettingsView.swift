@@ -53,6 +53,14 @@ struct SettingsView: View {
                     Toggle("One verse per line", isOn: $store.settings.versePerLine)
                     Toggle("Section headings", isOn: $store.settings.headings)
                     Toggle("Search whole words only", isOn: $store.settings.wholeWords)
+                    Toggle("Septuagint psalm numbers", isOn: $store.settings.septuagintPsalms)
+                }
+
+                Section("Church calendar") {
+                    Picker("Calendar", selection: $store.settings.oldCalendar) {
+                        Text("New").tag(false)
+                        Text("Old (Julian)").tag(true)
+                    }
                 }
 
                 Section("Notes and highlights") {

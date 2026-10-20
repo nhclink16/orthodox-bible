@@ -67,6 +67,7 @@ struct SelectionBar: View {
                 action(bookmarked ? "Saved" : "Bookmark", bookmarked ? "bookmark.fill" : "bookmark") {
                     store.toggleBookmarkOnSelection()
                 }
+                action("Fathers", "text.book.closed") { store.fathersOnSelection() }
                 action("Copy", "doc.on.doc") { store.copySelection() }
                 ShareLink(item: store.selectionText, subject: Text(store.selectionLabel)) {
                     label("Share", "square.and.arrow.up")

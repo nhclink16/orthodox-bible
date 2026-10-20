@@ -132,7 +132,7 @@ udid() {
 UDID="$(udid)"
 if [[ -z "$UDID" ]]; then
   RUNTIME="$(xcrun simctl list runtimes available | sed -n 's/.*\(com\.apple\.CoreSimulator\.SimRuntime\.iOS-[0-9-]*\).*/\1/p' | tail -1)"
-  UDID="$(xcrun simctl create "$SIMULATOR" "${DEVICE_TYPE:-iPhone 17 Pro}" "$RUNTIME")"
+  UDID="$(xcrun simctl create "$SIMULATOR" "${DEVICE_TYPE:-iPhone 17}" "$RUNTIME")"
 fi
 xcrun simctl boot "$UDID" 2>/dev/null || true
 

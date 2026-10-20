@@ -5,7 +5,7 @@ import os
 
 /// The reader's preferences, saved in the study database (under the "ios" setting) as JSON.
 struct ReaderSettings: Codable, Equatable {
-    var translation = "kjv"
+    var translation = "lxx"
     var appearance = Appearance.system
     /// Points at the default Dynamic Type size.
     var textSize: Double = 18
@@ -15,6 +15,10 @@ struct ReaderSettings: Codable, Equatable {
     var versePerLine = false
     var headings = true
     var wholeWords = false
+    /// Psalms numbered as the Septuagint numbers them (Orthodox fork).
+    var septuagintPsalms = true
+    /// Feasts and fasts on the Old (Julian) calendar rather than the New.
+    var oldCalendar = false
 
     static let textSizes: ClosedRange<Double> = 14...32
     static let lineSpacings: ClosedRange<Double> = 1.3...2.0
@@ -37,6 +41,8 @@ struct ReaderSettings: Codable, Equatable {
         versePerLine = value(.versePerLine, d.versePerLine)
         headings = value(.headings, d.headings)
         wholeWords = value(.wholeWords, d.wholeWords)
+        septuagintPsalms = value(.septuagintPsalms, d.septuagintPsalms)
+        oldCalendar = value(.oldCalendar, d.oldCalendar)
     }
 }
 
@@ -44,7 +50,7 @@ extension Comparable {
     func clamped(to range: ClosedRange<Self>) -> Self { min(max(self, range.lowerBound), range.upperBound) }
 }
 
-/// A chapter (0–1188 in the canonical grid) and verse.
+/// A chapter (0–1364 in the canonical grid) and verse.
 struct Position: Equatable {
     var chapter: Int
     var verse: Int
@@ -60,8 +66,9 @@ struct JumpRequest: Equatable {
 }
 
 enum Sheet: Identifiable, Equatable {
-    case books, search, settings, study
+    case books, search, settings, study, today
     case note(VerseRef)
+    case fathers(VerseRef)
 
     var id: String {
         switch self {
@@ -69,7 +76,9 @@ enum Sheet: Identifiable, Equatable {
         case .search: "search"
         case .settings: "settings"
         case .study: "study"
+        case .today: "today"
         case .note(let v): "note-\(v.book)-\(v.chapter)-\(v.verse)"
+        case .fathers(let v): "fathers-\(v.book)-\(v.chapter)-\(v.verse)"
         }
     }
 }
@@ -85,6 +94,9 @@ final class Store {
         didSet {
             guard settings != oldValue else { return }
             if settings.translation != oldValue.translation { translationChanged() }
+            if settings.septuagintPsalms != oldValue.septuagintPsalms {
+                setSeptuagintNumbering(on: settings.septuagintPsalms)
+            }
             scheduleSave()
         }
     }
@@ -107,7 +119,8 @@ final class Store {
         let bookList = books()
         let translations = bible.translations()
         var settings = ReaderSettings()
-        var position = Position(chapter: Int(bookList[42].firstChapter), verse: 1)
+        let john = bookList.first { $0.name == "John" } ?? bookList[0]
+        var position = Position(chapter: Int(john.firstChapter), verse: 1)
         if let json = bible.setting(key: "ios"), let saved = try? JSONDecoder().decode(Saved.self, from: Data(json.utf8)) {
             settings = saved.settings ?? settings
             if let chapter = saved.chapter, (0..<ReaderView.chapterCount).contains(chapter) {
@@ -115,13 +128,14 @@ final class Store {
             }
         }
         if !translations.contains(where: { $0.id == settings.translation }) {
-            settings.translation = translations.first?.id ?? "kjv"
+            settings.translation = translations.first?.id ?? "lxx"
         }
         self.bible = bible
         self.bookList = bookList
         self.translations = translations
         self.settings = settings
         self.position = position
+        setSeptuagintNumbering(on: settings.septuagintPsalms)
         jump = JumpRequest(chapter: position.chapter, verse: position.verse)
     }
 
@@ -255,6 +269,13 @@ final class Store {
         study { for ref in refs { try bible.setBookmark(verse: ref, on: on) } }
         show(on ? (refs.count == 1 ? "Bookmarked" : "Bookmarked \(refs.count) verses") : "Bookmark removed")
         selection = nil
+    }
+
+    /// The Church Fathers on the first selected verse.
+    func fathersOnSelection() {
+        guard let first = selectedRefs.first else { return }
+        selection = nil
+        sheet = .fathers(first)
     }
 
     func noteOnSelection() {
