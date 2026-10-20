@@ -166,18 +166,9 @@ fn verse_from_row(book: &str, chapter: i64, verse: i64) -> Option<VerseRef> {
     Some(VerseRef::new(book, u8::try_from(chapter).ok()?, u8::try_from(verse).ok()?))
 }
 
-/// A fresh id for this device: a hash of the time and the process id.
-fn new_device_id() -> String {
-    use std::hash::BuildHasher;
-    let nanos =
-        std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map(|d| d.as_nanos()).unwrap_or(0);
-    let hash = std::collections::hash_map::RandomState::new().hash_one((nanos, std::process::id()));
-    format!("{hash:016x}")
-}
-
 /// A record that syncs, as named by its key in `changes`. Verses are written `JHN.3.16` (the
 /// book code the tables use, which stays the same when books are added).
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug)]
 enum Record {
     Highlight(VerseRef),
     Note(VerseRef),
@@ -268,7 +259,7 @@ impl StudyStore {
         s.device = match s.setting("device-id") {
             Some(id) => id,
             None => {
-                let id = new_device_id();
+                let id = crate::online::random_id();
                 s.set_setting("device-id", &id)?;
                 id
             }
@@ -278,7 +269,7 @@ impl StudyStore {
         Ok(s)
     }
 
-    pub(crate) fn reload(&mut self) -> Result<()> {
+    fn reload(&mut self) -> Result<()> {
         self.highlights.clear();
         self.notes.clear();
         self.bookmarks.clear();
@@ -358,26 +349,31 @@ impl StudyStore {
 
     pub fn set_highlight(&mut self, v: VerseRef, color: Option<HighlightColor>) -> Result<()> {
         let code = v.book.info().code;
+        let created = now();
+        // The row and its change are saved together (the same in every method that writes).
+        let tx = self.conn.unchecked_transaction()?;
+        match color {
+            Some(c) => tx.execute(
+                "INSERT INTO highlights(book, chapter, verse, color, created) VALUES(?1, ?2, ?3, ?4, ?5)
+                 ON CONFLICT(book, chapter, verse) DO UPDATE SET color = excluded.color",
+                params![code, v.chapter, v.verse, c.to_i64(), created],
+            )?,
+            None => tx.execute(
+                "DELETE FROM highlights WHERE book = ?1 AND chapter = ?2 AND verse = ?3",
+                params![code, v.chapter, v.verse],
+            )?,
+        };
+        self.log_change(&Record::Highlight(v))?;
+        tx.commit()?;
         match color {
             Some(c) => {
-                let created = now();
-                self.conn.execute(
-                    "INSERT INTO highlights(book, chapter, verse, color, created) VALUES(?1, ?2, ?3, ?4, ?5)
-                     ON CONFLICT(book, chapter, verse) DO UPDATE SET color = excluded.color",
-                    params![code, v.chapter, v.verse, c.to_i64(), created],
-                )?;
                 let created = self.highlights.get(&v.key()).map_or(created, |(_, t)| *t);
                 self.highlights.insert(v.key(), (c, created));
             }
             None => {
-                self.conn.execute(
-                    "DELETE FROM highlights WHERE book = ?1 AND chapter = ?2 AND verse = ?3",
-                    params![code, v.chapter, v.verse],
-                )?;
                 self.highlights.remove(&v.key());
             }
         }
-        self.log_change(&Record::Highlight(v))?;
         self.generation += 1;
         Ok(())
     }
@@ -394,49 +390,58 @@ impl StudyStore {
     /// Saves a note; an empty (whitespace-only) body deletes it.
     pub fn set_note(&mut self, v: VerseRef, body: &str) -> Result<()> {
         let code = v.book.info().code;
-        if body.trim().is_empty() {
-            self.conn.execute(
+        let (delete, t) = (body.trim().is_empty(), now());
+        let tx = self.conn.unchecked_transaction()?;
+        if delete {
+            tx.execute(
                 "DELETE FROM notes WHERE book = ?1 AND chapter = ?2 AND verse = ?3",
                 params![code, v.chapter, v.verse],
             )?;
-            self.notes.remove(&v.key());
         } else {
-            let t = now();
-            self.conn.execute(
+            tx.execute(
                 "INSERT INTO notes(book, chapter, verse, body, created, updated) VALUES(?1, ?2, ?3, ?4, ?5, ?5)
                  ON CONFLICT(book, chapter, verse) DO UPDATE SET body = excluded.body, updated = excluded.updated",
                 params![code, v.chapter, v.verse, body, t],
             )?;
+        }
+        self.log_change(&Record::Note(v))?;
+        tx.commit()?;
+        if delete {
+            self.notes.remove(&v.key());
+        } else {
             let created = self.notes.get(&v.key()).map_or(t, |n| n.created);
             self.notes.insert(v.key(), Note { body: body.to_string(), created, updated: t });
         }
-        self.log_change(&Record::Note(v))?;
         self.generation += 1;
         Ok(())
     }
 
     pub fn set_bookmark(&mut self, v: VerseRef, label: Option<&str>) -> Result<()> {
         let code = v.book.info().code;
+        let t = now();
+        let tx = self.conn.unchecked_transaction()?;
+        match label {
+            Some(label) => tx.execute(
+                "INSERT INTO bookmarks(book, chapter, verse, label, created) VALUES(?1, ?2, ?3, ?4, ?5)
+                 ON CONFLICT(book, chapter, verse) DO UPDATE SET label = excluded.label",
+                params![code, v.chapter, v.verse, label, t],
+            )?,
+            None => tx.execute(
+                "DELETE FROM bookmarks WHERE book = ?1 AND chapter = ?2 AND verse = ?3",
+                params![code, v.chapter, v.verse],
+            )?,
+        };
+        self.log_change(&Record::Bookmark(v))?;
+        tx.commit()?;
         match label {
             Some(label) => {
-                let t = now();
-                self.conn.execute(
-                    "INSERT INTO bookmarks(book, chapter, verse, label, created) VALUES(?1, ?2, ?3, ?4, ?5)
-                     ON CONFLICT(book, chapter, verse) DO UPDATE SET label = excluded.label",
-                    params![code, v.chapter, v.verse, label, t],
-                )?;
                 let created = self.bookmarks.get(&v.key()).map_or(t, |b| b.created);
                 self.bookmarks.insert(v.key(), Bookmark { label: label.to_string(), created });
             }
             None => {
-                self.conn.execute(
-                    "DELETE FROM bookmarks WHERE book = ?1 AND chapter = ?2 AND verse = ?3",
-                    params![code, v.chapter, v.verse],
-                )?;
                 self.bookmarks.remove(&v.key());
             }
         }
-        self.log_change(&Record::Bookmark(v))?;
         self.generation += 1;
         Ok(())
     }
@@ -493,14 +498,16 @@ impl StudyStore {
 
     /// Saves a reading session, replacing an earlier save of the same session.
     pub fn record_reading(&self, s: &ReadingSession) -> Result<()> {
-        self.conn.execute(
+        let tx = self.conn.unchecked_transaction()?;
+        tx.execute(
             "INSERT INTO reading(started, book, chapter, translation, seconds, furthest, verses)
              VALUES(?1, ?2, ?3, ?4, ?5, ?6, ?7)
              ON CONFLICT(started) DO UPDATE SET seconds = excluded.seconds, furthest = excluded.furthest,
                verses = excluded.verses, translation = excluded.translation",
             params![s.started, s.book.info().code, s.chapter, s.translation, s.seconds, s.furthest, s.verses],
         )?;
-        self.log_change(&Record::Reading(s.started))
+        self.log_change(&Record::Reading(s.started))?;
+        Ok(tx.commit()?)
     }
 
     /// Reading sessions that started at or after `since` (Unix seconds), newest first.
@@ -540,16 +547,16 @@ impl StudyStore {
 
     /// Forgets reading history from `since` on (all of it for 0).
     pub fn clear_reading(&self, since: i64) -> Result<()> {
-        let started: Vec<i64> = self
-            .conn
+        let tx = self.conn.unchecked_transaction()?;
+        let started: Vec<i64> = tx
             .prepare("SELECT started FROM reading WHERE started >= ?1")?
             .query_map([since], |r| r.get(0))?
             .collect::<rusqlite::Result<_>>()?;
-        self.conn.execute("DELETE FROM reading WHERE started >= ?1", [since])?;
+        tx.execute("DELETE FROM reading WHERE started >= ?1", [since])?;
         for t in started {
             self.log_change(&Record::Reading(t))?;
         }
-        Ok(())
+        Ok(tx.commit()?)
     }
 
     /// Plans started, newest first.
@@ -566,35 +573,45 @@ impl StudyStore {
 
     /// Starts (or restarts) a plan on the day containing `started`, forgetting earlier progress.
     pub fn start_plan(&mut self, id: &str, started: i64) -> Result<()> {
+        let tx = self.conn.unchecked_transaction()?;
         let reads = self.plan_reads(id);
-        self.conn.execute("DELETE FROM plan_reads WHERE plan = ?1", [id])?;
-        self.conn.execute(
+        tx.execute("DELETE FROM plan_reads WHERE plan = ?1", [id])?;
+        tx.execute(
             "INSERT OR REPLACE INTO plans(id, started, finished) VALUES(?1, ?2, NULL)",
             params![id, started],
         )?;
-        self.log_plan(id, reads)
+        self.log_plan(id, reads)?;
+        tx.commit()?;
+        self.generation += 1;
+        Ok(())
     }
 
     pub fn finish_plan(&mut self, id: &str, at: Option<i64>) -> Result<()> {
-        self.conn.execute("UPDATE plans SET finished = ?2 WHERE id = ?1", params![id, at])?;
-        self.log_plan(id, Default::default())
+        let tx = self.conn.unchecked_transaction()?;
+        tx.execute("UPDATE plans SET finished = ?2 WHERE id = ?1", params![id, at])?;
+        self.log_plan(id, Default::default())?;
+        tx.commit()?;
+        self.generation += 1;
+        Ok(())
     }
 
     pub fn stop_plan(&mut self, id: &str) -> Result<()> {
+        let tx = self.conn.unchecked_transaction()?;
         let reads = self.plan_reads(id);
-        self.conn.execute("DELETE FROM plans WHERE id = ?1", [id])?;
-        self.conn.execute("DELETE FROM plan_reads WHERE plan = ?1", [id])?;
-        self.log_plan(id, reads)
+        tx.execute("DELETE FROM plans WHERE id = ?1", [id])?;
+        tx.execute("DELETE FROM plan_reads WHERE plan = ?1", [id])?;
+        self.log_plan(id, reads)?;
+        tx.commit()?;
+        self.generation += 1;
+        Ok(())
     }
 
     /// Logs a change to a plan and to the passages it had ticked (now cleared).
-    fn log_plan(&mut self, id: &str, cleared: std::collections::HashSet<(u16, u8)>) -> Result<()> {
+    fn log_plan(&self, id: &str, cleared: std::collections::HashSet<(u16, u8)>) -> Result<()> {
         for (day, passage) in cleared {
             self.log_change(&Record::PlanRead(id.to_string(), day, passage))?;
         }
-        self.log_change(&Record::Plan(id.to_string()))?;
-        self.generation += 1;
-        Ok(())
+        self.log_change(&Record::Plan(id.to_string()))
     }
 
     /// The passages ticked off in a plan, as (day, passage index) pairs.
@@ -613,18 +630,20 @@ impl StudyStore {
     }
 
     pub fn set_plan_read(&mut self, id: &str, day: u16, passage: u8, read: bool) -> Result<()> {
+        let tx = self.conn.unchecked_transaction()?;
         if read {
-            self.conn.execute(
+            tx.execute(
                 "INSERT OR REPLACE INTO plan_reads(plan, day, passage, at) VALUES(?1, ?2, ?3, ?4)",
                 params![id, day, passage, now()],
             )?;
         } else {
-            self.conn.execute(
+            tx.execute(
                 "DELETE FROM plan_reads WHERE plan = ?1 AND day = ?2 AND passage = ?3",
                 params![id, day, passage],
             )?;
         }
         self.log_change(&Record::PlanRead(id.to_string(), day, passage))?;
+        tx.commit()?;
         self.generation += 1;
         Ok(())
     }
@@ -670,15 +689,17 @@ impl StudyStore {
     }
 
     pub fn set_rule_done(&mut self, day: i64, item: &str, done: bool) -> Result<()> {
+        let tx = self.conn.unchecked_transaction()?;
         if done {
-            self.conn.execute(
+            tx.execute(
                 "INSERT OR REPLACE INTO rule_done(day, item, at) VALUES(?1, ?2, ?3)",
                 params![day, item, now()],
             )?;
         } else {
-            self.conn.execute("DELETE FROM rule_done WHERE day = ?1 AND item = ?2", params![day, item])?;
+            tx.execute("DELETE FROM rule_done WHERE day = ?1 AND item = ?2", params![day, item])?;
         }
         self.log_change(&Record::RuleDone(day, item.to_string()))?;
+        tx.commit()?;
         self.generation += 1;
         Ok(())
     }
@@ -693,14 +714,15 @@ impl StudyStore {
 
     /// Saves a setting. Only the prayer rule syncs; the others belong to this device.
     pub fn set_setting(&self, key: &str, value: &str) -> Result<()> {
-        self.conn.execute(
+        let tx = self.conn.unchecked_transaction()?;
+        tx.execute(
             "INSERT INTO settings(key, value) VALUES(?1, ?2) ON CONFLICT(key) DO UPDATE SET value = excluded.value",
             params![key, value],
         )?;
         if key == "rule" {
             self.log_change(&Record::Rule)?;
         }
-        Ok(())
+        Ok(tx.commit()?)
     }
 
     /// This device's id in the sync files (made once, then kept in the settings).
@@ -974,26 +996,45 @@ impl StudyStore {
     /// Erases every highlight, note, bookmark, plan and the reading history.
     ///
     /// This resets this device only: it forgets their changes instead of logging deletions, so
-    /// other devices keep their copies and the next sync brings them back here.
+    /// other devices keep their copies and the next sync brings them back here. Deletions are
+    /// kept, so one made here before erasing still reaches the other devices.
     pub fn erase_all(&mut self) -> Result<()> {
-        self.conn.execute_batch(
+        let tx = self.conn.unchecked_transaction()?;
+        // The latest change this device had seen, so the next edit of a forgotten record still
+        // comes after it (see `log_change`).
+        let floor = self.sync_floor().max(tx.query_row("SELECT MAX(at) FROM changes", [], |r| r.get(0))?);
+        if let Some(floor) = floor {
+            tx.execute(
+                "INSERT OR REPLACE INTO settings(key, value) VALUES('sync-floor', ?1)",
+                [floor.to_string()],
+            )?;
+        }
+        tx.execute_batch(
             "DELETE FROM highlights; DELETE FROM notes; DELETE FROM bookmarks;
              DELETE FROM plans; DELETE FROM plan_reads; DELETE FROM reading;
-             DELETE FROM changes WHERE key NOT LIKE 'rule-done:%' AND key <> 'setting:rule';",
+             DELETE FROM changes
+               WHERE value IS NOT NULL AND key NOT LIKE 'rule-done:%' AND key <> 'setting:rule';",
         )?;
+        tx.commit()?;
         self.reload()
+    }
+
+    /// The latest change time [`StudyStore::erase_all`] forgot.
+    fn sync_floor(&self) -> Option<i64> {
+        self.setting("sync-floor")?.parse().ok()
     }
 
     /// Logs the record's current state (or its deletion) as this device's latest change to it.
     /// The time is at least a second past the change it replaces, so an edit made after a sync
     /// still wins when this device's clock is behind, or when two edits fall in the same second.
+    /// A record with no change (new, or forgotten by `erase_all`) goes past the erase's floor.
     fn log_change(&self, r: &Record) -> Result<()> {
         let key = r.key();
         let prev: Option<i64> = self
             .conn
             .query_row("SELECT at FROM changes WHERE key = ?1", [&key], |row| row.get(0))
             .optional()?;
-        let at = prev.map_or(now(), |p| now().max(p + 1));
+        let at = prev.or_else(|| self.sync_floor()).map_or(now(), |p| now().max(p + 1));
         self.put_change(&key, self.record_value(r)?.as_deref(), at, &self.device)
     }
 
@@ -1076,7 +1117,8 @@ impl StudyStore {
     }
 
     /// Writes a record that came from another device (`None` deletes it). `false`, with nothing
-    /// written, when the value isn't one this version understands.
+    /// written, when the value isn't one this version understands, or is a plan tick from before
+    /// the plan was last (re)started here.
     fn apply_record(&self, r: &Record, value: Option<&str>) -> Result<bool> {
         let c = &self.conn;
         let verse = |v: &VerseRef| (v.book.info().code, v.chapter, v.verse);
@@ -1149,9 +1191,18 @@ impl StudyStore {
                     "INSERT OR REPLACE INTO plans(id, started, finished) VALUES(?1, ?2, ?3)",
                     params![id, started, int("finished")],
                 )?;
+                // A restart elsewhere also clears ticks made here before it that it never saw.
+                // (`started` is the start of that day, so ticks from earlier that day stay.)
+                c.execute("DELETE FROM plan_reads WHERE plan = ?1 AND at < ?2", params![id, started])?;
             }
             Record::PlanRead(plan, day, passage) => {
                 let Some(at) = int("at") else { return Ok(false) };
+                let started: Option<i64> = c
+                    .query_row("SELECT started FROM plans WHERE id = ?1", [plan], |r| r.get(0))
+                    .optional()?;
+                if started.is_some_and(|started| at < started) {
+                    return Ok(false);
+                }
                 c.execute(
                     "INSERT OR REPLACE INTO plan_reads(plan, day, passage, at) VALUES(?1, ?2, ?3, ?4)",
                     params![plan, day, passage, at],

@@ -21,7 +21,6 @@ const VERSION: u32 = 1;
 pub(crate) struct Change {
     pub key: String,
     /// The record as JSON; `None` when it was deleted.
-    #[serde(default)]
     pub value: Option<String>,
     /// Unix seconds.
     pub at: i64,
@@ -76,7 +75,9 @@ pub fn merge(store: &mut StudyStore, json: &str) -> Result<usize> {
 pub fn sync_folder(store: &mut StudyStore, dir: &Path) -> Result<SyncReport> {
     std::fs::create_dir_all(dir).with_context(|| format!("creating {}", dir.display()))?;
     let own = format!("{}.json", store.device_id());
-    // Hidden names are temporary files and iCloud's placeholders for files not downloaded yet.
+    // Hidden names are never sync files: `._<id>.json` is macOS's AppleDouble sidecar, made when
+    // the folder sits on a disk that isn't APFS or HFS+. (iCloud's `.<name>.json.icloud`
+    // placeholders and our own temp file don't end in `.json`.)
     let mut names: Vec<String> = std::fs::read_dir(dir)
         .with_context(|| format!("reading {}", dir.display()))?
         .filter_map(|e| e.ok()?.file_name().into_string().ok())
@@ -116,7 +117,7 @@ mod tests {
 
     use super::*;
     use crate::books::{BookId, VerseRef};
-    use crate::study::{HighlightColor, ReadingSession};
+    use crate::study::{HighlightColor, Include, ReadingSession, now};
 
     fn jn316() -> VerseRef {
         VerseRef::new(BookId::from_code("JHN").unwrap(), 3, 16)
@@ -165,6 +166,7 @@ mod tests {
         a.set_plan_read("john-21", 1, 0, true).unwrap();
         a.set_plan_read("odd:id", 3, 2, true).unwrap();
         a.record_reading(&session(5_000)).unwrap();
+        a.finish_plan("john-21", Some(2_000)).unwrap();
 
         let g = b.generation();
         assert_eq!(merge(&mut b, &export(&a).unwrap()).unwrap(), 7);
@@ -179,6 +181,22 @@ mod tests {
         // Changes keep the time and device they were made with.
         assert_eq!(stamp(&b, "note:JHN.3.16"), stamp(&a, "note:JHN.3.16"));
         assert_eq!(stamp(&b, "note:JHN.3.16").1, a.device_id());
+
+        // An import is logged too.
+        let mut c = store();
+        c.import_json(&a.export_json_with("kjv", |_| None, Include::EVERYTHING).unwrap()).unwrap();
+        let keys: Vec<_> = c.changes().unwrap().into_iter().map(|c| c.key).collect();
+        assert_eq!(
+            keys,
+            [
+                "bookmark:PSA.23.1",
+                "highlight:JHN.3.16",
+                "note:JHN.3.16",
+                "plan-read:john-21:1:0",
+                "plan:john-21",
+                "reading:5000"
+            ]
+        );
     }
 
     #[test]
@@ -323,14 +341,55 @@ mod tests {
         a.set_highlight(jn316(), Some(HighlightColor::Pink)).unwrap();
         a.set_note(jn316(), "kept elsewhere").unwrap();
         a.set_bookmark(ps23(), Some("")).unwrap();
+        let mut rule = a.rule();
+        rule.blocks.truncate(1);
+        a.set_rule(&rule).unwrap();
         merge(&mut b, &export(&a).unwrap()).unwrap();
 
+        // A deletion made before erasing still reaches the other device.
+        a.set_bookmark(ps23(), None).unwrap();
         a.erase_all().unwrap();
         assert_eq!(a.counts(), (0, 0, 0));
-        assert_eq!(merge(&mut b, &export(&a).unwrap()).unwrap(), 0);
-        assert_eq!(b.counts(), (1, 1, 1));
-        assert_eq!(merge(&mut a, &export(&b).unwrap()).unwrap(), 3);
+        assert!(a.changes().unwrap().iter().any(|c| c.key == "setting:rule"), "the rule's change is kept");
+        assert_eq!(merge(&mut b, &export(&a).unwrap()).unwrap(), 1);
+        assert_eq!(b.counts(), (1, 1, 0));
+        assert_eq!(merge(&mut a, &export(&b).unwrap()).unwrap(), 2);
         assert_eq!(a.note(jn316()).unwrap().body, "kept elsewhere");
+        assert!(!a.is_bookmarked(ps23()));
+    }
+
+    #[test]
+    fn an_edit_after_erasing_beats_what_was_seen_before() {
+        // Another device, its clock two minutes ahead, wrote a note; this one saw it, erased,
+        // and wrote its own.
+        let ahead = now() + 120;
+        let value = json!({"body": "old", "created": ahead, "updated": ahead}).to_string();
+        let theirs = json!({"version": 1, "device": "b",
+                            "changes": [{"key": "note:JHN.3.16", "value": value, "at": ahead, "device": "b"}]})
+        .to_string();
+        let mut a = store();
+        assert_eq!(merge(&mut a, &theirs).unwrap(), 1);
+        a.erase_all().unwrap();
+        a.set_note(jn316(), "new").unwrap();
+        assert_eq!(merge(&mut a, &theirs).unwrap(), 0);
+        assert_eq!(a.note(jn316()).unwrap().body, "new");
+    }
+
+    #[test]
+    fn restarting_a_plan_clears_its_ticks_on_both_devices() {
+        let (mut a, mut b) = (store(), store());
+        a.start_plan("john-21", 1_000).unwrap();
+        a.set_plan_read("john-21", 1, 0, true).unwrap();
+        merge(&mut b, &export(&a).unwrap()).unwrap();
+        // B ticks a passage, and A restarts the plan on a later day before B's file arrives.
+        b.set_plan_read("john-21", 3, 0, true).unwrap();
+        a.start_plan("john-21", now() + 86_400).unwrap();
+        let (ja, jb) = (export(&a).unwrap(), export(&b).unwrap());
+        merge(&mut a, &jb).unwrap();
+        merge(&mut b, &ja).unwrap();
+        assert!(a.plan_reads("john-21").is_empty());
+        assert!(b.plan_reads("john-21").is_empty());
+        assert_eq!(b.plans(), a.plans());
     }
 
     #[test]
@@ -359,9 +418,10 @@ mod tests {
         assert_eq!(sync_folder(&mut a, &dir).unwrap(), SyncReport::default());
         assert!(dir.join(format!("{}.json", a.device_id())).is_file());
 
-        // A broken file is reported, and an iCloud placeholder is ignored.
+        // A broken file is reported; an iCloud placeholder and an AppleDouble file are ignored.
         std::fs::write(dir.join("broken.json"), "{\"version\": 1,").unwrap();
         std::fs::write(dir.join(".other.json.icloud"), "").unwrap();
+        std::fs::write(dir.join("._other.json"), "\0\x05\x16\x07").unwrap();
         let report = sync_folder(&mut b, &dir).unwrap();
         assert_eq!((report.applied, report.devices), (2, 1));
         assert_eq!(report.skipped.len(), 1);
@@ -383,6 +443,7 @@ mod tests {
             format!("{}.json", a.device_id()),
             format!("{}.json", b.device_id()),
             ".other.json.icloud".into(),
+            "._other.json".into(),
             "broken.json".into(),
         ];
         expected.sort();
