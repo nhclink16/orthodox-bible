@@ -41,6 +41,7 @@ jobs:
           fetch-depth: 0
       - name: Tools
         run: |
+          "$HOME/.cargo/bin/rustup" update stable --no-self-update >/dev/null
           echo "$HOME/.cargo/bin" >> "$GITHUB_PATH"
           echo "/opt/homebrew/bin" >> "$GITHUB_PATH"
       - name: App Store Connect key
@@ -54,6 +55,8 @@ jobs:
       - name: Archive and upload to TestFlight
         env:
           TEAM_ID: UH434K44A3
+          # The runner can't reach the iMac's login keychain; Apple signs the upload instead.
+          CLOUD_SIGNING: "1"
           ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
           ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
         run: |

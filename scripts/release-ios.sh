@@ -15,6 +15,10 @@
 #                  an App Store Connect API key (the .p8 file, its key ID and the issuer ID),
 #                  to sign and upload without an Apple ID signed in to Xcode. Never commit it.
 #   ALLOW_DIRTY=1  build even though the working tree has uncommitted changes
+#   CLOUD_SIGNING=1
+#                  archive unsigned and let App Store Connect sign the upload with the team's
+#                  cloud-managed distribution certificate (needs the API key); for a machine whose
+#                  keychain a build can't reach, such as a CI runner
 #
 # apps/ios/APP_STORE.md covers the one-time setup and the App Store listing. Runs on the bash 3.2
 # that ships with macOS.
@@ -70,7 +74,7 @@ mkdir -p "$OUT"
 XCODEBUILD=(xcodebuild -quiet -project apps/ios/Bible.xcodeproj -scheme Bible -configuration Release
   -destination "generic/platform=iOS" -derivedDataPath target/ios/DerivedData)
 
-if [[ "$UNSIGNED" == 1 ]]; then
+if [[ "$UNSIGNED" == 1 || -n "${CLOUD_SIGNING:-}" ]]; then
   step "Archive $VERSION ($BUILD), unsigned"
   "${XCODEBUILD[@]}" -archivePath "$ARCHIVE" CODE_SIGNING_ALLOWED=NO archive
 else
