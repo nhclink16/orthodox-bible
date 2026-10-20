@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Builds dist/Bible.app on macOS. scripts/release-macos.sh wraps it to make the signed,
+# Builds dist/Orthodox Bible.app on macOS. scripts/release-macos.sh wraps it to make the signed,
 # notarized DMG and zip (see RELEASING.md).
 #
 #   scripts/bundle-macos.sh              # native architecture, ad-hoc signature
@@ -21,14 +21,10 @@ if [[ ! "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
   exit 1
 fi
 COPYRIGHT="$(sed -n 's/^Copyright (c) /Copyright © /p' LICENSE | head -1)"
-APP="dist/Bible.app"
+APP="dist/Orthodox Bible.app"
 ENTITLEMENTS="packaging/macos/entitlements.plist"
-# Sparkle checks this feed for updates and installs only archives signed with the private half
-# of this key, which `generate_keys --account bible-rs` keeps in the release Mac's login keychain
-# (RELEASING.md). Every release must be signed with the same key.
-FEED_URL="https://github.com/michaelshimeles/bible-rs/releases/latest/download/appcast.xml"
-SPARKLE_PUBLIC_KEY="Pq8ULcnRQOe3FxC6l7qBrhZ4VS3W53yxzZeO9z9dmY0="
-SPARKLE="$(scripts/fetch-sparkle.sh)"
+# This fork ships without Sparkle, so it never checks upstream's update feed. "Check for
+# Updates…" opens the fork's releases page instead (src/updater.rs).
 
 # The window code calls NSWindow.toolbarStyle, new in macOS 11, and the x86_64 target would
 # otherwise default to 10.12. This also reaches the C code that cc builds (SQLite, zstd).
@@ -47,16 +43,8 @@ else
 fi
 
 rm -rf "$APP"
-mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources" "$APP/Contents/Frameworks"
+mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
 cp "$BIN" "$APP/Contents/MacOS/Bible"
-
-# Sparkle, loaded once the first frame is up (src/updater.rs). The app isn't sandboxed, so
-# Sparkle's XPC services aren't needed; headers and modules are build-time only.
-FRAMEWORK="$APP/Contents/Frameworks/Sparkle.framework"
-ditto "$SPARKLE/Sparkle.framework" "$FRAMEWORK"
-for part in XPCServices Headers PrivateHeaders Modules; do
-  rm -rf "${FRAMEWORK:?}/$part" "${FRAMEWORK:?}/Versions/B/$part"
-done
 
 # App icon from the 1024 px PNG.
 ICONSET="$(mktemp -d)/AppIcon.iconset"
@@ -77,9 +65,9 @@ cat > "$APP/Contents/Info.plist" <<PLIST
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-  <key>CFBundleName</key><string>Bible</string>
-  <key>CFBundleDisplayName</key><string>Bible</string>
-  <key>CFBundleIdentifier</key><string>dev.bible-rs.app</string>
+  <key>CFBundleName</key><string>Orthodox Bible</string>
+  <key>CFBundleDisplayName</key><string>Orthodox Bible</string>
+  <key>CFBundleIdentifier</key><string>dev.nhclink16.orthodox-bible</string>
   <key>CFBundleExecutable</key><string>Bible</string>
   <key>CFBundleIconFile</key><string>AppIcon</string>
   <key>CFBundlePackageType</key><string>APPL</string>
@@ -93,10 +81,6 @@ cat > "$APP/Contents/Info.plist" <<PLIST
   <key>NSSupportsAutomaticGraphicsSwitching</key><true/>
   <key>NSRequiresAquaSystemAppearance</key><false/>
   <key>NSHumanReadableCopyright</key><string>${COPYRIGHT}. MIT License. Bundled translations are public domain.</string>
-  <key>SUFeedURL</key><string>${FEED_URL}</string>
-  <key>SUPublicEDKey</key><string>${SPARKLE_PUBLIC_KEY}</string>
-  <key>SURequireSignedFeed</key><true/>
-  <key>SUVerifyUpdateBeforeExtraction</key><true/>
 </dict>
 </plist>
 PLIST
@@ -104,16 +88,11 @@ plutil -lint "$APP/Contents/Info.plist" >/dev/null
 
 # Hardened runtime either way. An ad-hoc signature (required on Apple silicon) runs only on the
 # Mac that built it; a Developer ID signature gets a secure timestamp, which notarization needs.
-# Sparkle's helpers are signed inside out before the app; the framework must carry the app's
-# team, or library validation stops the hardened runtime from loading it.
 if [[ -n "${SIGN_IDENTITY:-}" ]]; then
   SIGN=(codesign --force --options runtime --timestamp --sign "$SIGN_IDENTITY")
 else
   SIGN=(codesign --force --options runtime --sign -)
 fi
-"${SIGN[@]}" "$FRAMEWORK/Versions/B/Autoupdate"
-"${SIGN[@]}" "$FRAMEWORK/Versions/B/Updater.app"
-"${SIGN[@]}" "$FRAMEWORK"
 "${SIGN[@]}" --entitlements "$ENTITLEMENTS" "$APP"
 
 echo "Built $APP ($VERSION, $(lipo -archs "$APP/Contents/MacOS/Bible"))"

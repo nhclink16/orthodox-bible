@@ -6,7 +6,7 @@
 //! run`, tests, other platforms) open the latest release's page instead.
 
 /// The project's releases on GitHub.
-pub const RELEASES: &str = "https://github.com/michaelshimeles/bible-rs/releases";
+pub const RELEASES: &str = "https://github.com/nhclink16/orthodox-bible/releases";
 
 /// Starts Sparkle, which checks for updates on its own schedule once the user has agreed to
 /// automatic checks (it asks on the second launch), and moves a copy of the app left under its

@@ -1830,7 +1830,7 @@ fn about(ui: &mut Ui, p: &Palette) {
     centred(
         r.top() + 100.0,
         40.0,
-        "Bible",
+        "Orthodox Bible",
         FontId::new(32.0, theme::family(theme::SERIF_DISPLAY)),
         p.ink,
         -0.015,
@@ -1845,7 +1845,7 @@ fn about(ui: &mut Ui, p: &Palette) {
     centred(
         r.top() + 168.0,
         20.0,
-        "A very fast, native Bible reader for the Mac.",
+        "A personal Orthodox fork of bible-rs.",
         theme::ui_font(13.0),
         p.ink_3,
         0.0,

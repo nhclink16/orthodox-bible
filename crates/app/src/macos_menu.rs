@@ -24,10 +24,10 @@ impl AppMenu {
     pub fn install() -> Option<Self> {
         let menu = Menu::new();
         let app = Submenu::with_items(
-            "Bible",
+            "Orthodox Bible",
             true,
             &[
-                &PredefinedMenuItem::about(Some("About Bible"), None),
+                &PredefinedMenuItem::about(Some("About Orthodox Bible"), None),
                 &item("check_updates", "Check for Updates…", None),
                 &PredefinedMenuItem::separator(),
                 &item("settings", "Settings…", Some("CmdOrCtrl+Comma")),

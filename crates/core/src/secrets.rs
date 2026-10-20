@@ -38,7 +38,7 @@ mod backend {
     /// overrides it.
     fn service() -> String {
         std::env::var("BIBLE_RS_KEYCHAIN_SERVICE")
-            .unwrap_or_else(|_| if cfg!(test) { "bible-rs-tests" } else { "bible-rs" }.into())
+            .unwrap_or_else(|_| if cfg!(test) { "bible-rs-tests" } else { "orthodox-bible" }.into())
     }
 
     impl SecretStore {
