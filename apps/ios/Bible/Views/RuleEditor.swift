@@ -46,9 +46,7 @@ struct RuleEditor: View {
                                 displayedComponents: .hourAndMinute)
                         }
                         ForEach(block.items, id: \.id) { item in
-                            Button {
-                                path.append(ItemRef(block: block.id, item: item.id))
-                            } label: {
+                            NavigationLink(value: ItemRef(block: block.id, item: item.id)) {
                                 ItemSummary(item: item, theme: theme)
                             }
                             .accessibilityIdentifier("item-\(item.id)")
@@ -245,6 +243,8 @@ private struct ItemEditor: View {
                     .accessibilityIdentifier("item-title")
                 TextField("Note", text: $item.note, axis: .vertical)
                     .accessibilityIdentifier("item-note")
+            } footer: {
+                Text("The note is the line under the title on Today.")
             }
 
             Section {

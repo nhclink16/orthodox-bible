@@ -275,8 +275,11 @@ final class BibleUITests: XCTestCase {
         XCTAssertFalse(app.buttons["item-evening-reflection"].exists)
         app.buttons["Save"].tap()
 
+        // Back on Today, up to the renamed part of the day.
+        XCTAssertTrue(app.buttons["edit-rule"].waitForExistence(timeout: 3))
         let dawn = app.staticTexts.matching(NSPredicate(format: "label BEGINSWITH[c] 'Dawn'")).firstMatch
-        XCTAssertTrue(dawn.waitForExistence(timeout: 3))
+        for _ in 0..<6 where !(dawn.exists && dawn.isHittable) { app.swipeDown(velocity: .slow) }
+        XCTAssertTrue(dawn.isHittable)
         XCTAssertTrue(app.buttons["rule-morning-prayers"].exists)
         XCTAssertTrue(scrolledTo(app.buttons.matching(NSPredicate(format: "label BEGINSWITH 'Psalm 50'")).firstMatch).exists)
         scrolledTo(app.buttons["edit-rule"])

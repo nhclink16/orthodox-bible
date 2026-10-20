@@ -153,10 +153,13 @@ private struct JesusPrayerCounter: View {
     @State private var said = 0
 
     private var done: Bool { said >= count }
+    /// The words, as the core's public-domain source prints them.
+    private let words = prayers().first { $0.id == "jesus-prayer" }?.text
+        ?? "Lord Jesus Christ, Son of God, have mercy upon me a sinner."
 
     var body: some View {
         VStack(spacing: 24) {
-            Text("Lord Jesus Christ, Son of God, have mercy on me, a sinner.")
+            Text(words)
                 .font(.reading(20))
                 .lineSpacing(6)
                 .multilineTextAlignment(.center)
@@ -179,6 +182,8 @@ private struct JesusPrayerCounter: View {
                         Text("\(said)")
                             .font(Font(Fonts.literata(72, weight: 300)))
                             .monospacedDigit()
+                            // Each count simply replaces the last.
+                            .contentTransition(.identity)
                             .foregroundStyle(Color(theme.ink))
                         Text("of \(count)")
                             .font(.subheadline)
