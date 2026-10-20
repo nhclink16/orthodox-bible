@@ -491,6 +491,22 @@ pub fn checkbox(ui: &mut Ui, p: &Palette, b: Rect, on: bool, label: &str) -> Res
     resp
 }
 
+/// A check box with no label, as a plan's readings have: 16 pt, radius 4; on, the accent with a
+/// check; off, the field colour with a hairline that darkens on hover. It answers 6 pt around.
+pub fn tick(ui: &mut Ui, p: &Palette, b: Rect, on: bool, id: egui::Id) -> Response {
+    let resp = ui.interact(b.expand(6.0), id, Sense::click());
+    let painter = ui.painter();
+    if on {
+        painter.rect_filled(b, 4.0, p.accent);
+        crate::icons::check(painter, Rect::from_center_size(b.center(), vec2(12.0, 12.0)), p.on_accent);
+    } else {
+        painter.rect_filled(b, 4.0, p.field);
+        let ring = if resp.hovered() { p.ink_3 } else { p.border };
+        painter.rect_stroke(b, 4.0, Stroke::new(1.0, ring), StrokeKind::Inside);
+    }
+    resp
+}
+
 /// A radio button (`ds-14`): 16 pt; off, the field colour with a hairline; on, a 5 pt accent ring
 /// around a `raised` centre.
 pub fn radio(painter: &Painter, p: &Palette, center: egui::Pos2, on: bool, hovered: bool) {

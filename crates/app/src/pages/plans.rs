@@ -37,19 +37,19 @@ pub struct State {
     reflection: Option<(VerseRef, String)>,
 }
 
-/// A plan with its progress, as of today.
-struct Under<'a> {
+/// A plan with its progress, as of today (the Today page shows it too).
+pub(super) struct Under<'a> {
     plan: &'static Plan,
     state: &'a PlanProgress,
     reads: HashSet<(u16, u8)>,
     /// Chapters read to the end since the plan began.
     finished: HashSet<ChapterIdx>,
     /// Today's day number (1-based; beyond the plan's length once it's over).
-    today: usize,
+    pub(super) today: usize,
 }
 
 impl Under<'_> {
-    fn new<'a>(plan: &'static Plan, state: &'a PlanProgress, env: &PageEnv<'_>) -> Under<'a> {
+    pub(super) fn new<'a>(plan: &'static Plan, state: &'a PlanProgress, env: &PageEnv<'_>) -> Under<'a> {
         let reads = env.study.plan_reads(&state.id);
         let finished = env
             .study
@@ -62,13 +62,13 @@ impl Under<'_> {
         Under { plan, state, reads, finished, today }
     }
 
-    fn passage_done(&self, day: usize, i: usize) -> bool {
+    pub(super) fn passage_done(&self, day: usize, i: usize) -> bool {
         let p = self.plan.day(day).get(i);
         self.reads.contains(&(day as u16, i as u8))
             || p.is_some_and(|p| p.verses.is_none() && self.finished.contains(&p.chapter))
     }
 
-    fn day_done(&self, day: usize) -> bool {
+    pub(super) fn day_done(&self, day: usize) -> bool {
         let n = self.plan.day(day).len();
         n > 0 && (0..n).all(|i| self.passage_done(day, i))
     }
@@ -112,7 +112,7 @@ fn icon_for(icon: PlanIcon) -> widgets::IconFn {
     }
 }
 
-fn day_label(passages: &[Passage], t: Option<&Translation>) -> String {
+pub(super) fn day_label(passages: &[Passage], t: Option<&Translation>) -> String {
     plans::label(passages, |b| {
         t.map(|t| t.meta.ref_name(b).to_string()).unwrap_or_else(|| b.ref_name().to_string())
     })
@@ -956,7 +956,7 @@ impl State {
     }
 }
 
-fn open_passage(p: &Passage, actions: &mut Vec<Action>) {
+pub(super) fn open_passage(p: &Passage, actions: &mut Vec<Action>) {
     let verse = p.verses.map(|(a, _)| a);
     actions.push(Action::Jump { chapter: p.chapter, verse, flash: verse.is_some() });
 }

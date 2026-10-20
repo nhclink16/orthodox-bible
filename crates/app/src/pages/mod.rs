@@ -7,6 +7,8 @@ pub mod highlights;
 pub mod history;
 pub mod notes;
 pub mod plans;
+pub mod rule;
+pub mod rule_editor;
 pub mod today;
 pub mod translations;
 
