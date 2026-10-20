@@ -117,3 +117,24 @@ Today the app holds exactly 66 books (`BOOK_COUNT`, `CHAPTER_COUNT=1189` at `boo
 - The books and numbering come through the FFI automatically.
 - Hard-coded spots to fix: `ReaderView.swift:95` (`chapterCount = 1189`) and `ChapterLayout.swift:66` (`isPsalm` is book 18).
 - The Fathers panel: add `commentary(verse) -> [CommentaryQuote]` to `ffi/src/lib.rs`, a new `Sheet.commentary` case (`Store.swift:60-74`, `RootView.swift:64-75`) and a button in `SelectionBar`.
+
+## More Orthodox features (research, 2026-10-20)
+
+All of these build on one piece: **computing Pascha, with an Old/New calendar setting**.
+
+| Idea | Data | License | Effort |
+|---|---|---|---|
+| Fasting calendar, with levels (no meat / fish / wine and oil / strict) | Computed: Pascha plus fixed dates. OCA's outline of the rules (facts, not text). | Rules aren't copyrightable | Small to medium |
+| Prayers: morning, evening, before and after Communion | Hapgood, *Service Book* (1906, 1922 scans; archive.org `cu31924029363128`). Coverdale Psalter on ponomar.net. | Public domain (pre-1929) | Medium (OCR cleanup) |
+| Jesus Prayer with a prayer-rope counter | None needed | — | Small |
+| Daily Epistle and Gospel | Compute it ourselves from the Typikon rules. Test against [orthocal-python](https://github.com/brianglass/orthocal-python) (MIT code; its data comes from church websites, so ask Brian Glass before reusing it). | Readings references are facts | Large |
+| Kathisma of the day | The 20 kathismata plus the weekly cycle (a small table) | Not copyrightable | Small |
+| Saints of the day | Names and dates only, written by us. Prologue from Ohrid English editions and Makarios' Synaxarion are copyrighted. | Facts only | Medium |
+| Troparia for the major feasts | Hapgood | Public domain | Medium |
+| Greek side by side | Swete LXX, Byzantine-text NT | Public domain (to verify) | Medium |
+
+Phase 2 note: use **LXX2012** (eBible `eng-lxx2012`, public domain) instead of raw Brenton. It's Brenton with modern names (Isaiah, not Esaias).
+
+Don't copy: Ponomar (GPL-3.0), OCA, GOARCH or Antiochian texts, or the Orthodox Study Bible.
+
+Suggested order: Pascha + calendar setting, then fasting, then prayers + Jesus Prayer, then the daily readings, then the kathisma of the day.
