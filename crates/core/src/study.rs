@@ -289,6 +289,15 @@ impl StudyStore {
     }
 
     /// Saves a note; an empty (whitespace-only) body deletes it.
+    /// Adds `text` to the verse's note, after a blank line if there is one already.
+    pub fn append_note(&mut self, v: VerseRef, text: &str) -> Result<()> {
+        let body = match self.note(v) {
+            Some(n) if !n.body.trim().is_empty() => format!("{}\n\n{text}", n.body.trim_end()),
+            _ => text.to_string(),
+        };
+        self.set_note(v, &body)
+    }
+
     pub fn set_note(&mut self, v: VerseRef, body: &str) -> Result<()> {
         let code = v.book.info().code;
         if body.trim().is_empty() {
@@ -1006,6 +1015,16 @@ mod plan_tests {
         assert_eq!(s.plans()[0].finished, Some(3_000));
         s.stop_plan("john-21").unwrap();
         assert!(s.plans().is_empty());
+    }
+
+    #[test]
+    fn notes_append() {
+        let mut s = StudyStore::open_in_memory().unwrap();
+        let v = VerseRef::new(BookId::GENESIS, 1, 1);
+        s.append_note(v, "A quote.").unwrap();
+        assert_eq!(s.note(v).unwrap().body, "A quote.");
+        s.append_note(v, "Another.").unwrap();
+        assert_eq!(s.note(v).unwrap().body, "A quote.\n\nAnother.");
     }
 
     #[test]

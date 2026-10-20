@@ -68,13 +68,16 @@ struct FathersView: View {
                         .font(Font(Fonts.literata(17)))
                         .lineLimit(open.contains(i) ? nil : 6)
                         .foregroundStyle(Color(theme.ink))
-                    if q.text.count > 360 {
-                        Button(open.contains(i) ? "Show less" : "Show more") {
-                            if open.contains(i) { open.remove(i) } else { open.insert(i) }
+                    HStack(spacing: 20) {
+                        if q.text.count > 360 {
+                            Button(open.contains(i) ? "Show less" : "Show more") {
+                                if open.contains(i) { open.remove(i) } else { open.insert(i) }
+                            }
                         }
-                        .font(.footnote.weight(.medium))
-                        .buttonStyle(.borderless)
+                        Button("Add to Note") { store.appendToNote(ref, Self.note(q)) }
                     }
+                    .font(.footnote.weight(.medium))
+                    .buttonStyle(.borderless)
                 }
                 .padding(.vertical, 6)
             }
@@ -101,6 +104,12 @@ struct FathersView: View {
         }
         .padding(20)
         .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    /// The quote as it goes into a note, as on the Mac (`bible_core::fathers::Quote::as_note`).
+    static func note(_ q: FatherQuote) -> String {
+        let source = q.source.isEmpty ? "" : ", \(q.source)"
+        return "\u{201C}\(q.text.trimmingCharacters(in: .whitespacesAndNewlines))\u{201D}\n\u{2014} \(q.author)\(source)"
     }
 
     private func load() {

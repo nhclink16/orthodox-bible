@@ -66,6 +66,14 @@ pub struct Quote {
     pub text: String,
 }
 
+impl Quote {
+    /// The quote as it goes into a note: the text in quotation marks, then who said it, where.
+    pub fn as_note(&self) -> String {
+        let source = if self.source.is_empty() { String::new() } else { format!(", {}", self.source) };
+        format!("\u{201c}{}\u{201d}\n\u{2014} {}{source}", self.text.trim(), self.author)
+    }
+}
+
 /// What [`install`] kept.
 #[derive(Debug)]
 pub struct Installed {
@@ -255,6 +263,7 @@ mod tests {
         let authors: Vec<&str> = q.iter().map(|q| q.author.as_str()).collect();
         assert_eq!(authors, ["Basil of Caesarea", "John Chrysostom"]);
         assert_eq!(q[1].text, "He so loved.");
+        assert_eq!(q[1].as_note(), "\u{201c}He so loved.\u{201d}\n\u{2014} John Chrysostom, Homily 27");
         assert_eq!(f.count(VerseRef::new(john, 3, 17)), 1);
         assert_eq!(f.count(VerseRef::new(john, 3, 18)), 0);
         assert_eq!(f.quotes(VerseRef::new(BookId::PSALMS, 51, 1))[0].text, "Have mercy.");

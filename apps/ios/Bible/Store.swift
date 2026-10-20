@@ -303,6 +303,14 @@ final class Store {
         study { try bible.setNote(verse: ref, body: body) }
     }
 
+    /// Adds `text` to the verse's note, after a blank line if there is one already.
+    func appendToNote(_ ref: VerseRef, _ text: String) {
+        let existing = note(ref).trimmingCharacters(in: .whitespacesAndNewlines)
+        if setNote(ref, existing.isEmpty ? text : existing + "\n\n" + text) {
+            show("Added to your note on \(rangeLabel(from: ref, to: ref))")
+        }
+    }
+
     func setHighlight(_ ref: VerseRef, _ color: HighlightColor?) {
         study { try bible.setHighlight(verse: ref, color: color) }
     }
