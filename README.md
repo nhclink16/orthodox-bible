@@ -15,6 +15,8 @@ typeset, searchable as you type, with highlights, notes and bookmarks kept on yo
 - **The Church Fathers on every verse** (Orthodox fork): select a verse and press F for quotes from
   the Fathers before 1054, from the Historical Christian Faith Commentaries Database. Installed from
   the database file you download; nothing is bundled.
+- **Today in the Church** (Orthodox fork): the day's feasts, its fast, and the Psalter's kathismata,
+  on the New or Old calendar, with Pascha computed for any year.
 - **Eight public-domain translations built in** (the Septuagint with the KJV New Testament, KJV, WEB, BSB, ASV, YLT, Darby, Webster), side by
   side in parallel columns or one verse across all of them. Add the NLT and the NET Bible free in
   one click, the ESV with a free key, others with an API.Bible key or a file you own

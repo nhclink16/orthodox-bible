@@ -96,6 +96,11 @@ and writers of churches outside Orthodox communion) and the source's non-patrist
 This replaces "no notes from the source texts" for this one panel; it is a separate, read-only
 file, not part of any translation.
 
+*Church calendar.* `bible_core::calendar` computes the church year from the date alone: Pascha by
+the Julian computus, fixed feasts on the New or Old calendar (a setting), the general fasting rules
+and the weekly kathismata. No data files, so nothing to license. The daily Epistle and Gospel are
+left out until there is an openly licensed lectionary table; a wrong reading is worse than none.
+
 `.bbl` files store that model as column arrays compressed with zstd (level 19 for bundled data):
 the 4.1 MB KJV is 1.04 MB, all seven bundled translations ≈ 7 MB. The JSON metadata header is
 uncompressed, so listing translations never decompresses anything. Decoding is a handful of linear

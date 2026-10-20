@@ -129,7 +129,19 @@ Original checklist:
 7. Add a filter for East / West / everyone.
 8. Record a new decision in DECISIONS.md. It replaces "no notes from source texts" for this feature only.
 
-## Phase 4: Orthodox calendar (later; needs data research)
+## Phase 4: Orthodox calendar (done 2026-10-20 on `orthodox/calendar`, except the readings)
+
+Done (`crates/core/src/calendar.rs`, sidebar → Today in the Church):
+- Pascha by the Julian computus, with a New/Old calendar switch. Fixed feasts move 13 days on the Old calendar.
+- The great feasts and the named Sundays and days of the Triodion and Pentecostarion.
+- The day's fast: the four fasting seasons, Wednesdays and Fridays, the fast-free weeks, the single fast days, and fish on feasts. Labeled as a general guide.
+- The day's kathismata for Matins and Vespers (ordinary weeks), with links that open the psalms.
+- "Coming up": the next feasts and fasts, and days to Pascha. Days step back and forward.
+
+Not done:
+- **Daily Epistle and Gospel.** Writing the lectionary from memory risks wrong readings. orthocal-python's data needs Brian Glass's permission, and Ponomar is GPL. Ask him first.
+- Saints of the day, prayers, the winter and Lenten kathisma orders, local fasting variants.
+
 
 - A "Today's readings" page. The current reading plans are just day counts (`plans.rs`), so they can't model this.
 - It needs the date of Pascha (Julian computus), the movable feasts counted from Pascha, and a table of the fixed-date readings.

@@ -4,6 +4,7 @@
 pub mod books;
 #[cfg(feature = "bundled")]
 pub mod bundled;
+pub mod calendar;
 pub mod copy;
 pub mod fathers;
 pub mod format;

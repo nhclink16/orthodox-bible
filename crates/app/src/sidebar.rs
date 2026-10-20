@@ -404,6 +404,19 @@ impl Sidebar {
                             ui,
                             p,
                             &Row {
+                                icon: Some(crate::icons::calendar),
+                                label: "Today in the Church",
+                                selected: env.page == crate::pages::Page::Today,
+                                ..Row::default()
+                            },
+                        );
+                        if r.clicked() {
+                            actions.push(Action::OpenPage(crate::pages::Page::Today));
+                        }
+                        let r = row(
+                            ui,
+                            p,
+                            &Row {
                                 icon: Some(crate::icons::history),
                                 label: "History",
                                 selected: env.page == crate::pages::Page::History,

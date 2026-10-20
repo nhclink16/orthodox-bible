@@ -75,6 +75,8 @@ pub enum Action {
     Compare,
     /// The Church Fathers on the selected verse, in the inspector.
     ShowFathers,
+    /// The church calendar the Today page follows.
+    SetCalendar(bible_core::calendar::Style),
     ClearSelection,
     SelectNext,
     SelectPrev,

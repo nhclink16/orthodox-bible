@@ -7,6 +7,7 @@ pub mod highlights;
 pub mod history;
 pub mod notes;
 pub mod plans;
+pub mod today;
 pub mod translations;
 
 use eframe::egui::{self, Color32, FontId, Painter, Rect, ScrollArea, Ui, pos2, vec2};
@@ -29,6 +30,8 @@ pub enum Page {
     Notes,
     History,
     Plans,
+    /// The church year (Orthodox fork).
+    Today,
 }
 
 impl Page {
@@ -42,6 +45,7 @@ impl Page {
             Page::Notes => "Search notes",
             Page::History => "Search history",
             Page::Plans => "Search plans",
+            Page::Today => "Search",
         }
     }
 
@@ -54,6 +58,7 @@ impl Page {
             "notes" => Page::Notes,
             "history" => Page::History,
             "plans" => Page::Plans,
+            "today" => Page::Today,
             _ => return None,
         })
     }
@@ -81,6 +86,7 @@ pub struct Pages {
     pub notes: notes::State,
     pub history: history::State,
     pub plans: plans::State,
+    pub today: today::State,
     /// Whether the page is scrolled (the toolbar then takes its material).
     pub scrolled: bool,
 }
@@ -122,6 +128,7 @@ impl Pages {
                     Page::Highlights => self.highlights.show(ui, content, env, actions),
                     Page::History => self.history.show(ui, content, env, actions),
                     Page::Plans => self.plans.show(ui, content, env, actions),
+                    Page::Today => self.today.show(ui, content, env, actions),
                     Page::Notes => self.notes.show_empty(ui, content, env, actions),
                     Page::Reader => content.top(),
                 };

@@ -62,6 +62,8 @@ pub struct Settings {
     /// The first-launch screens are done. Settings saved before they existed count as done.
     #[serde(default = "yes")]
     pub onboarded: bool,
+    /// The church calendar for feasts and fasts (Orthodox fork).
+    pub calendar: bible_core::calendar::Style,
 }
 
 fn yes() -> bool {
@@ -96,6 +98,7 @@ impl Default for Settings {
             backup_weekly: false,
             share: Default::default(),
             onboarded: false,
+            calendar: Default::default(),
         }
     }
 }
@@ -773,6 +776,7 @@ impl BibleApp {
                 let ids: Vec<String> = self.library.entries().iter().map(|e| e.meta.id.clone()).collect();
                 self.library.warm(&ids);
             }
+            Action::SetCalendar(style) => self.settings.calendar = style,
             Action::ShowFathers => {
                 let v = self.selection_or_location()[0];
                 self.reader.set_selection(Some(v));
