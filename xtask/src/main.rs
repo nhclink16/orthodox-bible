@@ -115,9 +115,10 @@ const LXX2012: Source = Source {
 };
 
 /// Verses of the grid that LXX2012 keeps inside another verse: across a chapter break, at a
-/// lectionary reading's first verse, or marked with `\vp` (1 Kings). Each (book, text,
-/// replacement) starts the grid's verse there, numbered as LXX2012 numbers its chapter so that
-/// `lxx::remap_lxx2012` moves it with the rest; they apply in order through the book.
+/// lectionary reading's first verse, mid-sentence (Psalm 34:17), or marked with `\vp` (1 Kings).
+/// Each (book, text, replacement) starts the grid's verse there, numbered as LXX2012 numbers its
+/// chapter so that `lxx::remap_lxx2012` moves it with the rest; they apply in order through the
+/// book.
 const LXX2012_SPLITS: &[(&str, &str, &str)] = &[
     // Genesis 2:25 and 5:32 begin LXX2012's 3:1 and 6:1; 8:4 ends its 8:3, and its 8:4–5 are 8:5.
     ("GEN", "\\v 1 And the two were naked", "\\c 2 \\v 25 And the two were naked"),
@@ -126,7 +127,9 @@ const LXX2012_SPLITS: &[(&str, &str, &str)] = &[
     ("GEN", "Japheth. And it came", "Japheth. \\c 6 \\p \\v 1 And it came"),
     ("GEN", "diminished, and the ark rested", "diminished, \\v 4 and the ark rested"),
     ("GEN", "\\v 4 And the water continued", "\\v 5 And the water continued"),
-    // 1 Kings 2:36–46 are inside 3:1; 7:21, 7:46 and 7:1–12 inside 7:18, 7:47 and 7:51.
+    // 1 Kings 2:36–46 are inside 3:1, and so are 2:35's additions, which the Septuagint reads
+    // before 2:36; 7:21, 7:46 and 7:1–12 are inside 7:18, 7:47 and 7:51.
+    ("1KI", "\\v 1 And the wisdom of Solomon", "\\c 2 \\p \\v 35 And the wisdom of Solomon"),
     ("1KI", "\\p \\vp 36) \\vp*", "\\c 2 \\p \\v 36"),
     ("1KI", "\\vp 37) \\vp*", "\\v 37"),
     ("1KI", "\\vp 38) \\vp*", "\\v 38"),
@@ -155,6 +158,8 @@ const LXX2012_SPLITS: &[(&str, &str, &str)] = &[
     ("1KI", "\\vp 10) \\vp*", "\\v 10"),
     ("1KI", "\\vp 11) \\vp*", "\\v 11"),
     ("1KI", "\\vp 12) \\vp*", "\\v 12"),
+    // Psalm 34:17 (LXX2012's 33:17) begins inside 33:16.
+    ("PSA", "earth. The righteous cried", "earth. \\q1 \\v 17 The righteous cried"),
     // Edom's oracle (Jeremiah 49:7) begins inside 29:7; it reads on as 30, the rest of the grid's 49.
     ("JER", "! CONCERNING IDUMEA", "! \\c 30 \\v 7 CONCERNING IDUMEA"),
     // Zephaniah 2:15 begins LXX2012's 3:1.

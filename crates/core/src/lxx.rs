@@ -145,7 +145,7 @@ pub type Moved = (&'static str, u8, (u8, u8), u8, (u8, u8));
 /// Verses the Septuagint lacks stay missing (Jeremiah 33:14–26, most of Exodus 36:10–33): where
 /// LXX2012 numbers a verse as a range for them (1 Kings 9:14–25), it is only its first verse
 /// unless listed here. Its additions stay in the verse LXX2012 puts them in (Esther's, 1 Kings
-/// 3:1 and 2:46).
+/// 2:46), apart from 1 Kings 2:35's, which the build splits out of LXX2012's 3:1.
 pub const MOVED: &[Moved] = &[
     ("GEN", 22, (15, 15), 22, (15, 16)),
     ("GEN", 22, (16, 23), 22, (17, 24)),
@@ -156,9 +156,12 @@ pub const MOVED: &[Moved] = &[
     ("GEN", 37, (33, 35), 37, (34, 36)),
     ("EXO", 20, (13, 14), 20, (14, 15)),
     ("EXO", 20, (15, 15), 20, (13, 13)),
+    ("EXO", 21, (16, 16), 21, (17, 17)),
+    ("EXO", 21, (17, 17), 21, (16, 16)),
     ("EXO", 28, (23, 23), 28, (29, 29)),
     ("EXO", 28, (26, 26), 28, (30, 30)),
     ("EXO", 28, (27, 39), 28, (31, 43)),
+    ("EXO", 32, (9, 9), 32, (8, 8)),
     ("EXO", 35, (8, 11), 35, (9, 12)),
     ("EXO", 35, (12, 13), 35, (17, 17)),
     ("EXO", 35, (14, 14), 35, (15, 15)),
@@ -283,7 +286,8 @@ pub const MOVED: &[Moved] = &[
     ("JER", 16, (1, 2), 16, (2, 2)),
     ("JER", 17, (1, 1), 17, (5, 5)),
     ("JER", 25, (34, 39), 49, (34, 39)),
-    ("JER", 26, (1, 28), 46, (1, 28)),
+    ("JER", 26, (1, 1), 49, (39, 39)),
+    ("JER", 26, (2, 28), 46, (2, 28)),
     ("JER", 27, (1, 46), 50, (1, 46)),
     ("JER", 28, (1, 64), 51, (1, 64)),
     ("JER", 29, (1, 7), 47, (1, 7)),
@@ -322,6 +326,8 @@ pub const MOVED: &[Moved] = &[
     ("HOS", 14, (1, 1), 13, (16, 16)),
     ("HOS", 14, (2, 10), 14, (1, 9)),
     ("AMO", 6, (11, 15), 6, (10, 14)),
+    ("OBA", 1, (2, 2), 1, (1, 1)),
+    ("OBA", 1, (3, 3), 1, (2, 3)),
     ("JON", 2, (1, 1), 1, (17, 17)),
     ("JON", 2, (2, 11), 2, (1, 10)),
     ("HAG", 2, (2, 24), 2, (1, 23)),
@@ -415,6 +421,10 @@ mod tests {
         has("JER", 48, 1, "concerning MOAB");
         has("JER", 25, 15, "cup of this unmixed wine");
         assert_eq!(text("JER", 33, 14), "");
+        // The Septuagint has no 46:1: LXX2012's 26:1 closes Elam's oracle.
+        assert_eq!(text("JER", 46, 1), "");
+        has("JER", 46, 2, "FOR EGYPT");
+        assert!(text("JER", 49, 39).ends_with("there came this word concerning Aelam."));
         // Genesis 2:25, 5:32 and 8:4 begin LXX2012's 3:1, 6:1 and 8:3's second half.
         has("GEN", 2, 25, "And the two were naked");
         assert!(text("GEN", 3, 1).starts_with("Now the serpent"));
@@ -426,28 +436,39 @@ mod tests {
         has("MAL", 4, 4, "Remember the law of my servant Moses");
         has("MAL", 4, 5, "Elias the Thesbite");
         has("MAL", 4, 6, "turn again the heart of the father");
-        // The Ten Commandments in the grid's order, and Exodus 35–40 rearranged.
+        // LXX2012 splits Obadiah 1:1, and its 1:3 is the grid's 1:2–3.
+        has("OBA", 1, 1, "Arise you, and let us rise up against her to war");
+        assert!(text("OBA", 1, 3).starts_with("Behold, I have made you small"));
+        // The Ten Commandments and 21:16–17 in the grid's order, 32:8 whole (the Septuagint has no
+        // 32:9), and Exodus 35–40 rearranged.
         assert_eq!(text("EXO", 20, 13), "You shall not kill.");
         assert_eq!(text("EXO", 20, 14), "You shall not commit adultery.");
+        has("EXO", 21, 16, "steal one of the children of Israel");
+        has("EXO", 21, 17, "reviles his father");
+        has("EXO", 32, 8, "and said, These are your gods, O Israel");
+        assert_eq!(text("EXO", 32, 9), "");
         has("EXO", 36, 8, "ten curtains for the tabernacle");
         has("EXO", 37, 1, "Beseleel made the ark");
         has("EXO", 38, 24, "twenty-nine talents");
         has("EXO", 39, 1, "the robes of the holy places, which belong to Aaron");
         has("EXO", 40, 34, "the cloud covered the tabernacle");
         assert_eq!(text("EXO", 36, 15), "");
-        // 1 Kings 20 and 21 change places, and 2:36–46 and 7:1–12 come out of 3:1 and 7:51.
+        // 1 Kings 20 and 21 change places, 2:35's additions and 2:36–46 come out of 3:1 in the
+        // Septuagint's order, and 7:1–12 out of 7:51.
         has("1KI", 20, 1, "son of Ader gathered all his forces");
         has("1KI", 21, 1, "Nabuthai the Jezraelite had a vineyard");
         has("1KI", 21, 19, "you have slain and taken possession");
         has("1KI", 2, 36, "the king called Semei");
         has("1KI", 7, 1, "Solomon built a house for himself in thirteen years");
-        assert!(!text("1KI", 3, 1).contains("Build you a house"));
+        has("1KI", 2, 35, "the wisdom of Solomon abounded");
+        assert_eq!(text("1KI", 3, 1), "");
         // Proverbs 24–31 are already in the grid's order in LXX2012.
         has("PRO", 24, 23, "respect of persons in judgment");
         has("PRO", 30, 15, "The horse-leech");
         has("PRO", 31, 10, "Who shall find a virtuous woman");
         has("PSA", 51, 1, "Have mercy upon me, O God");
         has("PSA", 11, 2, "the sinners have bent their bow");
+        has("PSA", 34, 17, "The righteous cried, and the Lord listened to them, and delivered them");
     }
 
     /// Every Old Testament reading of the lectionary opens its first and last verses in the

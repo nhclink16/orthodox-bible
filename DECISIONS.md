@@ -96,8 +96,8 @@ text first (`LXX2012_SPLITS`). That edits LXX2012's text, like dropping its plur
 lives in the build; the table lives in the core beside the psalm mapping. A verse the Septuagint
 lacks is missing, so it reads as not in this translation (Jeremiah 33:14–26), and a verse range
 LXX2012 gives for such verses counts as its first verse only. The Septuagint's additions stay in
-the verse LXX2012 puts them in. A test opens every Old Testament reading of the lectionary in the
-bundled text.
+the verse LXX2012 puts them in, except 1 Kings 2:35's: they join 2:35, so they come before 2:36 as
+in the Septuagint. A test opens every Old Testament reading of the lectionary in the bundled text.
 
 *Church Fathers.* The Fathers panel (verse menu → Church Fathers, or F) reads quotes from the
 Historical Christian Faith Commentaries Database, keyed by grid verse (it uses Hebrew psalm
@@ -498,5 +498,6 @@ What differs is the toolkit, and here the Mac's choice is overruled.
 - Septuagint numbering is mapped only for the bundled `lxx` (LXX2012); imported Septuagints keep
   their own. Where the Septuagint reorders a passage within its verses (1 Kings 11:1–8, the pluses
   of Proverbs 15–16), LXX2012's verses stay where it puts them, so a grid verse there can open a
-  little more or less than the KJV's.
+  little more or less than the KJV's. Typed references take Septuagint numbers in the Psalms only;
+  elsewhere they take the grid's, so Brenton's Jeremiah 38:31 is typed as 31:31.
 - Search covers locally available text; online translations are searched via their own sites.
