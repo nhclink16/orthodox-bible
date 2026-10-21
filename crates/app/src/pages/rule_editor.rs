@@ -645,11 +645,11 @@ fn item_fields(
             y += 44.0;
         }
         Kind::Readings => {
-            about(y, "The day's Epistle and Gospel. Coming soon.");
+            about(y, "The day's Epistle and Gospel. Read opens the Gospel.");
             y += 44.0;
         }
         Kind::Fathers => {
-            about(y, "The Church Fathers on the day's Gospel. Coming soon.");
+            about(y, "The Church Fathers on the day's Gospel, beside the reader.");
             y += 44.0;
         }
         Kind::Reflection => {

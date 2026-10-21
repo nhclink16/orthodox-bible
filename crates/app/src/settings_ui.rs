@@ -233,13 +233,14 @@ impl SettingsUi {
         }
     }
 
-    /// Data (frame 27): what's in the library and where, exports, backups, and erasing.
+    /// Data (frame 27): what's in the library and where, sync, exports, backups, and erasing.
     fn data(
         &mut self,
         ui: &mut Ui,
         library: &Library,
         settings: &mut Settings,
         study: &StudyStore,
+        sync: &crate::sync::Status,
         actions: &mut Vec<Action>,
     ) {
         let p = settings.theme.palette();
@@ -324,6 +325,56 @@ impl SettingsUi {
                 );
             }
         });
+        ui.add_space(24.0);
+
+        // Sync: the switch, and under it how the last sync went. Without iCloud Drive it stays
+        // off and says why.
+        group_title(ui, p, "Sync");
+        let folder = crate::sync::folder();
+        let (status, full) = match (&folder, settings.sync) {
+            (Err(why), _) => (Some(why.to_string()), None),
+            (Ok(_), false) => (None, None),
+            (Ok(_), true) => match (&sync.error, sync.skipped.first(), sync.synced) {
+                (Some(e), _, _) => (Some(e.clone()), Some(e.clone())),
+                (None, Some(first), _) => {
+                    (Some(format!("Couldn't read {first}")), Some(sync.skipped.join("\n")))
+                }
+                // "just now", "12 min ago", "Wed".
+                (None, None, Some(at)) => (
+                    Some(format!("Last synced {}", crate::time::ago(at).replace("Just now", "just now"))),
+                    None,
+                ),
+                (None, None, None) => (Some("Syncing…".into()), None),
+            },
+        };
+        rows_card(ui, p, &[if status.is_some() { 56.0 } else { 44.0 }], |ui, _, r| {
+            let right = pos2(r.right() - 16.0, r.center().y);
+            let status = status.as_deref().map(|s| {
+                crate::pages::elide(ui.painter(), s, &text::SMALL.font(), r.width() - 16.0 - 40.0 - 32.0)
+            });
+            row_label(ui, p, r, "Sync with your iPhone", status.as_deref());
+            if let Some(full) = &full {
+                let detail =
+                    Rect::from_min_max(pos2(r.left(), r.center().y), pos2(r.right() - 72.0, r.bottom()));
+                ui.interact(detail, ui.id().with("sync-status"), Sense::hover()).on_hover_text(full);
+            }
+            let mut child = ui.new_child(egui::UiBuilder::new().max_rect(r));
+            let mut on = settings.sync && folder.is_ok();
+            if folder.is_err() {
+                child.disable();
+            }
+            widgets::toggle(&mut child, p, right, ui.id().with("sync"), &mut on);
+            if folder.is_ok() {
+                settings.sync = on;
+            }
+        });
+        ui.add_space(8.0);
+        footnote(
+            ui,
+            p,
+            "Through iCloud Drive: notes, highlights, bookmarks, reading plans, your prayer rule and \
+             what you've ticked.",
+        );
         ui.add_space(24.0);
 
         group_title(ui, p, "Export");
@@ -440,11 +491,17 @@ impl SettingsUi {
             let right = r.right() - 16.0;
             let cy = r.center().y;
             if self.confirm_erase {
+                // Synced, the erasing reaches the iPhone too.
+                let question = if settings.sync && folder.is_ok() {
+                    "Erase everything here and on your iPhone?"
+                } else {
+                    "Erase everything?"
+                };
                 row_label(
                     ui,
                     p,
                     r,
-                    "Erase everything?",
+                    question,
                     Some("A backup is saved first; otherwise this can't be undone."),
                 );
                 let (b, resp) = Button::new(Kind::Destructive, "Erase Everything").small().show_right(
@@ -507,6 +564,7 @@ impl SettingsUi {
         library: &mut Library,
         settings: &mut Settings,
         study: &StudyStore,
+        sync: &crate::sync::Status,
         actions: &mut Vec<Action>,
         tx: &Sender<TaskResult>,
         import: &mut Option<(PathBuf, Option<String>)>,
@@ -520,7 +578,7 @@ impl SettingsUi {
                 .show(ctx, |ui| {
                     ui.set_min_size(screen.size());
                     let mut child = ui.new_child(egui::UiBuilder::new().max_rect(screen));
-                    self.window(&mut child, library, settings, study, actions, tx, import);
+                    self.window(&mut child, library, settings, study, sync, actions, tx, import);
                 });
             return true;
         }
@@ -547,7 +605,7 @@ impl SettingsUi {
             }
             let rect = ui.max_rect();
             let mut child = ui.new_child(egui::UiBuilder::new().max_rect(rect));
-            self.window(&mut child, library, settings, study, actions, tx, import);
+            self.window(&mut child, library, settings, study, sync, actions, tx, import);
         });
         open
     }
@@ -560,6 +618,7 @@ impl SettingsUi {
         library: &mut Library,
         settings: &mut Settings,
         study: &StudyStore,
+        sync: &crate::sync::Status,
         actions: &mut Vec<Action>,
         tx: &Sender<TaskResult>,
         import: &mut Option<(PathBuf, Option<String>)>,
@@ -640,7 +699,7 @@ impl SettingsUi {
                                 self.translations(ui, library, settings, actions, tx, import)
                             }
                             SettingsTab::Shortcuts => self.shortcuts(ui, settings),
-                            SettingsTab::Data => self.data(ui, library, settings, study, actions),
+                            SettingsTab::Data => self.data(ui, library, settings, study, sync, actions),
                             SettingsTab::About => about(ui, p),
                         }
                     });

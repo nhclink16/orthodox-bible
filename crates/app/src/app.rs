@@ -66,6 +66,8 @@ pub struct Settings {
     pub calendar: bible_core::calendar::Style,
     /// Remind at the times of the prayer rule's blocks while the app is open.
     pub rule_reminders: bool,
+    /// Sync study data with the iPhone through iCloud Drive (`crate::sync`).
+    pub sync: bool,
 }
 
 fn yes() -> bool {
@@ -102,6 +104,7 @@ impl Default for Settings {
             onboarded: false,
             calendar: Default::default(),
             rule_reminders: false,
+            sync: false,
         }
     }
 }
@@ -283,6 +286,8 @@ pub struct BibleApp {
     reminded: Option<i64>,
     /// The prayer rule's reminders, when they're on.
     rule_reminders: crate::pages::rule::Reminders,
+    /// Sync with the iPhone, when it's on.
+    sync: crate::sync::Sync,
     /// The page in the main area (the reader unless a library or study page is open).
     pub pages: crate::pages::Pages,
     /// `BIBLE_RS_DEMO`: steps that put the window into a given state (screenshots), one per frame.
@@ -408,6 +413,7 @@ impl BibleApp {
             compare: None,
             reminded: None,
             rule_reminders: Default::default(),
+            sync: Default::default(),
             focus: false,
             focus_reveal: false,
             backup_checked: None,
@@ -609,6 +615,16 @@ impl BibleApp {
                 if let (Some(v), true) = (verse, flash) {
                     self.reader.set_selection(Some(VerseRef::new(chapter.book(), chapter.chapter(), v)));
                 }
+            }
+            // At its first verse, the passage selected as far as its first chapter goes (a
+            // selection stays in one chapter).
+            Action::ReadPassage(p) => {
+                self.apply_one(
+                    ctx,
+                    Action::Jump { chapter: p.chapter(), verse: Some(p.from.1), flash: true },
+                );
+                let end = if p.to.0 == p.from.0 { p.to.1 } else { p.chapter().kjv_verses() };
+                self.reader.selection = Some((p.first(), VerseRef::new(p.book, p.from.0, end)));
             }
             // From a page, Back returns to the reader.
             Action::Back if !self.pages.reader() => self.pages.open(crate::pages::Page::Reader),
@@ -2245,6 +2261,15 @@ impl eframe::App for BibleApp {
             ctx.request_repaint();
         }
         self.poll_tasks(&ctx);
+        // Sync with the iPhone once the first frames are up, before anything shows the study
+        // data, so changes merged from it show in this frame.
+        if self.startup.frames > 2
+            && !crate::probing()
+            && self.sync.tick(&ctx, &mut self.study, self.settings.sync)
+        {
+            // The rule may have come with new times.
+            self.rule_reminders.reset();
+        }
         let mut actions = Vec::new();
         if let Some(probe) = &mut self.sidebar_probe
             && probe.begin(&ctx, frame_start)
@@ -2589,6 +2614,7 @@ impl eframe::App for BibleApp {
                 &mut self.library,
                 &mut self.settings,
                 &self.study,
+                self.sync.status(),
                 &mut actions,
                 &tx,
                 &mut import,
@@ -2655,6 +2681,7 @@ impl eframe::App for BibleApp {
         self.settings.chapter = self.reader.location.0.0;
         self.settings.verse = self.reader.location.1;
         self.settings.save(&self.study);
+        self.sync.quit(&self.study, self.settings.sync);
     }
 }
 

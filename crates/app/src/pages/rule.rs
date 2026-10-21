@@ -1,15 +1,17 @@
 //! The prayer rule on the Today page (Orthodox fork): the day's blocks with a check box for each
-//! item and what the item opens (a prayer's text, the reader, the Jesus Prayer's counter) in the
-//! page's place. Nothing counts streaks or scores: an item is done that day or it isn't.
+//! item and what the item opens (a prayer's text, the reader, the Fathers beside it, the Jesus
+//! Prayer's counter) in the page's place. Nothing counts streaks or scores: an item is done that
+//! day or it isn't.
 
 use std::collections::HashSet;
 
 use eframe::egui::{self, Align2, FontId, Key, Modifiers, Rect, Sense, Ui, pos2, vec2};
 
 use bible_core::calendar::{self, Day, Style};
+use bible_core::lectionary::{self, Passage, Reading};
 use bible_core::rule::{Block, Item, Kind, Rule};
 use bible_core::study::{PlanProgress, StudyStore};
-use bible_core::{BookId, ChapterIdx, Translation, lxx, plans, prayers};
+use bible_core::{BookId, ChapterIdx, Translation, VerseRef, lxx, plans, prayers};
 
 use super::plans::Under;
 use super::{PageEnv, group_label, text};
@@ -106,14 +108,14 @@ enum Open {
     },
     /// A chapter (and verse) in the reader.
     Read(ChapterIdx, Option<u8>),
+    /// A reading of the day in the reader, its verses selected.
+    Passage(Passage),
+    /// The Church Fathers panel on a verse.
+    Fathers(VerseRef),
     /// The Jesus Prayer's counter, up to this many.
     Count(u16),
     /// A reading plan never started.
     Start(&'static str),
-    /// The day's Epistle and Gospel and the Fathers on it wait for the daily lectionary, which is
-    /// built separately: with it, `resolve` opens the readings in the reader and the Fathers
-    /// panel on the Gospel.
-    Soon,
     Nothing,
     /// Nothing to do on this day (no kathisma on Sunday evening): no check box, and it counts
     /// as done.
@@ -125,9 +127,9 @@ impl Open {
         Some(match self {
             Open::Text { .. } if *kind == Kind::Reflection => "Open",
             Open::Text { .. } | Open::Count(_) => "Pray",
-            Open::Read(..) => "Read",
+            Open::Read(..) | Open::Passage(_) => "Read",
+            Open::Fathers(_) => "Open",
             Open::Start(_) => "Start plan",
-            Open::Soon => "Coming soon",
             Open::Nothing | Open::NotToday => return None,
         })
     }
@@ -196,12 +198,32 @@ fn plan_note(item: &Item, plan: &plans::Plan, state: &str) -> String {
     if item.title.trim() == plan.title { state.into() } else { format!("{} · {state}", plan.title) }
 }
 
-/// What `item` (in `block`) opens on day `d` (`today` being today), the line under its title,
-/// and the plan's day it follows, if it's a plan's.
+/// What the rule's Scripture and the Fathers open on a day with these `lessons`: its Liturgy's
+/// Gospel or, on a day without one (a Lenten weekday, Holy Friday), its first reading; and
+/// whether it is that Gospel.
+fn day_gospel(lessons: &[Reading]) -> Option<(&Reading, bool)> {
+    let gospel = lessons.iter().find(|r| r.at_liturgy() && r.kind == lectionary::Kind::Gospel);
+    gospel.map(|g| (g, true)).or_else(|| lessons.first().map(|r| (r, false)))
+}
+
+/// Says plainly that day `d` has no Liturgy Gospel, and what is read `first` instead: "No
+/// Gospel today · Isaiah 1:1–20 at the Sixth Hour".
+fn instead(first: &Reading, lessons: &[Reading], d: Day, today: Day) -> String {
+    let none =
+        if lessons.iter().any(|r| r.kind == lectionary::Kind::Gospel) { "No Liturgy" } else { "No Gospel" };
+    let when = if d == today { "today" } else { "on this day" };
+    let at =
+        if first.service.starts_with("Matins") || first.service.starts_with("Vespers") { "" } else { "the " };
+    format!("{none} {when} · {} at {at}{}", first.label(), first.service)
+}
+
+/// What `item` (in `block`) opens on day `d` (`today` being today, `lessons` its readings), the
+/// line under its title, and the plan's day it follows, if it's a plan's.
 fn resolve(
     item: &Item,
     block: &Block,
     (d, today): (Day, Day),
+    lessons: &[Reading],
     t: Option<&Translation>,
     started: &[PlanProgress],
     under: &[Under<'_>],
@@ -273,7 +295,28 @@ fn resolve(
                 }
             }
         },
-        Kind::Readings | Kind::Fathers => Open::Soon,
+        // The day's Epistle and Gospel, and Read opens the Gospel.
+        Kind::Readings => match day_gospel(lessons) {
+            Some((g, true)) => {
+                let epistle = lessons.iter().find(|r| r.at_liturgy() && r.kind == lectionary::Kind::Epistle);
+                detail = epistle.into_iter().chain([g]).map(|r| r.label()).collect::<Vec<_>>().join(" · ");
+                g.passages.first().map_or(Open::Nothing, |p| Open::Passage(*p))
+            }
+            Some((first, false)) => {
+                detail = instead(first, lessons, d, today);
+                first.passages.first().map_or(Open::Nothing, |p| Open::Passage(*p))
+            }
+            None => Open::Nothing,
+        },
+        // The Fathers on the Gospel's first verse.
+        Kind::Fathers => match day_gospel(lessons) {
+            Some((r, gospel)) => {
+                let on = if gospel { r.label() } else { instead(r, lessons, d, today) };
+                detail = if detail.is_empty() || !gospel { on } else { format!("{detail} · {on}") };
+                r.passages.first().map_or(Open::Nothing, |p| Open::Fathers(p.first()))
+            }
+            None => Open::Nothing,
+        },
         Kind::JesusPrayer { count } => {
             let times = format!("{count} times");
             detail = if detail.is_empty() { times } else { format!("{detail} · {times}") };
@@ -329,6 +372,7 @@ pub fn section(
         return y + 20.0;
     }
     let today = super::today::today();
+    let lessons = lectionary::readings(d, style);
     let t = super::reading_text(env);
     let started = env.study.plans();
     let under = following(rule, &started, env.study);
@@ -350,7 +394,8 @@ pub fn section(
         }
         y += 28.0;
         for item in items {
-            let (open, detail, follows) = resolve(item, block, (d, today), t.as_deref(), &started, &under);
+            let (open, detail, follows) =
+                resolve(item, block, (d, today), &lessons, t.as_deref(), &started, &under);
             let row = Rect::from_min_size(pos2(left, y), vec2(width, 48.0));
             let id = ui.id().with(("rule-item", &item.id));
             let idle = matches!(open, Open::NotToday);
@@ -370,12 +415,9 @@ pub fn section(
             let label = open.label(&item.kind);
             let mut room = row.right() - 12.0 - x;
             if let Some(l) = label {
-                let (font, ink) = if matches!(open, Open::Soon) {
-                    (theme::ui_font(12.0), p.ink_3)
-                } else {
-                    (theme::ui_medium(13.0), p.accent)
-                };
-                room -= text(&painter, row.right() - 12.0, row.top() + 14.0, 20.0, l, font, ink, true) + 16.0;
+                let font = theme::ui_medium(13.0);
+                room -= text(&painter, row.right() - 12.0, row.top() + 14.0, 20.0, l, font, p.accent, true)
+                    + 16.0;
             }
             let title_top = if detail.is_empty() { row.top() + 14.0 } else { row.top() + 5.0 };
             let title = super::elide(&painter, &item.title, &theme::ui_medium(14.0), room);
@@ -411,11 +453,17 @@ fn activate(open: Open, item: &Item, d: Day, done: bool, view: &mut Option<View>
     match open {
         Open::Text { text, source } => *view = Some(View::Text { day, item: id, title, text, source }),
         Open::Read(chapter, verse) => actions.push(Action::Jump { chapter, verse, flash: verse.is_some() }),
+        Open::Passage(p) => actions.push(Action::ReadPassage(p)),
+        // The verse selected in the reader, which the panel follows.
+        Open::Fathers(v) => {
+            actions.push(Action::Jump { chapter: v.chapter_idx(), verse: Some(v.verse), flash: true });
+            actions.push(Action::ShowFathers);
+        }
         Open::Count(target) => {
             *view = Some(View::Count { day, item: id, title, target: target.max(1), n: 0 })
         }
         Open::Start(plan) => actions.push(Action::StartPlan(plan.to_string())),
-        Open::Soon | Open::Nothing => actions.push(Action::SetRuleDone { day, item: id, done: !done }),
+        Open::Nothing => actions.push(Action::SetRuleDone { day, item: id, done: !done }),
         Open::NotToday => {}
     }
 }
@@ -432,10 +480,11 @@ pub fn open_item(
     let t = super::reading_text(env);
     let started = env.study.plans();
     let under = following(rule, &started, env.study);
+    let lessons = lectionary::readings(d, env.settings.calendar);
     for (block, items) in rule.for_day(d, env.settings.calendar) {
         if let Some(item) = items.into_iter().find(|i| i.id == id) {
             let today = super::today::today();
-            let (open, _, _) = resolve(item, block, (d, today), t.as_deref(), &started, &under);
+            let (open, _, _) = resolve(item, block, (d, today), &lessons, t.as_deref(), &started, &under);
             activate(open, item, d, env.study.rule_done(d).contains(id), view, actions);
         }
     }
@@ -676,6 +725,74 @@ fn counter(
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    /// The starter rule's Scripture and Fathers items on day `d` (seen from `today`): what each
+    /// opens, and the line under it.
+    fn scripture_and_fathers(d: Day, today: Day) -> Vec<(String, String)> {
+        let rule = Rule::starter();
+        let lessons = lectionary::readings(d, Style::New);
+        let mut out = Vec::new();
+        for (block, items) in rule.for_day(d, Style::New) {
+            for item in items.into_iter().filter(|i| matches!(i.kind, Kind::Readings | Kind::Fathers)) {
+                let (open, detail, _) = resolve(item, block, (d, today), &lessons, None, &[], &[]);
+                let opens = match open {
+                    Open::Passage(p) => format!("Read {}", lectionary::label(&[p])),
+                    Open::Fathers(v) => format!("Fathers on {v}"),
+                    _ => "nothing".into(),
+                };
+                out.push((opens, detail));
+            }
+        }
+        out
+    }
+
+    fn pairs(v: [(&str, &str); 2]) -> Vec<(String, String)> {
+        v.into_iter().map(|(a, b)| (a.to_string(), b.to_string())).collect()
+    }
+
+    #[test]
+    fn the_readings_and_the_fathers_follow_the_days_gospel() {
+        let day = calendar::civil;
+        // A weekday with a saint's Epistle: the Epistle and Gospel named, the Gospel opened.
+        let tuesday = day(2026, 10, 20);
+        assert_eq!(
+            scripture_and_fathers(tuesday, tuesday),
+            pairs([
+                ("Read Luke 9:23–27", "2 Timothy 2:1–10 · Luke 9:23–27"),
+                ("Fathers on Luke 9:23", "On the day's Gospel · Luke 9:23–27"),
+            ])
+        );
+        let sunday = day(2026, 10, 25);
+        assert_eq!(
+            scripture_and_fathers(sunday, tuesday),
+            pairs([
+                ("Read Luke 8:26–39", "Galatians 2:16–20 · Luke 8:26–39"),
+                ("Fathers on Luke 8:26", "On the day's Gospel · Luke 8:26–39"),
+            ])
+        );
+        let nativity = day(2026, 12, 25);
+        assert_eq!(
+            scripture_and_fathers(nativity, tuesday),
+            pairs([
+                ("Read Matthew 2:1–12", "Galatians 4:4–7 · Matthew 2:1–12"),
+                ("Fathers on Matthew 2:1", "On the day's Gospel · Matthew 2:1–12"),
+            ])
+        );
+        // A Lenten weekday has no Liturgy Gospel: the first reading, and saying so.
+        let lenten = day(2026, 3, 4);
+        let instead = "No Gospel today · Isaiah 5:16–25 at the Sixth Hour";
+        assert_eq!(
+            scripture_and_fathers(lenten, lenten),
+            pairs([("Read Isaiah 5:16–25", instead), ("Fathers on Isaiah 5:16", instead)])
+        );
+        let (_, other_day) = scripture_and_fathers(lenten, tuesday).remove(0);
+        assert_eq!(other_day, "No Gospel on this day · Isaiah 5:16–25 at the Sixth Hour");
+        // Holy Friday has Gospels but no Liturgy.
+        let friday = day(2026, 4, 10);
+        let (opens, detail) = scripture_and_fathers(friday, friday).remove(0);
+        assert_eq!(opens, "Read John 13:31–18:1");
+        assert_eq!(detail, "No Liturgy today · John 13:31–18:1 at Matins of the Twelve Passion Gospels");
+    }
 
     /// The app left open on the starter rule, waking only when `due` says to: each timed block
     /// is reminded of at its time, the morning's too after the night, and none twice.
