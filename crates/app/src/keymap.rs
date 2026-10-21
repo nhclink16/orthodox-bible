@@ -154,8 +154,9 @@ const fn fixed(
 
 pub const GROUPS: [&str; 3] = ["Navigate", "Verses", "View"];
 
-pub const ALL: [Shortcut; 19] = [
+pub const ALL: [Shortcut; 20] = [
     bindable("jump", "Navigate", "Jump to a reference", Chord::cmd(Key::K)),
+    bindable("today", "Navigate", "Today in the Church", Chord::shift_cmd(Key::T)),
     fixed("chapter", "Navigate", "Previous / next chapter", &["←", "→"]),
     fixed("history", "Navigate", "Back / forward", &["⌘", "[", "⌘", "]"]),
     bindable("search", "Navigate", "Search", Chord::cmd(Key::F)),
@@ -180,6 +181,7 @@ pub const ALL: [Shortcut; 19] = [
 pub fn action(id: &str) -> Option<Action> {
     Some(match id {
         "jump" => Action::OpenPalette,
+        "today" => Action::OpenToday,
         "search" => Action::OpenSearch(None),
         "sidebar" => Action::ToggleSidebar,
         "note" => Action::EditSelectedNote,

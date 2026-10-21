@@ -207,6 +207,29 @@ impl History {
     pub fn recent(&self) -> impl Iterator<Item = &(ChapterIdx, u8)> {
         self.back.iter().rev()
     }
+
+    /// How many places Back can go to.
+    pub fn depth(&self) -> usize {
+        self.back.len()
+    }
+}
+
+/// The reader opened from a step on Today (Open in reader): the band under the toolbar says
+/// where from, and Back at the history's depth on arrival goes back to the step.
+pub struct TodayReturn {
+    /// "Morning › Scripture".
+    pub from: String,
+    pub depth: usize,
+    /// The reading selected on arrival: still untouched on the way back, it is cleared.
+    pub selection: Option<(VerseRef, VerseRef)>,
+}
+
+/// A message at the bottom of the window. One with a button ("Begin") is clickable and stays
+/// 10 seconds instead of 4.
+struct Toast {
+    text: String,
+    at: f64,
+    action: Option<(&'static str, Action)>,
 }
 
 pub enum TaskResult {
@@ -261,7 +284,9 @@ pub struct BibleApp {
     /// The compact toolbar's More menu: open it next frame (demo), and its keyboard item.
     open_more: bool,
     more_highlight: Option<usize>,
-    toasts: Vec<(String, f64)>,
+    toasts: Vec<Toast>,
+    /// The reader opened from a step on Today, while its band shows.
+    pub today_return: Option<TodayReturn>,
     /// The reading (online) translation can't load the chapter being read.
     offline: Option<crate::offline::Offline>,
     /// The main area (right of the sidebar), where toasts centre.
@@ -398,6 +423,7 @@ impl BibleApp {
             open_more: false,
             more_highlight: None,
             toasts: Vec::new(),
+            today_return: None,
             offline: None,
             main_area: egui::Rect::NOTHING,
             online_gen,
@@ -490,7 +516,13 @@ impl BibleApp {
     }
 
     pub fn toast(&mut self, ctx: &egui::Context, msg: impl Into<String>) {
-        self.toasts.push((msg.into(), ctx.input(|i| i.time)));
+        self.toasts.push(Toast { text: msg.into(), at: ctx.input(|i| i.time), action: None });
+    }
+
+    /// Whether Back in the reader goes back to the step it was opened from: the band shows and
+    /// the reader is back at the depth it arrived at.
+    pub fn returns_to_step(&self) -> bool {
+        self.pages.reader() && self.today_return.as_ref().is_some_and(|r| self.history.depth() <= r.depth)
     }
 
     fn here(&self) -> (ChapterIdx, u8) {
@@ -524,10 +556,11 @@ impl BibleApp {
         // The rows of Settings › Shortcuts, with any chords chosen there.
         let bindings = crate::keymap::bindings(&self.settings.shortcuts);
         let anywhere = |a: &Action| matches!(a, Action::OpenPalette | Action::OpenSearch(_));
-        // The Jesus Prayer's counter on the Today page counts with Space.
-        let counting = self.pages.page == crate::pages::Page::Today && self.pages.today.counting();
-        // Escape leaves a prayer, the counter or the rule's editor there.
-        let viewing = self.pages.page == crate::pages::Page::Today && self.pages.today.viewing();
+        // On the Today page the keys that move the reader or act on its verses are held back
+        // (a step there never disturbs the reader); the arrow and page keys scroll the page, and
+        // its views take Escape, ⌘↩ and, in the Jesus Prayer's counter, Space.
+        let today = self.pages.page == crate::pages::Page::Today;
+        let counting = today && self.pages.today.counting();
         ctx.input_mut(|i| {
             let cmd = Modifiers::COMMAND;
             let cmd_shift = Modifiers::COMMAND | Modifiers::SHIFT;
@@ -584,15 +617,19 @@ impl BibleApp {
                 return;
             }
             // Copying works with the book picker open; the reader's single keys wait for it.
-            for (c, a) in bindings.iter().filter(|(c, a)| *a == Action::Copy || !(c.is_command() || picker)) {
+            for (c, a) in
+                bindings.iter().filter(|(c, a)| *a == Action::Copy || !(c.is_command() || picker || today))
+            {
                 key(c.modifiers(), c.key, a.clone());
             }
             key(cmd, Key::C, Action::CopyText);
             if picker {
                 return;
             }
-            key(Modifiers::NONE, Key::ArrowLeft, Action::PrevChapter);
-            key(Modifiers::NONE, Key::ArrowRight, Action::NextChapter);
+            if !today {
+                key(Modifiers::NONE, Key::ArrowLeft, Action::PrevChapter);
+                key(Modifiers::NONE, Key::ArrowRight, Action::NextChapter);
+            }
             key(Modifiers::NONE, Key::ArrowDown, Action::ScrollLines(3.0));
             key(Modifiers::NONE, Key::ArrowUp, Action::ScrollLines(-3.0));
             key(Modifiers::NONE, Key::PageDown, Action::ScrollPages(1.0));
@@ -601,14 +638,15 @@ impl BibleApp {
                 key(Modifiers::SHIFT, Key::Space, Action::ScrollPages(-1.0));
                 key(Modifiers::NONE, Key::Space, Action::ScrollPages(1.0));
             }
-            key(Modifiers::NONE, Key::J, Action::SelectNext);
-            key(Modifiers::NONE, Key::K, Action::SelectPrev);
-            if !viewing {
-                key(Modifiers::NONE, Key::Escape, Action::ClearSelection);
-            }
             key(Modifiers::NONE, Key::Slash, Action::OpenSearch(None));
             key(Modifiers::SHIFT, Key::Questionmark, Action::ShowShortcuts);
             key(Modifiers::NONE, Key::Questionmark, Action::ShowShortcuts);
+            if today {
+                return;
+            }
+            key(Modifiers::NONE, Key::J, Action::SelectNext);
+            key(Modifiers::NONE, Key::K, Action::SelectPrev);
+            key(Modifiers::NONE, Key::Escape, Action::ClearSelection);
             for (n, k) in
                 [Key::Num1, Key::Num2, Key::Num3, Key::Num4, Key::Num5, Key::Num6].into_iter().enumerate()
             {
@@ -664,6 +702,12 @@ impl BibleApp {
                     self.toast(ctx, more);
                 }
             }
+            // Back from a view on Today (a step, the rule's editor) is Today; from the reader
+            // opened from a step, once it is back where it arrived, the step.
+            Action::Back if self.pages.page == crate::pages::Page::Today && self.pages.today.viewing() => {
+                self.pages.today.close()
+            }
+            Action::Back if self.returns_to_step() => self.apply_one(ctx, Action::ReturnToStep),
             // From a page, Back returns to the reader.
             Action::Back if !self.pages.reader() => self.pages.open(crate::pages::Page::Reader),
             Action::Back => {
@@ -940,7 +984,72 @@ impl BibleApp {
                 }
                 Err(e) => self.toast(ctx, format!("{e:#}")),
             },
-            Action::OpenPage(page) => self.pages.open(page),
+            // From a step, Today in the Church is Today itself.
+            Action::OpenPage(crate::pages::Page::Today) | Action::OpenToday
+                if self.pages.page == crate::pages::Page::Today && self.pages.today.stepping() =>
+            {
+                self.pages.today.close()
+            }
+            Action::OpenPage(page) => {
+                // Another page: the band back to a step goes, and the step stays paused.
+                if page != crate::pages::Page::Reader {
+                    self.today_return = None;
+                }
+                self.pages.open(page);
+            }
+            Action::OpenToday => self.apply_one(ctx, Action::OpenPage(crate::pages::Page::Today)),
+            Action::BeginBlock(id) => {
+                self.apply_one(ctx, Action::OpenToday);
+                self.pages.today.begin(&id);
+            }
+            // At the verse in view, the reading selected as far as it goes in that chapter.
+            Action::OpenInReader { passages, at, from } => {
+                let c = at.chapter_idx();
+                if !self.shown(c) {
+                    self.not_included(ctx, c);
+                    return;
+                }
+                let verses: Vec<u8> = passages
+                    .iter()
+                    .flat_map(|p| p.verses())
+                    .filter(|v| v.chapter_idx() == c)
+                    .map(|v| v.verse)
+                    .collect();
+                let selection = verses.iter().min().zip(verses.iter().max()).map(|(a, b)| {
+                    (VerseRef::new(at.book, at.chapter, *a), VerseRef::new(at.book, at.chapter, *b))
+                });
+                self.pages.today.close();
+                self.pages.open(crate::pages::Page::Reader);
+                self.jump(c, Some(at.verse), false);
+                self.reader.selection = selection;
+                self.today_return = Some(TodayReturn { from, depth: self.history.depth(), selection });
+            }
+            Action::ReturnToStep => {
+                if let Some(r) = self.today_return.take()
+                    && self.reader.selection == r.selection
+                {
+                    self.reader.selection = None;
+                }
+                self.pages.open(crate::pages::Page::Today);
+                self.pages.today.resume();
+            }
+            Action::CloseReturn => self.today_return = None,
+            Action::AddToNote(v, note) => match self.study.append_note(v, &note) {
+                Ok(()) => self.toast(ctx, format!("Added to your note on {v}")),
+                Err(e) => self.toast(ctx, format!("Couldn't add the quote: {e:#}")),
+            },
+            Action::InstallFathers(src) => {
+                let dest = self.data_dir.join(bible_core::fathers::FILE);
+                match bible_core::fathers::install(&src, &dest) {
+                    Ok(done) => {
+                        self.fathers_db = bible_core::fathers::Fathers::open(&self.data_dir);
+                        let msg =
+                            format!("Installed {} quotes from {} Church Fathers", done.quotes, done.authors);
+                        self.toast(ctx, msg);
+                    }
+                    Err(e) => self.toast(ctx, format!("Couldn't install the Fathers: {e:#}")),
+                }
+            }
             Action::SaveNote(v, body) => {
                 if let Err(e) = self.study.set_note(v, &body) {
                     self.toast(ctx, format!("Couldn't save note: {e:#}"));
@@ -1010,6 +1119,16 @@ impl BibleApp {
             }
             Action::ShowShortcuts => self.shortcuts_open = !self.shortcuts_open,
             Action::CheckForUpdates => crate::updater::check_for_updates(),
+            // On Today the page scrolls, and the reader stays where it is.
+            Action::ScrollLines(n) if self.pages.page == crate::pages::Page::Today => {
+                let lh = self.settings.typo.size * self.settings.typo.line_height;
+                self.pages.today.scroll(n * lh);
+            }
+            Action::ScrollPages(n) if self.pages.page == crate::pages::Page::Today => {
+                let page =
+                    (self.main_area.height() - self.chrome.height - 3.0 * self.settings.typo.size).max(100.0);
+                self.pages.today.scroll(n * page);
+            }
             Action::ScrollLines(n) => {
                 let lh = self.settings.typo.size * self.settings.typo.line_height;
                 self.reader.scroll_by(n * lh);
@@ -1026,7 +1145,7 @@ impl BibleApp {
     /// One `BIBLE_RS_DEMO` step: `jump:<reference>`, `select:<reference>`, `palette:<query>`,
     /// `search:<query>`, `scope:<ot|nt>`, `step:<n>` (search results), `offline:<reference>`, `note:<reference>`, `compare:<reference>`, `study:<bookmarks|highlights|notes>`,
     /// `settings:<reading|translations|data>`, `plans-tab:<active|browse|completed>`,
-    /// `size:<width>x<height>` (the window's inner size).
+    /// `size:<width>x<height>` (the window's inner size), `remind:<block>` (a reminder's toast).
     fn demo_step(&mut self, ctx: &egui::Context, step: &str, actions: &mut Vec<Action>) {
         let (cmd, arg) = step.split_once(':').unwrap_or((step, ""));
         let verse = || bible_core::reference::parse(arg).map(|r| r.verse_ref());
@@ -1097,6 +1216,17 @@ impl BibleApp {
             // `today:<edit|day:<offset>|count:<n>|item id>`: the Today page's rule editor, a day
             // from today, the Jesus Prayer counted to n, or an item of the rule opened.
             "today" => self.pages.today.demo(arg),
+            // `remind:<block>`: the reminder toast of a block of the rule, as at its time.
+            "remind" => {
+                let rule = self.study.rule();
+                if let Some(b) = rule.blocks.iter().find(|b| b.id == arg) {
+                    let at =
+                        b.time.as_deref().and_then(bible_core::rule::minutes).map(crate::pages::rule::clock);
+                    let text = at.map_or(b.title.clone(), |at| format!("{} · {at}", b.title));
+                    let action = Some(("Begin", Action::BeginBlock(b.id.clone())));
+                    self.toasts.push(Toast { text, at: ctx.input(|i| i.time), action });
+                }
+            }
             // `plan-day:<plan>@<day>`: a plan's day view.
             "plan-day" => {
                 let (id, day) = arg.split_once('@').unwrap_or((arg, "1"));
@@ -1297,8 +1427,9 @@ impl BibleApp {
         let (due, wait) = self.rule_reminders.due(now, &self.study, self.settings.calendar);
         // egui sleeps while nothing happens: wake for the next block's time.
         ctx.request_repaint_after(Duration::from_secs(wait));
-        for message in due {
-            self.toast(ctx, message);
+        for (block, text) in due {
+            let at = ctx.input(|i| i.time);
+            self.toasts.push(Toast { text, at, action: Some(("Begin", Action::BeginBlock(block))) });
         }
     }
 
@@ -1387,9 +1518,11 @@ impl BibleApp {
         let target_open = self.sidebar_motion.target() > 0.5;
         items.push(sidebar_toggle(ui, p, lead.toggle_x, cy, lead.capsule, target_open, actions));
         let x = lead.nav_x;
+        let to_today = self.returns_to_step()
+            || (self.pages.page == crate::pages::Page::Today && self.pages.today.viewing());
         let nav = [
             CapsuleButton {
-                tooltip: "Back (⌘[)",
+                tooltip: if to_today { "Back to Today (⌘[)" } else { "Back (⌘[)" },
                 // From a page, Back returns to the reader.
                 enabled: self.history.can_back() || !self.pages.reader(),
                 on: false,
@@ -1813,6 +1946,56 @@ impl BibleApp {
         self.toolbar_items.push(r);
     }
 
+    /// Under the toolbar while the reader was opened from a step on Today (frame M10 of the
+    /// routine design): where from, Back to Today, and ✕ to stay in the reader.
+    fn return_band(&mut self, ui: &mut Ui, reader_rect: egui::Rect, actions: &mut Vec<Action>) {
+        let Some(r) = &self.today_return else { return };
+        let p = self.settings.theme.palette();
+        let painter = ui.painter().clone();
+        let from =
+            painter.layout_no_wrap(format!("From Today · {}", r.from), theme::ui_medium(13.0), p.ink_2);
+        let back = painter.layout_no_wrap("Back to Today".into(), theme::ui_semibold(13.0), p.accent);
+        let w = 14.0 + from.size().x + 10.0 + 1.0 + 10.0 + back.size().x + 10.0 + 1.0 + 4.0 + 28.0 + 4.0;
+        let top = reader_rect.top() + self.chrome.height + crate::reader::layout::PAGE_TOP;
+        let band = egui::Rect::from_min_size(
+            egui::pos2((reader_rect.center().x - w / 2.0).round(), top),
+            vec2(w, 32.0),
+        );
+        widgets::capsule(&painter, band, p);
+        let cy = band.center().y;
+        let mut x = band.left() + 14.0;
+        let fw = from.size().x;
+        painter.galley(egui::pos2(x, cy - from.size().y / 2.0), from, p.ink_2);
+        x += fw + 10.0;
+        widgets::capsule_divider(&painter, x, cy, p);
+        x += 1.0 + 10.0;
+        let hit =
+            egui::Rect::from_min_size(egui::pos2(x - 6.0, band.top()), vec2(back.size().x + 12.0, 32.0));
+        let resp = ui.interact(hit, Id::new("reader-back-today"), Sense::click());
+        let bw = back.size().x;
+        painter.galley(egui::pos2(x, cy - back.size().y / 2.0), back, p.accent);
+        if resp.on_hover_cursor(egui::CursorIcon::PointingHand).on_hover_text("⌘[").clicked() {
+            actions.push(Action::ReturnToStep);
+        }
+        x += bw + 10.0;
+        widgets::capsule_divider(&painter, x, cy, p);
+        let close = egui::Rect::from_min_size(egui::pos2(x + 5.0, cy - 14.0), vec2(28.0, 28.0));
+        if crate::panel::round_button(
+            ui,
+            p,
+            close,
+            "reader-return-close",
+            crate::icons::close,
+            "Stay in the reader",
+        )
+        .clicked()
+        {
+            actions.push(Action::CloseReturn);
+        }
+        #[cfg(target_os = "macos")]
+        self.toolbar_items.push(band);
+    }
+
     /// The compact toolbar's More menu (frame 34): the view tools, the sidebar and focus mode,
     /// with their shortcuts as currently bound.
     fn more_menu(&mut self, ui: &mut Ui, more: &egui::Response, actions: &mut Vec<Action>) {
@@ -1926,11 +2109,12 @@ impl BibleApp {
     }
 
     /// Toasts at the bottom centre of the main area, 24 pt above the window edge: inverse
-    /// capsules 40 high (design notes §7). Messages go after 4 s; the error toast of a chapter
+    /// capsules 40 high (design notes §7). Messages go after 4 s, or 10 s with a button (a
+    /// reminder's Begin), which a click anywhere on them presses; the error toast of a chapter
     /// that can't load offers Retry and stays until clicked away or the chapter loads.
-    fn toasts(&mut self, ctx: &egui::Context) {
+    fn toasts(&mut self, ctx: &egui::Context, actions: &mut Vec<Action>) {
         let now = ctx.input(|i| i.time);
-        self.toasts.retain(|(_, t)| now - t < 4.0);
+        self.toasts.retain(|t| now - t.at < if t.action.is_some() { 10.0 } else { 4.0 });
         let p = self.settings.theme.palette();
         let area = if self.main_area.is_positive() { self.main_area } else { ctx.content_rect() };
         // Ink on paper; in the dark a warm near-white, with the light theme's danger.
@@ -1942,30 +2126,37 @@ impl BibleApp {
         let divider = egui::Color32::from_rgba_unmultiplied(r, g, b, 0x8C);
         let danger = if dark { Theme::Light.palette().danger } else { Theme::Dark.palette().danger };
 
-        let mut msgs: Vec<(String, bool)> = Vec::new();
+        // The message, whether it's an error, and its button with the toast it's on.
+        type Row<'a> = (String, bool, Option<(&'a str, usize)>);
+        let mut msgs: Vec<Row<'_>> = Vec::new();
         if let Some(o) = self.offline.as_ref().filter(|o| !o.dismissed) {
-            msgs.push((o.toast(&self.library), true));
+            msgs.push((o.toast(&self.library), true, Some(("Retry", usize::MAX))));
         }
-        msgs.extend(self.toasts.iter().map(|(m, _)| (m.clone(), false)));
+        msgs.extend(
+            self.toasts
+                .iter()
+                .enumerate()
+                .map(|(k, t)| (t.text.clone(), false, t.action.as_ref().map(|(l, _)| (*l, k)))),
+        );
         if let Some(b) = &self.busy {
-            msgs.push((b.clone(), false));
+            msgs.push((b.clone(), false, None));
         }
-        let (mut retry, mut dismiss) = (false, false);
+        let (mut retry, mut dismiss, mut pressed) = (false, false, None);
         let mut y = area.bottom() - 24.0;
-        for (i, (m, error)) in msgs.iter().enumerate() {
+        for (i, (m, error, button)) in msgs.iter().enumerate() {
             let id = Id::new(("toast", i));
             let resp = egui::Area::new(id)
                 .order(egui::Order::Tooltip)
                 .fixed_pos(egui::pos2(area.center().x, y))
                 .pivot(Align2::CENTER_BOTTOM)
-                .interactable(*error)
+                .interactable(button.is_some())
                 .show(ctx, |ui| {
                     let painter = ui.painter().clone();
                     let font = theme::ui_medium(13.0);
                     let m = crate::pages::elide(&painter, m, &font, 480.0);
                     let msg = painter.layout_no_wrap(m, font, ink);
                     let action =
-                        error.then(|| painter.layout_no_wrap("Retry".into(), theme::ui_semibold(13.0), ink));
+                        button.map(|(l, _)| painter.layout_no_wrap(l.into(), theme::ui_semibold(13.0), ink));
                     let lead = if *error { 14.0 + 16.0 + 10.0 } else { 16.0 };
                     let tail = action.as_ref().map_or(0.0, |a| 10.0 + 1.0 + 10.0 + a.size().x);
                     let (rect, bg) =
@@ -2001,10 +2192,15 @@ impl BibleApp {
                         );
                         let act = ui.interact(hit, id.with("action"), Sense::click());
                         painter.galley(egui::pos2(x, cy - a.size().y / 2.0), a, ink);
-                        if act.clicked() {
-                            retry = true;
-                        } else if bg.clicked() {
-                            dismiss = true;
+                        match button {
+                            Some((_, usize::MAX)) if act.clicked() => retry = true,
+                            Some((_, usize::MAX)) if bg.clicked() => dismiss = true,
+                            // A reminder: the whole toast is its button.
+                            Some((_, k)) if act.clicked() || bg.clicked() => pressed = Some(*k),
+                            _ => {}
+                        }
+                        if !error && (act.hovered() || bg.hovered()) {
+                            ui.ctx().set_cursor_icon(egui::CursorIcon::PointingHand);
                         }
                     }
                 });
@@ -2016,6 +2212,10 @@ impl BibleApp {
                 ctx.request_repaint();
             }
             o.dismissed |= dismiss;
+        }
+        if let Some(k) = pressed {
+            let t = self.toasts.remove(k);
+            actions.extend(t.action.map(|(_, a)| a));
         }
         if !self.toasts.is_empty() {
             ctx.request_repaint_after(Duration::from_millis(250));
@@ -2419,6 +2619,8 @@ impl eframe::App for BibleApp {
                             }),
                         selection: self.reader.selected_refs().first().copied(),
                         page: self.pages.page,
+                        // Not while the way back to a step shows: its Today row stays in view.
+                        follow: self.today_return.is_none(),
                     };
                     self.sidebar.show(&mut child, &env, &mut self.settings.whole_words, &mut actions);
                 });
@@ -2436,6 +2638,7 @@ impl eframe::App for BibleApp {
                     settings: &self.settings,
                     query: &query,
                     toolbar: self.chrome.height,
+                    fathers: self.fathers_db.as_ref(),
                 };
                 self.pages.show(ui, full, &env, &mut actions);
                 let material = ctx.animate_bool_with_time(
@@ -2458,9 +2661,11 @@ impl eframe::App for BibleApp {
             let cols = self.columns();
             let offline = self.check_offline(&cols);
             let searching = self.sidebar.result_position().is_some();
-            // Bands under the toolbar: the parallel columns' heads, a search's result navigator.
+            // Bands under the toolbar: the parallel columns' heads, a search's result navigator,
+            // the way back to a step on Today.
             let heads = if cols.len() > 1 { COLUMN_HEADS } else { 0.0 };
-            let band = heads + if searching { SEARCH_BAND } else { 0.0 };
+            let returning = if self.today_return.is_some() { SEARCH_BAND } else { 0.0 };
+            let band = heads + if searching { SEARCH_BAND } else { 0.0 } + returning;
             let keyboard = !ctx.egui_wants_keyboard_input() && self.palette.is_none();
             // Focus mode: two points larger, 36 pt lines at 22, a 680 pt measure, a quiet head
             // 12 pt under where the toolbar would be.
@@ -2527,6 +2732,8 @@ impl eframe::App for BibleApp {
                 self.column_heads(ui, reader_rect, &cols, &mut actions);
             }
             self.result_navigator(ui, reader_rect.translate(vec2(0.0, heads)), &mut actions);
+            let below = heads + if searching { SEARCH_BAND } else { 0.0 };
+            self.return_band(ui, reader_rect.translate(vec2(0.0, below)), &mut actions);
             if let Some(panel) = &mut self.panel {
                 let r = egui::Rect::from_min_max(
                     egui::pos2(reader_rect.right(), full.top() + self.chrome.height),
@@ -2560,30 +2767,12 @@ impl eframe::App for BibleApp {
                 let mut child = ui.new_child(egui::UiBuilder::new().max_rect(r));
                 child.set_clip_rect(r);
                 match fathers.show(&mut child, p, self.fathers_db.as_ref()) {
-                    crate::fathers_panel::Outcome::Stay => {}
+                    crate::fathers_panel::Outcome::Stay | crate::fathers_panel::Outcome::Step(_) => {}
                     crate::fathers_panel::Outcome::Close => self.fathers = None,
                     crate::fathers_panel::Outcome::AddToNote(note) => {
-                        let v = fathers.verse;
-                        match self.study.append_note(v, &note) {
-                            Ok(()) => actions.push(Action::Toast(format!("Added to your note on {v}"))),
-                            Err(e) => actions.push(Action::Toast(format!("Couldn't add the quote: {e:#}"))),
-                        }
+                        actions.push(Action::AddToNote(fathers.verse, note))
                     }
-                    crate::fathers_panel::Outcome::Install(src) => {
-                        let dest = self.data_dir.join(bible_core::fathers::FILE);
-                        match bible_core::fathers::install(&src, &dest) {
-                            Ok(done) => {
-                                self.fathers_db = bible_core::fathers::Fathers::open(&self.data_dir);
-                                actions.push(Action::Toast(format!(
-                                    "Installed {} quotes from {} Church Fathers",
-                                    done.quotes, done.authors
-                                )));
-                            }
-                            Err(e) => {
-                                actions.push(Action::Toast(format!("Couldn't install the Fathers: {e:#}")))
-                            }
-                        }
-                    }
+                    crate::fathers_panel::Outcome::Install(src) => actions.push(Action::InstallFathers(src)),
                 }
             }
             let material = ctx.animate_bool_with_time(
@@ -2710,7 +2899,7 @@ impl eframe::App for BibleApp {
         self.plan_reminder(&ctx);
         self.rule_reminder(&ctx);
         self.auto_backup(&ctx);
-        self.toasts(&ctx);
+        self.toasts(&ctx, &mut actions);
         self.end_frame(&ctx, frame, frame_start, actions);
     }
 

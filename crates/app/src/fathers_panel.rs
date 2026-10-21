@@ -1,5 +1,6 @@
 //! The Church Fathers on the selected verse (`bible_core::fathers`), in the inspector's place
 //! beside the reader. It follows the selection; each quote shows its first lines until opened.
+//! In a step on Today it stays on the day's reading instead, its ‹ › stepping through its verses.
 
 use std::collections::HashSet;
 
@@ -20,6 +21,10 @@ const PREVIEW_ROWS: usize = 6;
 
 pub struct FathersPanel {
     pub verse: VerseRef,
+    /// The verses ‹ › step through (a step's reading), when they show.
+    pub within: Vec<VerseRef>,
+    /// In a step: no close button, and only the verse beside the title.
+    pub step: bool,
     quotes: Vec<Quote>,
     /// The verse `quotes` were read for.
     loaded: Option<VerseRef>,
@@ -31,6 +36,8 @@ pub struct FathersPanel {
 pub enum Outcome {
     Stay,
     Close,
+    /// Go to the verse before (-1) or after (1) in `within`.
+    Step(i32),
     /// Add this quote (formatted for a note) to the note on the panel's verse.
     AddToNote(String),
     /// Install the database from this `commentaries.sqlite`.
@@ -39,7 +46,14 @@ pub enum Outcome {
 
 impl FathersPanel {
     pub fn new(verse: VerseRef) -> Self {
-        Self { verse, quotes: Vec::new(), loaded: None, open: HashSet::new() }
+        Self {
+            verse,
+            within: Vec::new(),
+            step: false,
+            quotes: Vec::new(),
+            loaded: None,
+            open: HashSet::new(),
+        }
     }
 
     /// Draws the panel's content in `ui` (its panel already painted). `fathers` is `None` until
@@ -59,6 +73,7 @@ impl FathersPanel {
         let header = Rect::from_min_size(rect.min, vec2(rect.width(), 66.0));
         let detail = match (fathers, self.quotes.len()) {
             (None, _) => self.verse.to_string(),
+            _ if self.step => self.verse.to_string(),
             (Some(_), 1) => format!("{} · 1 quote", self.verse),
             (Some(_), n) => format!("{} · {n} quotes", self.verse),
         };
@@ -78,7 +93,23 @@ impl FathersPanel {
         );
         let close =
             Rect::from_center_size(pos2(header.right() - 26.0, header.top() + 33.0), vec2(28.0, 28.0));
-        if round_button(ui, p, close, "fathers-close", icons::close, "Close").clicked() {
+        if !self.within.is_empty() {
+            // The reading's verses, one at a time.
+            let at = self.within.iter().position(|v| *v == self.verse);
+            let prev = close.translate(vec2(-32.0, 0.0));
+            if at.is_some_and(|i| i > 0)
+                && round_button(ui, p, prev, "fathers-prev", icons::chevron_left, "Previous verse (K)")
+                    .clicked()
+            {
+                outcome = Outcome::Step(-1);
+            }
+            if at.is_some_and(|i| i + 1 < self.within.len())
+                && round_button(ui, p, close, "fathers-next", icons::chevron_right, "Next verse (J)")
+                    .clicked()
+            {
+                outcome = Outcome::Step(1);
+            }
+        } else if !self.step && round_button(ui, p, close, "fathers-close", icons::close, "Close").clicked() {
             outcome = Outcome::Close;
         }
         ui.painter().hline(header.x_range(), header.bottom() - 0.5, Stroke::new(1.0, p.separator));
@@ -95,7 +126,7 @@ impl FathersPanel {
                 }
             }
             Some(_) if self.quotes.is_empty() => {
-                message(&mut child, p, "No quotes from the Fathers on this verse.");
+                message(&mut child, p, "Nothing from the Fathers on this verse.");
             }
             Some(_) => {
                 if let Some(note) = self.list(&mut child, p) {

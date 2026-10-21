@@ -84,6 +84,7 @@ impl AppMenu {
             &[
                 &item("jump", "Jump to Reference…", Some("CmdOrCtrl+K")),
                 &item("search", "Search…", Some("CmdOrCtrl+F")),
+                &item("today", "Today in the Church", Some("CmdOrCtrl+Shift+T")),
                 &PredefinedMenuItem::separator(),
                 &item("back", "Back", Some("CmdOrCtrl+BracketLeft")),
                 &item("forward", "Forward", Some("CmdOrCtrl+BracketRight")),
@@ -133,6 +134,7 @@ impl AppMenu {
                 "sidebar" => Action::ToggleSidebar,
                 "jump" => Action::OpenPalette,
                 "search" => Action::OpenSearch(None),
+                "today" => Action::OpenToday,
                 "back" => Action::Back,
                 "forward" => Action::Forward,
                 "prev" => Action::PrevChapter,

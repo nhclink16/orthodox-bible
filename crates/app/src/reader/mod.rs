@@ -95,6 +95,8 @@ pub struct Reader {
     frames: u64,
     /// Chapters typeset so far (`BIBLE_RS_SIDEBAR_PROBE` counts them per transition).
     pub layouts: u64,
+    /// How full the font atlas was last frame (see [`atlas_rebuilt`]).
+    atlas: f32,
 }
 
 impl Reader {
@@ -125,6 +127,7 @@ impl Reader {
             selection_rect: None,
             frames: 0,
             layouts: 0,
+            atlas: 0.0,
         };
         if verse > 1 {
             r.pending_jump = Some((chapter, verse, false));
@@ -382,6 +385,10 @@ impl Reader {
         self.viewport_h = rect.height();
 
         // Re-key the cache when anything that affects layout changes, keeping the position.
+        if atlas_rebuilt(ui.ctx(), &mut self.atlas) {
+            // The same layouts again, with glyphs from the new atlas.
+            self.cache.clear();
+        }
         let key = Self::layout_key(env, geom.col_w);
         if key != self.key {
             if self.key != 0
@@ -763,6 +770,14 @@ impl Reader {
             });
         }
     }
+}
+
+/// Whether egui made its font atlas afresh since `last` (how full it was then), as it does once
+/// it is almost full: text laid out before then points at glyphs that are gone, so it is laid
+/// out again.
+pub fn atlas_rebuilt(ctx: &egui::Context, last: &mut f32) -> bool {
+    let fill = ctx.fonts(|f| f.font_atlas_fill_ratio());
+    std::mem::replace(last, fill) > fill
 }
 
 /// What [`paint_blocks`] draws besides the text.

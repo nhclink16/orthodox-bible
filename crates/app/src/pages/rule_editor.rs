@@ -277,7 +277,7 @@ impl Editor {
         let left = content.left();
         let width = content.width().min(640.0);
         let right = left + width;
-        let mut close = crumb(ui, p, left, content.top(), width, "Your rule");
+        let mut close = crumb(ui, p, (left, content.top(), width), "Today", &["Your rule"]);
         let top = content.top() + 36.0;
         super::title(&painter, p, left, top, "Your rule", "Changes to your rule apply when you save.");
         // Saved only while every time reads as one.

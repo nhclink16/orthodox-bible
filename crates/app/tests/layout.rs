@@ -203,3 +203,64 @@ fn publisher_notices_follow_the_text_as_links() {
         assert!(first.left() > 0.0, "it starts after the verse-number lane");
     });
 }
+
+fn span(
+    t: &bible_core::Translation,
+    typo: &Typography,
+    c: ChapterIdx,
+    verses: Option<std::ops::RangeInclusive<u8>>,
+) -> ChapterLayout {
+    with_fonts(|ctx| {
+        let cx = Ctx::new(typo, Theme::Light, 640.0, 0.0);
+        ctx.fonts_mut(|f| layout::layout_verses(f, &cx, t, c, verses))
+    })
+}
+
+/// Everything a layout places, text and labels, with where it goes, then its height.
+fn placed(l: &ChapterLayout) -> (Vec<(String, f32, f32)>, f32) {
+    let blocks = l.blocks.iter().map(|b| (b.galley.job.text.clone(), b.pos.x, b.pos.y));
+    let labels = l.labels.iter().map(|(p, g)| (g.job.text.clone(), p.x, p.y));
+    (blocks.chain(labels).collect(), l.height)
+}
+
+#[test]
+fn a_span_of_verses_is_typeset_alone() {
+    let kjv = bible_core::bundled::load("kjv").unwrap();
+    let luke9 = ChapterIdx::new(BookId::from_code("LUK").unwrap(), 9).unwrap();
+    for mode in [Mode::Paragraph, Mode::VersePerLine] {
+        let typo = Typography { mode, ..Typography::default() };
+        let l = span(&kjv, &typo, luke9, Some(44..=50));
+        let numbers: Vec<u8> = l.anchors.iter().map(|a| a.number).collect();
+        assert_eq!(numbers, (44..=50).collect::<Vec<u8>>(), "{mode:?}");
+        // Nothing of verses 43 or 51 shares a paragraph with them, and no chapter heading shows.
+        let text: String = l.blocks.iter().map(|b| b.galley.job.text.as_str()).collect();
+        for n in [43, 51] {
+            let v = kjv.find(bible_core::VerseRef::new(luke9.book(), 9, n)).unwrap().plain_text();
+            assert!(!text.contains(&v[..20]), "{mode:?}: verse {n} shows");
+        }
+        assert!(l.labels.is_empty(), "{mode:?}: a heading from verse 44");
+        // The chapter typeset whole, or as a span of all its verses, is the reader's chapter.
+        let chapter = chapter(&kjv, &typo, luke9);
+        assert_eq!(placed(&span(&kjv, &typo, luke9, None)), placed(&chapter));
+        assert_eq!(placed(&span(&kjv, &typo, luke9, Some(1..=u8::MAX))), placed(&chapter));
+    }
+}
+
+#[test]
+fn a_psalm_the_numberings_split_has_its_heading_as_shown() {
+    let lxx = bible_core::bundled::load("lxx").unwrap();
+    let typo = Typography::default();
+    let psalm = |c: u8| ChapterIdx::new(BookId::PSALMS, c).unwrap();
+    let heads = |l: &ChapterLayout| -> Vec<String> {
+        l.labels.iter().map(|(_, g)| g.job.text.clone()).filter(|t| t.starts_with("PSALM")).collect()
+    };
+    bible_core::lxx::set_numbering(true);
+    // The Septuagint's Psalm 115 is the grid's 116:10–19, and its Psalm 9 goes on into the grid's 10.
+    assert_eq!(heads(&span(&lxx, &typo, psalm(116), Some(1..=9))), ["PSALM 114"]);
+    assert_eq!(heads(&span(&lxx, &typo, psalm(116), Some(10..=19))), ["PSALM 115"]);
+    assert!(heads(&span(&lxx, &typo, psalm(10), Some(1..=18))).is_empty());
+    // In Hebrew numbering 116:10 is the middle of Psalm 116.
+    bible_core::lxx::set_numbering(false);
+    assert!(heads(&span(&lxx, &typo, psalm(116), Some(10..=19))).is_empty());
+    assert_eq!(heads(&span(&lxx, &typo, psalm(10), Some(1..=18))), ["PSALM 10"]);
+}
