@@ -474,18 +474,20 @@ final class BibleUITests: XCTestCase {
         // Settings, beside the church calendar, with a line under it.
         app.buttons["settings"].tap()
         scrolledTo(app.staticTexts["Which archdiocese’s calendar of readings to follow. Your parish’s bulletin is the best check."])
-        let readings = app.buttons.matching(NSPredicate(format: "label BEGINSWITH 'Readings, '")).firstMatch
-        XCTAssertEqual(readings.label, "Readings, Greek Orthodox Archdiocese")
+        let readings = app.buttons["Readings"]
+        XCTAssertEqual(readings.value as? String, "Greek Orthodox Archdiocese")
         readings.tap()
+        XCTAssertTrue(app.buttons["Antiochian Archdiocese"].waitForExistence(timeout: 3))
         app.buttons["Antiochian Archdiocese"].tap()
-        XCTAssertTrue(app.buttons["Readings, Antiochian Archdiocese"].waitForExistence(timeout: 3))
+        XCTAssertTrue(readings.waitForExistence(timeout: 3))
+        XCTAssertEqual(readings.value as? String, "Antiochian Archdiocese")
         app.buttons["Done"].tap()
         XCTAssertTrue(readings.waitForNonExistence(timeout: 3))
 
         // The Antiochian, All Saints of Antioch's; the rule's Readings item follows.
         openDay(2026, 6, 14)
         let antiochian = scrolledTo(app.buttons["reading-0"])
-        XCTAssertTrue(antiochian.label.hasPrefix("Epistle, Acts 11:19–30"), antiochian.label)
+        XCTAssertTrue(antiochian.label.hasPrefix("Epistle · All Saints of Antioch, Acts 11:19–30"), antiochian.label)
         XCTAssertTrue(app.buttons["reading-1"].label.hasPrefix("Gospel, Matthew 4:18–23"), app.buttons["reading-1"].label)
         let rule = scrolledTo(app.buttons["open-morning-reading"])
         XCTAssertTrue(rule.label.contains("Acts 11:19–30 · Matthew 4:18–23"), rule.label)

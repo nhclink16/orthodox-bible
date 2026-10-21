@@ -633,6 +633,11 @@ fn the_readings_follow_the_archdiocese_chosen() {
     // The 2nd Sunday after Pentecost: the cycle's Epistle, or All Saints of Antioch's.
     assert_eq!(lessons_in(2026, 6, 14, Greek)[1], "Liturgy Epistle Romans 2:10–16");
     assert_eq!(lessons_in(2026, 6, 14, Antiochian)[1], "Liturgy Epistle Acts 11:19–30");
+    // Named by its title, as the day's saint on a date that moves (St Raphael's first Saturday
+    // of November) is.
+    let titles = |month, day| day_readings(2026, month, day, false, Antiochian).into_iter().map(|r| r.title);
+    assert_eq!(titles(6, 14).nth(1).flatten().as_deref(), Some("All Saints of Antioch"));
+    assert!(titles(11, 7).all(|t| t.as_deref() == Some("St Raphael of Brooklyn")));
     // A saint only the Antiochian Archdiocese keeps is named beside the day.
     assert_eq!(lessons_in(2026, 7, 10, Greek)[0], "Liturgy Epistle 1 Corinthians 4:5–8");
     assert_eq!(

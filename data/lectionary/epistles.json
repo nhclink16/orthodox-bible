@@ -162,7 +162,7 @@
    "day": "sun",
    "name": "2nd Sunday after Pentecost",
    "readings": [
-    {"service": "Liturgy", "kind": "Epistle", "refs": ["Acts 11:19-30"], "in": "antiochian", "note": "Sunday of All Saints of Antioch (and of North America)"},
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Acts 11:19-30"], "in": "antiochian", "title": "All Saints of Antioch", "note": "Sunday of All Saints of Antioch (and of North America)"},
     {"service": "Liturgy", "kind": "Epistle", "refs": ["Rom 2:10-16"], "in": "greek", "note": "The cycle Epistle of the 2nd Sunday: goarch.org 2018-2027, OCA, the 1853 index, Hapgood 1906; Antiochian service text 2023."}
    ],
    "confidence": "medium",

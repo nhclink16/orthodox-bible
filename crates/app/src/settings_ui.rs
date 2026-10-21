@@ -1561,7 +1561,7 @@ fn reading(ui: &mut Ui, library: &Library, settings: &mut Settings, actions: &mu
     ui.add_space(24.0);
 
     // The church calendar (also on the Today page), and whose readings to follow.
-    group_title(ui, p, "Church");
+    group_title(ui, p, "Church calendar");
     rows_card(ui, p, &[44.0, 44.0], |ui, i, r| {
         let right = r.right() - 16.0;
         let cy = r.center().y;

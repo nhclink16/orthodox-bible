@@ -71,6 +71,8 @@ struct SettingsView: View {
                         Text("Greek Orthodox Archdiocese").tag(ReadingUsage.greek)
                         Text("Antiochian Archdiocese").tag(ReadingUsage.antiochian)
                     }
+                    // A page of their own: the names are too long for a menu's width.
+                    .pickerStyle(.navigationLink)
                 } header: {
                     Text("Church calendar")
                 } footer: {
