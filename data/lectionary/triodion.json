@@ -1,0 +1,998 @@
+{
+ "title": "Triodion: the Publican and the Pharisee to Holy Saturday",
+ "scope": "One entry for every day from the Sunday of the Publican and the Pharisee (pascha -70) to Holy Saturday (pascha -1), keyed by days from Pascha.",
+ "licence": "Released with bible-rs under the MIT licence. The table holds Scripture references only: no Bible text and no prose from the sources. Notes are our own.",
+ "usage": "Antiochian Orthodox Christian Archdiocese of North America: Byzantine (Greek) usage, Revised Julian fixed feasts, Julian Paschalion. Slavic (OCA) and Greek (GOARCH) differences are kept in 'variants' and 'slavic' and never replace the main reading.",
+ "numbering": "English Bible (KJV/Hebrew) chapter and verse, the grid's numbering, with half-verse letters dropped. Each string in refs is one contiguous range ('Book C:V', 'Book C:V-V' or 'Book C:V-C:V', with the grid's book abbreviations); a reading's refs are read together, in order, as one lesson.",
+ "confidence": "high: an Antiochian-facing source agrees with at least one independent source. medium: the sources differ (usually by a verse at the start or end) or the reference rests on one source. low: no Antiochian or Greek source was found, or the yearly ordo decides.",
+ "sources": {
+  "ANT-OLG": "Antiochian Archdiocese, Department of Liturgics: Online Liturgical Guide service texts, 2023-2026 (antiochian.org/servicetexts). References only.",
+  "ANT-CHART": "Antiochian Archdiocese, Sunday Liturgical Readings Chart 2026 (antiochian.org/liturgicalinstructions).",
+  "ANT": "antiochian.org daily readings, 2018-2026 (the GOARCH Online Chapel feed, as harvested in orthocal-python's data/antiochian_raw).",
+  "GOA": "Greek Orthodox Archdiocese of America, Online Chapel daily readings, 2018-2030 (goarch.org; partly as harvested in orthocal-python).",
+  "GOA-DCS": "GOA Digital Chant Stand (dcs.goarch.org), 'Readings for the Day', 2026.",
+  "OCA": "Orthodox Church in America lectionary, via the orthocal.info API, 2010-2032. Slavic usage.",
+  "HAP": "Isabel F. Hapgood, Service Book of the Holy Orthodox-Catholic Apostolic (Greco-Russian) Church, 1906 (public domain; archive.org cu31924029363128): tables of Epistles and Gospels.",
+  "SCR": "F. H. Scrivener, A Plain Introduction to the Criticism of the New Testament, Cambridge 1861 (public domain; archive.org plainintroductio00scri): Synaxarion and Menologion of the Byzantine lectionary manuscripts.",
+  "GRE": "V. Grechulevich, Ukazatel tserkovnykh chtenii, St Petersburg 1853 (public domain): Slavic lectionary index with zachalo numbers.",
+  "MCI": "Metropolitan Cantor Institute (Byzantine Catholic Archeparchy of Pittsburgh), 'The Lectionary' (mci.archpitt.org). Slavic usage.",
+  "NLM": "New Liturgical Movement: descriptions of the Antiochian Paschal procession (2019) and the Royal Hours of Theophany (2017).",
+  "WIKI": "Wikipedia, articles on the Triodion and Holy Week (for Holy Week Old Testament readings only)."
+ },
+ "rules": [
+  "Great Lent weekdays (pascha -48 to -9) have no Liturgy: Isaiah at the Sixth Hour, Genesis and Proverbs at Vespers (the Presanctified Liturgy on Wednesdays and Fridays). Cheesefare Wednesday and Friday are aliturgical too.",
+  "Readings are listed under the liturgical day they belong to; 'served' says when a service is held the evening before.",
+  "Sunday Matins Gospels from pascha -70 to -14 follow the eleven eothina (gospels.json).",
+  "Fixed feasts in this season (the Meeting, the Forty Martyrs, the Annunciation) are in menaion.json."
+ ],
+ "entries": [
+  {
+   "pascha": -70,
+   "name": "Sunday of the Publican and the Pharisee",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["2 Tim 3:10-15"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Luke 18:10-14"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT-CHART", "GOA", "OCA", "HAP", "SCR"],
+   "note": "The Lenten Triodion begins. Matins Gospel follows the eothinon cycle (not listed). Fast-free week follows."
+  },
+  {
+   "pascha": -69,
+   "name": "Monday after the Publican and Pharisee",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["2 Pet 1:20-2:9"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Mark 13:9-13"]}
+   ],
+   "confidence": "high",
+   "sources": ["GOA", "OCA", "SCR"]
+  },
+  {
+   "pascha": -68,
+   "name": "Tuesday after the Publican and Pharisee",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["2 Pet 2:9-22"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Mark 13:14-23"]}
+   ],
+   "confidence": "high",
+   "sources": ["GOA", "OCA", "SCR"]
+  },
+  {
+   "pascha": -67,
+   "name": "Wednesday after the Publican and Pharisee",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["2 Pet 3:1-18"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Mark 13:24-31"]}
+   ],
+   "confidence": "high",
+   "sources": ["GOA", "OCA", "SCR"],
+   "note": "Fast-free week: no fasting on Wednesday and Friday."
+  },
+  {
+   "pascha": -66,
+   "name": "Thursday after the Publican and Pharisee",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["1 John 1:8-2:6"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Mark 13:31-14:2"]}
+   ],
+   "confidence": "high",
+   "sources": ["GOA", "OCA", "SCR"]
+  },
+  {
+   "pascha": -65,
+   "name": "Friday after the Publican and Pharisee",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["1 John 2:7-17"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Mark 14:3-9"]}
+   ],
+   "confidence": "high",
+   "sources": ["GOA", "OCA", "SCR"],
+   "note": "Fast-free week: no fasting on Wednesday and Friday."
+  },
+  {
+   "pascha": -64,
+   "name": "Saturday before the Prodigal Son",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["1 Tim 6:11-16"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Luke 20:46-21:4"]}
+   ],
+   "confidence": "medium",
+   "sources": ["GOA", "OCA", "SCR"],
+   "variants": [
+    {"usage": "Slavic (OCA)", "service": "Liturgy", "kind": "Epistle", "refs": ["2 Tim 3:1-9"]},
+    {"usage": "Slavic (OCA)", "service": "Liturgy", "kind": "Gospel", "refs": ["Luke 20:46-21:4"]}
+   ],
+   "note": "The Epistle is the only point of disagreement: Greek/Antiochian feed 1 Tim 6:11-16, Slavic 2 Tim 3:1-9."
+  },
+  {
+   "pascha": -63,
+   "name": "Sunday of the Prodigal Son",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["1 Cor 6:12-20"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Luke 15:11-32"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT-CHART", "GOA", "OCA", "HAP", "SCR"],
+   "note": "Matins Gospel follows the eothinon cycle (not listed)."
+  },
+  {
+   "pascha": -62,
+   "name": "Monday of Meatfare Week",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["1 John 2:18-3:8"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Mark 11:1-11"]}
+   ],
+   "confidence": "medium",
+   "sources": ["GOA", "OCA", "SCR"],
+   "variants": [
+    {"usage": "Slavic (OCA)", "service": "Liturgy", "kind": "Epistle", "refs": ["1 John 2:18-3:10"]},
+    {"usage": "Slavic (OCA)", "service": "Liturgy", "kind": "Gospel", "refs": ["Mark 11:1-11"]}
+   ],
+   "note": "Epistle end verse differs between Greek (3:8) and Slavic (3:10) books; Gospel agreed."
+  },
+  {
+   "pascha": -61,
+   "name": "Tuesday of Meatfare Week",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["1 John 3:9-22"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Mark 14:10-42"]}
+   ],
+   "confidence": "medium",
+   "sources": ["GOA", "OCA", "SCR"],
+   "variants": [
+    {"usage": "Slavic (OCA)", "service": "Liturgy", "kind": "Epistle", "refs": ["1 John 3:10-20"]},
+    {"usage": "Slavic (OCA)", "service": "Liturgy", "kind": "Gospel", "refs": ["Mark 14:10-42"]}
+   ],
+   "note": "Epistle boundaries differ (Greek 3:9-22, Slavic 3:10-20); Gospel agreed."
+  },
+  {
+   "pascha": -60,
+   "name": "Wednesday of Meatfare Week",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["1 John 3:21-4:11"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Mark 14:43-15:1"]}
+   ],
+   "confidence": "medium",
+   "sources": ["GOA", "OCA", "SCR"],
+   "variants": [
+    {"usage": "Slavic (OCA)", "service": "Liturgy", "kind": "Epistle", "refs": ["1 John 3:21-4:6"]},
+    {"usage": "Slavic (OCA)", "service": "Liturgy", "kind": "Gospel", "refs": ["Mark 14:43-15:1"]}
+   ],
+   "note": "Epistle end verse differs (Greek 4:11, Slavic 4:6); Gospel agreed. Meat is still allowed this week; Wednesday and Friday are fast days as usual."
+  },
+  {
+   "pascha": -59,
+   "name": "Thursday of Meatfare Week",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["1 John 4:20-5:21"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Mark 15:1-15"]}
+   ],
+   "confidence": "high",
+   "sources": ["GOA", "OCA", "SCR"]
+  },
+  {
+   "pascha": -58,
+   "name": "Friday of Meatfare Week",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["2 John 1:1-13"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Mark 15:20", "Mark 15:22", "Mark 15:25", "Mark 15:33-41"]}
+   ],
+   "confidence": "high",
+   "sources": ["GOA", "OCA", "SCR"],
+   "variants": [
+    {"usage": "Slavic (OCA)", "service": "Liturgy", "kind": "Epistle", "refs": ["2 John 1:1-13"]},
+    {"usage": "Slavic (OCA)", "service": "Liturgy", "kind": "Gospel", "refs": ["Mark 15:22", "Mark 15:25", "Mark 15:33-41"]}
+   ]
+  },
+  {
+   "pascha": -57,
+   "name": "Saturday of Souls (Meatfare Saturday)",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["1 Thess 4:13-17"], "title": "for the departed"},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Luke 21:8-9", "Luke 21:25-27", "Luke 21:33-36"], "title": "of the day"}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "GOA", "OCA", "HAP", "SCR"],
+   "variants": [
+    {"usage": "Slavic (OCA)", "service": "Liturgy", "kind": "Epistle", "refs": ["1 Cor 10:23-28"], "title": "of the day"},
+    {"usage": "Slavic (OCA)", "service": "Liturgy", "kind": "Epistle", "refs": ["1 Thess 4:13-17"], "title": "for the departed"},
+    {"usage": "Slavic (OCA)", "service": "Liturgy", "kind": "Gospel", "refs": ["Luke 21:8-9", "Luke 21:25-27", "Luke 21:33-36"], "title": "of the day"},
+    {"usage": "Slavic (OCA)", "service": "Liturgy", "kind": "Gospel", "refs": ["John 5:24-30"], "title": "for the departed"}
+   ],
+   "note": "First of the four Saturdays of Souls in this period (the next is the Saturday before Pentecost); kollyva and memorial service. Antiochian practice joins the departed Epistle to the day's Gospel."
+  },
+  {
+   "pascha": -56,
+   "name": "Sunday of the Last Judgment (Meatfare Sunday)",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["1 Cor 8:8-9:2"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Matt 25:31-46"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT-CHART", "GOA", "OCA", "HAP", "SCR"],
+   "note": "Last day for meat. Matins Gospel follows the eothinon cycle (not listed)."
+  },
+  {
+   "pascha": -55,
+   "name": "Monday of Cheesefare Week",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["3 John 1:1-14"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Luke 19:29-40", "Luke 22:7-39"]}
+   ],
+   "confidence": "high",
+   "sources": ["GOA", "OCA", "SCR"],
+   "note": "The Epistle is the whole of 3 John: 14 verses in KJV numbering (GOARCH prints 1:1-15 in RSV numbering, which splits v. 14)."
+  },
+  {
+   "pascha": -54,
+   "name": "Tuesday of Cheesefare Week",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Jude 1:1-10"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Luke 22:39-42", "Luke 22:45-23:1"]}
+   ],
+   "confidence": "high",
+   "sources": ["GOA", "OCA", "SCR"]
+  },
+  {
+   "pascha": -53,
+   "name": "Wednesday of Cheesefare Week",
+   "readings": [
+    {"service": "Sixth Hour", "kind": "Old Testament", "refs": ["Joel 2:12-26"]},
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["Joel 3:12-21"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "GOA", "OCA", "SCR", "WIKI"],
+   "note": "No Divine Liturgy (aliturgical day); Lenten-style services. Joel 3:12-21 is Joel 4:12-21 in Hebrew/LXX numbering."
+  },
+  {
+   "pascha": -52,
+   "name": "Thursday of Cheesefare Week",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Jude 1:11-25"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Luke 23:1-31", "Luke 23:33", "Luke 23:44-56"]}
+   ],
+   "confidence": "medium",
+   "sources": ["GOA", "OCA", "SCR"],
+   "variants": [
+    {"usage": "Slavic (OCA)", "service": "Liturgy", "kind": "Epistle", "refs": ["Jude 1:11-25"]},
+    {"usage": "Slavic (OCA)", "service": "Liturgy", "kind": "Gospel", "refs": ["Luke 23:2-34", "Luke 23:44-56"]}
+   ],
+   "note": "Gospel verse selection differs by book: Greek feed 23:1-31, 33, 44-56; Slavic 23:2-34, 44-56; medieval Greek (SCR) 23:1-33, 44-56."
+  },
+  {
+   "pascha": -51,
+   "name": "Friday of Cheesefare Week",
+   "readings": [
+    {"service": "Sixth Hour", "kind": "Old Testament", "refs": ["Zech 8:7-17"]},
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["Zech 8:19-23"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "GOA", "OCA", "SCR"],
+   "note": "No Divine Liturgy (aliturgical day)."
+  },
+  {
+   "pascha": -50,
+   "name": "Saturday of the Holy Ascetics (Cheesefare Saturday)",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Gal 5:22-6:2"], "title": "of the ascetics"},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Matt 6:1-13"], "title": "of the day"}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "GOA", "OCA", "HAP"],
+   "variants": [
+    {"usage": "Slavic (OCA)", "service": "Liturgy", "kind": "Epistle", "refs": ["Rom 14:19-23", "Rom 16:25-27"], "title": "of the day"},
+    {"usage": "Slavic (OCA)", "service": "Liturgy", "kind": "Epistle", "refs": ["Gal 5:22-6:2"], "title": "of the ascetics"},
+    {"usage": "Slavic (OCA)", "service": "Liturgy", "kind": "Gospel", "refs": ["Matt 6:1-13"], "title": "of the day"},
+    {"usage": "Slavic (OCA)", "service": "Liturgy", "kind": "Gospel", "refs": ["Matt 11:27-30"], "title": "of the ascetics"}
+   ]
+  },
+  {
+   "pascha": -49,
+   "name": "Forgiveness Sunday (Cheesefare Sunday)",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Rom 13:11-14:4"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Matt 6:14-21"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT-CHART", "GOA", "OCA", "HAP", "SCR"],
+   "note": "Expulsion of Adam from Paradise. Matins Gospel follows the eothinon cycle (not listed). Forgiveness Vespers that evening has no Old Testament readings. Great Lent begins."
+  },
+  {
+   "pascha": -48,
+   "name": "Clean Monday (Monday of the First Week of Great Lent)",
+   "readings": [
+    {"service": "Sixth Hour", "kind": "Old Testament", "refs": ["Isa 1:1-20"]},
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["Gen 1:1-13"]},
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["Prov 1:1-20"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA"],
+   "note": "No Divine Liturgy. The Genesis and Proverbs readings belong to Vespers on the evening of this day."
+  },
+  {
+   "pascha": -47,
+   "name": "Tuesday of the First Week of Great Lent",
+   "readings": [
+    {"service": "Sixth Hour", "kind": "Old Testament", "refs": ["Isa 1:19-2:3"]},
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["Gen 1:14-23"]},
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["Prov 1:20-33"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT", "GOA", "OCA"],
+   "note": "No Divine Liturgy. The Genesis and Proverbs readings belong to Vespers on the evening of this day."
+  },
+  {
+   "pascha": -46,
+   "name": "Wednesday of the First Week of Great Lent",
+   "readings": [
+    {"service": "Sixth Hour", "kind": "Old Testament", "refs": ["Isa 2:3-11"]},
+    {"service": "Presanctified Liturgy", "kind": "Old Testament", "refs": ["Gen 1:24-2:3"]},
+    {"service": "Presanctified Liturgy", "kind": "Old Testament", "refs": ["Prov 2:1-22"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT", "GOA", "OCA"],
+   "note": "Vespers is joined to the Liturgy of the Presanctified Gifts. No Epistle or Gospel unless a Menaion feast or patronal feast is kept."
+  },
+  {
+   "pascha": -45,
+   "name": "Thursday of the First Week of Great Lent",
+   "readings": [
+    {"service": "Sixth Hour", "kind": "Old Testament", "refs": ["Isa 2:11-21"]},
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["Gen 2:4-19"]},
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["Prov 3:1-18"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA"],
+   "note": "No Divine Liturgy. The Genesis and Proverbs readings belong to Vespers on the evening of this day."
+  },
+  {
+   "pascha": -44,
+   "name": "Friday of the First Week of Great Lent",
+   "readings": [
+    {"service": "Sixth Hour", "kind": "Old Testament", "refs": ["Isa 3:1-14"]},
+    {"service": "Presanctified Liturgy", "kind": "Old Testament", "refs": ["Gen 2:20-3:20"]},
+    {"service": "Presanctified Liturgy", "kind": "Old Testament", "refs": ["Prov 3:19-34"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT", "GOA", "OCA"],
+   "note": "Vespers is joined to the Liturgy of the Presanctified Gifts. No Epistle or Gospel unless a Menaion feast or patronal feast is kept."
+  },
+  {
+   "pascha": -43,
+   "name": "Saturday of St Theodore the Recruit (First Saturday of Great Lent): Miracle of the Kollyva",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["2 Tim 2:1-10"], "title": "of the saint"},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Mark 2:23-3:5"], "title": "of the day"}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "GOA", "OCA", "SCR"],
+   "variants": [
+    {"usage": "Slavic (OCA)", "service": "Liturgy", "kind": "Epistle", "refs": ["Heb 1:1-12"], "title": "of the day"},
+    {"usage": "Slavic (OCA)", "service": "Liturgy", "kind": "Epistle", "refs": ["2 Tim 2:1-10"], "title": "of the saint"},
+    {"usage": "Slavic (OCA)", "service": "Liturgy", "kind": "Gospel", "refs": ["Mark 2:23-3:5"], "title": "of the day"},
+    {"usage": "Slavic (OCA)", "service": "Liturgy", "kind": "Gospel", "refs": ["John 15:17-16:2"], "title": "of the saint"}
+   ],
+   "note": "Liturgy of St John Chrysostom; kollyva blessed."
+  },
+  {
+   "pascha": -42,
+   "name": "Sunday of Orthodoxy (First Sunday of Great Lent)",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Heb 11:24-26", "Heb 11:32-40"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["John 1:43-51"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT-CHART", "GOA", "OCA", "HAP", "SCR"],
+   "variants": [
+    {"usage": "Slavic (OCA)", "service": "Liturgy", "kind": "Epistle", "refs": ["Heb 11:24-26", "Heb 11:32-12:2"]},
+    {"usage": "Slavic (OCA)", "service": "Liturgy", "kind": "Gospel", "refs": ["John 1:43-51"]}
+   ],
+   "note": "Liturgy of St Basil. Matins Gospel follows the eothinon cycle (not listed). If 9 March (Forty Martyrs) falls today, Antiochian practice in 2025 read Heb 12:1-10 with John 1:43-51 ('Mar 09 2025 READ'); that combination belongs to the Menaion layer."
+  },
+  {
+   "pascha": -41,
+   "name": "Monday of the Second Week of Great Lent",
+   "readings": [
+    {"service": "Sixth Hour", "kind": "Old Testament", "refs": ["Isa 4:2-5:7"]},
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["Gen 3:21-4:7"]},
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["Prov 3:34-4:22"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA"],
+   "note": "No Divine Liturgy. The Genesis and Proverbs readings belong to Vespers on the evening of this day."
+  },
+  {
+   "pascha": -40,
+   "name": "Tuesday of the Second Week of Great Lent",
+   "readings": [
+    {"service": "Sixth Hour", "kind": "Old Testament", "refs": ["Isa 5:7-16"]},
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["Gen 4:8-15"]},
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["Prov 5:1-15"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA"],
+   "note": "No Divine Liturgy. The Genesis and Proverbs readings belong to Vespers on the evening of this day."
+  },
+  {
+   "pascha": -39,
+   "name": "Wednesday of the Second Week of Great Lent",
+   "readings": [
+    {"service": "Sixth Hour", "kind": "Old Testament", "refs": ["Isa 5:16-25"]},
+    {"service": "Presanctified Liturgy", "kind": "Old Testament", "refs": ["Gen 4:16-26"]},
+    {"service": "Presanctified Liturgy", "kind": "Old Testament", "refs": ["Prov 5:15-6:3"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT", "GOA", "OCA"],
+   "note": "Vespers is joined to the Liturgy of the Presanctified Gifts. No Epistle or Gospel unless a Menaion feast or patronal feast is kept."
+  },
+  {
+   "pascha": -38,
+   "name": "Thursday of the Second Week of Great Lent",
+   "readings": [
+    {"service": "Sixth Hour", "kind": "Old Testament", "refs": ["Isa 6:1-12"]},
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["Gen 5:1-24"]},
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["Prov 6:3-20"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA"],
+   "note": "No Divine Liturgy. The Genesis and Proverbs readings belong to Vespers on the evening of this day."
+  },
+  {
+   "pascha": -37,
+   "name": "Friday of the Second Week of Great Lent",
+   "readings": [
+    {"service": "Sixth Hour", "kind": "Old Testament", "refs": ["Isa 7:1-14"]},
+    {"service": "Presanctified Liturgy", "kind": "Old Testament", "refs": ["Gen 5:32-6:8"]},
+    {"service": "Presanctified Liturgy", "kind": "Old Testament", "refs": ["Prov 6:20-7:1"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT", "GOA", "OCA"],
+   "note": "Vespers is joined to the Liturgy of the Presanctified Gifts. No Epistle or Gospel unless a Menaion feast or patronal feast is kept."
+  },
+  {
+   "pascha": -36,
+   "name": "Second Saturday of Great Lent (Saturday of Souls)",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Heb 3:12-16"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Mark 1:35-44"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "GOA", "OCA", "SCR"],
+   "variants": [
+    {"usage": "Slavic (OCA)", "service": "Liturgy", "kind": "Epistle", "refs": ["Heb 3:12-16"], "title": "of the day"},
+    {"usage": "Slavic (OCA)", "service": "Liturgy", "kind": "Epistle", "refs": ["1 Thess 4:13-17"], "title": "for the departed"},
+    {"usage": "Slavic (OCA)", "service": "Liturgy", "kind": "Gospel", "refs": ["Mark 1:35-44"], "title": "of the day"},
+    {"usage": "Slavic (OCA)", "service": "Liturgy", "kind": "Gospel", "refs": ["John 5:24-30"], "title": "for the departed"}
+   ],
+   "note": "Antiochian Saturday of Souls: Liturgy of St John Chrysostom with the memorial (Trisagion) for the departed; Antiochian service texts give only the day's readings."
+  },
+  {
+   "pascha": -35,
+   "name": "Sunday of St Gregory Palamas (Second Sunday of Great Lent)",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Heb 1:10-2:3"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Mark 2:1-12"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT-CHART", "GOA", "OCA", "HAP", "SCR"],
+   "variants": [
+    {"usage": "Slavic (OCA)", "service": "Liturgy", "kind": "Epistle", "refs": ["Heb 1:10-2:3"]},
+    {"usage": "Slavic (OCA)", "service": "Liturgy", "kind": "Epistle", "refs": ["Heb 7:26-8:2"], "title": "of the saint"},
+    {"usage": "Slavic (OCA)", "service": "Liturgy", "kind": "Gospel", "refs": ["Mark 2:1-12"]},
+    {"usage": "Slavic (OCA)", "service": "Liturgy", "kind": "Gospel", "refs": ["John 10:9-16"], "title": "of the saint"}
+   ],
+   "note": "Liturgy of St Basil. Matins Gospel follows the eothinon cycle (not listed)."
+  },
+  {
+   "pascha": -34,
+   "name": "Monday of the Third Week of Great Lent",
+   "readings": [
+    {"service": "Sixth Hour", "kind": "Old Testament", "refs": ["Isa 8:13-9:7"]},
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["Gen 6:9-22"]},
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["Prov 8:1-21"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT", "GOA", "OCA"],
+   "note": "No Divine Liturgy. The Genesis and Proverbs readings belong to Vespers on the evening of this day."
+  },
+  {
+   "pascha": -33,
+   "name": "Tuesday of the Third Week of Great Lent",
+   "readings": [
+    {"service": "Sixth Hour", "kind": "Old Testament", "refs": ["Isa 9:9-10:4"]},
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["Gen 7:1-5"]},
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["Prov 8:32-9:11"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA"],
+   "note": "No Divine Liturgy. The Genesis and Proverbs readings belong to Vespers on the evening of this day."
+  },
+  {
+   "pascha": -32,
+   "name": "Wednesday of the Third Week of Great Lent",
+   "readings": [
+    {"service": "Sixth Hour", "kind": "Old Testament", "refs": ["Isa 10:12-20"]},
+    {"service": "Presanctified Liturgy", "kind": "Old Testament", "refs": ["Gen 7:6-9"]},
+    {"service": "Presanctified Liturgy", "kind": "Old Testament", "refs": ["Prov 9:12-18"], "note": "The Septuagint text of this passage has extra or reordered verses; the range is given in English numbering."}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT", "GOA", "OCA"],
+   "note": "Vespers is joined to the Liturgy of the Presanctified Gifts. No Epistle or Gospel unless a Menaion feast or patronal feast is kept."
+  },
+  {
+   "pascha": -31,
+   "name": "Thursday of the Third Week of Great Lent",
+   "readings": [
+    {"service": "Sixth Hour", "kind": "Old Testament", "refs": ["Isa 11:10-12:2"]},
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["Gen 7:11-8:3"]},
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["Prov 10:1-22"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA"],
+   "note": "No Divine Liturgy. The Genesis and Proverbs readings belong to Vespers on the evening of this day."
+  },
+  {
+   "pascha": -30,
+   "name": "Friday of the Third Week of Great Lent",
+   "readings": [
+    {"service": "Sixth Hour", "kind": "Old Testament", "refs": ["Isa 13:2-13"]},
+    {"service": "Presanctified Liturgy", "kind": "Old Testament", "refs": ["Gen 8:4-21"]},
+    {"service": "Presanctified Liturgy", "kind": "Old Testament", "refs": ["Prov 10:31-11:12"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT", "GOA", "OCA"],
+   "note": "Vespers is joined to the Liturgy of the Presanctified Gifts. No Epistle or Gospel unless a Menaion feast or patronal feast is kept."
+  },
+  {
+   "pascha": -29,
+   "name": "Third Saturday of Great Lent (Saturday of Souls)",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Heb 10:32-38"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Mark 2:14-17"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "GOA", "OCA", "SCR"],
+   "variants": [
+    {"usage": "Slavic (OCA)", "service": "Liturgy", "kind": "Epistle", "refs": ["Heb 10:32-38"], "title": "of the day"},
+    {"usage": "Slavic (OCA)", "service": "Liturgy", "kind": "Epistle", "refs": ["1 Thess 4:13-17"], "title": "for the departed"},
+    {"usage": "Slavic (OCA)", "service": "Liturgy", "kind": "Gospel", "refs": ["Mark 2:14-17"], "title": "of the day"},
+    {"usage": "Slavic (OCA)", "service": "Liturgy", "kind": "Gospel", "refs": ["John 5:24-30"], "title": "for the departed"}
+   ],
+   "note": "Antiochian Saturday of Souls: Liturgy of St John Chrysostom with the memorial (Trisagion) for the departed; Antiochian service texts give only the day's readings."
+  },
+  {
+   "pascha": -28,
+   "name": "Sunday of the Veneration of the Cross (Third Sunday of Great Lent)",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Heb 4:14-5:6"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Mark 8:34-9:1"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT-CHART", "GOA", "OCA", "HAP", "SCR"],
+   "note": "Liturgy of St Basil. The Cross is brought out at Matins (eothinon Gospel, not listed) and venerated through Friday of the fourth week."
+  },
+  {
+   "pascha": -27,
+   "name": "Monday of the Fourth Week of Great Lent",
+   "readings": [
+    {"service": "Sixth Hour", "kind": "Old Testament", "refs": ["Isa 14:24-32"]},
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["Gen 8:21-9:7"]},
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["Prov 11:19-12:6"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA"],
+   "note": "No Divine Liturgy. The Genesis and Proverbs readings belong to Vespers on the evening of this day. The Cross remains out for veneration from the Sunday of the Cross through Friday of this week."
+  },
+  {
+   "pascha": -26,
+   "name": "Tuesday of the Fourth Week of Great Lent",
+   "readings": [
+    {"service": "Sixth Hour", "kind": "Old Testament", "refs": ["Isa 25:1-9"]},
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["Gen 9:8-17"]},
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["Prov 12:8-22"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA"],
+   "note": "No Divine Liturgy. The Genesis and Proverbs readings belong to Vespers on the evening of this day. The Cross remains out for veneration from the Sunday of the Cross through Friday of this week."
+  },
+  {
+   "pascha": -25,
+   "name": "Wednesday of Mid-Lent (Fourth Week of Great Lent)",
+   "readings": [
+    {"service": "Sixth Hour", "kind": "Old Testament", "refs": ["Isa 26:21-27:9"]},
+    {"service": "Presanctified Liturgy", "kind": "Old Testament", "refs": ["Gen 9:18-10:1"]},
+    {"service": "Presanctified Liturgy", "kind": "Old Testament", "refs": ["Prov 12:23-13:9"], "note": "The Septuagint text of this passage has extra or reordered verses; the range is given in English numbering."}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT", "GOA", "OCA"],
+   "note": "Vespers is joined to the Liturgy of the Presanctified Gifts. No Epistle or Gospel unless a Menaion feast or patronal feast is kept. The Cross remains out for veneration from the Sunday of the Cross through Friday of this week."
+  },
+  {
+   "pascha": -24,
+   "name": "Thursday of the Fourth Week of Great Lent",
+   "readings": [
+    {"service": "Sixth Hour", "kind": "Old Testament", "refs": ["Isa 28:14-22"]},
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["Gen 10:32-11:9"]},
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["Prov 13:19-14:6"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA"],
+   "note": "No Divine Liturgy. The Genesis and Proverbs readings belong to Vespers on the evening of this day. The Cross remains out for veneration from the Sunday of the Cross through Friday of this week."
+  },
+  {
+   "pascha": -23,
+   "name": "Friday of the Fourth Week of Great Lent",
+   "readings": [
+    {"service": "Sixth Hour", "kind": "Old Testament", "refs": ["Isa 29:13-23"]},
+    {"service": "Presanctified Liturgy", "kind": "Old Testament", "refs": ["Gen 12:1-7"]},
+    {"service": "Presanctified Liturgy", "kind": "Old Testament", "refs": ["Prov 14:15-26"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT", "GOA", "OCA"],
+   "note": "Vespers is joined to the Liturgy of the Presanctified Gifts. No Epistle or Gospel unless a Menaion feast or patronal feast is kept. The Cross remains out for veneration from the Sunday of the Cross through Friday of this week."
+  },
+  {
+   "pascha": -22,
+   "name": "Fourth Saturday of Great Lent (Saturday of Souls)",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Heb 6:9-12"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Mark 7:31-37"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "GOA", "OCA", "SCR"],
+   "variants": [
+    {"usage": "Slavic (OCA)", "service": "Liturgy", "kind": "Epistle", "refs": ["Heb 6:9-12"], "title": "of the day"},
+    {"usage": "Slavic (OCA)", "service": "Liturgy", "kind": "Epistle", "refs": ["1 Cor 15:47-57"], "title": "for the departed"},
+    {"usage": "Slavic (OCA)", "service": "Liturgy", "kind": "Gospel", "refs": ["Mark 7:31-37"], "title": "of the day"},
+    {"usage": "Slavic (OCA)", "service": "Liturgy", "kind": "Gospel", "refs": ["John 5:24-30"], "title": "for the departed"}
+   ],
+   "note": "Antiochian Saturday of Souls: Liturgy of St John Chrysostom with the memorial (Trisagion) for the departed; Antiochian service texts give only the day's readings."
+  },
+  {
+   "pascha": -21,
+   "name": "Sunday of St John Climacus (Fourth Sunday of Great Lent)",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Heb 6:13-20"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Mark 9:17-31"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT-CHART", "GOA", "OCA", "HAP", "SCR"],
+   "variants": [
+    {"usage": "Slavic (OCA)", "service": "Liturgy", "kind": "Epistle", "refs": ["Heb 6:13-20"]},
+    {"usage": "Slavic (OCA)", "service": "Liturgy", "kind": "Epistle", "refs": ["Eph 5:8-19"], "title": "of the saint"},
+    {"usage": "Slavic (OCA)", "service": "Liturgy", "kind": "Gospel", "refs": ["Mark 9:17-31"]},
+    {"usage": "Slavic (OCA)", "service": "Liturgy", "kind": "Gospel", "refs": ["Matt 4:25-5:12"], "title": "of the saint"}
+   ],
+   "note": "Liturgy of St Basil. Matins Gospel follows the eothinon cycle (not listed)."
+  },
+  {
+   "pascha": -20,
+   "name": "Monday of the Fifth Week of Great Lent",
+   "readings": [
+    {"service": "Sixth Hour", "kind": "Old Testament", "refs": ["Isa 37:33-38:6"]},
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["Gen 13:12-18"]},
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["Prov 14:27-15:4"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT", "GOA", "OCA"],
+   "note": "No Divine Liturgy. The Genesis and Proverbs readings belong to Vespers on the evening of this day."
+  },
+  {
+   "pascha": -19,
+   "name": "Tuesday of the Fifth Week of Great Lent",
+   "readings": [
+    {"service": "Sixth Hour", "kind": "Old Testament", "refs": ["Isa 40:18-31"]},
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["Gen 15:1-15"]},
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["Prov 15:7-19"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA"],
+   "note": "No Divine Liturgy. The Genesis and Proverbs readings belong to Vespers on the evening of this day."
+  },
+  {
+   "pascha": -18,
+   "name": "Wednesday of the Fifth Week of Great Lent",
+   "readings": [
+    {"service": "Sixth Hour", "kind": "Old Testament", "refs": ["Isa 41:4-14"]},
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["Gen 17:1-9"]},
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["Prov 15:20-16:9"], "note": "The Septuagint text of this passage has extra or reordered verses; the range is given in English numbering."}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT", "GOA", "OCA"],
+   "note": "No Divine Liturgy. The Genesis and Proverbs readings belong to Vespers on the evening of this day. In the fifth week the Presanctified Liturgy moves from Wednesday to Thursday. The Great Canon of St Andrew is sung at Thursday's Matins, served on Wednesday evening."
+  },
+  {
+   "pascha": -17,
+   "name": "Thursday of the Great Canon (Fifth Week of Great Lent)",
+   "readings": [
+    {"service": "Sixth Hour", "kind": "Old Testament", "refs": ["Isa 42:5-16"]},
+    {"service": "Presanctified Liturgy", "kind": "Old Testament", "refs": ["Gen 18:20-33"]},
+    {"service": "Presanctified Liturgy", "kind": "Old Testament", "refs": ["Prov 16:17-17:17"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT", "GOA", "OCA"],
+   "note": "Vespers is joined to the Liturgy of the Presanctified Gifts. No Epistle or Gospel unless a Menaion feast or patronal feast is kept. Presanctified on Thursday this week, after the Great Canon; Antiochian instructions call it 'a consolation for the labor of the Great Canon'."
+  },
+  {
+   "pascha": -16,
+   "name": "Friday of the Fifth Week of Great Lent",
+   "readings": [
+    {"service": "Sixth Hour", "kind": "Old Testament", "refs": ["Isa 45:11-17"]},
+    {"service": "Presanctified Liturgy", "kind": "Old Testament", "refs": ["Gen 22:1-18"]},
+    {"service": "Presanctified Liturgy", "kind": "Old Testament", "refs": ["Prov 17:17-18:5"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT", "GOA", "OCA"],
+   "note": "Vespers is joined to the Liturgy of the Presanctified Gifts. No Epistle or Gospel unless a Menaion feast or patronal feast is kept. The Akathist Hymn is sung at Saturday's Matins, served on Friday evening."
+  },
+  {
+   "pascha": -15,
+   "name": "Saturday of the Akathist (Fifth Saturday of Great Lent)",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Heb 9:1-7"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Luke 10:38-42", "Luke 11:27-28"]}
+   ],
+   "confidence": "medium",
+   "sources": ["ANT-OLG", "GOA", "OCA", "HAP"],
+   "variants": [
+    {"usage": "Greek (GOARCH feed)", "service": "Liturgy", "kind": "Epistle", "refs": ["Heb 9:1-7"]},
+    {"usage": "Greek (GOARCH feed)", "service": "Liturgy", "kind": "Gospel", "refs": ["Luke 1:39-49", "Luke 1:56"]},
+    {"usage": "Slavic (OCA)", "service": "Liturgy", "kind": "Epistle", "refs": ["Heb 9:24-28"], "title": "of the day"},
+    {"usage": "Slavic (OCA)", "service": "Liturgy", "kind": "Epistle", "refs": ["Heb 9:1-7"], "title": "of the Theotokos"},
+    {"usage": "Slavic (OCA)", "service": "Liturgy", "kind": "Gospel", "refs": ["Mark 8:27-31"], "title": "of the day"},
+    {"usage": "Slavic (OCA)", "service": "Liturgy", "kind": "Gospel", "refs": ["Luke 10:38-42", "Luke 11:27-28"], "title": "of the Theotokos"}
+   ],
+   "note": "Liturgy of St John Chrysostom. The Akathist Hymn is sung at Matins (Friday evening). Antiochian sources disagree on the Gospel: the Archdiocese's own service text reads Luke 10:38-42, 11:27-28; its GOARCH-supplied readings feed shows Luke 1:39-49, 56."
+  },
+  {
+   "pascha": -14,
+   "name": "Sunday of St Mary of Egypt (Fifth Sunday of Great Lent)",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Heb 9:11-14"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Mark 10:32-45"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT-CHART", "GOA", "OCA", "HAP", "SCR"],
+   "variants": [
+    {"usage": "Slavic (OCA)", "service": "Liturgy", "kind": "Epistle", "refs": ["Heb 9:11-14"]},
+    {"usage": "Slavic (OCA)", "service": "Liturgy", "kind": "Epistle", "refs": ["Gal 3:23-29"], "title": "of the saint"},
+    {"usage": "Slavic (OCA)", "service": "Liturgy", "kind": "Gospel", "refs": ["Mark 10:32-45"]},
+    {"usage": "Slavic (OCA)", "service": "Liturgy", "kind": "Gospel", "refs": ["Luke 7:36-50"], "title": "of the saint"}
+   ],
+   "note": "Liturgy of St Basil (the last Sunday on which it is served in Lent). Matins Gospel follows the eothinon cycle (not listed)."
+  },
+  {
+   "pascha": -13,
+   "name": "Monday of the Sixth Week of Great Lent",
+   "readings": [
+    {"service": "Sixth Hour", "kind": "Old Testament", "refs": ["Isa 48:17-49:4"]},
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["Gen 27:1-41"]},
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["Prov 19:16-25"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA"],
+   "note": "No Divine Liturgy. The Genesis and Proverbs readings belong to Vespers on the evening of this day."
+  },
+  {
+   "pascha": -12,
+   "name": "Tuesday of the Sixth Week of Great Lent",
+   "readings": [
+    {"service": "Sixth Hour", "kind": "Old Testament", "refs": ["Isa 49:6-10"]},
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["Gen 31:3-16"]},
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["Prov 21:3-21"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA"],
+   "note": "No Divine Liturgy. The Genesis and Proverbs readings belong to Vespers on the evening of this day."
+  },
+  {
+   "pascha": -11,
+   "name": "Wednesday of the Sixth Week of Great Lent",
+   "readings": [
+    {"service": "Sixth Hour", "kind": "Old Testament", "refs": ["Isa 58:1-11"]},
+    {"service": "Presanctified Liturgy", "kind": "Old Testament", "refs": ["Gen 43:26-31", "Gen 45:1-16"]},
+    {"service": "Presanctified Liturgy", "kind": "Old Testament", "refs": ["Prov 21:23-22:4"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT", "GOA", "OCA"],
+   "note": "Vespers is joined to the Liturgy of the Presanctified Gifts. No Epistle or Gospel unless a Menaion feast or patronal feast is kept."
+  },
+  {
+   "pascha": -10,
+   "name": "Thursday of the Sixth Week of Great Lent",
+   "readings": [
+    {"service": "Sixth Hour", "kind": "Old Testament", "refs": ["Isa 65:8-16"]},
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["Gen 46:1-7"]},
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["Prov 23:15-24:5"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT", "GOA", "OCA"],
+   "note": "No Divine Liturgy. The Genesis and Proverbs readings belong to Vespers on the evening of this day."
+  },
+  {
+   "pascha": -9,
+   "name": "Friday of the Sixth Week of Great Lent (eve of Lazarus Saturday)",
+   "readings": [
+    {"service": "Sixth Hour", "kind": "Old Testament", "refs": ["Isa 66:10-24"]},
+    {"service": "Presanctified Liturgy", "kind": "Old Testament", "refs": ["Gen 49:33-50:26"]},
+    {"service": "Presanctified Liturgy", "kind": "Old Testament", "refs": ["Prov 31:8-31"], "note": "The Septuagint orders Proverbs 25-31 differently; this is the passage on the valiant woman, given in English numbering."}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT", "GOA", "OCA"],
+   "note": "Vespers is joined to the Liturgy of the Presanctified Gifts. No Epistle or Gospel unless a Menaion feast or patronal feast is kept. Great Lent's forty days end at this Vespers, which begins Lazarus Saturday. Antiochian instructions place this Presanctified Liturgy in the morning or late afternoon."
+  },
+  {
+   "pascha": -8,
+   "name": "Lazarus Saturday",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Heb 12:28-13:8"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["John 11:1-45"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "GOA", "OCA", "SCR"],
+   "note": "Liturgy of St John Chrysostom with the baptismal hymn 'As many as have been baptized'. Matins has no Gospel. The Vespers readings of the evening before are under Pascha-9."
+  },
+  {
+   "pascha": -7,
+   "name": "Palm Sunday (Entry of the Lord into Jerusalem)",
+   "readings": [
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["Gen 49:1-2", "Gen 49:8-12"], "served": "Saturday evening"},
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["Zeph 3:14-19"], "served": "Saturday evening"},
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["Zech 9:9-15"], "served": "Saturday evening"},
+    {"service": "Matins", "kind": "Gospel", "refs": ["Matt 21:1-11", "Matt 21:15-17"]},
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Phil 4:4-9"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["John 12:1-18"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT-CHART", "GOA", "OCA", "HAP", "SCR"],
+   "note": "Liturgy of St John Chrysostom. One of the Twelve Great Feasts. The Bridegroom Matins of Holy Monday, served this evening, is under Pascha-6."
+  },
+  {
+   "pascha": -6,
+   "name": "Great and Holy Monday",
+   "readings": [
+    {"service": "Matins", "kind": "Gospel", "refs": ["Matt 21:18-43"], "served": "Sunday evening (Bridegroom Matins)"},
+    {"service": "Sixth Hour", "kind": "Old Testament", "refs": ["Ezek 1:1-20"]},
+    {"service": "Presanctified Liturgy", "kind": "Old Testament", "refs": ["Exod 1:1-20"]},
+    {"service": "Presanctified Liturgy", "kind": "Old Testament", "refs": ["Job 1:1-12"]},
+    {"service": "Presanctified Liturgy", "kind": "Gospel", "refs": ["Matt 24:3-35"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "GOA", "OCA", "HAP", "SCR", "WIKI"],
+   "note": "Antiochian instructions place the Presanctified Liturgy in the morning. The custom of reading the four Gospels at the Little Hours on Monday to Wednesday has no fixed verse divisions and is not listed."
+  },
+  {
+   "pascha": -5,
+   "name": "Great and Holy Tuesday",
+   "readings": [
+    {"service": "Matins", "kind": "Gospel", "refs": ["Matt 22:15-23:39"], "served": "Monday evening (Bridegroom Matins)"},
+    {"service": "Sixth Hour", "kind": "Old Testament", "refs": ["Ezek 1:21-2:1"], "note": "OCA prints Ezek 1:21-28 (-2:1 LXX)."},
+    {"service": "Presanctified Liturgy", "kind": "Old Testament", "refs": ["Exod 2:5-10"]},
+    {"service": "Presanctified Liturgy", "kind": "Old Testament", "refs": ["Job 1:13-22"]},
+    {"service": "Presanctified Liturgy", "kind": "Gospel", "refs": ["Matt 24:36-26:2"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "GOA", "OCA", "HAP", "SCR", "WIKI"]
+  },
+  {
+   "pascha": -4,
+   "name": "Great and Holy Wednesday",
+   "readings": [
+    {"service": "Matins", "kind": "Gospel", "refs": ["John 12:17-50"], "served": "Tuesday evening (Bridegroom Matins)"},
+    {"service": "Sixth Hour", "kind": "Old Testament", "refs": ["Ezek 2:3-3:3"], "confidence": "medium", "note": "Only OCA checked for this reading."},
+    {"service": "Presanctified Liturgy", "kind": "Old Testament", "refs": ["Exod 2:11-22", "Exod 18:4"], "note": "The Septuagint adds at 2:22 the naming of Eliezer, which the Antiochian text (and English Bibles) give as Exod 18:4."},
+    {"service": "Presanctified Liturgy", "kind": "Old Testament", "refs": ["Job 2:1-10"]},
+    {"service": "Presanctified Liturgy", "kind": "Gospel", "refs": ["Matt 26:6-16"]},
+    {"service": "Holy Unction", "kind": "Epistle", "refs": ["Jas 5:10-16"], "title": "1st", "served": "Wednesday evening"},
+    {"service": "Holy Unction", "kind": "Gospel", "refs": ["Luke 10:25-37"], "title": "1st", "served": "Wednesday evening"},
+    {"service": "Holy Unction", "kind": "Epistle", "refs": ["Rom 15:1-7"], "title": "2nd", "served": "Wednesday evening"},
+    {"service": "Holy Unction", "kind": "Gospel", "refs": ["Luke 19:1-10"], "title": "2nd", "served": "Wednesday evening"},
+    {"service": "Holy Unction", "kind": "Epistle", "refs": ["1 Cor 12:27-13:8"], "title": "3rd", "served": "Wednesday evening"},
+    {"service": "Holy Unction", "kind": "Gospel", "refs": ["Matt 10:1", "Matt 10:5-8"], "title": "3rd", "served": "Wednesday evening"},
+    {"service": "Holy Unction", "kind": "Epistle", "refs": ["2 Cor 6:16-7:1"], "title": "4th", "served": "Wednesday evening"},
+    {"service": "Holy Unction", "kind": "Gospel", "refs": ["Matt 8:14-23"], "title": "4th", "served": "Wednesday evening"},
+    {"service": "Holy Unction", "kind": "Epistle", "refs": ["2 Cor 1:8-11"], "title": "5th", "served": "Wednesday evening"},
+    {"service": "Holy Unction", "kind": "Gospel", "refs": ["Matt 25:1-13"], "title": "5th", "served": "Wednesday evening"},
+    {"service": "Holy Unction", "kind": "Epistle", "refs": ["Gal 5:22-6:2"], "title": "6th", "served": "Wednesday evening"},
+    {"service": "Holy Unction", "kind": "Gospel", "refs": ["Matt 15:21-28"], "title": "6th", "served": "Wednesday evening"},
+    {"service": "Holy Unction", "kind": "Epistle", "refs": ["1 Thess 5:14-23"], "title": "7th", "served": "Wednesday evening"},
+    {"service": "Holy Unction", "kind": "Gospel", "refs": ["Matt 9:9-13"], "title": "7th", "served": "Wednesday evening"}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "GOA", "OCA", "HAP", "SCR"],
+   "note": "Holy Unction is a sacramental service, not part of the Triodion cycle; Antiochian instructions direct parishes to serve it on Holy Wednesday evening. Holy Thursday Matins may also be served this night (listed under Pascha-3)."
+  },
+  {
+   "pascha": -3,
+   "name": "Great and Holy Thursday",
+   "readings": [
+    {"service": "Matins", "kind": "Gospel", "refs": ["Luke 22:1-39"], "served": "Thursday morning, or Wednesday night"},
+    {"service": "First Hour", "kind": "Old Testament", "refs": ["Jer 11:18-12:5", "Jer 12:9-11", "Jer 12:14-15"]},
+    {"service": "Vesperal Liturgy of St Basil", "kind": "Old Testament", "refs": ["Exod 19:10-19"]},
+    {"service": "Vesperal Liturgy of St Basil", "kind": "Old Testament", "refs": ["Job 38:1-21", "Job 42:1-5"], "confidence": "medium", "note": "End verse of the Job 38 portion varies: Antiochian 38:1-21, Hapgood 38:1-22, OCA 38:1-23."},
+    {"service": "Vesperal Liturgy of St Basil", "kind": "Old Testament", "refs": ["Isa 50:4-11"]},
+    {"service": "Vesperal Liturgy of St Basil", "kind": "Epistle", "refs": ["1 Cor 11:23-32"]},
+    {"service": "Vesperal Liturgy of St Basil", "kind": "Gospel", "refs": ["Matt 26:2-20", "John 13:3-17", "Matt 26:21-39", "Luke 22:43-45", "Matt 26:40-27:2"]},
+    {"service": "Washing of the Feet", "kind": "Gospel", "refs": ["John 13:1-11"], "confidence": "low", "note": "optional rite after the Liturgy; reading before the washing"},
+    {"service": "Washing of the Feet", "kind": "Gospel", "refs": ["John 13:12-17"], "title": "reading after the washing", "confidence": "low"}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "GOA", "OCA", "HAP", "SCR"],
+   "variants": [
+    {"usage": "Greek (GOARCH feed)", "service": "Vesperal Liturgy of St Basil", "kind": "Gospel", "refs": ["Matt 26:1-20", "John 13:3-17", "Matt 26:21-39", "Luke 22:43-44", "Matt 26:40-27:2"]}
+   ],
+   "note": "Institution of the Mystical Supper. The Jeremiah prophecy is read at the First Hour on this day (not the Sixth). Antiochian instructions: Matins in the morning, followed by the Vesperal Liturgy; the Washing of the Feet may follow."
+  },
+  {
+   "pascha": -2,
+   "name": "Great and Holy Friday",
+   "readings": [
+    {"service": "Matins of the Twelve Passion Gospels", "kind": "Gospel", "refs": ["John 13:31-18:1"], "title": "1st", "served": "Thursday evening"},
+    {"service": "Matins of the Twelve Passion Gospels", "kind": "Gospel", "refs": ["John 18:1-28"], "title": "2nd", "served": "Thursday evening"},
+    {"service": "Matins of the Twelve Passion Gospels", "kind": "Gospel", "refs": ["Matt 26:57-75"], "title": "3rd", "served": "Thursday evening"},
+    {"service": "Matins of the Twelve Passion Gospels", "kind": "Gospel", "refs": ["John 18:28-19:16"], "title": "4th", "served": "Thursday evening"},
+    {"service": "Matins of the Twelve Passion Gospels", "kind": "Gospel", "refs": ["Matt 27:3-32"], "title": "5th", "served": "Thursday evening"},
+    {"service": "Matins of the Twelve Passion Gospels", "kind": "Gospel", "refs": ["Mark 15:16-32"], "title": "6th", "served": "Thursday evening"},
+    {"service": "Matins of the Twelve Passion Gospels", "kind": "Gospel", "refs": ["Matt 27:33-54"], "title": "7th", "served": "Thursday evening"},
+    {"service": "Matins of the Twelve Passion Gospels", "kind": "Gospel", "refs": ["Luke 23:32-49"], "title": "8th", "served": "Thursday evening"},
+    {"service": "Matins of the Twelve Passion Gospels", "kind": "Gospel", "refs": ["John 19:25-37"], "title": "9th", "served": "Thursday evening"},
+    {"service": "Matins of the Twelve Passion Gospels", "kind": "Gospel", "refs": ["Mark 15:43-47"], "title": "10th", "served": "Thursday evening"},
+    {"service": "Matins of the Twelve Passion Gospels", "kind": "Gospel", "refs": ["John 19:38-42"], "title": "11th", "served": "Thursday evening"},
+    {"service": "Matins of the Twelve Passion Gospels", "kind": "Gospel", "refs": ["Matt 27:62-66"], "title": "12th", "served": "Thursday evening"},
+    {"service": "Royal Hours", "kind": "Old Testament", "refs": ["Zech 11:10-13"], "title": "First Hour"},
+    {"service": "Royal Hours", "kind": "Epistle", "refs": ["Gal 6:14-18"], "title": "First Hour"},
+    {"service": "Royal Hours", "kind": "Gospel", "refs": ["Matt 27:1-56"], "title": "First Hour"},
+    {"service": "Royal Hours", "kind": "Old Testament", "refs": ["Isa 50:4-11"], "title": "Third Hour"},
+    {"service": "Royal Hours", "kind": "Epistle", "refs": ["Rom 5:6-10"], "title": "Third Hour"},
+    {"service": "Royal Hours", "kind": "Gospel", "refs": ["Mark 15:16-41"], "title": "Third Hour"},
+    {"service": "Royal Hours", "kind": "Old Testament", "refs": ["Isa 52:13-54:1"], "title": "Sixth Hour"},
+    {"service": "Royal Hours", "kind": "Epistle", "refs": ["Heb 2:11-18"], "title": "Sixth Hour"},
+    {"service": "Royal Hours", "kind": "Gospel", "refs": ["Luke 23:32-49"], "title": "Sixth Hour"},
+    {"service": "Royal Hours", "kind": "Old Testament", "refs": ["Jer 11:18-12:5", "Jer 12:9-11", "Jer 12:14-15"], "title": "Ninth Hour"},
+    {"service": "Royal Hours", "kind": "Epistle", "refs": ["Heb 10:19-31"], "title": "Ninth Hour"},
+    {"service": "Royal Hours", "kind": "Gospel", "refs": ["John 19:23-37"], "title": "Ninth Hour"},
+    {"service": "Vespers of the Taking-Down from the Cross", "kind": "Old Testament", "refs": ["Exod 33:11-23"]},
+    {"service": "Vespers of the Taking-Down from the Cross", "kind": "Old Testament", "refs": ["Job 42:12-17"], "note": "The Septuagint has further verses after 42:17."},
+    {"service": "Vespers of the Taking-Down from the Cross", "kind": "Old Testament", "refs": ["Isa 52:13-54:1"]},
+    {"service": "Vespers of the Taking-Down from the Cross", "kind": "Epistle", "refs": ["1 Cor 1:18-2:2"]},
+    {"service": "Vespers of the Taking-Down from the Cross", "kind": "Gospel", "refs": ["Matt 27:1-38", "Luke 23:39-43", "Matt 27:39-54", "John 19:31-37", "Matt 27:55-61"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "OCA", "HAP", "SCR"],
+   "variants": [
+    {"usage": "Slavic (OCA)", "service": "Royal Hours", "kind": "Epistle", "refs": ["Rom 5:6-11"], "title": "Third Hour"},
+    {"usage": "Slavic (OCA)", "service": "Royal Hours", "kind": "Gospel", "refs": ["John 18:28-19:37"], "title": "Ninth Hour"}
+   ],
+   "note": "No Divine Liturgy. The Royal Hours may be served together in the morning or at their own hours; the Typika follows the Ninth Hour. Vespers of the Taking-Down (Apokathelosis) is served in the afternoon."
+  },
+  {
+   "pascha": -1,
+   "name": "Great and Holy Saturday",
+   "readings": [
+    {"service": "Matins (Lamentations)", "kind": "Old Testament", "refs": ["Ezek 37:1-14"], "served": "Friday evening"},
+    {"service": "Matins (Lamentations)", "kind": "Epistle", "refs": ["1 Cor 5:6-8", "Gal 3:13-14"], "served": "Friday evening"},
+    {"service": "Matins (Lamentations)", "kind": "Gospel", "refs": ["Matt 27:62-66"], "served": "Friday evening"},
+    {"service": "Vesperal Liturgy of St Basil", "kind": "Old Testament", "refs": ["Gen 1:1-13"], "title": "1st"},
+    {"service": "Vesperal Liturgy of St Basil", "kind": "Old Testament", "refs": ["Isa 60:1-16"], "title": "2nd"},
+    {"service": "Vesperal Liturgy of St Basil", "kind": "Old Testament", "refs": ["Exod 12:1-11"], "title": "3rd", "note": "The Antiochian text heads it 12:1-12 but its text ends at 12:11."},
+    {"service": "Vesperal Liturgy of St Basil", "kind": "Old Testament", "refs": ["Jonah 1:1-4:11"], "title": "4th", "note": "the whole book"},
+    {"service": "Vesperal Liturgy of St Basil", "kind": "Old Testament", "refs": ["Josh 5:10-15"], "title": "5th"},
+    {"service": "Vesperal Liturgy of St Basil", "kind": "Old Testament", "refs": ["Exod 13:20-15:19"], "title": "6th", "note": "ends with the Song of Moses, sung with the refrain 'For gloriously has He been glorified'"},
+    {"service": "Vesperal Liturgy of St Basil", "kind": "Old Testament", "refs": ["Zeph 3:8-15"], "title": "7th"},
+    {"service": "Vesperal Liturgy of St Basil", "kind": "Old Testament", "refs": ["1 Kgs 17:8-24"], "title": "8th", "note": "3 Kingdoms 17:8-24 in the Septuagint"},
+    {"service": "Vesperal Liturgy of St Basil", "kind": "Old Testament", "refs": ["Isa 61:10-62:5"], "title": "9th", "note": "begins at the second half of 61:10"},
+    {"service": "Vesperal Liturgy of St Basil", "kind": "Old Testament", "refs": ["Gen 22:1-18"], "title": "10th"},
+    {"service": "Vesperal Liturgy of St Basil", "kind": "Old Testament", "refs": ["Isa 61:1-10"], "title": "11th", "confidence": "medium", "note": "Antiochian text: 61:1-10a (ends at the first half of v. 10); OCA and Hapgood: 61:1-9."},
+    {"service": "Vesperal Liturgy of St Basil", "kind": "Old Testament", "refs": ["2 Kgs 4:8-37"], "title": "12th", "note": "4 Kingdoms 4:8-37 in the Septuagint"},
+    {"service": "Vesperal Liturgy of St Basil", "kind": "Old Testament", "refs": ["Isa 63:11-64:5"], "title": "13th"},
+    {"service": "Vesperal Liturgy of St Basil", "kind": "Old Testament", "refs": ["Jer 31:31-34"], "title": "14th", "note": "Jer 38:31-34 in the Septuagint"},
+    {"service": "Vesperal Liturgy of St Basil", "kind": "Old Testament", "refs": ["Dan 3:1-23", "Pr Azar 1:1-66"], "title": "15th", "note": "Septuagint Dan 3:1-88: Daniel 3:1-23, then the Prayer of Azariah and the Song of the Three Youths through 'Bless the Lord, Ananias, Azarias and Misael'. Sung with the refrain 'Praise the Lord and supremely exalt Him'."},
+    {"service": "Vesperal Liturgy of St Basil", "kind": "Epistle", "refs": ["Rom 6:3-11"]},
+    {"service": "Vesperal Liturgy of St Basil", "kind": "Gospel", "refs": ["Matt 28:1-20"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "GOA", "OCA", "HAP", "SCR"],
+   "note": "Matins with the Lamentations at the tomb is served on Friday evening. The Vesperal Liturgy is the first Liturgy of Pascha, with baptisms. Antiochian rubric: at least readings 1-6 and 15 are read; its shorter parish text reads only Genesis, Jonah and Daniel. 'Arise, O God' replaces the Alleluia before the Gospel."
+  }
+ ]
+}

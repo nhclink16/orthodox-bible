@@ -1,5 +1,6 @@
 //! `cargo run -p xtask -- build-data`
 //! `cargo run -p xtask -- build-orthodox` (after build-data, or with the committed `kjv.bbl`)
+//! `cargo run -p xtask -- lectionary-check 2026-01-01 2027-12-31` (see `lectionary.rs`)
 //!
 //! Downloads the public-domain USFM sources pinned below from eBible.org (into `.sources/`),
 //! verifies their SHA-256, converts them with the same USFM importer users get, and writes
@@ -14,6 +15,8 @@ use bible_core::format;
 use bible_core::model::{Origin, TranslationBuilder, TranslationMeta};
 use bible_core::usfm;
 use sha2::{Digest, Sha256};
+
+mod lectionary;
 
 struct Source {
     id: &'static str,
@@ -230,8 +233,13 @@ fn main() -> Result<()> {
             }
             Ok(())
         }
+        Some("lectionary") => lectionary::show(&args[1..]),
+        Some("lectionary-check") => lectionary::check(&root, &args[1..]),
         _ => {
-            eprintln!("usage: cargo run -p xtask -- build-data [ids…] | fetch [ids…]");
+            eprintln!(
+                "usage: cargo run -p xtask -- build-data [ids…] | fetch [ids…] | lectionary <from> [to] [--old] | \
+                 lectionary-check <from> <to> [--old]"
+            );
             std::process::exit(2)
         }
     }

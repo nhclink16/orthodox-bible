@@ -98,8 +98,28 @@ file, not part of any translation.
 
 *Church calendar.* `bible_core::calendar` computes the church year from the date alone: Pascha by
 the Julian computus, fixed feasts on the New or Old calendar (a setting), the general fasting rules
-and the weekly kathismata. No data files, so nothing to license. The daily Epistle and Gospel are
-left out until there is an openly licensed lectionary table; a wrong reading is worse than none.
+and the weekly kathismata. No data files, so nothing to license. The daily readings are the
+lectionary's (below).
+
+*Lectionary.* No openly licensed lectionary table existed, so the fork compiled its own:
+`data/lectionary/` holds the Pentecostarion, the Triodion, the Epistle and Gospel cycles after
+Pentecost and the Menaion as Scripture references only (MIT, with the code), each entry with its
+sources (the Antiochian Archdiocese's service texts and 2026 chart, the GOARCH feed antiochian.org
+shows, the GOA Chant Stand, the OCA, Hapgood 1906, Scrivener 1861) and a confidence.
+`bible_core::lectionary::readings(day, style)` applies the Typikon in Antiochian (Byzantine) usage:
+the Epistle by week after Pentecost, counting back from the Publican past the 32nd; the Gospel's
+Lukan jump after the Sunday after the Elevation, Luke's dated autumn Sundays and the winter
+Sundays' order; and each Menaion entry's precedence on weekdays, Sundays, the Saturdays and
+Sundays around the feasts, in Lent, Holy Week and Bright Week. References are stored in grid
+numbering and read by their own parser, never `reference::parse`, so the Septuagint-numbering
+setting can't move a reading. `xtask lectionary-check` compares the Liturgy's Epistle and Gospel
+with orthocal.info's Greek tradition; it is a check, not a source, and where they differ the
+tables follow the Antiochian evidence. Where the Archdiocese's own service texts and charts differ
+from the GOARCH feed that antiochian.org shows, the tables follow the service texts and keep the
+feed's reading as a variant. The days the yearly ordo settles (the free days between the
+Nativity and Theophany, 19 and 26 January, long winters) are marked low confidence rather than
+guessed silently. Slavic usage isn't implemented; its differences are kept in the tables'
+`variants` for later.
 
 `.bbl` files store that model as column arrays compressed with zstd (level 19 for bundled data):
 the 4.1 MB KJV is 1.04 MB, all seven bundled translations ≈ 7 MB. The JSON metadata header is

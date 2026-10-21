@@ -1,0 +1,618 @@
+{
+ "title": "Pentecostarion: Pascha to the Monday of the Holy Spirit",
+ "scope": "One entry for every day from Pascha (pascha 0) to the Monday of the Holy Spirit (pascha 50), keyed by days after Pascha.",
+ "licence": "Released with bible-rs under the MIT licence. The table holds Scripture references only: no Bible text and no prose from the sources. Notes are our own.",
+ "usage": "Antiochian Orthodox Christian Archdiocese of North America: Byzantine (Greek) usage, Revised Julian fixed feasts, Julian Paschalion. Slavic (OCA) and Greek (GOARCH) differences are kept in 'variants' and 'slavic' and never replace the main reading.",
+ "numbering": "English Bible (KJV/Hebrew) chapter and verse, the grid's numbering, with half-verse letters dropped. Each string in refs is one contiguous range ('Book C:V', 'Book C:V-V' or 'Book C:V-C:V', with the grid's book abbreviations); a reading's refs are read together, in order, as one lesson.",
+ "confidence": "high: an Antiochian-facing source agrees with at least one independent source. medium: the sources differ (usually by a verse at the start or end) or the reference rests on one source. low: no Antiochian or Greek source was found, or the yearly ordo decides.",
+ "sources": {
+  "ANT-OLG": "Antiochian Archdiocese, Department of Liturgics: Online Liturgical Guide service texts, 2023-2026 (antiochian.org/servicetexts). References only.",
+  "ANT-CHART": "Antiochian Archdiocese, Sunday Liturgical Readings Chart 2026 (antiochian.org/liturgicalinstructions).",
+  "ANT": "antiochian.org daily readings, 2018-2026 (the GOARCH Online Chapel feed, as harvested in orthocal-python's data/antiochian_raw).",
+  "GOA": "Greek Orthodox Archdiocese of America, Online Chapel daily readings, 2018-2030 (goarch.org; partly as harvested in orthocal-python).",
+  "GOA-DCS": "GOA Digital Chant Stand (dcs.goarch.org), 'Readings for the Day', 2026.",
+  "OCA": "Orthodox Church in America lectionary, via the orthocal.info API, 2010-2032. Slavic usage.",
+  "HAP": "Isabel F. Hapgood, Service Book of the Holy Orthodox-Catholic Apostolic (Greco-Russian) Church, 1906 (public domain; archive.org cu31924029363128): tables of Epistles and Gospels.",
+  "SCR": "F. H. Scrivener, A Plain Introduction to the Criticism of the New Testament, Cambridge 1861 (public domain; archive.org plainintroductio00scri): Synaxarion and Menologion of the Byzantine lectionary manuscripts.",
+  "GRE": "V. Grechulevich, Ukazatel tserkovnykh chtenii, St Petersburg 1853 (public domain): Slavic lectionary index with zachalo numbers.",
+  "MCI": "Metropolitan Cantor Institute (Byzantine Catholic Archeparchy of Pittsburgh), 'The Lectionary' (mci.archpitt.org). Slavic usage.",
+  "NLM": "New Liturgical Movement: descriptions of the Antiochian Paschal procession (2019) and the Royal Hours of Theophany (2017).",
+  "WIKI": "Wikipedia, articles on the Triodion and Holy Week (for Holy Week Old Testament readings only)."
+ },
+ "rules": [
+  "Acts is the Epistle and John the Gospel every day, except Bright Tuesday, Myrrhbearers Sunday, the Ascension and the Monday of the Holy Spirit. Nothing shifts in this season.",
+  "Vespers readings marked 'evening before' are sung on the eve. The Agape Vespers Gospel is filed under Pascha.",
+  "Sunday Matins Gospels follow the Antiochian chart (eothina 1, 4, 5, 7, 8, 10).",
+  "Fixed feasts that meet this season (St George, the Apostle John, Sts Constantine and Helen) are in menaion.json."
+ ],
+ "entries": [
+  {
+   "pascha": 0,
+   "name": "Holy Pascha (Sunday of the Resurrection)",
+   "readings": [
+    {"service": "Matins", "kind": "Gospel", "refs": ["Mark 16:1-8"], "served": "at the start of Paschal Matins, read outside the closed church doors", "confidence": "medium"},
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Acts 1:1-8"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["John 1:1-17"]},
+    {"service": "Vespers", "kind": "Gospel", "refs": ["John 20:19-25"], "served": "afternoon or evening of Pascha (Agape Vespers)"}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "GOA", "OCA", "HAP", "SCR", "MCI", "NLM"],
+   "note": "Liturgy and Agape Vespers readings are high confidence. The Matins Gospel Mark 16:1-8 is Byzantine/Greek usage, read at the doors before the first 'Christ is risen'. It rests on the GOARCH feed and a description of Antiochian practice, not an Antiochian rubric text (medium). Antiochian rubric: the Agape Vespers Gospel is read in as many languages as possible. orthocal files the Agape Vespers Gospel under Bright Monday, because liturgically it is that day's Vespers. Slavic usage (Hapgood 1906, orthocal) has no Matins Gospel at Pascha."
+  },
+  {
+   "pascha": 1,
+   "name": "Bright Monday",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Acts 1:12-17", "Acts 1:21-26"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["John 1:18-28"]}
+   ],
+   "confidence": "high",
+   "sources": ["GOA", "OCA", "SCR", "MCI"],
+   "note": "Greek and Antiochian practice: when St George (23 April) falls before Pascha, his feast moves to Bright Monday and his readings are added or substituted. This is a menaion interaction, not part of this table. Slavic parishes may also hold a Paschal cross procession with five Gospels (Matt 28:1-20, Mark 16:1-8, Luke 24:1-12, John 20:1-10, Luke 24:36-53). That is not Antiochian usage."
+  },
+  {
+   "pascha": 2,
+   "name": "Bright Tuesday",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Acts 2:14-21"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Luke 24:12-35"]}
+   ],
+   "confidence": "high",
+   "sources": ["GOA", "OCA", "SCR", "MCI"]
+  },
+  {
+   "pascha": 3,
+   "name": "Bright Wednesday",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Acts 2:22-38"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["John 1:35-51"]}
+   ],
+   "confidence": "medium",
+   "sources": ["GOA", "OCA", "SCR", "MCI"],
+   "variants": [
+    {"usage": "Slavic (OCA/Russian)", "service": "Liturgy", "kind": "Epistle", "refs": ["Acts 2:22-36"]}
+   ],
+   "note": "The Epistle's end verse is disputed. GOARCH (and so antiochian.org) reads Acts 2:22-38. Scrivener's manuscripts, OCA, the Metropolitan Cantor Institute and akroasis read Acts 2:22-36. No independent printed Greek or Antiochian Apostolos was available to settle it. The Gospel is certain. Scrivener prints John 1:35-52, which reflects a different verse division; English Bibles end the chapter at 1:51. Scrivener's manuscript table also orders this week's Acts lessons differently (Wed 2:38-43, Thu 3:1-8, Fri 2:22-36). No modern source follows that order."
+  },
+  {
+   "pascha": 4,
+   "name": "Bright Thursday",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Acts 2:38-43"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["John 3:1-15"]}
+   ],
+   "confidence": "high",
+   "sources": ["GOA", "OCA", "SCR", "MCI"]
+  },
+  {
+   "pascha": 5,
+   "name": "Bright Friday (Life-giving Spring of the Theotokos)",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Phil 2:5-11"], "title": "Life-giving Spring", "confidence": "medium"},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["John 2:12-22"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "GOA", "OCA", "SCR", "MCI"],
+   "variants": [
+    {"usage": "GOA (goarch.org, GOA DCS; antiochian.org's feed): the day's Acts", "service": "Liturgy", "kind": "Epistle", "refs": ["Acts 3:1-8"]},
+    {"usage": "Slavic (OCA/Russian)", "service": "Liturgy", "kind": "Epistle", "refs": ["Acts 3:1-8", "Phil 2:5-11"]},
+    {"usage": "Slavic (OCA/Russian)", "service": "Liturgy", "kind": "Gospel", "refs": ["John 2:12-22", "Luke 10:38-42", "Luke 11:27-28"]}
+   ],
+   "note": "The Archdiocese's service text reads the Theotokos's Epistle for the Life-giving Spring with the day's Gospel. goarch.org and antiochian.org's feed read the day's Acts 3:1-8 (2025, 2026)."
+  },
+  {
+   "pascha": 6,
+   "name": "Bright Saturday",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Acts 3:11-16"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["John 3:22-33"]}
+   ],
+   "confidence": "high",
+   "sources": ["GOA", "OCA", "SCR", "MCI"]
+  },
+  {
+   "pascha": 7,
+   "name": "Thomas Sunday (Antipascha; 2nd Sunday of Pascha)",
+   "readings": [
+    {"service": "Matins", "kind": "Gospel", "refs": ["Matt 28:16-20"], "title": "Eothinon 1"},
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Acts 5:12-20"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["John 20:19-31"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-CHART", "GOA", "OCA", "HAP", "SCR", "MCI"]
+  },
+  {
+   "pascha": 8,
+   "name": "Monday of Thomas Week (2nd week of Pascha)",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Acts 3:19-26"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["John 2:1-11"]}
+   ],
+   "confidence": "high",
+   "sources": ["GOA", "OCA", "SCR", "MCI"]
+  },
+  {
+   "pascha": 9,
+   "name": "Tuesday of Thomas Week",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Acts 4:1-10"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["John 3:16-21"]}
+   ],
+   "confidence": "high",
+   "sources": ["GOA", "OCA", "SCR", "MCI"],
+   "note": "In Russian usage this is Radonitsa, a day for the departed with a memorial service at the graves. It is not observed in Antiochian practice, and the Liturgy readings do not change."
+  },
+  {
+   "pascha": 10,
+   "name": "Wednesday of Thomas Week",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Acts 4:13-22"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["John 5:17-24"]}
+   ],
+   "confidence": "high",
+   "sources": ["GOA", "OCA", "SCR", "MCI"]
+  },
+  {
+   "pascha": 11,
+   "name": "Thursday of Thomas Week",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Acts 4:23-31"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["John 5:24-30"]}
+   ],
+   "confidence": "high",
+   "sources": ["GOA", "OCA", "SCR", "MCI"]
+  },
+  {
+   "pascha": 12,
+   "name": "Friday of Thomas Week",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Acts 5:1-11"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["John 5:30-6:2"]}
+   ],
+   "confidence": "high",
+   "sources": ["GOA", "OCA", "SCR", "MCI"]
+  },
+  {
+   "pascha": 13,
+   "name": "Saturday of Thomas Week",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Acts 5:21-32"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["John 6:14-27"]}
+   ],
+   "confidence": "high",
+   "sources": ["GOA", "OCA", "SCR", "MCI"],
+   "variants": [
+    {"usage": "Slavic (OCA/Russian)", "service": "Liturgy", "kind": "Epistle", "refs": ["Acts 5:21-33"]}
+   ]
+  },
+  {
+   "pascha": 14,
+   "name": "Sunday of the Myrrhbearing Women (3rd Sunday of Pascha)",
+   "readings": [
+    {"service": "Matins", "kind": "Gospel", "refs": ["Luke 24:1-12"], "title": "Eothinon 4"},
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Acts 6:1-7"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Mark 15:43-16:8"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-CHART", "GOA", "OCA", "HAP", "SCR", "MCI"],
+   "variants": [
+    {"usage": "Slavic (OCA/Russian)", "service": "Matins", "kind": "Gospel", "refs": ["Mark 16:9-20"]}
+   ],
+   "note": "The Matins Gospel differs by usage. Antiochian and Greek read Eothinon 4 (Luke 24:1-12). Slavic reads Eothinon 3 (Mark 16:9-20)."
+  },
+  {
+   "pascha": 15,
+   "name": "Monday of the 3rd Week of Pascha",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Acts 6:8-7:5", "Acts 7:47-60"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["John 4:46-54"]}
+   ],
+   "confidence": "high",
+   "sources": ["GOA", "OCA", "SCR", "MCI"]
+  },
+  {
+   "pascha": 16,
+   "name": "Tuesday of the 3rd Week of Pascha",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Acts 8:5-17"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["John 6:27-33"]}
+   ],
+   "confidence": "high",
+   "sources": ["GOA", "OCA", "SCR", "MCI"]
+  },
+  {
+   "pascha": 17,
+   "name": "Wednesday of the 3rd Week of Pascha",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Acts 8:18-25"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["John 6:35-39"]}
+   ],
+   "confidence": "high",
+   "sources": ["GOA", "OCA", "SCR", "MCI"],
+   "note": "Scrivener's manuscripts read the John 6 lessons of this week in another order (Wed 6:48-54, Thu 6:40-44, Fri 6:35-39). All modern sources read Wed 6:35-39, Thu 6:40-44, Fri 6:48-54."
+  },
+  {
+   "pascha": 18,
+   "name": "Thursday of the 3rd Week of Pascha",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Acts 8:26-39"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["John 6:40-44"]}
+   ],
+   "confidence": "high",
+   "sources": ["GOA", "OCA", "SCR", "MCI"]
+  },
+  {
+   "pascha": 19,
+   "name": "Friday of the 3rd Week of Pascha",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Acts 8:40-9:19"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["John 6:48-54"]}
+   ],
+   "confidence": "high",
+   "sources": ["GOA", "OCA", "SCR", "MCI"]
+  },
+  {
+   "pascha": 20,
+   "name": "Saturday of the 3rd Week of Pascha",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Acts 9:19-31"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["John 15:17-16:2"]}
+   ],
+   "confidence": "high",
+   "sources": ["GOA", "OCA", "SCR", "MCI"],
+   "note": "The Epistle begins with the second half of 9:19. The half-verse letter is dropped."
+  },
+  {
+   "pascha": 21,
+   "name": "Sunday of the Paralytic (4th Sunday of Pascha)",
+   "readings": [
+    {"service": "Matins", "kind": "Gospel", "refs": ["Luke 24:12-35"], "title": "Eothinon 5"},
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Acts 9:32-42"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["John 5:1-15"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-CHART", "GOA", "OCA", "HAP", "SCR", "MCI"],
+   "variants": [
+    {"usage": "Slavic (OCA/Russian)", "service": "Matins", "kind": "Gospel", "refs": ["Luke 24:1-12"]}
+   ],
+   "note": "The Matins Gospel differs by usage. Antiochian and Greek read Eothinon 5 (Luke 24:12-35). Slavic reads Eothinon 4 (Luke 24:1-12)."
+  },
+  {
+   "pascha": 22,
+   "name": "Monday of the 4th Week of Pascha",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Acts 10:1-16"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["John 6:56-69"]}
+   ],
+   "confidence": "high",
+   "sources": ["GOA", "OCA", "SCR", "MCI"]
+  },
+  {
+   "pascha": 23,
+   "name": "Tuesday of the 4th Week of Pascha (Eve of Mid-Pentecost)",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Acts 10:21-33"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["John 7:1-13"]}
+   ],
+   "confidence": "high",
+   "sources": ["GOA", "OCA", "SCR", "MCI"],
+   "note": "The Great Vespers of Mid-Pentecost is served this evening. Its readings are filed under day 24."
+  },
+  {
+   "pascha": 24,
+   "name": "Mid-Pentecost (Wednesday of the 4th Week)",
+   "readings": [
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["Mic 4:2-3", "Mic 4:5", "Mic 6:2-5", "Mic 6:8", "Mic 5:4-5"], "served": "evening before"},
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["Isa 55:1", "Isa 12:3-4", "Isa 55:2-3", "Isa 55:6-13"], "served": "evening before"},
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["Prov 9:1-11"], "served": "evening before"},
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Acts 14:6-18"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["John 7:14-30"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "GOA", "OCA", "SCR", "MCI"],
+   "note": "The Vespers readings are composites. Mic 5:4-5 uses English (KJV) numbering; it is Mic 5:3-4 in Hebrew Bibles. Only 5:4 is actually read. The Antiochian rubric heads the Isaiah lesson '55:1-2; 12:3-4; 55:2-3, 6-13'; the refs here follow the text as read, which leaves out 55:4-5. OCA lists Isa 55:1; 12:3-4; 55:2-13. There is no Matins Gospel. Slavic usage adds a small blessing of waters (Heb 2:11-18; John 5:1-4 per orthocal). It is not Antiochian usage."
+  },
+  {
+   "pascha": 25,
+   "name": "Thursday of the 4th Week of Pascha",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Acts 10:34-43"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["John 8:12-20"]}
+   ],
+   "confidence": "high",
+   "sources": ["GOA", "OCA", "SCR", "MCI"]
+  },
+  {
+   "pascha": 26,
+   "name": "Friday of the 4th Week of Pascha",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Acts 10:44-11:10"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["John 8:21-30"]}
+   ],
+   "confidence": "high",
+   "sources": ["GOA", "OCA", "SCR", "MCI"]
+  },
+  {
+   "pascha": 27,
+   "name": "Saturday of the 4th Week of Pascha",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Acts 12:1-11"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["John 8:31-42"]}
+   ],
+   "confidence": "high",
+   "sources": ["GOA", "OCA", "SCR", "MCI"]
+  },
+  {
+   "pascha": 28,
+   "name": "Sunday of the Samaritan Woman (5th Sunday of Pascha)",
+   "readings": [
+    {"service": "Matins", "kind": "Gospel", "refs": ["John 20:1-10"], "title": "Eothinon 7"},
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Acts 11:19-30"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["John 4:5-42"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-CHART", "GOA", "OCA", "HAP", "SCR"],
+   "variants": [
+    {"usage": "Slavic (OCA/Russian)", "service": "Liturgy", "kind": "Epistle", "refs": ["Acts 11:19-26", "Acts 11:29-30"]}
+   ]
+  },
+  {
+   "pascha": 29,
+   "name": "Monday of the 5th Week of Pascha",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Acts 12:12-17"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["John 8:42-51"]}
+   ],
+   "confidence": "high",
+   "sources": ["GOA", "OCA", "SCR", "MCI"]
+  },
+  {
+   "pascha": 30,
+   "name": "Tuesday of the 5th Week of Pascha",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Acts 12:25-13:12"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["John 8:51-59"]}
+   ],
+   "confidence": "high",
+   "sources": ["GOA", "OCA", "SCR", "MCI"]
+  },
+  {
+   "pascha": 31,
+   "name": "Wednesday of the 5th Week (Leave-taking of Mid-Pentecost)",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Acts 13:13-24"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["John 6:5-14"]}
+   ],
+   "confidence": "high",
+   "sources": ["GOA", "OCA", "SCR", "MCI"]
+  },
+  {
+   "pascha": 32,
+   "name": "Thursday of the 5th Week of Pascha",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Acts 14:20-15:4"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["John 9:39-10:9"]}
+   ],
+   "confidence": "medium",
+   "sources": ["GOA", "OCA", "SCR", "MCI"],
+   "variants": [
+    {"usage": "Slavic (OCA/Russian) and Scrivener's manuscripts", "service": "Liturgy", "kind": "Epistle", "refs": ["Acts 14:20-27"]}
+   ],
+   "note": "The Epistle's end verse is disputed. GOARCH (and so antiochian.org) reads Acts 14:20-15:4. Scrivener's manuscripts and Slavic usage read Acts 14:20-27. No independent printed Greek or Antiochian Apostolos was available to settle it. The Gospel is certain."
+  },
+  {
+   "pascha": 33,
+   "name": "Friday of the 5th Week of Pascha",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Acts 15:5-12"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["John 10:17-28"]}
+   ],
+   "confidence": "high",
+   "sources": ["GOA", "OCA", "SCR", "MCI"],
+   "variants": [
+    {"usage": "Slavic (OCA/Russian)", "service": "Liturgy", "kind": "Epistle", "refs": ["Acts 15:5-34"]}
+   ]
+  },
+  {
+   "pascha": 34,
+   "name": "Saturday of the 5th Week of Pascha",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Acts 15:35-41"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["John 10:27-38"]}
+   ],
+   "confidence": "high",
+   "sources": ["GOA", "OCA", "SCR", "MCI"]
+  },
+  {
+   "pascha": 35,
+   "name": "Sunday of the Blind Man (6th Sunday of Pascha)",
+   "readings": [
+    {"service": "Matins", "kind": "Gospel", "refs": ["John 20:11-18"], "title": "Eothinon 8"},
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Acts 16:16-34"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["John 9:1-38"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-CHART", "GOA", "OCA", "HAP", "SCR", "MCI"]
+  },
+  {
+   "pascha": 36,
+   "name": "Monday of the 6th Week of Pascha",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Acts 17:1-9"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["John 11:47-54"]}
+   ],
+   "confidence": "high",
+   "sources": ["GOA", "OCA", "SCR", "MCI"],
+   "variants": [
+    {"usage": "Slavic (OCA/Russian)", "service": "Liturgy", "kind": "Epistle", "refs": ["Acts 17:1-15"]},
+    {"usage": "Slavic (OCA/Russian)", "service": "Liturgy", "kind": "Gospel", "refs": ["John 11:47-57"]}
+   ]
+  },
+  {
+   "pascha": 37,
+   "name": "Tuesday of the 6th Week of Pascha",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Acts 17:19-28"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["John 12:19-36"]}
+   ],
+   "confidence": "high",
+   "sources": ["GOA", "OCA", "SCR", "MCI"]
+  },
+  {
+   "pascha": 38,
+   "name": "Wednesday of the 6th Week (Leave-taking of Pascha)",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Acts 18:22-28"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["John 12:36-47"]}
+   ],
+   "confidence": "high",
+   "sources": ["GOA", "OCA", "SCR", "MCI"],
+   "note": "The Great Vespers of the Ascension is served this evening. Its readings are filed under day 39."
+  },
+  {
+   "pascha": 39,
+   "name": "Ascension of the Lord (Thursday of the 6th Week)",
+   "readings": [
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["Isa 2:2-3"], "served": "evening before"},
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["Isa 62:10-63:3", "Isa 63:7-9"], "served": "evening before"},
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["Zech 14:1", "Zech 14:4", "Zech 14:8-11"], "served": "evening before"},
+    {"service": "Matins", "kind": "Gospel", "refs": ["Mark 16:9-20"]},
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Acts 1:1-12"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Luke 24:36-53"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "GOA", "OCA", "HAP", "SCR", "MCI"]
+  },
+  {
+   "pascha": 40,
+   "name": "Friday of the 6th Week of Pascha",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Acts 19:1-8"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["John 14:1-11"]}
+   ],
+   "confidence": "high",
+   "sources": ["GOA", "OCA", "SCR", "MCI"]
+  },
+  {
+   "pascha": 41,
+   "name": "Saturday of the 6th Week of Pascha",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Acts 20:7-12"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["John 14:10-21"]}
+   ],
+   "confidence": "high",
+   "sources": ["GOA", "OCA", "SCR", "MCI"]
+  },
+  {
+   "pascha": 42,
+   "name": "Sunday of the Holy Fathers of the First Ecumenical Council (7th Sunday of Pascha)",
+   "readings": [
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["Gen 14:14-20"], "served": "evening before", "confidence": "medium"},
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["Deut 1:8-11", "Deut 1:15-17"], "served": "evening before", "confidence": "medium"},
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["Deut 10:14-21"], "served": "evening before", "confidence": "medium"},
+    {"service": "Matins", "kind": "Gospel", "refs": ["John 21:1-14"], "title": "Eothinon 10"},
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Acts 20:16-18", "Acts 20:28-36"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["John 17:1-13"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-CHART", "GOA", "OCA", "HAP", "SCR", "MCI"],
+   "note": "The Liturgy and Matins readings are high confidence. The three Vespers readings (Saturday evening) rest on OCA only; no Antiochian service text was found for them (medium)."
+  },
+  {
+   "pascha": 43,
+   "name": "Monday of the 7th Week of Pascha",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Acts 21:8-14"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["John 14:27-15:7"]}
+   ],
+   "confidence": "high",
+   "sources": ["GOA", "OCA", "SCR", "MCI"]
+  },
+  {
+   "pascha": 44,
+   "name": "Tuesday of the 7th Week of Pascha",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Acts 21:26-32"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["John 16:2-13"]}
+   ],
+   "confidence": "high",
+   "sources": ["GOA", "OCA", "SCR", "MCI"]
+  },
+  {
+   "pascha": 45,
+   "name": "Wednesday of the 7th Week of Pascha",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Acts 23:1-11"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["John 16:15-23"]}
+   ],
+   "confidence": "high",
+   "sources": ["GOA", "OCA", "SCR", "MCI"]
+  },
+  {
+   "pascha": 46,
+   "name": "Thursday of the 7th Week of Pascha",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Acts 25:13-19"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["John 16:23-33"]}
+   ],
+   "confidence": "high",
+   "sources": ["GOA", "OCA", "SCR", "MCI"]
+  },
+  {
+   "pascha": 47,
+   "name": "Friday of the 7th Week (Leave-taking of the Ascension)",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Acts 27:1-28:1"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["John 17:18-26"]}
+   ],
+   "confidence": "high",
+   "sources": ["GOA", "OCA", "SCR", "MCI"],
+   "variants": [
+    {"usage": "Slavic (OCA/Russian)", "service": "Liturgy", "kind": "Epistle", "refs": ["Acts 27:1-44"]}
+   ]
+  },
+  {
+   "pascha": 48,
+   "name": "Saturday of Souls (Saturday before Pentecost)",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Acts 28:1-31"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["John 21:14-25"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "GOA", "SCR"],
+   "variants": [
+    {"usage": "Greek (GOARCH Online Chapel)", "service": "Liturgy", "kind": "Epistle", "refs": ["1 Thess 4:13-17"]},
+    {"usage": "Slavic (OCA/Russian)", "service": "Liturgy", "kind": "Gospel", "refs": ["John 21:15-25"]},
+    {"usage": "Slavic (OCA/Russian), for the departed", "service": "Liturgy", "kind": "Epistle", "refs": ["1 Thess 4:13-17"]},
+    {"usage": "Slavic (OCA/Russian), for the departed", "service": "Liturgy", "kind": "Gospel", "refs": ["John 5:24-30"]}
+   ],
+   "note": "Usages differ on this day. Antiochian service texts read the day's Acts and John only, with the prokeimenon and hymns of the departed. GOARCH and its feed (shown on antiochian.org) put the Epistle of the departed in place of Acts. Slavic usage reads both the day's pair and the pair for the departed. No Matins Gospel; the Friday-evening Vespers has no readings."
+  },
+  {
+   "pascha": 49,
+   "name": "Holy Pentecost (Sunday of the Holy Trinity)",
+   "readings": [
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["Num 11:16-17", "Num 11:24-29"], "served": "evening before"},
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["Joel 2:23-32"], "served": "evening before"},
+    {"service": "Vespers", "kind": "Old Testament", "refs": ["Ezek 36:24-28"], "served": "evening before"},
+    {"service": "Matins", "kind": "Gospel", "refs": ["John 20:19-23"]},
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Acts 2:1-11"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["John 7:37-52", "John 8:12"]}
+   ],
+   "confidence": "high",
+   "sources": ["ANT-OLG", "ANT-CHART", "GOA", "OCA", "HAP", "SCR", "MCI"],
+   "note": "Joel 2:23-32 uses English (KJV) numbering; in Hebrew Bibles it is Joel 2:23-27 and 3:1-5. The Gospel skips John 7:53-8:11, as every source does. Hapgood's Great Feasts table misprints the Pentecost Gospel as 'Luke xvi. 15-18; xvii. 1-4'; its own Sunday table gives John 7:37-52, 8:12. The Kneeling Vespers on Pentecost evening has no readings; it is liturgically the Vespers of Monday."
+  },
+  {
+   "pascha": 50,
+   "name": "Monday of the Holy Spirit",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Eph 5:8-19"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Matt 18:10-20"]}
+   ],
+   "confidence": "high",
+   "sources": ["GOA", "OCA", "HAP", "SCR"],
+   "note": "Hapgood prints Eph 5:9-19. The Slavic pericope begins mid-way through 5:8, and with the half-verse letter dropped that is 5:8."
+  }
+ ]
+}

@@ -36,6 +36,12 @@ every source above; copies of those statements are reproduced in [`bibles.md`](b
   text, no derived index, no test fixtures. They can be imported from a file the user owns or
   fetched with the user's own API key (see the README).
 
+## Lectionary tables — MIT
+
+| Files | Contents | Compiled from | Licence |
+|---|---|---|---|
+| `data/lectionary/*.json` | The daily Scripture readings of the church year (Pentecostarion, Triodion, Epistle and Gospel cycles, Menaion) as chapter-and-verse references, with each entry's sources, confidence and notes | Compiled for this fork from the Antiochian Archdiocese's service texts and 2026 Sunday chart, the GOARCH Online Chapel feed shown on antiochian.org, the GOA Digital Chant Stand, the OCA lectionary (orthocal.info), Hapgood's *Service Book* (1906) and Scrivener's *Plain Introduction* (1861); each file's header lists them | MIT, with the code. References only: no Bible text and no prose from the sources, which were read only to confirm references. The notes are our own. |
+
 ## Fonts — SIL Open Font License 1.1
 
 | Font | Use | Source | Licence |
