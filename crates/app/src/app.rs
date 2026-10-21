@@ -64,6 +64,8 @@ pub struct Settings {
     pub onboarded: bool,
     /// The church calendar for feasts and fasts (Orthodox fork).
     pub calendar: bible_core::calendar::Style,
+    /// Which archdiocese's readings the lectionary follows where they differ.
+    pub usage: bible_core::lectionary::Usage,
     /// Remind at the times of the prayer rule's blocks while the app is open.
     pub rule_reminders: bool,
     /// Sync study data with the iPhone through iCloud Drive (`crate::sync`).
@@ -106,6 +108,7 @@ impl Default for Settings {
             share: Default::default(),
             onboarded: false,
             calendar: Default::default(),
+            usage: Default::default(),
             rule_reminders: false,
             sync: false,
             synced: false,
@@ -148,7 +151,11 @@ pub struct Init {
 
 pub fn initialize(data_dir: PathBuf, notify: Arc<dyn Fn() + Send + Sync>) -> Result<Init> {
     let t = Instant::now();
-    let study = StudyStore::open(&data_dir.join("study.sqlite"))?;
+    let mut study = StudyStore::open(&data_dir.join("study.sqlite"))?;
+    // Before any sync: a database copied from another Mac takes a sync id of its own here.
+    if let Some(machine) = crate::sync::machine() {
+        study.bind_machine(&machine)?;
+    }
     let mut settings = Settings::load(&study);
     let library = Library::open(&data_dir, notify);
     if !library.contains(&settings.translation) {

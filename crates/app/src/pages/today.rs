@@ -590,7 +590,7 @@ impl State {
         // The day's readings.
         let told = (info.feasts.iter().any(|f| great(f)), !info.feasts.is_empty());
         let mut all = self.all_readings == Some(d);
-        let lessons = lectionary::readings(d, style);
+        let lessons = lectionary::readings_in(d, style, env.settings.usage);
         y = readings(ui, env, left, width, y, &lessons, told, &mut all, actions) + 20.0;
         if all {
             self.all_readings = Some(d);

@@ -372,7 +372,7 @@ pub fn section(
         return y + 20.0;
     }
     let today = super::today::today();
-    let lessons = lectionary::readings(d, style);
+    let lessons = lectionary::readings_in(d, style, env.settings.usage);
     let t = super::reading_text(env);
     let started = env.study.plans();
     let under = following(rule, &started, env.study);
@@ -480,7 +480,7 @@ pub fn open_item(
     let t = super::reading_text(env);
     let started = env.study.plans();
     let under = following(rule, &started, env.study);
-    let lessons = lectionary::readings(d, env.settings.calendar);
+    let lessons = lectionary::readings_in(d, env.settings.calendar, env.settings.usage);
     for (block, items) in rule.for_day(d, env.settings.calendar) {
         if let Some(item) = items.into_iter().find(|i| i.id == id) {
             let today = super::today::today();
