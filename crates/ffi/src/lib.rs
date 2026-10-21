@@ -30,7 +30,7 @@ pub use plans::{ActivePlan, PlanDay, PlanInfo, PlanPassage, reading_plans};
 pub use readings::{Reading, ReadingConfidence, ReadingKind, ReadingPassage, ReadingUsage, day_readings};
 pub use rule::{
     FastLevel, MonthDay, Prayer, Rule, RuleBlock, RuleDay, RuleDayBlock, RuleDayItem, RuleItem, RuleKept,
-    RuleKind, RuleOpen, RuleSeason, civil_day, prayers, starter_rule,
+    RuleKind, RuleNow, RuleOpen, RulePart, RuleSeason, civil_day, prayers, starter_rule,
 };
 pub use sync::SyncReport;
 pub use tokens::{Palette, ThemeName, palette};
@@ -285,6 +285,13 @@ pub struct FatherQuote {
     pub text: String,
 }
 
+/// A verse and how many quotes of the Fathers are on it.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, uniffi::Record)]
+pub struct VerseCount {
+    pub verse: VerseRef,
+    pub quotes: u32,
+}
+
 /// A kathisma of the Psalter: its number, "Psalms 24–31", and the chapter its first psalm is.
 #[derive(Debug, Clone, PartialEq, uniffi::Record)]
 pub struct Kathisma {
@@ -393,17 +400,52 @@ impl Bible {
 
     /// Chapter `index` (0–1364) of a translation, ready to typeset.
     pub fn chapter(&self, translation: String, index: u16, options: ContentOptions) -> ChapterContent {
+        self.chapter_span(translation, index, 1, u8::MAX, options)
+    }
+
+    /// Verses `from` to `to` of chapter `index`, as [`Bible::chapter`] gives the chapter: nothing
+    /// outside them, and the chapter's head only from verse 1.
+    pub fn chapter_span(
+        &self,
+        translation: String,
+        index: u16,
+        from: u8,
+        to: u8,
+        options: ContentOptions,
+    ) -> ChapterContent {
         let c = ChapterIdx(index.min(CHAPTER_COUNT as u16 - 1));
         let lib = self.library();
         let meta = lib.get(&translation).map(|e| e.meta.clone());
         let status = match lib.chapter(&translation, c) {
-            Chapter::Ready(t) => return content::chapter(&t, c, options),
+            Chapter::Ready(t) => return content::chapter_span(&t, c, from..=to, options),
             Chapter::Missing => ChapterStatus::Missing,
             Chapter::Pending => ChapterStatus::Pending,
             Chapter::NoKey => ChapterStatus::NoKey,
             Chapter::Failed(message) => ChapterStatus::Failed { message },
         };
-        ChapterContent::unavailable(meta.as_ref(), c, status)
+        ChapterContent { head: from <= 1, ..ChapterContent::unavailable(meta.as_ref(), c, status) }
+    }
+
+    /// Every verse of `passages` with how many quotes of the Fathers it has (none until they're
+    /// installed), so a list of the verses can set apart those with nothing.
+    pub fn fathers_counts(&self, passages: Vec<ReadingPassage>) -> Vec<VerseCount> {
+        let fathers = self.fathers.read().unwrap();
+        passages
+            .iter()
+            .filter_map(|p| {
+                let (from, to) = (p.from.core().ok()?, p.to.core().ok()?);
+                Some(bible_core::lectionary::Passage {
+                    book: from.book,
+                    from: (from.chapter, from.verse),
+                    to: (to.chapter, to.verse),
+                })
+            })
+            .flat_map(|p| p.verses())
+            .map(|v| VerseCount {
+                verse: v.into(),
+                quotes: fathers.as_ref().map_or(0, |f| f.count(v) as u32),
+            })
+            .collect()
     }
 
     /// Searches a local translation: every word must appear (as a word prefix unless

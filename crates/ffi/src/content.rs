@@ -5,6 +5,8 @@
 //!
 //! Spacing is in points at the design's 20 pt reading size; apps scale it with their text size.
 
+use std::ops::RangeInclusive;
+
 use bible_core::model::{MarkKind, Style, Translation, TranslationMeta, VerseView, caps_words};
 use bible_core::{BookId, ChapterIdx};
 
@@ -61,6 +63,10 @@ pub struct ChapterContent {
     /// Gospel According to John"); empty otherwise.
     pub book_title: String,
     pub blocks: Vec<Block>,
+    /// Whether the chapter's head (its title, numeral or PSALM n label) goes above the blocks:
+    /// not for verses of it that start after verse 1 ([`crate::Bible::chapter_span`]).
+    #[uniffi(default = true)]
+    pub head: bool,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, uniffi::Enum)]
@@ -131,6 +137,7 @@ impl ChapterContent {
             book_name,
             book_title,
             blocks: Vec::new(),
+            head: true,
         }
     }
 }
@@ -143,12 +150,24 @@ fn names(meta: Option<&TranslationMeta>, book: BookId) -> (String, String) {
     (short, long)
 }
 
-/// Lays out the blocks of chapter `c` of `t`.
-pub fn chapter(t: &Translation, c: ChapterIdx, opts: ContentOptions) -> ChapterContent {
+/// Lays out the blocks of the `verses` of chapter `c` of `t` (all of them for `1..=u8::MAX`; a
+/// verse the translation joins to one of them comes too), with the chapter's head only from
+/// verse 1.
+pub fn chapter_span(
+    t: &Translation,
+    c: ChapterIdx,
+    verses: RangeInclusive<u8>,
+    opts: ContentOptions,
+) -> ChapterContent {
+    let head = *verses.start() <= 1;
     let mut b = Builder::new(c, opts);
+    // A heading at the start of a later verse isn't the psalm's own.
+    b.psalm &= head;
     let per_line = opts.verse_per_line;
     let mut kind = BlockKind::Prose { indent: false };
-    for v in t.verses_in(c) {
+    let within =
+        |v: &VerseView<'_>| v.number <= *verses.end() && v.number_end.max(v.number) >= *verses.start();
+    for v in t.verses_in(c).filter(within) {
         let styles = |off: usize| style_mask(&v, off);
         let mut cursor = 0usize;
         let mut first = true;
@@ -255,6 +274,7 @@ pub fn chapter(t: &Translation, c: ChapterIdx, opts: ContentOptions) -> ChapterC
         book_name,
         book_title,
         blocks: b.blocks,
+        head,
     }
 }
 

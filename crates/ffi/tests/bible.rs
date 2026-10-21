@@ -307,7 +307,25 @@ fn church_days_and_the_fathers() {
 
 /// The rule on a date, its plans' days counted from UTC midnights.
 fn rule_on(bible: &Bible, year: i32, month: u8, day: u8) -> RuleDay {
-    bible.rule_day(year, month, day, false, ReadingUsage::Greek, civil_day(year, month, day) * 86_400)
+    rule_at(bible, (year, month, day), None, &[])
+}
+
+/// The rule on a date at `minute`, with the parts of the day `ended`.
+fn rule_at(bible: &Bible, (year, month, day): (i32, u8, u8), minute: Option<u16>, ended: &[&str]) -> RuleDay {
+    let midnight = civil_day(year, month, day) * 86_400;
+    let ended = ended.iter().map(|s| s.to_string()).collect();
+    bible.rule_day(year, month, day, false, ReadingUsage::Greek, midnight, minute, ended)
+}
+
+/// The item of `block` to open after `after` on a date.
+fn next_on(
+    bible: &Bible,
+    (year, month, day): (i32, u8, u8),
+    block: &str,
+    after: Option<&str>,
+) -> Option<String> {
+    let midnight = civil_day(year, month, day) * 86_400;
+    bible.rule_next(year, month, day, false, midnight, block.into(), after.map(Into::into))
 }
 
 fn month(bible: &Bible, year: i32, month: u8, old_calendar: bool) -> Vec<MonthDay> {
@@ -536,6 +554,153 @@ fn plans_start_and_read_day_by_day() {
     let _ = std::fs::remove_dir_all(dir);
 }
 
+/// The verses a chapter's blocks hold.
+fn verses_of(c: &ChapterContent) -> Vec<u8> {
+    let mut v: Vec<u8> = c.blocks.iter().flat_map(|b| &b.runs).map(|r| r.verse).filter(|&v| v > 0).collect();
+    v.dedup();
+    v
+}
+
+#[test]
+fn a_span_of_a_chapter_holds_only_its_verses() {
+    let (bible, dir) = open("span");
+    let (luke9, options) = (index("lk 9"), ContentOptions::default());
+    // In paragraphs verses share lines: the span is set from its own verses alone.
+    let span = bible.chapter_span("kjv".into(), luke9, 44, 50, options);
+    assert_eq!((span.status.clone(), verses_of(&span)), (ChapterStatus::Ready, (44..=50).collect()));
+    assert!(text(&span.blocks[0]).starts_with("44\u{a0}Let these sayings sink down"), "{:?}", span.blocks[0]);
+    assert!(!span.head, "no chapter head after verse 1");
+    let per_line = ContentOptions { verse_per_line: true, ..options };
+    let lines = bible.chapter_span("kjv".into(), luke9, 44, 50, per_line);
+    assert_eq!(lines.blocks.len(), 7);
+    assert_eq!(
+        (lines.blocks[0].gutter.as_deref(), lines.blocks[6].gutter.as_deref()),
+        (Some("44"), Some("50"))
+    );
+    // From verse 1 it has the chapter's head; the whole chapter is the chapter.
+    let start = bible.chapter_span("kjv".into(), luke9, 1, 6, options);
+    assert_eq!((start.head, verses_of(&start)), (true, (1..=6).collect()));
+    let whole = bible.chapter("kjv".into(), luke9, options);
+    assert!(whole.head);
+    assert_eq!(bible.chapter_span("kjv".into(), luke9, 1, u8::MAX, options), whole);
+    // A psalm keeps its title only from its first verse.
+    let ps3 = index("ps 3");
+    let title = |c: &ChapterContent| c.blocks.iter().any(|b| b.kind == BlockKind::PsalmTitle);
+    assert!(title(&bible.chapter_span("kjv".into(), ps3, 1, 4, options)));
+    assert!(!title(&bible.chapter_span("kjv".into(), ps3, 2, 4, options)));
+    let missing = bible.chapter_span("nlt".into(), luke9, 44, 50, options);
+    assert!(matches!(missing.status, ChapterStatus::Failed { .. }) && !missing.head);
+    let _ = std::fs::remove_dir_all(dir);
+}
+
+#[test]
+fn a_days_items_carry_the_scripture_they_read() {
+    use bible_core::calendar::Style;
+    let (bible, dir) = open("parts");
+    let wed = (2026, 10, 21);
+    let day = rule_on(&bible, 2026, 10, 21);
+    // As the core works them out, item by item.
+    let d = civil_day(2026, 10, 21);
+    let lessons = bible_core::lectionary::readings_in(d, Style::New, bible_core::lectionary::Usage::Greek);
+    let rule = bible_core::rule::Rule::starter();
+    for (b, items) in rule.for_day(d, Style::New) {
+        for i in items {
+            let core: Vec<RulePart> =
+                bible_core::rule::parts(i, b, d, &lessons, None).into_iter().map(Into::into).collect();
+            assert_eq!(rule_item(&day, &i.id).unwrap().parts, core, "{}", i.id);
+        }
+    }
+    let names = |parts: &[RulePart]| -> Vec<(String, String, String)> {
+        parts.iter().map(|p| (p.label.clone(), p.reference.clone(), p.end.clone())).collect()
+    };
+    let scripture = rule_item(&day, "morning-reading").unwrap().parts;
+    assert_eq!(
+        names(&scripture),
+        [
+            ("Epistle".into(), "2 Corinthians 9:6–11".into(), "End of the Epistle".into()),
+            ("Gospel".into(), "Luke 9:44–50".into(), "End of the Gospel".into())
+        ]
+    );
+    let luke = |verse| VerseRef { book: 57, chapter: 9, verse };
+    let gospel = ReadingPassage { from: luke(44), to: luke(50), chapter_index: index("lk 9") };
+    assert_eq!(scripture[1].passages, [gospel]);
+    assert_eq!(rule_item(&day, "evening-fathers").unwrap().parts, scripture[1..]);
+    // Psalms in the Septuagint's numbering, as the phone shows them.
+    let psalter = rule_item(&day, "evening-kathisma").unwrap().parts;
+    assert_eq!((psalter[0].reference.as_str(), psalter[0].passages.len()), ("Psalms 85–90", 6));
+    assert_eq!(psalter[0].passages[0].from, VerseRef { book: 25, chapter: 86, verse: 1 });
+    let psalm = rule_item(&day, "midday-psalm").unwrap().parts;
+    assert_eq!(names(&psalm), [("Psalm 90".into(), "Psalm 90".into(), "End of Psalm 90".into())]);
+    assert!(rule_item(&day, "morning-prayers").unwrap().parts.is_empty());
+
+    // A plan's item reads the day's first passage not yet read.
+    let mut r = bible.rule();
+    r.blocks[0].items.push(new_item("gospels", RuleKind::Plan { plan: "gospels-30".into() }));
+    bible.set_rule(r).unwrap();
+    bible.start_plan("gospels-30".into(), d * 86_400).unwrap();
+    let plan = |b: &Bible| rule_item(&rule_at(b, wed, None, &[]), "gospels").unwrap().parts;
+    assert_eq!(names(&plan(&bible)), [("Day 1".into(), "Matthew 1".into(), "End of Matthew 1".into())]);
+    bible.set_plan_read("gospels-30".into(), 1, 0, true).unwrap();
+    assert_eq!(plan(&bible)[0].reference, "Matthew 2");
+    let _ = std::fs::remove_dir_all(dir);
+}
+
+#[test]
+fn the_now_card_and_done_follow_the_rule() {
+    let (bible, dir) = open("now");
+    let wed = (2026, 10, 21);
+    let at = |h: u16, m: u16| Some(h * 60 + m);
+    let now = |minute, ended: &[&str]| rule_at(&bible, wed, minute, ended).now;
+    let offer = |block: &str, due| Some(RuleNow { block: block.into(), due });
+    assert_eq!(now(None, &[]), None, "only with the minute it is");
+    assert_eq!(now(at(4, 30), &[]), offer("morning", false));
+    assert_eq!(now(at(7, 10), &[]), offer("morning", true));
+    assert_eq!(now(at(20, 45), &[]), offer("evening", true));
+    let d = civil_day(2026, 10, 21);
+    for id in ["morning-prayers", "morning-reading", "meal-prayer", "midday-psalm"] {
+        bible.set_rule_done(d, id.into(), true).unwrap();
+    }
+    assert_eq!(now(at(7, 10), &[]), offer("evening", false));
+    assert_eq!(now(at(20, 45), &["evening"]), None);
+
+    // Done moves on through the part of the day, passing over what's done.
+    let next = |block, after| next_on(&bible, wed, block, after);
+    assert_eq!(next("evening", None).as_deref(), Some("evening-prayers"));
+    assert_eq!(next("evening", Some("evening-prayers")).as_deref(), Some("evening-kathisma"));
+    bible.set_rule_done(d, "evening-kathisma".into(), true).unwrap();
+    assert_eq!(next("evening", Some("evening-prayers")).as_deref(), Some("evening-fathers"));
+    assert_eq!(next("evening", Some("evening-reflection")), None);
+    assert_eq!(next("midday", Some("midday-psalm")).as_deref(), Some("midday-jesus-prayer"), "optional");
+    assert_eq!(next("morning", None), None, "all done");
+    // Sunday evening has no kathisma.
+    let sunday = next_on(&bible, (2026, 10, 25), "evening", Some("evening-prayers"));
+    assert_eq!(sunday.as_deref(), Some("evening-fathers"));
+    // A plan with no reading on the day is passed over; one not started is offered.
+    let mut r = bible.rule();
+    r.blocks[3].items.insert(1, new_item("later", RuleKind::Plan { plan: "gospels-30".into() }));
+    r.blocks[3].items.insert(2, new_item("unstarted", RuleKind::Plan { plan: "psalter-20".into() }));
+    bible.set_rule(r).unwrap();
+    bible.start_plan("gospels-30".into(), civil_day(2026, 10, 22) * 86_400).unwrap();
+    assert_eq!(next("evening", Some("evening-prayers")).as_deref(), Some("unstarted"));
+    let _ = std::fs::remove_dir_all(dir);
+}
+
+#[test]
+fn the_fathers_chips_list_every_verse_of_the_reading() {
+    let (bible, dir) = open("chips");
+    let luke = |chapter, verse| VerseRef { book: 57, chapter, verse };
+    let passage = ReadingPassage { from: luke(9, 44), to: luke(9, 50), chapter_index: index("lk 9") };
+    let counts = bible.fathers_counts(vec![passage]);
+    let verses: Vec<VerseRef> = counts.iter().map(|c| c.verse).collect();
+    assert_eq!(verses, (44..=50).map(|v| luke(9, v)).collect::<Vec<_>>());
+    assert!(counts.iter().all(|c| c.quotes == 0), "nothing until the Fathers are installed");
+    // Across a chapter's end.
+    let across = ReadingPassage { from: luke(9, 61), to: luke(10, 2), chapter_index: index("lk 9") };
+    let verses: Vec<VerseRef> = bible.fathers_counts(vec![across]).iter().map(|c| c.verse).collect();
+    assert_eq!(verses, [luke(9, 61), luke(9, 62), luke(10, 1), luke(10, 2)]);
+    let _ = std::fs::remove_dir_all(dir);
+}
+
 /// "Liturgy Epistle 2 Timothy 2:1–10 (Great Martyr …)": a day's readings, one line each.
 fn lessons(year: i32, month: u8, day: u8) -> Vec<String> {
     lessons_in(year, month, day, ReadingUsage::Greek)
@@ -647,7 +812,8 @@ fn the_readings_follow_the_archdiocese_chosen() {
     // The rule's Readings and Fathers items follow it too.
     let (bible, dir) = open("usage");
     let item = |month, day, usage, id| {
-        let rule = bible.rule_day(2026, month, day, false, usage, civil_day(2026, month, day) * 86_400);
+        let midnight = civil_day(2026, month, day) * 86_400;
+        let rule = bible.rule_day(2026, month, day, false, usage, midnight, None, Vec::new());
         rule_item(&rule, id).unwrap().detail.unwrap()
     };
     assert_eq!(item(6, 14, Greek, "morning-reading"), "Romans 2:10–16 · Matthew 4:18–23");

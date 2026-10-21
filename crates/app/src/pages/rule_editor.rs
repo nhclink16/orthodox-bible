@@ -7,10 +7,10 @@ use std::collections::{HashMap, HashSet};
 
 use eframe::egui::{self, Id, Rect, Sense, Stroke, StrokeKind, Ui, pos2, vec2};
 
-use bible_core::rule::{Block, Item, Kind, Rule, Season};
+use bible_core::rule::{Block, Item, Kind, Rule, Season, minutes};
 use bible_core::{lxx, plans, prayers};
 
-use super::rule::{clock, crumb, minutes, shown_psalm};
+use super::rule::{clock, crumb, shown_psalm};
 use super::{PageEnv, text};
 use crate::actions::Action;
 use crate::icons;

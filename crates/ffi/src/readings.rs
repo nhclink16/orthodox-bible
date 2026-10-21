@@ -55,6 +55,12 @@ pub struct ReadingPassage {
     pub chapter_index: u16,
 }
 
+impl From<lectionary::Passage> for ReadingPassage {
+    fn from(p: lectionary::Passage) -> Self {
+        ReadingPassage { from: p.first().into(), to: p.last().into(), chapter_index: p.chapter().0 }
+    }
+}
+
 /// One lesson: the passages read together at a service.
 #[derive(Debug, Clone, PartialEq, Eq, uniffi::Record)]
 pub struct Reading {
@@ -107,15 +113,7 @@ pub fn day_readings(year: i32, month: u8, day: u8, old_calendar: bool, usage: Re
                 Kind::Gospel => ReadingKind::Gospel,
             },
             label: r.label(),
-            passages: r
-                .passages
-                .iter()
-                .map(|p| ReadingPassage {
-                    from: p.first().into(),
-                    to: p.last().into(),
-                    chapter_index: p.chapter().0,
-                })
-                .collect(),
+            passages: r.passages.iter().map(|&p| p.into()).collect(),
             title: r.title.map(Into::into),
             served: r.served.map(Into::into),
             occasion: (!own(r)).then(|| r.occasion.into()),

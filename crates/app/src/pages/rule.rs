@@ -9,7 +9,7 @@ use eframe::egui::{self, Align2, FontId, Key, Modifiers, Rect, Sense, Ui, pos2, 
 
 use bible_core::calendar::{self, Day, Style};
 use bible_core::lectionary::{self, Passage, Reading};
-use bible_core::rule::{Block, Item, Kind, Rule};
+use bible_core::rule::{Block, Item, Kind, Rule, kathismata, minutes};
 use bible_core::study::{PlanProgress, StudyStore};
 use bible_core::{BookId, ChapterIdx, Translation, VerseRef, lxx, plans, prayers};
 
@@ -22,13 +22,6 @@ use crate::widgets::{self, Button, Kind as ButtonKind};
 
 /// The Jesus Prayer, as the counter shows it.
 const JESUS_PRAYER: &str = "Lord Jesus Christ, Son of God, have mercy on me, a sinner.";
-
-/// A rule's time ("HH:MM") as minutes after midnight.
-pub fn minutes(time: &str) -> Option<i64> {
-    let (h, m) = time.split_once(':')?;
-    let (h, m) = (h.trim().parse::<i64>().ok()?, m.trim().parse::<i64>().ok()?);
-    ((0..24).contains(&h) && (0..60).contains(&m)).then_some(h * 60 + m)
-}
 
 /// Minutes after midnight as the app shows a time: "7:00", "20:30".
 pub fn clock(minutes: i64) -> String {
@@ -77,7 +70,7 @@ impl Reminders {
             let started = study.plans();
             let mut done = study.rule_done(day);
             done.extend(plans_read(&rule, day, style, day, &following(&rule, &started, study)));
-            done.extend(idle(&rule, day, style));
+            done.extend(rule.idle(day, style));
             self.wake = Some(at_minute(24 * 60));
             for (block, items) in rule.for_day(day, style) {
                 let Some(at) = block.time.as_deref().and_then(minutes) else { continue };
@@ -135,14 +128,6 @@ impl Open {
     }
 }
 
-/// The day's kathismata for a kathisma item: at Matins in the morning block (or any block
-/// before noon), at Vespers in the others.
-fn kathismata(block: &Block, d: Day) -> &'static [u8] {
-    let (matins, vespers) = calendar::kathismata(calendar::weekday(d));
-    let before_noon = block.time.as_deref().and_then(minutes).is_some_and(|m| m < 12 * 60);
-    if block.id == "morning" || before_noon { matins } else { vespers }
-}
-
 /// The reading plans under way that the rule's items follow, with their progress.
 pub(super) fn following<'a>(rule: &Rule, started: &'a [PlanProgress], study: &StudyStore) -> Vec<Under<'a>> {
     let followed = |id: &str| {
@@ -171,17 +156,6 @@ pub(super) fn plans_read(rule: &Rule, d: Day, style: Style, today: Day, under: &
     };
     let items = rule.for_day(d, style).into_iter().flat_map(|(_, items)| items);
     items.filter(|i| matches!(&i.kind, Kind::Plan { plan } if read(plan))).map(|i| i.id.clone()).collect()
-}
-
-/// The ids of day `d`'s items with nothing to do then (the kathisma on Sunday evening): they
-/// count as done for `Rule::kept` and the reminders.
-pub(super) fn idle(rule: &Rule, d: Day, style: Style) -> Vec<String> {
-    let mut out = Vec::new();
-    for (block, items) in rule.for_day(d, style) {
-        let none = kathismata(block, d).is_empty();
-        out.extend(items.into_iter().filter(|i| none && i.kind == Kind::Kathisma).map(|i| i.id.clone()));
-    }
-    out
 }
 
 /// A plan's day that an item follows: its box ticks the day's readings, and it's done once

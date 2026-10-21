@@ -964,7 +964,7 @@ impl State {
                 let some =
                     rule.for_day(day, style).iter().flat_map(|(_, i)| i).any(|i| ticked.contains(&i.id));
                 let mut kept_or_idle = ticked.clone();
-                kept_or_idle.extend(rule_view::idle(rule, day, style));
+                kept_or_idle.extend(rule.idle(day, style));
                 let (kept, of) = rule.kept(day, style, &kept_or_idle);
                 let c = pos2(cell.center().x, cell.top() + 29.0);
                 if of > 0 && some && kept == of {
