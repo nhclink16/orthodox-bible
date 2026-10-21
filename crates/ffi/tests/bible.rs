@@ -595,7 +595,7 @@ fn the_days_readings_open_in_the_reader() {
         lessons(2024, 6, 30)[1..],
         [
             "Liturgy Epistle Hebrews 11:33–12:2",
-            "Liturgy Gospel Matthew 9:36–10:8 (Synaxis of the Holy, Glorious and All-praised Twelve Apostles)",
+            "Liturgy Gospel Matthew 9:36; 10:1–8 (Synaxis of the Holy, Glorious and All-praised Twelve Apostles)",
         ],
         "All Saints with the Apostles' Gospel"
     );
