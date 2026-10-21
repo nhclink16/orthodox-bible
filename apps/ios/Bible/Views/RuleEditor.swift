@@ -162,9 +162,17 @@ struct RuleEditor: View {
             saved = store.bible.rule()
             rule = saved
         }
+        // A sync brought the Mac's rule: shown while nothing has been changed here.
+        .onChange(of: store.ruleVersion) {
+            guard rule == saved, path.isEmpty else { return }
+            saved = store.bible.rule()
+            rule = saved
+        }
     }
 
     private func save() {
+        // Saving the rule as it was would stamp it newer than the Mac's, and put it back there.
+        guard rule != saved else { return dismiss() }
         for b in rule.blocks.indices {
             if rule.blocks[b].title.trimmingCharacters(in: .whitespaces).isEmpty { rule.blocks[b].title = "Untitled" }
             for i in rule.blocks[b].items.indices

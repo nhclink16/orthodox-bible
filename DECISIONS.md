@@ -417,18 +417,25 @@ What differs is the toolkit, and here the Mac's choice is overruled.
   phone doesn't see when a chapter has been read to the end, so opening a plan's passage checks
   it off.
 - **The day's readings** (`day_readings`) come with the passages the reader opens and the
-  occasion each is read for, only when it isn't the day's own: St Artemius's Epistle beside a
-  weekday's Gospel, but not the feast that takes the whole day. A saint's or fixed feast's
-  occasion is told from the weekly cycles' by whether it's read on the same date a year before or
-  after; the cycles' and Pascha's never are, since the date's weekday moves on. The rule's
-  Readings item opens the Liturgy's Gospel (on a Lenten weekday, the first reading, and says so),
-  and the Fathers item opens the Fathers on its first verse.
+  occasion each is read for, when the day's great feast doesn't name it: St Artemius's Epistle
+  beside a weekday's Gospel, and St Demetrius's whole day, but not the Nativity's (nor its Royal
+  Hours). A saint's or fixed feast's occasion is told from the weekly cycles' by whether it's read
+  on the same date two years running (any of 2024–2032); the cycles' and Pascha's never are, since
+  the date's weekday moves on. It's known by name, so St George moved to Bright Monday is too. The
+  rule's Readings item opens the Liturgy's Gospel (on a Lenten weekday, the first reading, and
+  says so), and the Fathers item opens the Fathers on its first verse.
 - **Sync with the Mac** goes through a folder the person picks in Files (iCloud Drive › Orthodox
   Bible › Sync, which the Mac makes), kept as a bookmark, so the app needs no iCloud entitlement.
-  The core merges every device's file there (`bible_core::sync`) while the app holds the folder's
-  security scope and an `NSFileCoordinator` write on it, off the main thread; files iCloud hasn't
-  downloaded are asked for, and the sync runs again a few seconds later. It runs when the app
-  comes to the front, three seconds after a change, and as it goes to the background.
+  Another folder is asked about first, and one moved since (into Recently Deleted, say) isn't
+  followed, since the Mac keeps to its place. The bridge merges every device's file there
+  (`bible_core::sync`'s merge and export) while the app holds the folder's security scope and an
+  `NSFileCoordinator` write on it, off the main thread; it reads and writes the files without the
+  study store's lock, as the Mac does, since iCloud Drive can keep a read waiting. Files iCloud
+  hasn't brought down, or not in their latest version, are asked for, and the sync runs again
+  after 5 s, 10 s and so on for about five minutes. It runs when the app comes to the front, three
+  seconds after a change, and as it goes to the background. An editor left open over a synced
+  change takes it up while untouched, and saving it unchanged writes nothing, so it can't put the
+  old text back on the Mac.
 - **No network, no encryption.** The phone build turns off `bible-core`'s `tls` feature, so the
   app contains no TLS or other encryption code. Its Info.plist sets
   `ITSAppUsesNonExemptEncryption` to `NO`, and the App Store's export questions don't apply.

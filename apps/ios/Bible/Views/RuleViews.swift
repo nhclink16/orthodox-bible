@@ -50,6 +50,12 @@ struct RuleItemLabel: View {
                 Image(systemName: "book")
                     .font(.footnote)
                     .foregroundStyle(Color(theme.ink3))
+            } else if case .fathers = item.open {
+                // As the reader's Fathers action shows it.
+                Image(systemName: "text.book.closed")
+                    .font(.footnote)
+                    .foregroundStyle(Color(theme.ink3))
+                    .accessibilityHidden(true)
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)

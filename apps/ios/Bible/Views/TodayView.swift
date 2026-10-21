@@ -239,9 +239,9 @@ struct TodayView: View {
         let rest = all.filter { !$0.isMain }
         let shown = allReadings || rest.count <= 4 ? rest.count : 3
         if !all.isEmpty {
-            Section("Readings") {
+            Section {
                 ForEach(Array(main.enumerated()), id: \.offset) { i, r in
-                    readingButton(r, after: nil, id: i)
+                    readingButton(r, after: i > 0 ? main[i - 1] : nil, id: i)
                 }
                 ForEach(0..<shown, id: \.self) { i in
                     readingButton(rest[i], after: i > 0 ? rest[i - 1] : nil, id: main.count + i)
@@ -249,6 +249,12 @@ struct TodayView: View {
                 if shown < rest.count {
                     Button("\(rest.count - shown) more readings") { allReadings = true }
                         .accessibilityIdentifier("more-readings")
+                }
+            } header: {
+                Text("Readings")
+            } footer: {
+                if all.contains(where: { $0.confidence == .low }) {
+                    Text("Some of the day’s readings vary from parish to parish. Check your parish calendar.")
                 }
             }
         }
@@ -339,17 +345,21 @@ private struct ReadingRow: View {
         HStack {
             VStack(alignment: .leading, spacing: 2) {
                 if reading.isMain {
-                    // An occasion says what the title would.
-                    Text([reading.kind.label, occasion == nil ? reading.title : nil].compactMap { $0 }.joined(separator: " · "))
+                    // Only a Liturgy other than the usual morning one is named (the Presanctified,
+                    // the Vesperal of St Basil); an occasion says what the title would.
+                    let liturgy = service && reading.service != "Liturgy" ? reading.service : nil
+                    Text([reading.kind.label, liturgy, occasion == nil ? reading.title : nil].compactMap { $0 }.joined(separator: " · "))
                         .font(.subheadline)
                         .foregroundStyle(Color(theme.ink2))
-                    Text(reading.label)
+                    Text(reading.label.unbroken)
                         .font(.reading(19))
                         .foregroundStyle(Color(theme.ink))
+                        .accessibilityLabel(reading.label)
                 } else {
-                    Text(reading.label)
+                    Text(reading.label.unbroken)
                         .font(.subheadline)
                         .foregroundStyle(Color(theme.ink))
+                        .accessibilityLabel(reading.label)
                     let line = service
                         ? [reading.service, reading.title, reading.kind.label, reading.served]
                         : [reading.title, reading.kind.label]
@@ -361,11 +371,6 @@ private struct ReadingRow: View {
                     Text(occasion)
                         .font(.footnote)
                         .foregroundStyle(Color(theme.ink2))
-                }
-                if reading.confidence == .low {
-                    Text("Check your parish calendar")
-                        .font(.footnote)
-                        .foregroundStyle(Color(theme.ink3))
                 }
             }
             Spacer(minLength: 0)
@@ -383,6 +388,22 @@ private struct ReadingRow: View {
 extension Reading {
     /// The Liturgy's Epistle or Gospel, shown first.
     var isMain: Bool { atLiturgy && kind != .oldTestament }
+}
+
+extension String {
+    /// A reference that breaks onto a new line only between its parts ("; ", ", "), never
+    /// inside one: no "2 Timothy" over "2:1–10" at the largest text sizes.
+    var unbroken: String {
+        var out = ""
+        var previous: Character = ";"
+        for c in self {
+            out.append(c == " " && previous != ";" && previous != "," ? "\u{00A0}" : c)
+            // A word joiner: no break after the dash.
+            if c == "–" { out.append("\u{2060}") }
+            previous = c
+        }
+        return out
+    }
 }
 
 extension ReadingKind {

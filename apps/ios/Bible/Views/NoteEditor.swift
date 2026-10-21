@@ -7,6 +7,8 @@ struct NoteEditor: View {
     let ref: VerseRef
     let theme: Theme
     @State private var text = ""
+    /// The note as it was opened (or as a sync brought it while untouched).
+    @State private var original = ""
     @State private var existed = false
     @State private var failed = false
     @FocusState private var focused: Bool
@@ -54,12 +56,23 @@ struct NoteEditor: View {
         }
         .onAppear {
             text = store.note(ref)
+            original = text
             existed = !text.isEmpty
             focused = true
         }
+        // A sync brought another device's edit: shown while nothing has been typed here.
+        .onChange(of: store.marksVersion) {
+            guard text == original else { return }
+            text = store.note(ref)
+            original = text
+            existed = !text.isEmpty
+        }
     }
 
+    /// Saves only a change: saving the note as it was would stamp it newer than another
+    /// device's edit, and put the old text back there.
     private func save(_ body: String) {
+        if body == original.trimmingCharacters(in: .whitespacesAndNewlines) { return dismiss() }
         if store.setNote(ref, body) { dismiss() } else { failed = true }
     }
 

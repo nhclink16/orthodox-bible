@@ -1,3 +1,4 @@
+use std::os::unix::fs::PermissionsExt;
 use std::path::PathBuf;
 use std::sync::Arc;
 
@@ -571,8 +572,25 @@ fn the_days_readings_open_in_the_reader() {
     let sunday = day_readings(2026, 10, 25, false);
     assert_eq!(sunday[0].title.as_deref(), Some("Eothinon 10"));
     assert!(sunday.iter().all(|r| r.occasion.is_none()));
-    // A feast that takes the whole day is the day's own too.
-    assert!(day_readings(2026, 10, 26, false).iter().all(|r| r.occasion.is_none()), "St Demetrius");
+    // A saint's whole day names the saint, since the day's great feasts don't.
+    let demetrius = day_readings(2026, 10, 26, false);
+    assert_eq!(demetrius.len(), 6);
+    assert!(
+        demetrius.iter().all(|r| r.occasion.as_deref() == Some("Great Martyr Demetrius the Myrrh-streamer"))
+    );
+    // A great feast's own readings are the day's, the Royal Hours' too.
+    let eve = day_readings(2026, 12, 24, false);
+    assert_eq!(eve.iter().filter(|r| r.service == "Royal Hours").count(), 12);
+    assert!(eve.iter().all(|r| r.occasion.is_none()), "Eve of the Nativity");
+    // A feast moved off its date is still named: St George on Bright Monday.
+    assert_eq!(
+        lessons(2027, 5, 3),
+        [
+            "Matins Gospel Luke 21:12–19 (Great Martyr George the Trophy-bearer)",
+            "Liturgy Epistle Acts 12:1–11 (Great Martyr George the Trophy-bearer)",
+            "Liturgy Gospel John 1:18–28",
+        ]
+    );
     assert_eq!(
         lessons(2024, 6, 30)[1..],
         [
@@ -635,6 +653,21 @@ fn sync_carries_study_and_the_rule_between_devices() {
     assert_eq!(mac.note(JOHN_3_16).unwrap(), None);
     assert_eq!(mac.marks("kjv".into(), index("jn 3"))[0].highlight, Some(HighlightColor::Blue));
     assert_eq!(phone.sync(shared.clone()).unwrap().applied, 0);
+    let names: Vec<_> =
+        std::fs::read_dir(&folder).unwrap().map(|e| e.unwrap().file_name().into_string().unwrap()).collect();
+    assert_eq!(names.len(), 3, "each device's file and the broken one, no temporary files: {names:?}");
+    assert!(names.iter().all(|n| n.ends_with(".json") && !n.starts_with('.')), "{names:?}");
+
+    // A folder the app may no longer open says so in plain words.
+    std::fs::set_permissions(&folder, std::fs::Permissions::from_mode(0o000)).unwrap();
+    let denied = phone.sync(shared.clone());
+    std::fs::set_permissions(&folder, std::fs::Permissions::from_mode(0o755)).unwrap();
+    match denied {
+        Err(BibleError::Failed { message }) => {
+            assert_eq!(message, "The app can no longer open the sync folder. Choose it again.")
+        }
+        other => panic!("{other:?}"),
+    }
     for dir in [phone_dir, mac_dir, folder] {
         let _ = std::fs::remove_dir_all(dir);
     }

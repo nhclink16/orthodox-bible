@@ -399,6 +399,25 @@ final class BibleUITests: XCTestCase {
         expectChapter("Luke 9")
         XCTAssertTrue(verse("Luke 9:23").waitForExistence(timeout: 3))
 
+        // A saint's whole day names the saint once, under the Epistle.
+        openDay(2026, 10, 26)
+        let demetrius = scrolledTo(app.buttons["reading-0"])
+        XCTAssertTrue(demetrius.label.contains("Great Martyr Demetrius"), demetrius.label)
+        XCTAssertFalse(app.buttons["reading-1"].label.contains("Demetrius"), app.buttons["reading-1"].label)
+        app.buttons["Done"].tap()
+
+        // An evening Liturgy says which it is.
+        openDay(2026, 4, 9)
+        let thursday = scrolledTo(app.buttons["reading-0"])
+        XCTAssertTrue(thursday.label.hasPrefix("Epistle · Vesperal Liturgy of St Basil, 1 Corinthians 11:23–32"), thursday.label)
+        XCTAssertTrue(app.buttons["reading-1"].label.hasPrefix("Gospel, Matthew 26:2–20; John 13:3–17"), app.buttons["reading-1"].label)
+        app.buttons["Done"].tap()
+
+        // Readings the parishes differ on say so once, under them.
+        openDay(2026, 1, 26)
+        scrolledTo(app.staticTexts["Some of the day’s readings vary from parish to parish. Check your parish calendar."])
+        app.buttons["Done"].tap()
+
         // A Lenten weekday has no Liturgy of its own: what there is, at the Hours and Vespers.
         openDay(2026, 3, 4)
         let isaiah = scrolledTo(app.buttons["reading-0"])
@@ -443,48 +462,84 @@ final class BibleUITests: XCTestCase {
         expectChapter("Isaiah 5")
     }
 
-    func testSyncsThroughAFolder() {
-        // Never iCloud Drive: a folder of the test's own, in the app's temporary folder.
-        let folder = "uitest-sync-\(UUID().uuidString)"
+    /// Never iCloud Drive: a folder in the test's own temporary folder, which the app reaches on
+    /// the simulator; the first device's file waits beside it while the second turns sync on.
+    private let syncFolder = FileManager.default.temporaryDirectory.appendingPathComponent("uitest-sync-\(UUID().uuidString)")
+    private var syncAside: URL { syncFolder.appendingPathExtension("aside") }
+
+    override func tearDown() {
+        try? FileManager.default.removeItem(at: syncFolder)
+        try? FileManager.default.removeItem(at: syncAside)
+    }
+
+    func testSyncsThroughAFolder() throws {
         app.terminate()
-        app.launchEnvironment["BIBLE_SYNC_FOLDER"] = folder
+        app.launchEnvironment["BIBLE_SYNC_FOLDER"] = syncFolder.path
         app.launch()
         XCTAssertTrue(reference.waitForExistence(timeout: 10))
         // A note written before sync is turned on goes too.
-        verse("John 1:3").tap()
-        app.selectionAction("Note").tap()
-        let note = app.textFields["Write a note"].exists ? app.textFields["Write a note"] : app.textViews.firstMatch
-        XCTAssertTrue(note.waitForExistence(timeout: 3))
-        note.typeText("Written on the other device.")
-        app.buttons["Save"].tap()
+        writeNote("John 1:3", "Written on the other device.")
         turnOnSync()
         XCTAssertTrue(
             app.staticTexts["Through iCloud Drive: notes, highlights, bookmarks, reading plans, your prayer rule and what you’ve ticked."].exists)
+        XCTAssertTrue(lastSynced.label.hasSuffix(" · nothing from your Mac in this folder yet"), lastSynced.label)
         app.buttons["sync-now"].tap()
         XCTAssertTrue(lastSynced.waitForExistence(timeout: 5))
+        app.buttons["Done"].tap()
 
-        // Another device: nothing of its own, the same folder.
+        // A change goes a few seconds later by itself.
+        writeNote("John 1:4", "Sent without Sync now.")
+        sleep(5)
+
+        // Off forgets the folder, and nothing done meanwhile is written there.
+        app.buttons["settings"].tap()
+        let sync = scrolledTo(app.switches["sync"])
+        sync.coordinate(withNormalizedOffset: CGVector(dx: 0.92, dy: 0.5)).tap()
+        expect(sync, value: "0")
+        XCTAssertFalse(app.buttons["sync-now"].exists)
+        app.buttons["Done"].tap()
+        verse("John 1:1").tap()
+        app.selectionAction("Highlight Green").tap()
+        sleep(4)
+
+        // Another device, with nothing of its own, turns sync on while the first one's file is
+        // set aside, then gets it with its notes open.
         app.terminate()
+        let fm = FileManager.default
+        let files = try fm.contentsOfDirectory(atPath: syncFolder.path).filter { $0.hasSuffix(".json") }
+        XCTAssertEqual(files.count, 1, "\(files)")
+        try fm.moveItem(at: syncFolder, to: syncAside)
         app.launch()
         XCTAssertTrue(reference.waitForExistence(timeout: 10))
         turnOnSync()
         app.buttons["Done"].tap()
         app.buttons["study"].tap()
         app.buttons["Notes"].tap()
-        XCTAssertTrue(row("John 1:3").waitForExistence(timeout: 3))
+        XCTAssertFalse(row("John 1:3").waitForExistence(timeout: 1))
+        try fm.moveItem(at: syncAside.appendingPathComponent(files[0]), to: syncFolder.appendingPathComponent(files[0]))
+        // It syncs on coming back to the front, and the open list takes the changes in.
+        XCUIDevice.shared.press(.home)
+        app.activate()
+        XCTAssertTrue(row("John 1:3").waitForExistence(timeout: 5))
         XCTAssertTrue(row("John 1:3").label.contains("Written on the other device."), row("John 1:3").label)
-
-        // Off forgets the folder.
-        app.buttons["Done"].tap()
-        app.buttons["settings"].tap()
-        let sync = scrolledTo(app.switches["sync"])
-        sync.coordinate(withNormalizedOffset: CGVector(dx: 0.92, dy: 0.5)).tap()
-        expect(sync, value: "0")
-        XCTAssertFalse(app.buttons["sync-now"].exists)
+        XCTAssertTrue(row("John 1:4").exists, "sent without Sync now")
+        app.buttons["Highlights"].tap()
+        XCTAssertFalse(row("John 1:1").waitForExistence(timeout: 2), "highlighted while sync was off")
     }
 
     private var lastSynced: XCUIElement {
         app.staticTexts.matching(NSPredicate(format: "label BEGINSWITH 'Last synced'")).firstMatch
+    }
+
+    private func writeNote(_ reference: String, _ text: String) {
+        verse(reference).tap()
+        app.selectionAction("Note").tap()
+        let note = app.textFields["Write a note"].exists ? app.textFields["Write a note"] : app.textViews.firstMatch
+        XCTAssertTrue(note.waitForExistence(timeout: 3))
+        note.typeText(text)
+        app.buttons["Save"].tap()
+        // The verse stays selected under the note.
+        app.selectionAction("Clear selection").tap()
     }
 
     /// Turns on Settings' sync with the folder the test named, and waits for its first sync.

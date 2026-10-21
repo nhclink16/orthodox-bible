@@ -146,6 +146,10 @@ final class Store {
     private(set) var syncError: String?
     /// The files the last sync couldn't read, each with why.
     private(set) var syncSkipped: [String] = []
+    /// The other devices' files the last sync read: none in a folder the Mac doesn't sync.
+    private(set) var syncDevices: UInt32 = 0
+    /// Files the last sync found still coming down from iCloud.
+    private(set) var syncWaiting = 0
 
     @ObservationIgnored let reminders = Reminders()
     /// A reminder was tapped while a note was being written: Today opens once it's closed.
@@ -157,8 +161,10 @@ final class Store {
     @ObservationIgnored private var syncAgain = false
     /// Called once the syncs asked for are done.
     @ObservationIgnored private var syncDone: [() -> Void] = []
-    /// A sync found files still in iCloud and is followed by one more.
-    @ObservationIgnored private var syncRetried = false
+    /// Syncs run again in a row for files still coming down from iCloud.
+    @ObservationIgnored private var syncRetries = 0
+    /// The rule as it was before the first sync with another device, which may replace it.
+    @ObservationIgnored private var ruleBeforeSync: Rule?
     @ObservationIgnored private var backgroundSync = UIBackgroundTaskIdentifier.invalid
 
     init() {
@@ -425,6 +431,7 @@ final class Store {
 
     func saveRule(_ rule: Rule) {
         changing { try bible.setRule(rule: rule) }
+        if ruleBeforeSync != nil { ruleBeforeSync = rule }
         Task { await refreshReminders() }
     }
 
@@ -528,13 +535,13 @@ final class Store {
 
     var syncOn: Bool { syncBookmark != nil }
 
-    /// UI tests sync a folder of their own, named in BIBLE_SYNC_FOLDER, instead of one picked
-    /// in iCloud Drive.
+    /// UI tests sync a folder of their own, at the path in BIBLE_SYNC_FOLDER (the test's own
+    /// temporary folder, which it fills and clears), instead of one picked in iCloud Drive.
     static var testSyncFolder: URL? {
         guard ProcessInfo.processInfo.arguments.contains("--uitest"),
-            let name = ProcessInfo.processInfo.environment["BIBLE_SYNC_FOLDER"]
+            let path = ProcessInfo.processInfo.environment["BIBLE_SYNC_FOLDER"]
         else { return nil }
-        return FileManager.default.temporaryDirectory.appendingPathComponent(name, isDirectory: true)
+        return URL(fileURLWithPath: path, isDirectory: true)
     }
 
     /// Turns sync on with a picked folder, and syncs.
@@ -549,6 +556,7 @@ final class Store {
         }
         forgetSyncs()
         syncFolder = FolderSync.name(url)
+        ruleBeforeSync = bible.rule()
         syncNow()
     }
 
@@ -564,6 +572,10 @@ final class Store {
         syncFolder = nil
         syncError = nil
         syncSkipped = []
+        syncDevices = 0
+        syncWaiting = 0
+        syncRetries = 0
+        ruleBeforeSync = nil
     }
 
     /// Syncs about three seconds after the last of a run of changes.
@@ -618,27 +630,35 @@ final class Store {
             if let fresh = outcome.bookmark { saveSyncBookmark(fresh) }
             syncFolder = outcome.folder ?? syncFolder
             syncError = outcome.error
+            syncWaiting = outcome.downloading
+            if outcome.downloading == 0 { syncRetries = 0 }
             if let report = outcome.report {
                 lastSynced = Date()
                 syncSkipped = report.skipped
+                syncDevices = report.devices
                 if report.applied > 0 {
                     // Everything shown is read again: the reader's marks, Today, the month, plans.
                     marksVersion += 1
                     ruleVersion += 1
                     Task { await refreshReminders() }
                 }
-            }
-            // Files asked for from iCloud are usually there in a moment.
-            if outcome.downloading > 0 && !syncRetried {
-                syncRetried = true
-                syncSoon(after: .seconds(5))
-            } else if outcome.downloading == 0 {
-                syncRetried = false
+                // The rule is one record: on the first sync with the Mac, the one changed last
+                // is kept on both.
+                if let before = ruleBeforeSync, report.devices > 0 {
+                    ruleBeforeSync = nil
+                    if bible.rule() != before { show("Your prayer rule now matches your Mac’s.") }
+                }
             }
         }
         if syncAgain {
             syncAgain = false
             return syncNow()
+        }
+        // Files asked for from iCloud are usually there in a moment: looked for again a few
+        // times, further apart each time (5 s, 10 s… about 5 minutes in all).
+        if syncBookmark == bookmark, outcome.downloading > 0, syncRetries < 6 {
+            syncSoon(after: .seconds(5 << syncRetries))
+            syncRetries += 1
         }
         finishSyncing()
     }

@@ -9,6 +9,8 @@ struct SettingsView: View {
     /// Turning sync on: which folder to choose, then the Files picker for it.
     @State private var choosing = false
     @State private var picking = false
+    /// A folder picked that isn't the one the Mac syncs, to confirm.
+    @State private var unlike: URL?
 
     var body: some View {
         @Bindable var store = store
@@ -82,6 +84,9 @@ struct SettingsView: View {
                         Button("Sync now") { store.syncNow() }
                             .disabled(store.syncing)
                             .accessibilityIdentifier("sync-now")
+                        if store.syncError != nil {
+                            Button("Choose folder…") { choosing = true }
+                        }
                     }
                 } footer: {
                     VStack(alignment: .leading, spacing: 6) {
@@ -126,7 +131,16 @@ struct SettingsView: View {
             Text("Choose iCloud Drive › Orthodox Bible › Sync. The Mac app makes this folder; you can also make it in Files.")
         }
         .fileImporter(isPresented: $picking, allowedContentTypes: [.folder]) { result in
-            if case .success(let url) = result { store.startSync(folder: url) }
+            guard case .success(let url) = result else { return }
+            if FolderSync.isMacs(url) { store.startSync(folder: url) } else { unlike = url }
+        }
+        .confirmationDialog(
+            "This isn’t the Orthodox Bible › Sync folder your Mac uses. Use it anyway?",
+            isPresented: Binding(get: { unlike != nil }, set: { if !$0 { unlike = nil } }),
+            titleVisibility: .visible, presenting: unlike
+        ) { url in
+            Button("Use folder") { store.startSync(folder: url) }
+            Button("Choose again") { picking = true }
         }
     }
 
@@ -194,14 +208,18 @@ private struct SyncStatus: View {
     @Environment(Store.self) private var store
 
     var body: some View {
-        TimelineView(.everyMinute) { context in
+        // Drawn again a minute after each sync, and each minute after that.
+        TimelineView(.periodic(from: store.lastSynced ?? .now, by: 60)) { context in
             VStack(alignment: .leading, spacing: 2) {
                 if let error = store.syncError {
-                    Text("Couldn’t sync: \(error)")
+                    Text(error)
+                } else if store.syncWaiting > 0 {
+                    Text("Waiting for iCloud Drive…")
                 } else if let last = store.lastSynced {
-                    Text(context.date.timeIntervalSince(last) < 60
+                    let when = context.date.timeIntervalSince(last) < 60
                         ? "Last synced just now"
-                        : "Last synced \(last.formatted(.relative(presentation: .named, unitsStyle: .wide)))")
+                        : "Last synced \(last.formatted(.relative(presentation: .named, unitsStyle: .wide)))"
+                    Text(store.syncDevices == 0 ? "\(when) · nothing from your Mac in this folder yet" : when)
                 } else if store.syncing {
                     Text("Syncing…")
                 }
