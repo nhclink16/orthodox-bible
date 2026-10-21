@@ -234,7 +234,9 @@ struct TodayView: View {
     /// long day (Holy Friday's twenty-nine) shows its first few until asked for the rest.
     @ViewBuilder
     private func readings(_ civil: CivilDate) -> some View {
-        let all = dayReadings(year: civil.year, month: civil.month, day: civil.day, oldCalendar: store.settings.oldCalendar)
+        let all = dayReadings(
+            year: civil.year, month: civil.month, day: civil.day, oldCalendar: store.settings.oldCalendar,
+            usage: store.settings.usage)
         let main = all.filter(\.isMain)
         let rest = all.filter { !$0.isMain }
         let shown = allReadings || rest.count <= 4 ? rest.count : 3

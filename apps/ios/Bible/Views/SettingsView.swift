@@ -62,11 +62,19 @@ struct SettingsView: View {
                     Toggle("Septuagint psalm numbers", isOn: $store.settings.septuagintPsalms)
                 }
 
-                Section("Church calendar") {
+                Section {
                     Picker("Calendar", selection: $store.settings.oldCalendar) {
                         Text("New").tag(false)
                         Text("Old (Julian)").tag(true)
                     }
+                    Picker("Readings", selection: $store.settings.usage) {
+                        Text("Greek Orthodox Archdiocese").tag(ReadingUsage.greek)
+                        Text("Antiochian Archdiocese").tag(ReadingUsage.antiochian)
+                    }
+                } header: {
+                    Text("Church calendar")
+                } footer: {
+                    Text("Which archdiocese’s calendar of readings to follow. Your parish’s bulletin is the best check.")
                 }
 
                 Section("Notes and highlights") {

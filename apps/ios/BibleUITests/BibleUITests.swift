@@ -410,7 +410,7 @@ final class BibleUITests: XCTestCase {
         openDay(2026, 4, 9)
         let thursday = scrolledTo(app.buttons["reading-0"])
         XCTAssertTrue(thursday.label.hasPrefix("Epistle · Vesperal Liturgy of St Basil, 1 Corinthians 11:23–32"), thursday.label)
-        XCTAssertTrue(app.buttons["reading-1"].label.hasPrefix("Gospel, Matthew 26:2–20; John 13:3–17"), app.buttons["reading-1"].label)
+        XCTAssertTrue(app.buttons["reading-1"].label.hasPrefix("Gospel, Matthew 26:1–20; John 13:3–17"), app.buttons["reading-1"].label)
         app.buttons["Done"].tap()
 
         // Readings the parishes differ on say so once, under them.
@@ -460,6 +460,35 @@ final class BibleUITests: XCTestCase {
         XCTAssertTrue(lent.label.contains("No Gospel today · Isaiah 5:16–25 at the Sixth Hour"), lent.label)
         lent.tap()
         expectChapter("Isaiah 5")
+    }
+
+    func testTheReadingsFollowTheArchdioceseChosen() {
+        // The 2nd Sunday after Pentecost: the Greek Archdiocese reads the week's Epistle.
+        openDay(2026, 6, 14)
+        let greek = scrolledTo(app.buttons["reading-0"])
+        XCTAssertTrue(greek.label.hasPrefix("Epistle, Romans 2:10–16"), greek.label)
+        app.buttons["Done"].tap()
+        // A tap while the sheet slides away is lost.
+        XCTAssertTrue(greek.waitForNonExistence(timeout: 3))
+
+        // Settings, beside the church calendar, with a line under it.
+        app.buttons["settings"].tap()
+        scrolledTo(app.staticTexts["Which archdiocese’s calendar of readings to follow. Your parish’s bulletin is the best check."])
+        let readings = app.buttons.matching(NSPredicate(format: "label BEGINSWITH 'Readings, '")).firstMatch
+        XCTAssertEqual(readings.label, "Readings, Greek Orthodox Archdiocese")
+        readings.tap()
+        app.buttons["Antiochian Archdiocese"].tap()
+        XCTAssertTrue(app.buttons["Readings, Antiochian Archdiocese"].waitForExistence(timeout: 3))
+        app.buttons["Done"].tap()
+        XCTAssertTrue(readings.waitForNonExistence(timeout: 3))
+
+        // The Antiochian, All Saints of Antioch's; the rule's Readings item follows.
+        openDay(2026, 6, 14)
+        let antiochian = scrolledTo(app.buttons["reading-0"])
+        XCTAssertTrue(antiochian.label.hasPrefix("Epistle, Acts 11:19–30"), antiochian.label)
+        XCTAssertTrue(app.buttons["reading-1"].label.hasPrefix("Gospel, Matthew 4:18–23"), app.buttons["reading-1"].label)
+        let rule = scrolledTo(app.buttons["open-morning-reading"])
+        XCTAssertTrue(rule.label.contains("Acts 11:19–30 · Matthew 4:18–23"), rule.label)
     }
 
     /// Never iCloud Drive: a folder in the test's own temporary folder, which the app reaches on

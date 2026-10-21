@@ -5,7 +5,7 @@ use std::collections::HashSet;
 use std::sync::OnceLock;
 
 use bible_core::calendar::{self, Style};
-use bible_core::lectionary::{self, Confidence, Kind};
+use bible_core::lectionary::{self, Confidence, Kind, Usage};
 
 use crate::VerseRef;
 
@@ -26,6 +26,24 @@ pub enum ReadingConfidence {
     Medium,
     /// The yearly ordo decides, or no Antiochian or Greek source was found.
     Low,
+}
+
+/// Whose calendar of readings to follow where the churches differ (`lectionary::Usage`).
+#[derive(Debug, Clone, Copy, PartialEq, Eq, uniffi::Enum)]
+pub enum ReadingUsage {
+    /// The Greek Orthodox Archdiocese of America, as goarch.org prints them.
+    Greek,
+    /// The Antiochian Archdiocese, with its own saints.
+    Antiochian,
+}
+
+impl From<ReadingUsage> for Usage {
+    fn from(u: ReadingUsage) -> Self {
+        match u {
+            ReadingUsage::Greek => Usage::Greek,
+            ReadingUsage::Antiochian => Usage::Antiochian,
+        }
+    }
 }
 
 /// A run of verses in the grid's numbering, from `from` to `to` (inclusive).
@@ -59,12 +77,14 @@ pub struct Reading {
 }
 
 /// The readings of a civil date in service order: the Vespers of the evening before, Matins, the
-/// Hours, the Liturgy, then the day's evening services. On the New or Old calendar.
+/// Hours, the Liturgy, then the day's evening services. On the New or Old calendar, in the Greek
+/// or Antiochian usage.
 #[uniffi::export]
-pub fn day_readings(year: i32, month: u8, day: u8, old_calendar: bool) -> Vec<Reading> {
+pub fn day_readings(year: i32, month: u8, day: u8, old_calendar: bool, usage: ReadingUsage) -> Vec<Reading> {
     let style = crate::rule::style(old_calendar);
+    let usage = Usage::from(usage);
     let d = calendar::civil(year, month, day);
-    let rs = lectionary::readings(d, style);
+    let rs = lectionary::readings_in(d, style, usage);
     let feast = !calendar::day(d, style).feasts.is_empty();
     // An occasion is the day's own unless it's a saint's or a fixed feast's that the day's great
     // feast doesn't name: on a day with none, or one the Liturgy's Epistle and Gospel (without
@@ -73,7 +93,7 @@ pub fn day_readings(year: i32, month: u8, day: u8, old_calendar: bool) -> Vec<Re
         rs.iter().filter(|r| r.at_liturgy() && r.kind != Kind::OldTestament).collect();
     let anchor = if main.is_empty() { rs.iter().collect() } else { main };
     let own = |r: &lectionary::Reading| {
-        !fixed().contains(r.occasion)
+        !fixed(usage).contains(r.occasion)
             || r.service == "Royal Hours"
             || (feast && anchor.iter().all(|a| a.occasion == r.occasion))
     };
@@ -108,13 +128,14 @@ pub fn day_readings(year: i32, month: u8, day: u8, old_calendar: bool) -> Vec<Re
         .collect()
 }
 
-/// The saints' and the fixed feasts' occasions (the Menaion's), which keep their date: the ones
-/// read on the same date two years running, in 2024–2032. The weekly cycles' and Pascha's never
-/// are, since the date's weekday moves on. Known by name, so a feast moved off its date (St George
-/// to Bright Monday) is known there too. Found once, in a few milliseconds.
-fn fixed() -> &'static HashSet<&'static str> {
-    static FIXED: OnceLock<HashSet<&'static str>> = OnceLock::new();
-    FIXED.get_or_init(|| {
+/// The saints' and the fixed feasts' occasions (the Menaion's) in `usage`, which keep their date:
+/// the ones read on the same date two years running, in 2024–2032. The weekly cycles' and
+/// Pascha's never are, since the date's weekday moves on. Known by name, so a feast moved off its
+/// date (St George to Bright Monday) is known there too. Found once per usage, in a few
+/// milliseconds.
+fn fixed(usage: Usage) -> &'static HashSet<&'static str> {
+    static FIXED: [OnceLock<HashSet<&'static str>>; Usage::ALL.len()] = [OnceLock::new(), OnceLock::new()];
+    FIXED[usage as usize].get_or_init(|| {
         let mut fixed = HashSet::new();
         // Each date of a leap year; 29 February comes round again four years on.
         for date in calendar::civil(2024, 1, 1)..calendar::civil(2025, 1, 1) {
@@ -123,7 +144,7 @@ fn fixed() -> &'static HashSet<&'static str> {
             let years: Vec<HashSet<&'static str>> = (2024..=2032)
                 .step_by(step)
                 .map(|y| {
-                    let rs = lectionary::readings(calendar::civil(y, month, day), Style::New);
+                    let rs = lectionary::readings_in(calendar::civil(y, month, day), Style::New, usage);
                     rs.into_iter().map(|r| r.occasion).collect()
                 })
                 .collect();
