@@ -386,16 +386,18 @@ final class Store {
             year: year, month: month, oldCalendar: settings.oldCalendar, midnight: Self.midnight(first))
     }
 
-    /// Checks an item off on `day`, or clears it. A plan's item checks off that day's passages.
+    /// Checks an item off on `day`, or clears it. A plan's item checks off that day's passages
+    /// instead, which say whether it's done, as on the Mac.
     func setDone(_ item: RuleDayItem, day: Int64, _ done: Bool) {
         changing {
+            var ticked = done
             if case .plan(let plan, let planDay) = item.open {
                 for i in (bible.planDay(plan: plan, day: planDay)?.passages ?? []).indices {
                     try bible.setPlanRead(plan: plan, day: planDay, passage: UInt8(i), read: done)
                 }
-            } else {
-                try bible.setRuleDone(day: day, item: item.id, done: done)
+                ticked = false
             }
+            try bible.setRuleDone(day: day, item: item.id, done: ticked)
         }
     }
 

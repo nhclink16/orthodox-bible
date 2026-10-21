@@ -491,7 +491,7 @@ fn plans_start_and_read_day_by_day() {
     assert_eq!(days[19].label, "Psalms 143–150 · Psalm 151");
     assert!(bible.plan_day("psalter-20".into(), 21).is_none());
 
-    // In the rule: the next day to read, or an offer to start.
+    // In the rule: the plan's day that falls on the date, or an offer to start.
     let mut rule = bible.rule();
     rule.blocks[0].items.push(new_item("psalter", RuleKind::Plan { plan: "psalter-20".into() }));
     rule.blocks[0].items.push(new_item("nt", RuleKind::Plan { plan: "nt-psalter-180".into() }));
@@ -506,6 +506,10 @@ fn plans_start_and_read_day_by_day() {
     // Done once that day's reading is read, which keeps the day in the month too.
     let monday = rule_item(&rule_on(&bible, 2026, 10, 19), "psalter").unwrap();
     assert_eq!((monday.open, monday.done), (RuleOpen::Plan { plan: "psalter-20".into(), day: 1 }, true));
+    // A tick of its own still counts, as on the Mac.
+    bible.set_rule_done(day.day, "psalter".into(), true).unwrap();
+    assert!(rule_item(&rule_on(&bible, 2026, 10, 20), "psalter").unwrap().done);
+    bible.set_rule_done(day.day, "psalter".into(), false).unwrap();
     let oct = month(&bible, 2026, 10, false);
     assert_eq!((oct[18].kept, oct[19].kept), (RuleKept::Partly, RuleKept::Nothing));
     let before = rule_item(&rule_on(&bible, 2026, 10, 18), "psalter").unwrap();

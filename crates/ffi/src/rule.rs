@@ -348,10 +348,8 @@ impl Bible {
                     .into_iter()
                     .map(|i| {
                         let (open, detail) = opens(i, b, (d, midnight), &study, &under);
-                        let done = match open {
-                            RuleOpen::Plan { .. } => plan_read(i, midnight, &under),
-                            _ => done.contains(&i.id),
-                        };
+                        // As the Mac counts it: ticked, or a plan's reading for the day read.
+                        let done = done.contains(&i.id) || plan_read(i, midnight, &under);
                         RuleDayItem {
                             id: i.id.clone(),
                             title: i.title.clone(),
