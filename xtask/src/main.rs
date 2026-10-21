@@ -237,8 +237,9 @@ fn main() -> Result<()> {
         Some("lectionary-check") => lectionary::check(&root, &args[1..]),
         _ => {
             eprintln!(
-                "usage: cargo run -p xtask -- build-data [ids…] | fetch [ids…] | lectionary <from> [to] [--old] | \
-                 lectionary-check <from> <to> [--old]"
+                "usage: cargo run -p xtask -- build-data [ids…] | fetch [ids…] | lectionary <from> [to] [--old] \
+                 [--usage greek|antiochian] | lectionary-check <from> <to> [--old] [--usage greek|antiochian] \
+                 [--against orthocal|goarch|antiochian] [--data <path>]"
             );
             std::process::exit(2)
         }

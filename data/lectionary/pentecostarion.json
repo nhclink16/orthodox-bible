@@ -2,9 +2,9 @@
  "title": "Pentecostarion: Pascha to the Monday of the Holy Spirit",
  "scope": "One entry for every day from Pascha (pascha 0) to the Monday of the Holy Spirit (pascha 50), keyed by days after Pascha.",
  "licence": "Released with bible-rs under the MIT licence. The table holds Scripture references only: no Bible text and no prose from the sources. Notes are our own.",
- "usage": "Antiochian Orthodox Christian Archdiocese of North America: Byzantine (Greek) usage, Revised Julian fixed feasts, Julian Paschalion. Slavic (OCA) and Greek (GOARCH) differences are kept in 'variants' and 'slavic' and never replace the main reading.",
+ "usage": "Byzantine usage, Revised Julian fixed feasts, Julian Paschalion, in two usages: Greek (the Greek Orthodox Archdiocese of America as goarch.org prints it; the default) and Antiochian (the Antiochian Orthodox Christian Archdiocese of North America's service texts and charts). Where they differ both are recorded: a reading or an entry marked \"in\": \"greek\" or \"antiochian\" is read only in that usage, and an entry's \"greek\" or \"antiochian\" object changes its name, its rules (weekday, sunday, saturday, bright; none = no reading) or its confidence there. Slavic (OCA) and other alternatives (a patron's readings) are kept in 'variants' and 'slavic' and are never read.",
  "numbering": "English Bible (KJV/Hebrew) chapter and verse, the grid's numbering, with half-verse letters dropped. Each string in refs is one contiguous range ('Book C:V', 'Book C:V-V' or 'Book C:V-C:V', with the grid's book abbreviations); a reading's refs are read together, in order, as one lesson.",
- "confidence": "high: an Antiochian-facing source agrees with at least one independent source. medium: the sources differ (usually by a verse at the start or end) or the reference rests on one source. low: no Antiochian or Greek source was found, or the yearly ordo decides.",
+ "confidence": "high: a source of the usage (the Antiochian service texts and charts; goarch.org) agrees with at least one independent source. medium: the sources differ (usually by a verse at the start or end) or the reference rests on one source. low: no Antiochian or Greek source was found, or the yearly ordo decides.",
  "sources": {
   "ANT-OLG": "Antiochian Archdiocese, Department of Liturgics: Online Liturgical Guide service texts, 2023-2026 (antiochian.org/servicetexts). References only.",
   "ANT-CHART": "Antiochian Archdiocese, Sunday Liturgical Readings Chart 2026 (antiochian.org/liturgicalinstructions).",
@@ -88,17 +88,17 @@
    "pascha": 5,
    "name": "Bright Friday (Life-giving Spring of the Theotokos)",
    "readings": [
-    {"service": "Liturgy", "kind": "Epistle", "refs": ["Phil 2:5-11"], "title": "Life-giving Spring", "confidence": "medium"},
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Phil 2:5-11"], "in": "antiochian", "title": "Life-giving Spring", "confidence": "medium"},
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Acts 3:1-8"], "in": "greek"},
     {"service": "Liturgy", "kind": "Gospel", "refs": ["John 2:12-22"]}
    ],
    "confidence": "high",
    "sources": ["ANT-OLG", "GOA", "OCA", "SCR", "MCI"],
    "variants": [
-    {"usage": "GOA (goarch.org, GOA DCS; antiochian.org's feed): the day's Acts", "service": "Liturgy", "kind": "Epistle", "refs": ["Acts 3:1-8"]},
     {"usage": "Slavic (OCA/Russian)", "service": "Liturgy", "kind": "Epistle", "refs": ["Acts 3:1-8", "Phil 2:5-11"]},
     {"usage": "Slavic (OCA/Russian)", "service": "Liturgy", "kind": "Gospel", "refs": ["John 2:12-22", "Luke 10:38-42", "Luke 11:27-28"]}
    ],
-   "note": "The Archdiocese's service text reads the Theotokos's Epistle for the Life-giving Spring with the day's Gospel. goarch.org and antiochian.org's feed read the day's Acts 3:1-8 (2025, 2026)."
+   "note": "Antiochian usage: the Archdiocese's service text reads the Theotokos's Epistle for the Life-giving Spring with the day's Gospel. Greek usage: the day's Acts 3:1-8 (goarch.org 2024-2030, GOA DCS and antiochian.org's feed)."
   },
   {
    "pascha": 6,
@@ -575,18 +575,18 @@
    "pascha": 48,
    "name": "Saturday of Souls (Saturday before Pentecost)",
    "readings": [
-    {"service": "Liturgy", "kind": "Epistle", "refs": ["Acts 28:1-31"]},
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Acts 28:1-31"], "in": "antiochian"},
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["1 Thess 4:13-17"], "in": "greek", "title": "for the departed"},
     {"service": "Liturgy", "kind": "Gospel", "refs": ["John 21:14-25"]}
    ],
    "confidence": "high",
    "sources": ["ANT-OLG", "GOA", "SCR"],
    "variants": [
-    {"usage": "Greek (GOARCH Online Chapel)", "service": "Liturgy", "kind": "Epistle", "refs": ["1 Thess 4:13-17"]},
     {"usage": "Slavic (OCA/Russian)", "service": "Liturgy", "kind": "Gospel", "refs": ["John 21:15-25"]},
     {"usage": "Slavic (OCA/Russian), for the departed", "service": "Liturgy", "kind": "Epistle", "refs": ["1 Thess 4:13-17"]},
     {"usage": "Slavic (OCA/Russian), for the departed", "service": "Liturgy", "kind": "Gospel", "refs": ["John 5:24-30"]}
    ],
-   "note": "Usages differ on this day. Antiochian service texts read the day's Acts and John only, with the prokeimenon and hymns of the departed. GOARCH and its feed (shown on antiochian.org) put the Epistle of the departed in place of Acts. Slavic usage reads both the day's pair and the pair for the departed. No Matins Gospel; the Friday-evening Vespers has no readings."
+   "note": "Usages differ on this day. Antiochian service texts read the day's Acts and John only, with the prokeimenon and hymns of the departed. Greek usage (goarch.org 2018-2030, also shown on antiochian.org) puts the Epistle of the departed in place of Acts. Slavic usage reads both the day's pair and the pair for the departed. No Matins Gospel; the Friday-evening Vespers has no readings."
   },
   {
    "pascha": 49,
