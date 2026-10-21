@@ -27,7 +27,7 @@ pub mod tokens;
 
 pub use content::{Block, BlockKind, ChapterContent, ChapterStatus, ContentOptions, Run};
 pub use plans::{ActivePlan, PlanDay, PlanInfo, PlanPassage, reading_plans};
-pub use readings::{Reading, ReadingConfidence, ReadingKind, ReadingPassage, day_readings};
+pub use readings::{Reading, ReadingConfidence, ReadingKind, ReadingPassage, ReadingUsage, day_readings};
 pub use rule::{
     FastLevel, MonthDay, Prayer, Rule, RuleBlock, RuleDay, RuleDayBlock, RuleDayItem, RuleItem, RuleKept,
     RuleKind, RuleOpen, RuleSeason, civil_day, prayers, starter_rule,

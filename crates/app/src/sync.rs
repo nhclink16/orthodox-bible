@@ -43,6 +43,21 @@ fn folder_in(over: Option<OsString>, home: Option<PathBuf>) -> Result<PathBuf, &
     if drive.is_dir() { Ok(drive.join("Orthodox Bible").join("Sync")) } else { Err(NO_ICLOUD) }
 }
 
+/// This Mac's hardware UUID (IOPlatformUUID), which ties the study database to it
+/// (`StudyStore::bind_machine`). `None` if it can't be read; the database is then left unbound.
+pub fn machine() -> Option<String> {
+    #[cfg(target_os = "macos")]
+    {
+        let mut id = [0u8; 16];
+        let wait = libc::timespec { tv_sec: 1, tv_nsec: 0 };
+        // SAFETY: `gethostuuid` writes the 16 bytes of a `uuid_t` into `id`.
+        if unsafe { libc::gethostuuid(id.as_mut_ptr(), &wait) } == 0 && id != [0; 16] {
+            return Some(id.iter().map(|b| format!("{b:02X}")).collect());
+        }
+    }
+    None
+}
+
 /// When to sync, from the store's generation and the clock (egui seconds).
 #[derive(Debug, Default)]
 struct Schedule {
@@ -364,6 +379,14 @@ mod tests {
         assert_eq!(folder_in(Some(over.clone().into()), None), Ok(over));
         assert_eq!(folder_in(Some("".into()), Some(home.clone())), Ok(ours));
         let _ = std::fs::remove_dir_all(&home);
+    }
+
+    #[cfg(target_os = "macos")]
+    #[test]
+    fn the_mac_has_the_same_machine_id_every_time() {
+        let id = machine().expect("the hardware UUID");
+        assert_eq!(id.len(), 32);
+        assert_eq!(machine(), Some(id));
     }
 
     #[test]

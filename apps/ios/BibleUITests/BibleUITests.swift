@@ -462,6 +462,37 @@ final class BibleUITests: XCTestCase {
         expectChapter("Isaiah 5")
     }
 
+    func testTheReadingsFollowTheArchdioceseChosen() {
+        // The 2nd Sunday after Pentecost: the Greek Archdiocese reads the week's Epistle.
+        openDay(2026, 6, 14)
+        let greek = scrolledTo(app.buttons["reading-0"])
+        XCTAssertTrue(greek.label.hasPrefix("Epistle, Romans 2:10–16"), greek.label)
+        app.buttons["Done"].tap()
+        // A tap while the sheet slides away is lost.
+        XCTAssertTrue(greek.waitForNonExistence(timeout: 3))
+
+        // Settings, beside the church calendar, with a line under it.
+        app.buttons["settings"].tap()
+        scrolledTo(app.staticTexts["Which archdiocese’s calendar of readings to follow. Your parish’s bulletin is the best check."])
+        let readings = app.buttons["Readings"]
+        XCTAssertEqual(readings.value as? String, "Greek Orthodox Archdiocese")
+        readings.tap()
+        XCTAssertTrue(app.buttons["Antiochian Archdiocese"].waitForExistence(timeout: 3))
+        app.buttons["Antiochian Archdiocese"].tap()
+        XCTAssertTrue(readings.waitForExistence(timeout: 3))
+        XCTAssertEqual(readings.value as? String, "Antiochian Archdiocese")
+        app.buttons["Done"].tap()
+        XCTAssertTrue(readings.waitForNonExistence(timeout: 3))
+
+        // The Antiochian, All Saints of Antioch's; the rule's Readings item follows.
+        openDay(2026, 6, 14)
+        let antiochian = scrolledTo(app.buttons["reading-0"])
+        XCTAssertTrue(antiochian.label.hasPrefix("Epistle · All Saints of Antioch, Acts 11:19–30"), antiochian.label)
+        XCTAssertTrue(app.buttons["reading-1"].label.hasPrefix("Gospel, Matthew 4:18–23"), app.buttons["reading-1"].label)
+        let rule = scrolledTo(app.buttons["open-morning-reading"])
+        XCTAssertTrue(rule.label.contains("Acts 11:19–30 · Matthew 4:18–23"), rule.label)
+    }
+
     /// Never iCloud Drive: a folder in the test's own temporary folder, which the app reaches on
     /// the simulator; the first device's file waits beside it while the second turns sync on.
     private let syncFolder = FileManager.default.temporaryDirectory.appendingPathComponent("uitest-sync-\(UUID().uuidString)")

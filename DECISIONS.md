@@ -133,7 +133,8 @@ Greek Orthodox Archdiocese of America as goarch.org prints it, because Nicholas'
 Trinity in Augusta, is a GOARCH parish whose bulletins print goarch.org's readings. **Antiochian**
 follows the Antiochian Archdiocese's own service texts and charts, with its saints (Raphael of
 Brooklyn, Joseph of Damascus, Nicholas and Habib Khasha, Julian of Homs, Xenia of St Petersburg,
-Vincent of Lerins, All Saints of Antioch) and its verse boundaries. The tables record both where
+Vincent of Lerins, All Saints of Antioch) and its verse boundaries. Both apps follow a Readings
+setting, Greek by default, kept on each device and not synced. The tables record both where
 they differ: a reading or entry marked `"in"` belongs to one usage, and an entry's `"greek"` or
 `"antiochian"` object changes its name, rules or confidence there; a few rules in the code differ
 too (a saint moved into Bright Week, St Ignatius before the Nativity, St Theodore's and the
@@ -457,7 +458,9 @@ What differs is the toolkit, and here the Mac's choice is overruled.
   on the same date two years running (any of 2024–2032); the cycles' and Pascha's never are, since
   the date's weekday moves on. It's known by name, so St George moved to Bright Monday is too. The
   rule's Readings item opens the Liturgy's Gospel (on a Lenten weekday, the first reading, and
-  says so), and the Fathers item opens the Fathers on its first verse.
+  says so), and the Fathers item opens the Fathers on its first verse. The readings, and so these
+  items, follow the usage chosen in Settings (Readings: the Greek or the Antiochian Archdiocese),
+  which stays on the phone and isn't synced.
 - **Sync with the Mac** goes through a folder the person picks in Files (iCloud Drive › Orthodox
   Bible › Sync, which the Mac makes), kept as a bookmark, so the app needs no iCloud entitlement.
   Another folder is asked about first, and one moved since (into Recently Deleted, say) isn't
@@ -469,7 +472,13 @@ What differs is the toolkit, and here the Mac's choice is overruled.
   after 5 s, 10 s and so on for about five minutes. It runs when the app comes to the front, three
   seconds after a change, and as it goes to the background. An editor left open over a synced
   change takes it up while untouched, and saving it unchanged writes nothing, so it can't put the
-  old text back on the Mac.
+  old text back on the Mac. At launch the study store is bound to the phone's
+  `identifierForVendor` (`bind_machine`), and the Mac's to its hardware UUID, so a backup restored
+  onto another device syncs under an id of its own instead of writing over this one's file; the
+  old id's file is merged as another device's, so nothing is lost. A database copied before either
+  copy was ever bound keeps sharing its id, though. Two Macs taking turns on one data folder add a
+  file at each switch, and an install from Xcode can add one, since it may change
+  `identifierForVendor`.
 - **No network, no encryption.** The phone build turns off `bible-core`'s `tls` feature, so the
   app contains no TLS or other encryption code. Its Info.plist sets
   `ITSAppUsesNonExemptEncryption` to `NO`, and the App Store's export questions don't apply.

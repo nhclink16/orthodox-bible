@@ -725,9 +725,35 @@ impl StudyStore {
         Ok(tx.commit()?)
     }
 
-    /// This device's id in the sync files (made once, then kept in the settings).
+    /// This device's id in the sync files (made once, then kept in the settings; see
+    /// [`Self::bind_machine`] for when it changes).
     pub fn device_id(&self) -> String {
         self.device.clone()
+    }
+
+    /// Ties this database to the device it's on. `machine` is a stable id for this physical device
+    /// and install, from the platform (the Mac's hardware UUID, the iPhone's identifierForVendor).
+    /// If the database was last bound to another machine, it has been copied (a new Mac set up
+    /// from a backup, two Macs sharing a data folder), and both copies would write the same sync
+    /// file over each other's; so this one takes a new device id. The old id's file stays in the
+    /// sync folder and is merged here as another device's, so nothing is lost. Bound to the same
+    /// machine again (a restore on the same Mac), it keeps its id and still gets back what it had
+    /// sent; a database never bound (tests, the CLI) keeps its id too.
+    pub fn bind_machine(&mut self, machine: &str) -> Result<()> {
+        match self.setting("device-machine") {
+            Some(m) if m == machine => return Ok(()),
+            // Changes already logged keep the old id: they were made under it, and the old id's
+            // file has them with the same stamps, so merging it finds nothing newer and every
+            // device still breaks ties the same way. The id is saved before the machine, so a
+            // crash in between only makes another new one.
+            Some(_) => {
+                let id = crate::online::random_id();
+                self.set_setting("device-id", &id)?;
+                self.device = id;
+            }
+            None => {}
+        }
+        self.set_setting("device-machine", machine)
     }
 
     /// JSON export of all study data. `text` supplies verse text for context (may return `None`).

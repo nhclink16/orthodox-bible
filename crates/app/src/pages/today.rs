@@ -590,7 +590,7 @@ impl State {
         // The day's readings.
         let told = (info.feasts.iter().any(|f| great(f)), !info.feasts.is_empty());
         let mut all = self.all_readings == Some(d);
-        let lessons = lectionary::readings(d, style);
+        let lessons = lectionary::readings_in(d, style, env.settings.usage);
         y = readings(ui, env, left, width, y, &lessons, told, &mut all, actions) + 20.0;
         if all {
             self.all_readings = Some(d);
@@ -1100,10 +1100,14 @@ mod tests {
 
     /// What the day's Liturgy readings are read for, as the page shows it.
     fn read_for_on(y: i32, m: u8, d: u8) -> Vec<Option<String>> {
+        read_for_in(y, m, d, lectionary::Usage::Greek)
+    }
+
+    fn read_for_in(y: i32, m: u8, d: u8, usage: lectionary::Usage) -> Vec<Option<String>> {
         let d = calendar::civil(y, m, d);
         let feasts = calendar::day(d, Style::New).feasts;
         let (feast, named) = (feasts.iter().any(|f| great(f)), !feasts.is_empty());
-        let lessons = lectionary::readings(d, Style::New);
+        let lessons = lectionary::readings_in(d, Style::New, usage);
         let liturgy = lessons.iter().filter(|r| r.at_liturgy() && r.kind != lectionary::Kind::OldTestament);
         liturgy.map(|r| read_for(r, feast, named)).collect()
     }
@@ -1138,5 +1142,9 @@ mod tests {
         );
         let forefeast = [Some("St Sylvester".into()), Some("Forefeast of Theophany".into())];
         assert_eq!(read_for_on(2026, 1, 2), forefeast);
+        // The Antiochian Archdiocese's days that move, which the day section doesn't name.
+        let antioch = [Some("All Saints of Antioch".into()), None];
+        assert_eq!(read_for_in(2026, 6, 14, lectionary::Usage::Antiochian), antioch);
+        assert_eq!(read_for_in(2026, 11, 7, lectionary::Usage::Antiochian), both("St Raphael of Brooklyn"));
     }
 }

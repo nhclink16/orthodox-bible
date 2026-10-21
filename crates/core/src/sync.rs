@@ -3,7 +3,9 @@
 //! Each device logs the latest change to every record (see [`crate::study`]) and writes the whole
 //! log to `<device-id>.json` in the folder. Syncing merges the other devices' files: for each
 //! record the newest change wins (a tie goes to the larger device id, so every device picks the
-//! same one), and a deletion is a change like any other.
+//! same one), and a deletion is a change like any other. A database copied to another machine
+//! takes a new id there ([`StudyStore::bind_machine`]), so the two don't write over each other's
+//! file.
 
 use std::collections::HashMap;
 use std::path::Path;
@@ -458,21 +460,85 @@ mod tests {
         std::fs::create_dir_all(&db).unwrap();
         let shared = dir.join("sync");
         let mut a = StudyStore::open(&db.join("study.sqlite")).unwrap();
+        a.bind_machine("mac-1").unwrap();
         a.set_note(jn316(), "before the backup").unwrap();
         sync_folder(&mut a, &shared).unwrap();
         drop(a);
         std::fs::copy(db.join("study.sqlite"), db.join("backup.sqlite")).unwrap();
 
         let mut a = StudyStore::open(&db.join("study.sqlite")).unwrap();
+        a.bind_machine("mac-1").unwrap();
         a.set_note(jn316(), "after the backup").unwrap();
         sync_folder(&mut a, &shared).unwrap();
+        let id = a.device_id();
         drop(a);
 
-        // Same device id, older data: its own file brings the later note back.
+        // Same machine, so the same device id, and older data: its own file brings the later
+        // note back.
         let mut restored = StudyStore::open(&db.join("backup.sqlite")).unwrap();
+        restored.bind_machine("mac-1").unwrap();
+        assert_eq!(restored.device_id(), id);
         let report = sync_folder(&mut restored, &shared).unwrap();
         assert_eq!((report.applied, report.devices), (1, 0));
         assert_eq!(restored.note(jn316()).unwrap().body, "after the backup");
+        let _ = std::fs::remove_dir_all(&dir);
+    }
+
+    #[test]
+    fn a_database_copied_to_another_machine_takes_a_new_id() {
+        let dir = temp_dir("copied");
+        std::fs::create_dir_all(&dir).unwrap();
+        let shared = dir.join("sync");
+        let mut old = StudyStore::open(&dir.join("old.sqlite")).unwrap();
+        let id = old.device_id();
+        // A database from before binding keeps its id.
+        old.bind_machine("mac-1").unwrap();
+        assert_eq!(old.device_id(), id);
+        old.set_note(jn316(), "before the copy").unwrap();
+        sync_folder(&mut old, &shared).unwrap();
+        drop(old);
+        std::fs::copy(dir.join("old.sqlite"), dir.join("new.sqlite")).unwrap();
+
+        let mut old = StudyStore::open(&dir.join("old.sqlite")).unwrap();
+        old.bind_machine("mac-1").unwrap();
+        assert_eq!(old.device_id(), id, "same machine, same id");
+        let mut new = StudyStore::open(&dir.join("new.sqlite")).unwrap();
+        assert_eq!(new.device_id(), id);
+        new.bind_machine("mac-2").unwrap();
+        let new_id = new.device_id();
+        assert_ne!(new_id, id);
+        drop(new);
+        let mut new = StudyStore::open(&dir.join("new.sqlite")).unwrap();
+        new.bind_machine("mac-2").unwrap();
+        assert_eq!(new.device_id(), new_id, "kept from then on");
+        // What was logged before the copy keeps the old id.
+        assert_eq!(stamp(&new, "note:JHN.3.16").1, id);
+
+        old.set_highlight(jn316(), Some(HighlightColor::Blue)).unwrap();
+        sync_folder(&mut old, &shared).unwrap();
+        // The new Mac syncs before iCloud has brought the old one's latest file down, and its file
+        // is uploaded over the folder's. With one id between them it would replace the old Mac's.
+        let lagging = dir.join("lagging");
+        new.set_bookmark(ps23(), Some("Shepherd")).unwrap();
+        sync_folder(&mut new, &lagging).unwrap();
+        for e in std::fs::read_dir(&lagging).unwrap() {
+            let e = e.unwrap();
+            std::fs::copy(e.path(), shared.join(e.file_name())).unwrap();
+        }
+        let mut phone = store();
+        sync_folder(&mut phone, &shared).unwrap();
+
+        // The old id's file is merged as another device's, like the phone's.
+        let report = sync_folder(&mut new, &shared).unwrap();
+        assert_eq!((report.applied, report.devices), (1, 2));
+        assert_eq!(sync_folder(&mut old, &shared).unwrap().applied, 1);
+        for s in [&old, &new, &phone] {
+            assert_eq!(s.note(jn316()).unwrap().body, "before the copy");
+            assert_eq!(s.highlight(jn316()), Some(HighlightColor::Blue));
+            assert_eq!(s.bookmark(ps23()).unwrap().label, "Shepherd");
+        }
+        assert_eq!(sync_folder(&mut new, &shared).unwrap().applied, 0);
+        assert_eq!(sync_folder(&mut old, &shared).unwrap().applied, 0);
         let _ = std::fs::remove_dir_all(&dir);
     }
 }

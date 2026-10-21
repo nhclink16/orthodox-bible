@@ -995,9 +995,9 @@
    "weekday": "replaces",
    "name": "St Raphael (Hawaweeny), Bishop of Brooklyn (Antiochian Archdiocese: first Saturday of November)",
    "readings": [
-    {"service": "Matins", "kind": "Gospel", "refs": ["John 10:1-9"]},
-    {"service": "Liturgy", "kind": "Epistle", "refs": ["Heb 7:26-8:2"]},
-    {"service": "Liturgy", "kind": "Gospel", "refs": ["John 10:9-16"]}
+    {"service": "Matins", "kind": "Gospel", "refs": ["John 10:1-9"], "title": "St Raphael of Brooklyn"},
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Heb 7:26-8:2"], "title": "St Raphael of Brooklyn"},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["John 10:9-16"], "title": "St Raphael of Brooklyn"}
    ],
    "confidence": "medium",
    "sources": ["ANT-OLG", "ANT-CHART", "ANT"],

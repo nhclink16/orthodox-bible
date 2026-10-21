@@ -307,7 +307,7 @@ fn church_days_and_the_fathers() {
 
 /// The rule on a date, its plans' days counted from UTC midnights.
 fn rule_on(bible: &Bible, year: i32, month: u8, day: u8) -> RuleDay {
-    bible.rule_day(year, month, day, false, civil_day(year, month, day) * 86_400)
+    bible.rule_day(year, month, day, false, ReadingUsage::Greek, civil_day(year, month, day) * 86_400)
 }
 
 fn month(bible: &Bible, year: i32, month: u8, old_calendar: bool) -> Vec<MonthDay> {
@@ -538,7 +538,11 @@ fn plans_start_and_read_day_by_day() {
 
 /// "Liturgy Epistle 2 Timothy 2:1–10 (Great Martyr …)": a day's readings, one line each.
 fn lessons(year: i32, month: u8, day: u8) -> Vec<String> {
-    day_readings(year, month, day, false)
+    lessons_in(year, month, day, ReadingUsage::Greek)
+}
+
+fn lessons_in(year: i32, month: u8, day: u8, usage: ReadingUsage) -> Vec<String> {
+    day_readings(year, month, day, false, usage)
         .iter()
         .map(|r| {
             let occasion = r.occasion.as_ref().map(|o| format!(" ({o})")).unwrap_or_default();
@@ -550,7 +554,7 @@ fn lessons(year: i32, month: u8, day: u8) -> Vec<String> {
 #[test]
 fn the_days_readings_open_in_the_reader() {
     // Tuesday 20 October 2026: St Artemius's Epistle with the weekday's Gospel.
-    let day = day_readings(2026, 10, 20, false);
+    let day = day_readings(2026, 10, 20, false, ReadingUsage::Greek);
     assert_eq!(
         lessons(2026, 10, 20),
         [
@@ -569,17 +573,17 @@ fn the_days_readings_open_in_the_reader() {
         }]
     );
     // A Sunday: the Resurrection Gospel at Matins; both cycles are the day's own.
-    let sunday = day_readings(2026, 10, 25, false);
+    let sunday = day_readings(2026, 10, 25, false, ReadingUsage::Greek);
     assert_eq!(sunday[0].title.as_deref(), Some("Eothinon 10"));
     assert!(sunday.iter().all(|r| r.occasion.is_none()));
     // A saint's whole day names the saint, since the day's great feasts don't.
-    let demetrius = day_readings(2026, 10, 26, false);
+    let demetrius = day_readings(2026, 10, 26, false, ReadingUsage::Greek);
     assert_eq!(demetrius.len(), 6);
     assert!(
         demetrius.iter().all(|r| r.occasion.as_deref() == Some("Great Martyr Demetrius the Myrrh-streamer"))
     );
     // A great feast's own readings are the day's, the Royal Hours' too.
-    let eve = day_readings(2026, 12, 24, false);
+    let eve = day_readings(2026, 12, 24, false, ReadingUsage::Greek);
     assert_eq!(eve.iter().filter(|r| r.service == "Royal Hours").count(), 12);
     assert!(eve.iter().all(|r| r.occasion.is_none()), "Eve of the Nativity");
     // A feast moved off its date is still named: St George on Bright Monday.
@@ -609,18 +613,48 @@ fn the_days_readings_open_in_the_reader() {
         ]
     );
     // Holy Friday: the Passion Gospels and the Royal Hours, with no Liturgy.
-    let friday = day_readings(2026, 4, 10, false);
+    let friday = day_readings(2026, 4, 10, false, ReadingUsage::Greek);
     assert!(friday.iter().all(|r| !r.at_liturgy && r.occasion.is_none()));
     assert_eq!((friday.len(), friday[0].title.as_deref()), (29, Some("1st")));
     assert_eq!(friday[0].served.as_deref(), Some("Thursday evening"));
     // A feast that meets Pentecost is shown beside it, to check with the parish.
-    let pentecost = day_readings(2040, 6, 24, false);
+    let pentecost = day_readings(2040, 6, 24, false, ReadingUsage::Greek);
     let forerunner: Vec<&Reading> = pentecost.iter().filter(|r| r.occasion.is_some()).collect();
     assert_eq!(forerunner.len(), 3);
     assert!(forerunner.iter().all(|r| r.confidence == ReadingConfidence::Low));
     // On the Old calendar the Nativity is on 7 January.
-    let nativity = day_readings(2027, 1, 7, true);
+    let nativity = day_readings(2027, 1, 7, true, ReadingUsage::Greek);
     assert!(nativity.iter().any(|r| r.at_liturgy && r.label == "Matthew 2:1–12"));
+}
+
+#[test]
+fn the_readings_follow_the_archdiocese_chosen() {
+    use ReadingUsage::{Antiochian, Greek};
+    // The 2nd Sunday after Pentecost: the cycle's Epistle, or All Saints of Antioch's.
+    assert_eq!(lessons_in(2026, 6, 14, Greek)[1], "Liturgy Epistle Romans 2:10–16");
+    assert_eq!(lessons_in(2026, 6, 14, Antiochian)[1], "Liturgy Epistle Acts 11:19–30");
+    // Named by its title, as the day's saint on a date that moves (St Raphael's first Saturday
+    // of November) is.
+    let titles = |month, day| day_readings(2026, month, day, false, Antiochian).into_iter().map(|r| r.title);
+    assert_eq!(titles(6, 14).nth(1).flatten().as_deref(), Some("All Saints of Antioch"));
+    assert!(titles(11, 7).all(|t| t.as_deref() == Some("St Raphael of Brooklyn")));
+    // A saint only the Antiochian Archdiocese keeps is named beside the day.
+    assert_eq!(lessons_in(2026, 7, 10, Greek)[0], "Liturgy Epistle 1 Corinthians 4:5–8");
+    assert_eq!(
+        lessons_in(2026, 7, 10, Antiochian)[1],
+        "Liturgy Epistle 2 Timothy 2:1–10 (Hieromartyr Joseph of Damascus and his companions)"
+    );
+    // The rule's Readings and Fathers items follow it too.
+    let (bible, dir) = open("usage");
+    let item = |month, day, usage, id| {
+        let rule = bible.rule_day(2026, month, day, false, usage, civil_day(2026, month, day) * 86_400);
+        rule_item(&rule, id).unwrap().detail.unwrap()
+    };
+    assert_eq!(item(6, 14, Greek, "morning-reading"), "Romans 2:10–16 · Matthew 4:18–23");
+    assert_eq!(item(6, 14, Antiochian, "morning-reading"), "Acts 11:19–30 · Matthew 4:18–23");
+    assert_eq!(item(7, 10, Greek, "evening-fathers"), "Matthew 13:44–54");
+    assert_eq!(item(7, 10, Antiochian, "evening-fathers"), "John 15:17–16:2");
+    let _ = std::fs::remove_dir_all(dir);
 }
 
 #[test]
@@ -670,5 +704,42 @@ fn sync_carries_study_and_the_rule_between_devices() {
     }
     for dir in [phone_dir, mac_dir, folder] {
         let _ = std::fs::remove_dir_all(dir);
+    }
+}
+
+#[test]
+fn a_phone_set_up_from_another_ones_backup_syncs_under_its_own_id() {
+    let (phone, dir) = open("bind-first");
+    let copy = std::env::temp_dir().join(format!("bible-ffi-bind-second-{}", std::process::id()));
+    let folder = std::env::temp_dir().join(format!("bible-ffi-bind-sync-{}", std::process::id()));
+    for d in [&copy, &folder] {
+        let _ = std::fs::remove_dir_all(d);
+    }
+    let shared = folder.to_string_lossy().to_string();
+    phone.bind_machine("phone-1".into()).unwrap();
+    phone.set_note(JOHN_3_16, "From the first phone".into()).unwrap();
+    phone.sync(shared.clone()).unwrap();
+    drop(phone);
+
+    // Its data restored onto a second phone, and opened again on the first.
+    std::fs::create_dir_all(&copy).unwrap();
+    std::fs::copy(dir.join("study.sqlite"), copy.join("study.sqlite")).unwrap();
+    let first = Bible::new(dir.to_string_lossy().into()).unwrap();
+    first.bind_machine("phone-1".into()).unwrap();
+    let second = Bible::new(copy.to_string_lossy().into()).unwrap();
+    second.bind_machine("phone-2".into()).unwrap();
+    assert_eq!(second.note(JOHN_3_16).unwrap().as_deref(), Some("From the first phone"));
+
+    // The first keeps its file. The second writes one of its own beside it rather than over it,
+    // and reads the first's as another device's.
+    assert_eq!(first.sync(shared.clone()).unwrap().devices, 0);
+    second.set_bookmark(JOHN_3_16, true).unwrap();
+    let report = second.sync(shared.clone()).unwrap();
+    assert_eq!((report.applied, report.devices), (0, 1));
+    assert_eq!(std::fs::read_dir(&folder).unwrap().count(), 2);
+    assert_eq!(first.sync(shared.clone()).unwrap().applied, 1);
+    assert!(first.marks("kjv".into(), index("jn 3"))[0].bookmark);
+    for d in [dir, copy, folder] {
+        let _ = std::fs::remove_dir_all(d);
     }
 }

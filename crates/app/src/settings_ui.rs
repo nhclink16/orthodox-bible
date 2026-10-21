@@ -5,6 +5,8 @@
 use std::path::PathBuf;
 use std::sync::mpsc::Sender;
 
+use bible_core::calendar::Style;
+use bible_core::lectionary::Usage;
 use bible_core::library::{EntryKind, Library};
 use bible_core::model::Origin;
 use bible_core::online::apibible::RemoteBible;
@@ -1558,6 +1560,49 @@ fn reading(ui: &mut Ui, library: &Library, settings: &mut Settings, actions: &mu
     typo.red_letters = red;
     ui.add_space(24.0);
 
+    // The church calendar (also on the Today page), and whose readings to follow.
+    group_title(ui, p, "Church calendar");
+    rows_card(ui, p, &[44.0, 44.0], |ui, i, r| {
+        let right = r.right() - 16.0;
+        let cy = r.center().y;
+        match i {
+            0 => {
+                row_label(ui, p, r, "Calendar", None);
+                let selected = usize::from(settings.calendar == Style::Old);
+                let calendars = ["New calendar", "Old calendar"];
+                let id = ui.id().with("calendar");
+                if let Some(k) = widgets::segmented_fit(ui, p, pos2(right, cy), id, &calendars, selected) {
+                    settings.calendar = if k == 0 { Style::New } else { Style::Old };
+                }
+            }
+            _ => {
+                row_label(ui, p, r, "Readings", None);
+                let name = |u: Usage| match u {
+                    Usage::Greek => "Greek Orthodox Archdiocese",
+                    Usage::Antiochian => "Antiochian Archdiocese",
+                };
+                let field = Rect::from_min_size(pos2(right - 240.0, cy - 16.0), vec2(240.0, 32.0));
+                let resp =
+                    widgets::select_field(ui, p, field, name(settings.usage), None, ui.id().with("usage"));
+                crate::menu::popup(&resp, p).show(|ui| {
+                    ui.set_min_width(240.0);
+                    for u in Usage::ALL {
+                        if ui.selectable_label(settings.usage == u, name(u)).clicked() {
+                            settings.usage = u;
+                        }
+                    }
+                });
+            }
+        }
+    });
+    ui.add_space(8.0);
+    footnote(
+        ui,
+        p,
+        "Which archdiocese's calendar of readings to follow. Your parish's bulletin is the best check.",
+    );
+    ui.add_space(24.0);
+
     // Footer: the fonts' licence, and a reset.
     let (r, _) = ui.allocate_exact_size(vec2(width, 32.0), Sense::hover());
     ui.painter().text(
@@ -1571,7 +1616,7 @@ fn reading(ui: &mut Ui, library: &Library, settings: &mut Settings, actions: &mu
     let w = widgets::secondary_button_width(ui, label);
     let b = Rect::from_min_size(pos2(r.right() - w, r.top()), vec2(w, 32.0));
     if widgets::secondary_button(ui, p, b, label, ui.id().with("reset")).clicked() {
-        *typo = Typography::default();
+        settings.typo = Typography::default();
     }
 }
 
