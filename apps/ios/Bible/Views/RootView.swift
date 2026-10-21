@@ -183,7 +183,7 @@ struct TopBar: View {
             HStack(spacing: 0) {
                 tool("calendar", "Today in the Church", id: "today") { store.sheet = .today }
                 tool("magnifyingglass", "Search", id: "search") { store.sheet = .search }
-                tool("textformat.size", "Text and theme", id: "settings") { store.sheet = .settings }
+                tool("gearshape", "Settings", id: "settings") { store.sheet = .settings }
                 tool("bookmark", "Bookmarks, highlights and notes", id: "study") { store.sheet = .study }
             }
             .padding(.horizontal, 4)

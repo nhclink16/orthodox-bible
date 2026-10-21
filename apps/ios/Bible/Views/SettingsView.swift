@@ -1,7 +1,7 @@
 import SwiftUI
 import UniformTypeIdentifiers
 
-/// Theme, type and reading options, applied as you change them.
+/// Settings: theme, type, reading, the church calendar and readings, and sync, applied as you change them.
 struct SettingsView: View {
     @Environment(Store.self) private var store
     @Environment(\.dismiss) private var dismiss
@@ -124,7 +124,7 @@ struct SettingsView: View {
                     LabeledContent("Version", value: Self.version)
                 }
             }
-            .navigationTitle("Reading")
+            .navigationTitle("Settings")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {
