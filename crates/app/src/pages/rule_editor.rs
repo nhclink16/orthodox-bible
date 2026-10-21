@@ -227,6 +227,16 @@ impl Editor {
         }
     }
 
+    /// Takes up the rule as `stored` now (synced from the iPhone) while nothing in it has been
+    /// changed here, so Save can't put the old one back.
+    pub fn follow(&mut self, stored: &Rule) {
+        if *stored != self.saved && self.rule().as_ref() == Some(&self.saved) {
+            self.blocks = drafts(stored);
+            self.saved = stored.clone();
+            self.numbers.clear();
+        }
+    }
+
     /// Something would be lost by leaving without saving.
     pub fn changed(&self) -> bool {
         self.rule().is_none_or(|r| r != self.saved) || self.reminders != self.saved_reminders
@@ -791,5 +801,21 @@ mod tests {
         let taken = editor.taken();
         assert!(taken.contains("morning") && taken.contains("evening-kathisma"));
         assert!(!taken.contains(&new_id("item", &taken)));
+    }
+
+    #[test]
+    fn an_untouched_draft_follows_the_rule_synced_from_the_iphone() {
+        let mut editor = Editor::new(Rule::starter(), false);
+        let mut phone = Rule::starter();
+        phone.blocks[0].title = "Dawn".into();
+        editor.follow(&phone);
+        assert_eq!(editor.rule(), Some(phone.clone()));
+        assert!(!editor.changed(), "nothing to save");
+        // A draft being changed here stays as it is.
+        editor.blocks[0].time = "6:30".into();
+        let edited = editor.rule();
+        editor.follow(&Rule::starter());
+        assert_eq!(editor.rule(), edited);
+        assert_eq!(editor.saved, phone);
     }
 }

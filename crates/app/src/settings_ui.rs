@@ -327,25 +327,17 @@ impl SettingsUi {
         });
         ui.add_space(24.0);
 
-        // Sync: the switch, and under it how the last sync went. Without iCloud Drive it stays
-        // off and says why.
+        // Sync: the switch, and under it how the last sync went. Without iCloud Drive it can't be
+        // turned on and says why; turned on earlier, it shows on and waits for iCloud Drive.
         group_title(ui, p, "Sync");
         let folder = crate::sync::folder();
         let (status, full) = match (&folder, settings.sync) {
             (Err(why), _) => (Some(why.to_string()), None),
             (Ok(_), false) => (None, None),
-            (Ok(_), true) => match (&sync.error, sync.skipped.first(), sync.synced) {
-                (Some(e), _, _) => (Some(e.clone()), Some(e.clone())),
-                (None, Some(first), _) => {
-                    (Some(format!("Couldn't read {first}")), Some(sync.skipped.join("\n")))
-                }
-                // "just now", "12 min ago", "Wed".
-                (None, None, Some(at)) => (
-                    Some(format!("Last synced {}", crate::time::ago(at).replace("Just now", "just now"))),
-                    None,
-                ),
-                (None, None, None) => (Some("Syncing…".into()), None),
-            },
+            (Ok(_), true) => {
+                let (line, full) = sync.line();
+                (Some(line), full)
+            }
         };
         rows_card(ui, p, &[if status.is_some() { 56.0 } else { 44.0 }], |ui, _, r| {
             let right = pos2(r.right() - 16.0, r.center().y);
@@ -359,12 +351,12 @@ impl SettingsUi {
                 ui.interact(detail, ui.id().with("sync-status"), Sense::hover()).on_hover_text(full);
             }
             let mut child = ui.new_child(egui::UiBuilder::new().max_rect(r));
-            let mut on = settings.sync && folder.is_ok();
-            if folder.is_err() {
+            if folder.is_err() && !settings.sync {
                 child.disable();
             }
+            let mut on = settings.sync;
             widgets::toggle(&mut child, p, right, ui.id().with("sync"), &mut on);
-            if folder.is_ok() {
+            if folder.is_ok() || !on {
                 settings.sync = on;
             }
         });
@@ -423,8 +415,11 @@ impl SettingsUi {
         });
         ui.add_space(24.0);
 
+        // Once synced, what's restored or erased here reaches the iPhone the next time sync runs,
+        // even with it off now: every record restored or erased is logged as a change.
+        let iphone = settings.sync || settings.synced;
         group_title(ui, p, "Backup");
-        rows_card(ui, p, &[44.0, 44.0, 44.0, 44.0], |ui, i, r| {
+        rows_card(ui, p, &[44.0, 44.0, 44.0, if iphone { 56.0 } else { 44.0 }], |ui, i, r| {
             let right = r.right() - 16.0;
             let cy = r.center().y;
             match i {
@@ -474,7 +469,8 @@ impl SettingsUi {
                     ui.painter().text(pos2(right, cy), Align2::RIGHT_CENTER, value, text::UI.font(), p.ink_2);
                 }
                 _ => {
-                    row_label(ui, p, r, "Restore from a JSON backup", None);
+                    let detail = iphone.then_some("Restores on your iPhone too, over any changes made since");
+                    row_label(ui, p, r, "Restore from a JSON backup", detail);
                     let (_, resp) = Button::new(Kind::Secondary, "Import Backup…")
                         .small()
                         .icon(icons::download)
@@ -491,19 +487,14 @@ impl SettingsUi {
             let right = r.right() - 16.0;
             let cy = r.center().y;
             if self.confirm_erase {
-                // Synced, the erasing reaches the iPhone too.
-                let question = if settings.sync && folder.is_ok() {
-                    "Erase everything here and on your iPhone?"
+                let question =
+                    if iphone { "Erase everything here and on your iPhone?" } else { "Erase everything?" };
+                let detail = if iphone && !settings.sync {
+                    "On your iPhone the next time you sync. A backup is saved first."
                 } else {
-                    "Erase everything?"
+                    "A backup is saved first; otherwise this can't be undone."
                 };
-                row_label(
-                    ui,
-                    p,
-                    r,
-                    question,
-                    Some("A backup is saved first; otherwise this can't be undone."),
-                );
+                row_label(ui, p, r, question, Some(detail));
                 let (b, resp) = Button::new(Kind::Destructive, "Erase Everything").small().show_right(
                     ui,
                     p,

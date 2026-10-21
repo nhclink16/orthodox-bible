@@ -15,8 +15,9 @@ pub enum Action {
         verse: Option<u8>,
         flash: bool,
     },
-    /// Open a reading of the day (`bible_core::lectionary`) in the reader, its verses selected.
-    ReadPassage(bible_core::lectionary::Passage),
+    /// Open a reading of the day (`bible_core::lectionary::Reading::passages`) in the reader,
+    /// its verses selected.
+    ReadPassage(&'static [bible_core::lectionary::Passage]),
     Back,
     Forward,
     PrevChapter,

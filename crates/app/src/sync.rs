@@ -23,12 +23,16 @@ pub const NO_ICLOUD: &str = "Turn on iCloud Drive in System Settings first";
 /// How often to sync while the app is open, and how long after the latest local change (seconds).
 const EVERY: f64 = 120.0;
 const QUIET: f64 = 3.0;
+/// How long a read of the folder waits on iCloud Drive before Settings says so (seconds).
+const WAIT: f64 = 30.0;
 
 /// The folder the devices share: `BIBLE_RS_SYNC_DIR` when set, else "Orthodox Bible/Sync" in
-/// iCloud Drive, which must be on. Offscreen renders only ever use `BIBLE_RS_SYNC_DIR`.
+/// iCloud Drive, which must be on. Offscreen renders, other data folders (`BIBLE_RS_HOME`:
+/// manual tests, demos) and unit tests only ever use `BIBLE_RS_SYNC_DIR`, so they never reach
+/// the real iPhone.
 pub fn folder() -> Result<PathBuf, &'static str> {
-    let home = if crate::offscreen() { None } else { dirs::home_dir() };
-    folder_in(std::env::var_os("BIBLE_RS_SYNC_DIR"), home)
+    let elsewhere = cfg!(test) || crate::offscreen() || std::env::var_os("BIBLE_RS_HOME").is_some();
+    folder_in(std::env::var_os("BIBLE_RS_SYNC_DIR"), if elsewhere { None } else { dirs::home_dir() })
 }
 
 fn folder_in(over: Option<OsString>, home: Option<PathBuf>) -> Result<PathBuf, &'static str> {
@@ -78,8 +82,8 @@ impl Schedule {
 type Files = Vec<(String, u64, Result<String, String>)>;
 
 enum Job {
-    /// Reading the folder at this path.
-    Reading(JoinHandle<Result<Files, String>>, PathBuf),
+    /// Reading the folder at this path, since this time (egui seconds).
+    Reading(JoinHandle<Result<Files, String>>, PathBuf, f64),
     /// Writing this device's file, with what the sync did and the text written.
     Writing(JoinHandle<Result<(), String>>, SyncReport, String),
 }
@@ -92,6 +96,40 @@ pub struct Status {
     /// Why it failed, or the files it couldn't read and why.
     pub error: Option<String>,
     pub skipped: Vec<String>,
+    /// A read of the folder has been waiting on iCloud Drive for a while.
+    pub waiting: bool,
+}
+
+impl Status {
+    /// What Settings says under the switch, in plain words, and the details behind it for its
+    /// tooltip: "Last synced 5 min ago", "Last synced 2 h ago · couldn't read one file from
+    /// another device", "Couldn't write to the sync folder. Trying again in 2 minutes."
+    pub fn line(&self) -> (String, Option<String>) {
+        // "just now", "12 min ago", "Wed".
+        let when = self
+            .synced
+            .map(|at| format!("Last synced {}", crate::time::ago(at).replace("Just now", "just now")));
+        let problem = match (&self.error, self.skipped.len()) {
+            _ if self.waiting => Some("waiting for iCloud Drive".to_string()),
+            // Each error starts with what failed, in plain words; the rest is the system's.
+            (Some(e), _) => {
+                let what = e.split(": ").next().unwrap_or(e);
+                return (format!("{what}. Trying again in 2 minutes."), Some(e.clone()));
+            }
+            (None, 0) => None,
+            (None, 1) => Some("couldn't read one file from another device".into()),
+            (None, n) => Some(format!("couldn't read {n} files from other devices")),
+        };
+        let full = (!self.skipped.is_empty()).then(|| self.skipped.join("\n"));
+        let line = match (when, problem) {
+            (Some(when), Some(p)) => format!("{when} · {p}"),
+            (Some(when), None) => when,
+            // Waiting before the first sync.
+            (None, Some(p)) => format!("{}{}…", p[..1].to_uppercase(), &p[1..]),
+            (None, None) => "Syncing…".into(),
+        };
+        (line, full)
+    }
 }
 
 #[derive(Default)]
@@ -123,13 +161,25 @@ impl Sync {
             self.schedule = Schedule::default();
         }
         self.on = on;
+        let now = ctx.input(|i| i.time);
         let mut applied = false;
         match self.job.take() {
-            Some(Job::Reading(h, dir)) if h.is_finished() => match h.join() {
-                Ok(Ok(files)) => applied = self.merge(ctx, study, files, dir),
-                Ok(Err(e)) => self.failed(e),
-                Err(_) => self.failed("The sync stopped unexpectedly".into()),
-            },
+            // Turned off while the folder was read: nothing is merged, and nothing written.
+            Some(Job::Reading(h, ..)) if !on && h.is_finished() => self.status.waiting = false,
+            Some(Job::Reading(h, dir, _)) if h.is_finished() => {
+                self.status.waiting = false;
+                match h.join() {
+                    Ok(Ok(files)) => applied = self.merge(ctx, study, files, dir),
+                    Ok(Err(e)) => self.failed(e),
+                    Err(_) => self.failed("The sync stopped unexpectedly".into()),
+                }
+            }
+            // iCloud Drive can keep a read waiting while it downloads a file: Settings says so.
+            // (Another read would wait on the same download.)
+            Some(Job::Reading(h, dir, started)) => {
+                self.status.waiting = now - started >= WAIT;
+                self.job = Some(Job::Reading(h, dir, started));
+            }
             Some(Job::Writing(h, report, json)) if h.is_finished() => match h.join() {
                 Ok(Ok(())) => {
                     self.own = Some(json);
@@ -143,17 +193,19 @@ impl Sync {
         if !on || self.job.is_some() {
             return applied;
         }
-        match self.schedule.due(ctx.input(|i| i.time), study.generation()) {
+        match self.schedule.due(now, study.generation()) {
             Ok(()) => match folder() {
                 Ok(dir) => {
-                    let (ctx, at) = (ctx.clone(), dir.clone());
+                    let (repaint, at) = (ctx.clone(), dir.clone());
                     let read = self.spawn(move || {
                         let files = read_folder(&at);
-                        ctx.request_repaint();
+                        repaint.request_repaint();
                         files
                     });
                     if let Some(h) = read {
-                        self.job = Some(Job::Reading(h, dir));
+                        self.job = Some(Job::Reading(h, dir, now));
+                        // To say it's waiting, if it is by then.
+                        ctx.request_repaint_after(std::time::Duration::from_secs_f64(WAIT));
                     }
                 }
                 Err(e) => self.failed(e.into()),
@@ -206,7 +258,7 @@ impl Sync {
         let json = match bible_core::sync::export(study) {
             Ok(json) => json,
             Err(e) => {
-                self.failed(format!("{e:#}"));
+                self.failed(format!("Couldn't prepare this Mac's changes: {e:#}"));
                 return applied;
             }
         };
@@ -233,7 +285,8 @@ impl Sync {
     }
 
     fn finished(&mut self, report: SyncReport) {
-        self.status = Status { synced: Some(bible_core::study::now()), error: None, skipped: report.skipped };
+        let synced = Some(bible_core::study::now());
+        self.status = Status { synced, error: None, skipped: report.skipped, waiting: false };
     }
 
     fn failed(&mut self, error: String) {
@@ -401,5 +454,68 @@ mod tests {
         bible_core::sync::sync_folder(&mut phone, &dir).unwrap();
         assert!(phone.is_bookmarked(jn316));
         let _ = std::fs::remove_dir_all(&dir);
+    }
+
+    #[test]
+    fn a_read_says_when_it_waits_and_comes_to_nothing_once_sync_is_off() {
+        let dir = temp_dir("waiting");
+        let jn316 = VerseRef::new(BookId::from_code("JHN").unwrap(), 3, 16);
+        let mut phone = StudyStore::open_in_memory().unwrap();
+        phone.set_highlight(jn316, Some(HighlightColor::Blue)).unwrap();
+        bible_core::sync::sync_folder(&mut phone, &dir).unwrap();
+        let mut mac = StudyStore::open_in_memory().unwrap();
+        let ctx = egui::Context::default();
+        let mut s = Sync { on: true, ..Default::default() };
+        // A read started 10 s ago (egui's clock is at 0), held back as iCloud Drive might.
+        let (go, held) = std::sync::mpsc::channel::<()>();
+        let at = dir.clone();
+        let h =
+            std::thread::spawn(move || held.recv().map_or_else(|_| Ok(Vec::new()), |()| read_folder(&at)));
+        s.job = Some(Job::Reading(h, dir.clone(), -10.0));
+        assert!(!s.tick(&ctx, &mut mac, true));
+        assert!(!s.status.waiting);
+        // Half a minute on, Settings says it's waiting.
+        if let Some(Job::Reading(_, _, started)) = &mut s.job {
+            *started = -30.0;
+        }
+        s.tick(&ctx, &mut mac, true);
+        assert!(s.status.waiting);
+        assert_eq!(s.status.line().0, "Waiting for iCloud Drive…");
+
+        // The switch turned off before the read came back: nothing is merged or written.
+        go.send(()).unwrap();
+        while matches!(&s.job, Some(Job::Reading(h, ..)) if !h.is_finished()) {
+            std::thread::yield_now();
+        }
+        assert!(!s.tick(&ctx, &mut mac, false));
+        assert!(s.job.is_none() && !s.status.waiting);
+        assert_eq!(mac.highlight(jn316), None);
+        assert!(!dir.join(format!("{}.json", mac.device_id())).exists());
+        let _ = std::fs::remove_dir_all(&dir);
+    }
+
+    #[test]
+    fn settings_says_how_the_last_sync_went_in_plain_words() {
+        let mut st = Status::default();
+        assert_eq!(st.line(), ("Syncing…".to_string(), None));
+        st.synced = Some(bible_core::study::now() - 300);
+        assert_eq!(st.line(), ("Last synced 5 min ago".to_string(), None));
+        // Skipped files are counted; their names and why are in the tooltip.
+        st.skipped =
+            vec!["0123abcd.json: not a sync file: EOF while parsing a value at line 1 column 14".into()];
+        let (line, full) = st.line();
+        assert_eq!(line, "Last synced 5 min ago · couldn't read one file from another device");
+        assert_eq!(full.as_deref(), Some(st.skipped[0].as_str()));
+        st.skipped.push("4567ef01.json: made by a newer version of the app (sync format 2)".into());
+        assert_eq!(st.line().0, "Last synced 5 min ago · couldn't read 2 files from other devices");
+        // An error says what failed and that it's tried again; the system's words are behind it.
+        let e = "Couldn't make the sync folder: Not a directory (os error 20)";
+        st.error = Some(e.into());
+        assert_eq!(
+            st.line(),
+            ("Couldn't make the sync folder. Trying again in 2 minutes.".into(), Some(e.into()))
+        );
+        st.waiting = true;
+        assert_eq!(st.line().0, "Last synced 5 min ago · waiting for iCloud Drive");
     }
 }

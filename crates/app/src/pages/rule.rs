@@ -109,7 +109,7 @@ enum Open {
     /// A chapter (and verse) in the reader.
     Read(ChapterIdx, Option<u8>),
     /// A reading of the day in the reader, its verses selected.
-    Passage(Passage),
+    Passage(&'static [Passage]),
     /// The Church Fathers panel on a verse.
     Fathers(VerseRef),
     /// The Jesus Prayer's counter, up to this many.
@@ -300,11 +300,11 @@ fn resolve(
             Some((g, true)) => {
                 let epistle = lessons.iter().find(|r| r.at_liturgy() && r.kind == lectionary::Kind::Epistle);
                 detail = epistle.into_iter().chain([g]).map(|r| r.label()).collect::<Vec<_>>().join(" · ");
-                g.passages.first().map_or(Open::Nothing, |p| Open::Passage(*p))
+                Open::Passage(g.passages)
             }
             Some((first, false)) => {
                 detail = instead(first, lessons, d, today);
-                first.passages.first().map_or(Open::Nothing, |p| Open::Passage(*p))
+                Open::Passage(first.passages)
             }
             None => Open::Nothing,
         },
@@ -736,7 +736,7 @@ mod tests {
             for item in items.into_iter().filter(|i| matches!(i.kind, Kind::Readings | Kind::Fathers)) {
                 let (open, detail, _) = resolve(item, block, (d, today), &lessons, None, &[], &[]);
                 let opens = match open {
-                    Open::Passage(p) => format!("Read {}", lectionary::label(&[p])),
+                    Open::Passage(p) => format!("Read {}", lectionary::label(p)),
                     Open::Fathers(v) => format!("Fathers on {v}"),
                     _ => "nothing".into(),
                 };

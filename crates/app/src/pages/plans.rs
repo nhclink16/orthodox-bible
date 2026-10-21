@@ -34,7 +34,8 @@ pub struct State {
     tab: Tab,
     /// The plan and day open in the day view.
     pub open: Option<(String, usize)>,
-    reflection: Option<(VerseRef, String)>,
+    /// The reflection being written: its verse, the draft, and the note it started from.
+    reflection: Option<(VerseRef, String, String)>,
 }
 
 /// The day of a plan begun at `started` that `now` falls on (1 the first), counted in local
@@ -859,10 +860,17 @@ impl State {
     ) -> f32 {
         let painter = ui.painter().clone();
         let saved = env.study.note(v).map(|n| n.body.clone()).unwrap_or_default();
-        if self.reflection.as_ref().is_none_or(|(rv, _)| *rv != v) {
-            self.reflection = Some((v, saved.clone()));
+        // The draft follows the note while nothing is typed in it, so a change synced from the
+        // iPhone shows (and Save can't put the old text back).
+        match &mut self.reflection {
+            Some((rv, draft, base)) if *rv == v => {
+                if *draft == *base || *draft == saved {
+                    (*draft, *base) = (saved.clone(), saved.clone());
+                }
+            }
+            _ => self.reflection = Some((v, saved.clone(), saved.clone())),
         }
-        let Some((_, draft)) = &mut self.reflection else { return at.top() };
+        let Some((_, draft, _)) = &mut self.reflection else { return at.top() };
         let x = at.left() + 16.0;
         let w = at.width() - 32.0;
         let verse = t.and_then(|t| t.find(v)).map(|v| v.plain_text()).unwrap_or_default();

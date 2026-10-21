@@ -63,6 +63,15 @@ impl NotePopover {
         actions: &mut Vec<Action>,
     ) -> bool {
         let now = ctx.input(|i| i.time);
+        // The note changed elsewhere (synced from the iPhone) while nothing was typed here.
+        // (Saving only whitespace deletes it.)
+        let stored = study.note(self.verse);
+        let gone = stored.is_none() && self.saved.trim().is_empty();
+        if self.note == self.saved && !gone && stored.map_or("", |n| n.body.as_str()) != self.saved {
+            self.saved = stored.map(|n| n.body.clone()).unwrap_or_default();
+            self.note = self.saved.clone();
+            self.saved_at = stored.map(|n| n.updated);
+        }
         let esc = ctx.input_mut(|i| i.consume_key(Modifiers::NONE, Key::Escape));
         let done_key = ctx.input_mut(|i| i.consume_key(Modifiers::COMMAND, Key::Enter));
         if esc || done_key {
