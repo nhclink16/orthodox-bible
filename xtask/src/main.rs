@@ -114,6 +114,66 @@ const LXX2012: Source = Source {
                 domain. New Testament: King James Version (1769), public domain outside the United Kingdom.",
 };
 
+/// Verses of the grid that LXX2012 keeps inside another verse: across a chapter break, at a
+/// lectionary reading's first verse, or marked with `\vp` (1 Kings). Each (book, text,
+/// replacement) starts the grid's verse there, numbered as LXX2012 numbers its chapter so that
+/// `lxx::remap_lxx2012` moves it with the rest; they apply in order through the book.
+const LXX2012_SPLITS: &[(&str, &str, &str)] = &[
+    // Genesis 2:25 and 5:32 begin LXX2012's 3:1 and 6:1; 8:4 ends its 8:3, and its 8:4–5 are 8:5.
+    ("GEN", "\\v 1 And the two were naked", "\\c 2 \\v 25 And the two were naked"),
+    ("GEN", "ashamed. Now the serpent", "ashamed. \\c 3 \\p \\v 1 Now the serpent"),
+    ("GEN", "\\v 1 And Noe was", "\\c 5 \\v 32 And Noe was"),
+    ("GEN", "Japheth. And it came", "Japheth. \\c 6 \\p \\v 1 And it came"),
+    ("GEN", "diminished, and the ark rested", "diminished, \\v 4 and the ark rested"),
+    ("GEN", "\\v 4 And the water continued", "\\v 5 And the water continued"),
+    // 1 Kings 2:36–46 are inside 3:1; 7:21, 7:46 and 7:1–12 inside 7:18, 7:47 and 7:51.
+    ("1KI", "\\p \\vp 36) \\vp*", "\\c 2 \\p \\v 36"),
+    ("1KI", "\\vp 37) \\vp*", "\\v 37"),
+    ("1KI", "\\vp 38) \\vp*", "\\v 38"),
+    ("1KI", "\\vp 39) \\vp*", "\\v 39"),
+    ("1KI", "\\vp 40) \\vp*", "\\v 40"),
+    ("1KI", "\\vp 41) \\vp*", "\\v 41"),
+    ("1KI", "\\vp 42) \\vp*", "\\v 42"),
+    ("1KI", "\\vp 43) \\vp*", "\\v 43"),
+    ("1KI", "\\vp 44) \\vp*", "\\v 44"),
+    ("1KI", "\\vp 45) \\vp*", "\\v 45"),
+    ("1KI", "\\vp 46) \\vp*", "\\v 46"),
+    ("1KI", "\\v 2 Nevertheless", "\\c 3 \\v 2 Nevertheless"),
+    // LXX2012 holds 7:1–12's place with an empty verse; they come out of 7:51 below.
+    ("1KI", "\\v 1-12 ", ""),
+    ("1KI", "\\vp 21\\vp*", "\\v 21"),
+    ("1KI", "\\vp 46 \\vp*", "\\v 46"),
+    ("1KI", "\\vp 1) \\vp*", "\\v 1"),
+    ("1KI", "\\vp 2) \\vp*", "\\v 2"),
+    ("1KI", "\\vp 3) \\vp*", "\\v 3"),
+    ("1KI", "\\vp 4) \\vp*", "\\v 4"),
+    ("1KI", "\\vp 5) \\vp*", "\\v 5"),
+    ("1KI", "\\vp 6) \\vp*", "\\v 6"),
+    ("1KI", "\\vp 7) \\vp*", "\\v 7"),
+    ("1KI", "\\vp 8) \\vp*", "\\v 8"),
+    ("1KI", "\\vp 9) \\vp*", "\\v 9"),
+    ("1KI", "\\vp 10) \\vp*", "\\v 10"),
+    ("1KI", "\\vp 11) \\vp*", "\\v 11"),
+    ("1KI", "\\vp 12) \\vp*", "\\v 12"),
+    // Edom's oracle (Jeremiah 49:7) begins inside 29:7; it reads on as 30, the rest of the grid's 49.
+    ("JER", "! CONCERNING IDUMEA", "! \\c 30 \\v 7 CONCERNING IDUMEA"),
+    // Zephaniah 2:15 begins LXX2012's 3:1.
+    ("ZEP", "\\v 1 This is the scornful", "\\c 2 \\v 15 This is the scornful"),
+    ("ZEP", "hands. Alas the glorious", "hands. \\c 3 \\p \\v 1 Alas the glorious"),
+];
+
+/// A book of LXX2012 with its [`LXX2012_SPLITS`] made.
+fn split_lxx2012(book: &str, mut text: String) -> Result<String> {
+    let mut at = 0;
+    for (_, find, with) in LXX2012_SPLITS.iter().filter(|s| s.0 == book) {
+        let i =
+            at + text[at..].find(find).with_context(|| format!("LXX2012 {book}: no {find:?} to split"))?;
+        text.replace_range(i..i + find.len(), with);
+        at = i + with.len();
+    }
+    Ok(text)
+}
+
 fn main() -> Result<()> {
     let args: Vec<String> = std::env::args().skip(1).collect();
     let root = Path::new(env!("CARGO_MANIFEST_DIR")).parent().unwrap().to_path_buf();
@@ -361,7 +421,8 @@ fn build_orthodox(root: &Path) -> Result<()> {
         let mut text = String::new();
         std::io::Read::read_to_string(&mut f, &mut text).with_context(|| name.clone())?;
         // LXX2012 marks a plural "you" as "you⌃"; read aloud or at a glance it's a stray symbol.
-        usfm::UsfmParser::new(&mut b).parse(&text.replace('⌃', ""))?;
+        let text = split_lxx2012(name.get(3..6).unwrap_or(""), text.replace('⌃', ""))?;
+        usfm::UsfmParser::new(&mut b).parse(&text)?;
     }
     let warnings = std::mem::take(&mut b.warnings);
     let skipped = std::mem::take(&mut b.skipped_books);

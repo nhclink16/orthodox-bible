@@ -85,6 +85,20 @@ references all go through `lxx::shown` and `lxx::from_lxx`, so Psalm 51 reads as
 too. Verse numbers follow English Bibles (titles aren't verses), which is how LXX2012 numbers them.
 Psalm 151 and the Prayer of Azariah (the Song of the Three Youths) are books of their own.
 
+*Septuagint chapters.* LXX2012 numbers other books its own way too. Jeremiah 25–51 follow the
+Septuagint's order, Exodus 35–40 and 1 Kings 20–21 are rearranged, and some verses are joined or
+split where Brenton's sentences run differently. These move onto the grid at build time as well, by
+a table (`lxx::MOVED`) made by comparing every Old Testament book with the KJV, so Jeremiah 31:31
+opens the new covenant in every column. Sometimes LXX2012 keeps a grid verse inside another one:
+across a chapter break, at the start of a lectionary reading, or where 1 Kings marks it with `\vp`
+(Genesis 5:32 is in its 6:1, 1 Kings 2:36–46 in its 3:1). There `xtask build-orthodox` splits the
+text first (`LXX2012_SPLITS`). That edits LXX2012's text, like dropping its plural-you marker, so it
+lives in the build; the table lives in the core beside the psalm mapping. A verse the Septuagint
+lacks is missing, so it reads as not in this translation (Jeremiah 33:14–26), and a verse range
+LXX2012 gives for such verses counts as its first verse only. The Septuagint's additions stay in
+the verse LXX2012 puts them in. A test opens every Old Testament reading of the lectionary in the
+bundled text.
+
 *Church Fathers.* The Fathers panel (verse menu → Church Fathers, or F) reads quotes from the
 Historical Christian Faith Commentaries Database, keyed by grid verse (it uses Hebrew psalm
 numbers too). That database mixes public-domain translations with fair-use excerpts of modern
@@ -481,7 +495,8 @@ What differs is the toolkit, and here the Mac's choice is overruled.
 - No footnotes or cross-references from the source texts (dropped at import).
 - SWORD modules in versifications other than KJV(A)/NRSV(A) (e.g. Vulgate, Synodal) aren't supported yet,
   and SWORD imports don't read the deuterocanonical books yet (USFM, OSIS and Zefania do).
-- Septuagint numbering is mapped for the Psalms only, and only for the bundled `lxx` (LXX2012). Its
-  other books (Jeremiah 25–51, Exodus 35–40, 1 Kings, Job, …) keep LXX2012's numbering, so parallel
-  columns can be a verse or a chapter apart there. Imported Septuagints keep their own numbering.
+- Septuagint numbering is mapped only for the bundled `lxx` (LXX2012); imported Septuagints keep
+  their own. Where the Septuagint reorders a passage within its verses (1 Kings 11:1–8, the pluses
+  of Proverbs 15–16), LXX2012's verses stay where it puts them, so a grid verse there can open a
+  little more or less than the KJV's.
 - Search covers locally available text; online translations are searched via their own sites.

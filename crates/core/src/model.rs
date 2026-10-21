@@ -413,8 +413,10 @@ impl Translation {
     }
 }
 
-/// Moves a verse from a source's numbering to the grid's: (book, chapter, verse) in and out.
-pub type Remap = fn(BookId, u8, u8) -> Option<(BookId, u8, u8)>;
+/// Moves a verse from a source's numbering to the grid's: (book, chapter, verse) in, and out the
+/// book, chapter and first and last grid verse it stands for (more than one when the source joins
+/// them).
+pub type Remap = fn(BookId, u8, u8) -> Option<(BookId, u8, u8, u8)>;
 
 /// Incrementally converts a stream of book/chapter/verse/text events into a [`Translation`].
 ///
@@ -447,7 +449,8 @@ pub struct TranslationBuilder {
     /// Called as each book begins (import progress).
     pub on_book: Option<Box<dyn FnMut(BookId) + Send>>,
     /// Moves each verse from the source's numbering to the grid's (book, chapter, verse); `None`
-    /// drops it. Used for a Septuagint, whose psalms are numbered differently ([`crate::lxx`]).
+    /// drops it, and a verse moved onto the one before carries on that verse. Used for a
+    /// Septuagint, whose psalms and some chapters are numbered differently ([`crate::lxx`]).
     pub remap: Option<Remap>,
 }
 
@@ -552,21 +555,18 @@ impl TranslationBuilder {
         self.end_verse();
         let (c, n, e) = match (self.remap, self.book) {
             (Some(remap), Some(book)) => {
-                let (Ok(ch), Ok(n), Ok(e)) = (
-                    u8::try_from(self.src_chapter),
-                    u8::try_from(number),
-                    u8::try_from(number_end.max(number)),
-                ) else {
+                let (Ok(ch), Ok(n)) = (u8::try_from(self.src_chapter), u8::try_from(number)) else {
                     return;
                 };
-                let Some((c, v)) =
-                    remap(book, ch, n).and_then(|(b, ch, v)| Some((ChapterIdx::new(b, ch)?, v)))
+                // The remap says which grid verses it stands for, whatever range the source gives.
+                let Some((c, v, last)) =
+                    remap(book, ch, n).and_then(|(b, ch, v, last)| Some((ChapterIdx::new(b, ch)?, v, last)))
                 else {
                     self.warnings
                         .push(format!("{} {ch}:{n}: outside the canonical grid, skipped", book.name()));
                     return;
                 };
-                (c, v, (v as u32 + (e - n) as u32).min(u8::MAX as u32) as u8)
+                (c, v, last)
             }
             _ => {
                 let Some(c) = self.chapter else { return };
@@ -578,6 +578,11 @@ impl TranslationBuilder {
             }
         };
         if n == 0 {
+            return;
+        }
+        if self.remap.is_some() && self.verses.last().is_some_and(|(lc, lv)| *lc == c && lv.number == n) {
+            // The source splits what the grid counts as one verse.
+            self.reopen_verse(e);
             return;
         }
         if !self.seen.insert((c.0, n)) {
@@ -598,6 +603,19 @@ impl TranslationBuilder {
 
     fn verse_len(&self) -> usize {
         self.text.len() - self.verse_start
+    }
+
+    /// Carries on the verse just ended, through grid verse `end`. Nothing has been added since,
+    /// so its text, marks and spans are still the last ones.
+    fn reopen_verse(&mut self, end: u8) {
+        let (_, v) = self.verses.last_mut().expect("a verse to carry on");
+        v.number_end = v.number_end.max(end);
+        self.verse_start = v.text_start as usize;
+        self.cur_marks = self.marks.split_off(v.marks_start as usize);
+        self.cur_spans = self.spans.split_off(v.spans_start as usize);
+        self.in_verse = true;
+        // A break before the next part already separates it.
+        self.pending_space = self.pending_marks.is_empty();
     }
 
     /// Appends verse text. Text outside a verse is ignored.
