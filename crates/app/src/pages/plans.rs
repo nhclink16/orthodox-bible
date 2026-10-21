@@ -6,8 +6,8 @@ use std::collections::HashSet;
 use eframe::egui::{self, Color32, FontId, Rect, Sense, Stroke, StrokeKind, Ui, pos2, vec2};
 
 use bible_core::plans::{self, Passage, Plan, PlanIcon};
-use bible_core::study::PlanProgress;
-use bible_core::{ChapterIdx, Translation, VerseRef};
+use bible_core::study::{PlanProgress, StudyStore};
+use bible_core::{ChapterIdx, Translation, VerseRef, calendar};
 
 use super::{PageEnv, group_label, text};
 use crate::actions::Action;
@@ -37,38 +37,53 @@ pub struct State {
     reflection: Option<(VerseRef, String)>,
 }
 
-/// A plan with its progress, as of today.
-struct Under<'a> {
-    plan: &'static Plan,
+/// The day of a plan begun at `started` that `now` falls on (1 the first), counted in local
+/// calendar days so that a change of the clocks doesn't move it.
+pub fn day_number(started: i64, now: i64) -> i64 {
+    let day = |t| {
+        let l = time::local(t);
+        calendar::civil(l.year, l.month, l.day)
+    };
+    day(now) - day(started) + 1
+}
+
+/// A plan with its progress, as of today (the Today page shows it too).
+pub(super) struct Under<'a> {
+    pub(super) plan: &'static Plan,
     state: &'a PlanProgress,
     reads: HashSet<(u16, u8)>,
     /// Chapters read to the end since the plan began.
     finished: HashSet<ChapterIdx>,
     /// Today's day number (1-based; beyond the plan's length once it's over).
-    today: usize,
+    pub(super) today: usize,
 }
 
 impl Under<'_> {
-    fn new<'a>(plan: &'static Plan, state: &'a PlanProgress, env: &PageEnv<'_>) -> Under<'a> {
-        let reads = env.study.plan_reads(&state.id);
-        let finished = env
-            .study
+    pub(super) fn new<'a>(plan: &'static Plan, state: &'a PlanProgress, study: &StudyStore) -> Under<'a> {
+        let reads = study.plan_reads(&state.id);
+        let finished = study
             .reading_since(state.started)
             .into_iter()
             .filter(|s| s.finished())
             .filter_map(|s| s.chapter_idx())
             .collect();
-        let today = ((time::day_start(bible_core::study::now()) - state.started) / DAY).max(0) as usize + 1;
+        let today = day_number(state.started, bible_core::study::now()).max(1) as usize;
         Under { plan, state, reads, finished, today }
     }
 
-    fn passage_done(&self, day: usize, i: usize) -> bool {
+    /// The date of the plan's `day`: noon of its first day and whole days on, so that a change
+    /// of the clocks moves it an hour, never onto another day.
+    fn date(&self, day: usize) -> time::Local {
+        time::local(self.state.started + (day as i64 - 1) * DAY + DAY / 2)
+    }
+
+    pub(super) fn passage_done(&self, day: usize, i: usize) -> bool {
         let p = self.plan.day(day).get(i);
         self.reads.contains(&(day as u16, i as u8))
             || p.is_some_and(|p| p.verses.is_none() && self.finished.contains(&p.chapter))
     }
 
-    fn day_done(&self, day: usize) -> bool {
+    pub(super) fn day_done(&self, day: usize) -> bool {
         let n = self.plan.day(day).len();
         n > 0 && (0..n).all(|i| self.passage_done(day, i))
     }
@@ -77,22 +92,8 @@ impl Under<'_> {
         (1..=self.plan.len()).filter(|d| self.day_done(*d)).count()
     }
 
-    /// Days read in a row, up to today (or yesterday, while today is still to do).
-    fn streak(&self) -> usize {
-        let mut d = self.today.min(self.plan.len());
-        if !self.day_done(d) {
-            d = d.saturating_sub(1);
-        }
-        let mut n = 0;
-        while d >= 1 && self.day_done(d) {
-            n += 1;
-            d -= 1;
-        }
-        n
-    }
-
     /// The day to continue with: today's, or the first unfinished one before it.
-    fn current_day(&self) -> usize {
+    pub(super) fn current_day(&self) -> usize {
         let today = self.today.min(self.plan.len()).max(1);
         if self.day_done(today) {
             return today;
@@ -112,7 +113,7 @@ fn icon_for(icon: PlanIcon) -> widgets::IconFn {
     }
 }
 
-fn day_label(passages: &[Passage], t: Option<&Translation>) -> String {
+pub(super) fn day_label(passages: &[Passage], t: Option<&Translation>) -> String {
     plans::label(passages, |b| {
         t.map(|t| t.meta.ref_name(b).to_string()).unwrap_or_else(|| b.ref_name().to_string())
     })
@@ -163,7 +164,7 @@ impl State {
         if let Some((id, day)) = self.open.clone()
             && let (Some(plan), Some(state)) = (plans::get(&id), started.iter().find(|s| s.id == id))
         {
-            let under = Under::new(plan, state, env);
+            let under = Under::new(plan, state, env.study);
             return self.day_view(ui, content, env, &under, day, actions);
         }
         self.open = None;
@@ -229,7 +230,7 @@ impl State {
                     if !matches(plan) {
                         continue;
                     }
-                    let under = Under::new(plan, s, env);
+                    let under = Under::new(plan, s, env.study);
                     y = self.hero(
                         ui,
                         p,
@@ -356,7 +357,7 @@ impl State {
             false,
         );
 
-        // Continue, the streak and today's time.
+        // Continue and today's time. No streaks (Orthodox fork): reading isn't an achievement.
         let current = u.current_day();
         let label = format!("Continue · {}", day_label(u.plan.day(current), t));
         let cy = y + 136.0 + 20.0;
@@ -373,25 +374,7 @@ impl State {
                 open_passage(passage, actions);
             }
         }
-        let mut sx = button.right() + 16.0;
-        let streak = u.streak();
-        if streak > 0 {
-            let flame = Rect::from_min_size(pos2(sx, cy - 8.0), vec2(16.0, 16.0));
-            icons::heavy(|| {
-                icons::flame(&painter, flame, p.swatch(bible_core::study::HighlightColor::Orange))
-            });
-            let w = text(
-                &painter,
-                sx + 22.0,
-                cy - 8.0,
-                16.0,
-                &format!("{streak}-day streak"),
-                theme::ui_semibold(13.0),
-                p.ink,
-                false,
-            );
-            sx += 22.0 + w + 16.0;
-        }
+        let sx = button.right() + 16.0;
         let words: usize = u.plan.day(day.max(1)).iter().map(|ps| passage_size(ps, t).1).sum();
         if words > 0 {
             let mins = format!("~{} min today", minutes(words));
@@ -408,7 +391,7 @@ impl State {
         let block = (day.max(1) - 1) / 30;
         let first = block * 30 + 1;
         let last = (first + 29).min(len);
-        let first_date = time::local(u.state.started + (first as i64 - 1) * DAY);
+        let first_date = u.date(first);
         group_label(
             &painter,
             p,
@@ -583,7 +566,7 @@ impl State {
             -0.01,
         );
         widgets::paint_on_baseline(&painter, left, css_baseline(y, 36.0, 28.0, true), g, p.ink);
-        let date = time::local(u.state.started + (day as i64 - 1) * DAY);
+        let date = u.date(day);
         let words: usize = passages.iter().map(|ps| passage_size(ps, t).1).sum();
         let mut sub = format!(
             "{}, {} {}",
@@ -620,7 +603,7 @@ impl State {
             } else if let Some(fill) = widgets::hover_fill(ui, &resp, p, false) {
                 painter.rect_filled(cell, 12.0, fill);
             }
-            let dd = time::local(u.state.started + (d as i64 - 1) * DAY);
+            let dd = u.date(d);
             let wd = time::weekday_short(dd.weekday);
             let ink = if d == u.today { p.accent } else { p.ink_3 };
             let g = widgets::line(&painter, wd, theme::ui_medium(11.0), ink, 0.0);
@@ -783,11 +766,17 @@ impl State {
             painter.circle_filled(*pts.last().unwrap(), 5.0, p.accent);
             painter.add(egui::Shape::line(pts, Stroke::new(10.0, p.accent)));
         }
-        let pct = format!("{} %", (frac * 100.0).round());
-        let g = widgets::line(&painter, &pct, FontId::new(28.0, theme::family(theme::SERIF)), p.ink, 0.0);
+        // Days read, not a percentage (Orthodox fork).
+        let g = widgets::line(
+            &painter,
+            &done.to_string(),
+            FontId::new(28.0, theme::family(theme::SERIF)),
+            p.ink,
+            0.0,
+        );
         let gx = c.x - g.size().x / 2.0;
         widgets::paint_on_baseline(&painter, gx, css_baseline(card.top() + 40.0, 36.0, 28.0, true), g, p.ink);
-        let days = format!("{done} of {len} days");
+        let days = format!("of {len} days");
         let g = widgets::line(&painter, &days, theme::ui_medium(12.0), p.ink_2, 0.0);
         let gx = c.x - g.size().x / 2.0;
         widgets::paint_on_baseline(
@@ -956,7 +945,7 @@ impl State {
     }
 }
 
-fn open_passage(p: &Passage, actions: &mut Vec<Action>) {
+pub(super) fn open_passage(p: &Passage, actions: &mut Vec<Action>) {
     let verse = p.verses.map(|(a, _)| a);
     actions.push(Action::Jump { chapter: p.chapter, verse, flash: verse.is_some() });
 }

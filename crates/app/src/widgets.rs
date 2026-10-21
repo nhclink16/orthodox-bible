@@ -491,6 +491,30 @@ pub fn checkbox(ui: &mut Ui, p: &Palette, b: Rect, on: bool, label: &str) -> Res
     resp
 }
 
+/// The focus halo of a field (`ds-14`) around a row or control that Tab has focused.
+pub fn focus_ring(painter: &Painter, p: &Palette, resp: &Response, rect: Rect, radius: f32) {
+    if resp.has_focus() {
+        painter.rect_stroke(rect, radius, Stroke::new(3.0, p.focus), StrokeKind::Outside);
+    }
+}
+
+/// A check box with no label, as a plan's readings have: 16 pt, radius 4; on, the accent with a
+/// check; off, the field colour with a hairline that darkens on hover. It answers 6 pt around.
+pub fn tick(ui: &mut Ui, p: &Palette, b: Rect, on: bool, id: egui::Id) -> Response {
+    let resp = ui.interact(b.expand(6.0), id, Sense::click());
+    let painter = ui.painter();
+    focus_ring(painter, p, &resp, b, 4.0);
+    if on {
+        painter.rect_filled(b, 4.0, p.accent);
+        crate::icons::check(painter, Rect::from_center_size(b.center(), vec2(12.0, 12.0)), p.on_accent);
+    } else {
+        painter.rect_filled(b, 4.0, p.field);
+        let ring = if resp.hovered() { p.ink_3 } else { p.border };
+        painter.rect_stroke(b, 4.0, Stroke::new(1.0, ring), StrokeKind::Inside);
+    }
+    resp
+}
+
 /// A radio button (`ds-14`): 16 pt; off, the field colour with a hairline; on, a 5 pt accent ring
 /// around a `raised` centre.
 pub fn radio(painter: &Painter, p: &Palette, center: egui::Pos2, on: bool, hovered: bool) {
@@ -1053,6 +1077,22 @@ pub fn text_field(
     )
 }
 
+fn segment_widths(painter: &Painter, labels: &[&str], selected: usize) -> Vec<f32> {
+    labels
+        .iter()
+        .enumerate()
+        .map(|(i, l)| {
+            let font = if i == selected { text::UI_STRONG.font() } else { theme::ui_medium(text::UI.size) };
+            painter.layout_no_wrap(l.to_string(), font, Color32::PLACEHOLDER).size().x + 20.0
+        })
+        .collect()
+}
+
+/// The width of a [`segmented_tight`] control, to place it before drawing it.
+pub fn segmented_tight_width(painter: &Painter, labels: &[&str], selected: usize) -> f32 {
+    segment_widths(painter, labels, selected).iter().sum::<f32>() + 2.0 * (labels.len() as f32 - 1.0) + 4.0
+}
+
 /// A segmented control sized to its labels (`ds-07`): segments 28 pt with 10 pt sides, 2 pt
 /// apart in a 32 pt `fill` track; the selected one `raised` with the knob shadow. Drawn with its
 /// right edge at `right_center`; returns the track and the newly selected index.
@@ -1064,15 +1104,8 @@ pub fn segmented_tight(
     labels: &[&str],
     selected: usize,
 ) -> (Rect, Option<usize>) {
-    let widths: Vec<f32> = labels
-        .iter()
-        .enumerate()
-        .map(|(i, l)| {
-            let font = if i == selected { text::UI_STRONG.font() } else { theme::ui_medium(text::UI.size) };
-            ui.painter().layout_no_wrap(l.to_string(), font, Color32::PLACEHOLDER).size().x + 20.0
-        })
-        .collect();
-    let total: f32 = widths.iter().sum::<f32>() + 2.0 * (labels.len() as f32 - 1.0) + 4.0;
+    let widths = segment_widths(ui.painter(), labels, selected);
+    let total = segmented_tight_width(ui.painter(), labels, selected);
     let track = Rect::from_min_size(pos2(right_center.x - total, right_center.y - 16.0), vec2(total, 32.0));
     ui.painter().rect_filled(track, 16.0, p.fill);
     let mut x = track.left() + 2.0;

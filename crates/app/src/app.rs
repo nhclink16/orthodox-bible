@@ -64,6 +64,8 @@ pub struct Settings {
     pub onboarded: bool,
     /// The church calendar for feasts and fasts (Orthodox fork).
     pub calendar: bible_core::calendar::Style,
+    /// Remind at the times of the prayer rule's blocks while the app is open.
+    pub rule_reminders: bool,
 }
 
 fn yes() -> bool {
@@ -99,6 +101,7 @@ impl Default for Settings {
             share: Default::default(),
             onboarded: false,
             calendar: Default::default(),
+            rule_reminders: false,
         }
     }
 }
@@ -278,6 +281,8 @@ pub struct BibleApp {
     backup_checked: Option<f64>,
     /// The day the plan reminder last showed.
     reminded: Option<i64>,
+    /// The prayer rule's reminders, when they're on.
+    rule_reminders: crate::pages::rule::Reminders,
     /// The page in the main area (the reader unless a library or study page is open).
     pub pages: crate::pages::Pages,
     /// `BIBLE_RS_DEMO`: steps that put the window into a given state (screenshots), one per frame.
@@ -402,6 +407,7 @@ impl BibleApp {
             share_sheet: None,
             compare: None,
             reminded: None,
+            rule_reminders: Default::default(),
             focus: false,
             focus_reveal: false,
             backup_checked: None,
@@ -483,6 +489,10 @@ impl BibleApp {
         // The rows of Settings › Shortcuts, with any chords chosen there.
         let bindings = crate::keymap::bindings(&self.settings.shortcuts);
         let anywhere = |a: &Action| matches!(a, Action::OpenPalette | Action::OpenSearch(_));
+        // The Jesus Prayer's counter on the Today page counts with Space.
+        let counting = self.pages.page == crate::pages::Page::Today && self.pages.today.counting();
+        // Escape leaves a prayer, the counter or the rule's editor there.
+        let viewing = self.pages.page == crate::pages::Page::Today && self.pages.today.viewing();
         ctx.input_mut(|i| {
             let cmd = Modifiers::COMMAND;
             let cmd_shift = Modifiers::COMMAND | Modifiers::SHIFT;
@@ -552,11 +562,15 @@ impl BibleApp {
             key(Modifiers::NONE, Key::ArrowUp, Action::ScrollLines(-3.0));
             key(Modifiers::NONE, Key::PageDown, Action::ScrollPages(1.0));
             key(Modifiers::NONE, Key::PageUp, Action::ScrollPages(-1.0));
-            key(Modifiers::SHIFT, Key::Space, Action::ScrollPages(-1.0));
-            key(Modifiers::NONE, Key::Space, Action::ScrollPages(1.0));
+            if !counting {
+                key(Modifiers::SHIFT, Key::Space, Action::ScrollPages(-1.0));
+                key(Modifiers::NONE, Key::Space, Action::ScrollPages(1.0));
+            }
             key(Modifiers::NONE, Key::J, Action::SelectNext);
             key(Modifiers::NONE, Key::K, Action::SelectPrev);
-            key(Modifiers::NONE, Key::Escape, Action::ClearSelection);
+            if !viewing {
+                key(Modifiers::NONE, Key::Escape, Action::ClearSelection);
+            }
             key(Modifiers::NONE, Key::Slash, Action::OpenSearch(None));
             key(Modifiers::SHIFT, Key::Questionmark, Action::ShowShortcuts);
             key(Modifiers::NONE, Key::Questionmark, Action::ShowShortcuts);
@@ -777,6 +791,24 @@ impl BibleApp {
                 self.library.warm(&ids);
             }
             Action::SetCalendar(style) => self.settings.calendar = style,
+            Action::SetRuleDone { day, item, done } => {
+                if let Err(e) = self.study.set_rule_done(day, &item, done) {
+                    self.toast(ctx, format!("{e:#}"));
+                }
+            }
+            Action::SaveRule(rule) => {
+                if let Err(e) = self.study.set_rule(&rule) {
+                    self.toast(ctx, format!("Couldn't save your rule: {e:#}"));
+                }
+                // The times may have moved: work the next reminder out again.
+                self.rule_reminders.reset();
+                ctx.request_repaint();
+            }
+            Action::SetRuleReminders(on) => {
+                self.settings.rule_reminders = on;
+                self.rule_reminders.reset();
+                ctx.request_repaint();
+            }
             Action::ShowFathers => {
                 let v = self.selection_or_location()[0];
                 self.reader.set_selection(Some(v));
@@ -1008,6 +1040,9 @@ impl BibleApp {
             }
             "pick" => self.pages.translations.selected = Some(arg.to_string()),
             "plans-tab" => self.pages.plans.set_tab(arg),
+            // `today:<edit|day:<offset>|count:<n>|item id>`: the Today page's rule editor, a day
+            // from today, the Jesus Prayer counted to n, or an item of the rule opened.
+            "today" => self.pages.today.demo(arg),
             // `plan-day:<plan>@<day>`: a plan's day view.
             "plan-day" => {
                 let (id, day) = arg.split_once('@').unwrap_or((arg, "1"));
@@ -1185,7 +1220,7 @@ impl BibleApp {
         self.reminded = Some(today);
         let due = self.study.plans().into_iter().filter(|p| p.finished.is_none()).find_map(|p| {
             let plan = bible_core::plans::get(&p.id)?;
-            let day = ((today - p.started) / 86_400 + 1) as usize;
+            let day = crate::pages::plans::day_number(p.started, now).max(1) as usize;
             let reads = self.study.plan_reads(&p.id);
             let todo = (0..plan.day(day).len()).any(|i| !reads.contains(&(day as u16, i as u8)));
             todo.then(|| {
@@ -1195,6 +1230,21 @@ impl BibleApp {
         });
         if let Some(msg) = due {
             self.toast(ctx, msg);
+        }
+    }
+
+    /// The prayer rule's reminders (Orthodox fork): when a block's time comes while the app is
+    /// open, and something in it is still to do, its title and time in a toast.
+    fn rule_reminder(&mut self, ctx: &egui::Context) {
+        if !self.settings.rule_reminders || self.startup.frames < 3 {
+            return;
+        }
+        let now = bible_core::study::now();
+        let (due, wait) = self.rule_reminders.due(now, &self.study, self.settings.calendar);
+        // egui sleeps while nothing happens: wake for the next block's time.
+        ctx.request_repaint_after(Duration::from_secs(wait));
+        for message in due {
+            self.toast(ctx, message);
         }
     }
 
@@ -2594,6 +2644,7 @@ impl eframe::App for BibleApp {
         }
         self.shortcuts_help(&ctx, &mut actions);
         self.plan_reminder(&ctx);
+        self.rule_reminder(&ctx);
         self.auto_backup(&ctx);
         self.toasts(&ctx);
         self.end_frame(&ctx, frame, frame_start, actions);

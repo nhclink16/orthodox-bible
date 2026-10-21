@@ -77,6 +77,15 @@ pub enum Action {
     ShowFathers,
     /// The church calendar the Today page follows.
     SetCalendar(bible_core::calendar::Style),
+    /// The prayer rule (Orthodox fork): tick an item done or not on a day (a
+    /// `bible_core::calendar::Day`), save the rule, and its reminders on or off.
+    SetRuleDone {
+        day: i64,
+        item: String,
+        done: bool,
+    },
+    SaveRule(Box<bible_core::rule::Rule>),
+    SetRuleReminders(bool),
     ClearSelection,
     SelectNext,
     SelectPrev,
