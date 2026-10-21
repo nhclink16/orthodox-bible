@@ -1,10 +1,16 @@
 import SwiftUI
+import UniformTypeIdentifiers
 
 /// Theme, type and reading options, applied as you change them.
 struct SettingsView: View {
     @Environment(Store.self) private var store
     @Environment(\.dismiss) private var dismiss
     let theme: Theme
+    /// Turning sync on: which folder to choose, then the Files picker for it.
+    @State private var choosing = false
+    @State private var picking = false
+    /// A folder picked that isn't the one the Mac syncs, to confirm.
+    @State private var unlike: URL?
 
     var body: some View {
         @Bindable var store = store
@@ -68,6 +74,27 @@ struct SettingsView: View {
                     ExportButton(title: "Export as JSON", format: .json, file: "Bible notes.json")
                 }
 
+                Section {
+                    Toggle("Sync with your Mac", isOn: Binding(get: { store.syncOn }, set: turnSync))
+                        .accessibilityIdentifier("sync")
+                    if store.syncOn {
+                        if let folder = store.syncFolder {
+                            LabeledContent("Folder", value: folder)
+                        }
+                        Button("Sync now") { store.syncNow() }
+                            .disabled(store.syncing)
+                            .accessibilityIdentifier("sync-now")
+                        if store.syncError != nil {
+                            Button("Choose folder…") { choosing = true }
+                        }
+                    }
+                } footer: {
+                    VStack(alignment: .leading, spacing: 6) {
+                        if store.syncOn { SyncStatus() }
+                        Text("Through iCloud Drive: notes, highlights, bookmarks, reading plans, your prayer rule and what you’ve ticked.")
+                    }
+                }
+
                 if let t = store.translation {
                     Section("About the \(t.abbrev)") {
                         VStack(alignment: .leading, spacing: 6) {
@@ -97,6 +124,35 @@ struct SettingsView: View {
         }
         .presentationDetents([.medium, .large])
         .presentationBackgroundInteraction(.enabled(upThrough: .medium))
+        // The Files picker can't carry a line of its own: which folder to choose comes first.
+        .confirmationDialog("Sync with your Mac", isPresented: $choosing, titleVisibility: .visible) {
+            Button("Choose folder") { picking = true }
+        } message: {
+            Text("Choose iCloud Drive › Orthodox Bible › Sync. The Mac app makes this folder; you can also make it in Files.")
+        }
+        .fileImporter(isPresented: $picking, allowedContentTypes: [.folder]) { result in
+            guard case .success(let url) = result else { return }
+            if FolderSync.isMacs(url) { store.startSync(folder: url) } else { unlike = url }
+        }
+        .confirmationDialog(
+            "This isn’t the Orthodox Bible › Sync folder your Mac uses. Use it anyway?",
+            isPresented: Binding(get: { unlike != nil }, set: { if !$0 { unlike = nil } }),
+            titleVisibility: .visible, presenting: unlike
+        ) { url in
+            Button("Use folder") { store.startSync(folder: url) }
+            Button("Choose again") { picking = true }
+        }
+    }
+
+    /// On asks for the folder (a UI test's own, if it named one); off forgets it.
+    private func turnSync(_ on: Bool) {
+        guard on else { return store.stopSync() }
+        if let folder = Store.testSyncFolder {
+            try? FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+            store.startSync(folder: folder)
+        } else {
+            choosing = true
+        }
     }
 
     static var version: String {
@@ -144,6 +200,32 @@ private struct ThemeSwatch: View {
         .buttonStyle(.plain)
         .accessibilityLabel("\(appearance.label) theme")
         .accessibilityAddTraits(selected ? .isSelected : [])
+    }
+}
+
+/// When the Mac was last synced with, or why it couldn't be.
+private struct SyncStatus: View {
+    @Environment(Store.self) private var store
+
+    var body: some View {
+        // Drawn again a minute after each sync, and each minute after that.
+        TimelineView(.periodic(from: store.lastSynced ?? .now, by: 60)) { context in
+            VStack(alignment: .leading, spacing: 2) {
+                if let error = store.syncError {
+                    Text(error)
+                } else if store.syncWaiting > 0 {
+                    Text("Waiting for iCloud Drive…")
+                } else if let last = store.lastSynced {
+                    let when = context.date.timeIntervalSince(last) < 60
+                        ? "Last synced just now"
+                        : "Last synced \(last.formatted(.relative(presentation: .named, unitsStyle: .wide)))"
+                    Text(store.syncDevices == 0 ? "\(when) · nothing from your Mac in this folder yet" : when)
+                } else if store.syncing {
+                    Text("Syncing…")
+                }
+                ForEach(store.syncSkipped, id: \.self) { Text("Couldn’t read \($0)") }
+            }
+        }
     }
 }
 

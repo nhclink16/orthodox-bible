@@ -1,3 +1,4 @@
+use std::os::unix::fs::PermissionsExt;
 use std::path::PathBuf;
 use std::sync::Arc;
 
@@ -356,8 +357,22 @@ fn a_days_rule_opens_what_each_item_needs() {
         rule_item(&day, "midday-psalm").unwrap().open,
         RuleOpen::Chapter { chapter_index: index("ps 90") }
     );
-    assert_eq!(rule_item(&day, "morning-reading").unwrap().open, RuleOpen::ComingSoon);
-    assert_eq!(rule_item(&day, "evening-fathers").unwrap().open, RuleOpen::ComingSoon);
+    // The day's readings: the Liturgy's Epistle and Gospel, opening at the Gospel, and the
+    // Fathers on its first verse.
+    let readings = rule_item(&day, "morning-reading").unwrap();
+    assert_eq!(readings.detail.as_deref(), Some("2 Timothy 2:1–10 · Luke 9:23–27"));
+    assert_eq!(readings.open, RuleOpen::Passage { chapter_index: index("lk 9"), verse: 23 });
+    let fathers = rule_item(&day, "evening-fathers").unwrap();
+    assert_eq!(fathers.detail.as_deref(), Some("Luke 9:23–27"));
+    assert_eq!(fathers.open, RuleOpen::Fathers { verse: VerseRef { book: 57, chapter: 9, verse: 23 } });
+    // A Lenten weekday has no Gospel: the first reading, and it says so.
+    let lent = rule_item(&rule_on(&bible, 2026, 3, 4), "morning-reading").unwrap();
+    assert_eq!(lent.detail.as_deref(), Some("No Gospel today · Isaiah 5:16–25 at the Sixth Hour"));
+    assert_eq!(lent.open, RuleOpen::Passage { chapter_index: index("is 5"), verse: 16 });
+    // Holy Friday has no Liturgy: the first of its Gospels.
+    let friday = rule_item(&rule_on(&bible, 2026, 4, 10), "evening-fathers").unwrap();
+    assert_eq!(friday.detail.as_deref(), Some("John 13:31–18:1 at Matins of the Twelve Passion Gospels"));
+    assert_eq!(friday.open, RuleOpen::Fathers { verse: VerseRef { book: 58, chapter: 13, verse: 31 } });
     let jesus = rule_item(&day, "midday-jesus-prayer").unwrap();
     assert_eq!((jesus.open, jesus.optional), (RuleOpen::JesusPrayer { count: 33 }, true));
     assert!(matches!(
@@ -519,4 +534,141 @@ fn plans_start_and_read_day_by_day() {
     assert!(bible.active_plans(start).is_empty());
     assert!(prayers().iter().any(|p| p.id == "before-meals"));
     let _ = std::fs::remove_dir_all(dir);
+}
+
+/// "Liturgy Epistle 2 Timothy 2:1–10 (Great Martyr …)": a day's readings, one line each.
+fn lessons(year: i32, month: u8, day: u8) -> Vec<String> {
+    day_readings(year, month, day, false)
+        .iter()
+        .map(|r| {
+            let occasion = r.occasion.as_ref().map(|o| format!(" ({o})")).unwrap_or_default();
+            format!("{} {:?} {}{occasion}", r.service, r.kind, r.label)
+        })
+        .collect()
+}
+
+#[test]
+fn the_days_readings_open_in_the_reader() {
+    // Tuesday 20 October 2026: St Artemius's Epistle with the weekday's Gospel.
+    let day = day_readings(2026, 10, 20, false);
+    assert_eq!(
+        lessons(2026, 10, 20),
+        [
+            "Liturgy Epistle 2 Timothy 2:1–10 (Great Martyr Artemius of Antioch; St Gerasimos of Kefalonia)",
+            "Liturgy Gospel Luke 9:23–27",
+        ]
+    );
+    let gospel = &day[1];
+    assert!(gospel.at_liturgy && gospel.title.is_none() && gospel.confidence == ReadingConfidence::High);
+    assert_eq!(
+        gospel.passages,
+        [ReadingPassage {
+            from: VerseRef { book: 57, chapter: 9, verse: 23 },
+            to: VerseRef { book: 57, chapter: 9, verse: 27 },
+            chapter_index: index("lk 9"),
+        }]
+    );
+    // A Sunday: the Resurrection Gospel at Matins; both cycles are the day's own.
+    let sunday = day_readings(2026, 10, 25, false);
+    assert_eq!(sunday[0].title.as_deref(), Some("Eothinon 10"));
+    assert!(sunday.iter().all(|r| r.occasion.is_none()));
+    // A saint's whole day names the saint, since the day's great feasts don't.
+    let demetrius = day_readings(2026, 10, 26, false);
+    assert_eq!(demetrius.len(), 6);
+    assert!(
+        demetrius.iter().all(|r| r.occasion.as_deref() == Some("Great Martyr Demetrius the Myrrh-streamer"))
+    );
+    // A great feast's own readings are the day's, the Royal Hours' too.
+    let eve = day_readings(2026, 12, 24, false);
+    assert_eq!(eve.iter().filter(|r| r.service == "Royal Hours").count(), 12);
+    assert!(eve.iter().all(|r| r.occasion.is_none()), "Eve of the Nativity");
+    // A feast moved off its date is still named: St George on Bright Monday.
+    assert_eq!(
+        lessons(2027, 5, 3),
+        [
+            "Matins Gospel Luke 21:12–19 (Great Martyr George the Trophy-bearer)",
+            "Liturgy Epistle Acts 12:1–11 (Great Martyr George the Trophy-bearer)",
+            "Liturgy Gospel John 1:18–28",
+        ]
+    );
+    assert_eq!(
+        lessons(2024, 6, 30)[1..],
+        [
+            "Liturgy Epistle Hebrews 11:33–12:2",
+            "Liturgy Gospel Matthew 9:36–10:8 (Synaxis of the Holy, Glorious and All-praised Twelve Apostles)",
+        ],
+        "All Saints with the Apostles' Gospel"
+    );
+    // A Lenten weekday has no Liturgy of its own: the Hours' and the Presanctified's readings.
+    assert_eq!(
+        lessons(2026, 3, 4),
+        [
+            "Sixth Hour OldTestament Isaiah 5:16–25",
+            "Presanctified Liturgy OldTestament Genesis 4:16–26",
+            "Presanctified Liturgy OldTestament Proverbs 5:15–6:3",
+        ]
+    );
+    // Holy Friday: the Passion Gospels and the Royal Hours, with no Liturgy.
+    let friday = day_readings(2026, 4, 10, false);
+    assert!(friday.iter().all(|r| !r.at_liturgy && r.occasion.is_none()));
+    assert_eq!((friday.len(), friday[0].title.as_deref()), (29, Some("1st")));
+    assert_eq!(friday[0].served.as_deref(), Some("Thursday evening"));
+    // A feast that meets Pentecost is shown beside it, to check with the parish.
+    let pentecost = day_readings(2040, 6, 24, false);
+    let forerunner: Vec<&Reading> = pentecost.iter().filter(|r| r.occasion.is_some()).collect();
+    assert_eq!(forerunner.len(), 3);
+    assert!(forerunner.iter().all(|r| r.confidence == ReadingConfidence::Low));
+    // On the Old calendar the Nativity is on 7 January.
+    let nativity = day_readings(2027, 1, 7, true);
+    assert!(nativity.iter().any(|r| r.at_liturgy && r.label == "Matthew 2:1–12"));
+}
+
+#[test]
+fn sync_carries_study_and_the_rule_between_devices() {
+    let (phone, phone_dir) = open("sync-phone");
+    let (mac, mac_dir) = open("sync-mac");
+    let folder = std::env::temp_dir().join(format!("bible-ffi-sync-{}", std::process::id()));
+    let _ = std::fs::remove_dir_all(&folder);
+    let shared = folder.to_string_lossy().to_string();
+
+    mac.set_note(JOHN_3_16, "From the Mac".into()).unwrap();
+    mac.set_highlight(JOHN_3_16, Some(HighlightColor::Blue)).unwrap();
+    mac.set_rule_done(civil_day(2026, 10, 20), "morning-prayers".into(), true).unwrap();
+    let first = mac.sync(shared.clone()).unwrap();
+    assert_eq!(first, SyncReport { applied: 0, devices: 0, skipped: vec![] }, "the folder is made");
+
+    // The phone gets all three, and a file it can't read is reported, not fatal.
+    std::fs::write(folder.join("broken.json"), "{").unwrap();
+    let report = phone.sync(shared.clone()).unwrap();
+    assert_eq!((report.applied, report.devices), (3, 1));
+    assert_eq!(report.skipped.len(), 1);
+    assert!(report.skipped[0].starts_with("broken.json: "), "{:?}", report.skipped);
+    assert_eq!(phone.note(JOHN_3_16).unwrap().as_deref(), Some("From the Mac"));
+    assert!(rule_on(&phone, 2026, 10, 20).blocks[0].items[0].done);
+
+    // And back: the phone's edits reach the Mac; syncing again applies nothing.
+    phone.set_note(JOHN_3_16, "".into()).unwrap();
+    phone.sync(shared.clone()).unwrap();
+    assert_eq!(mac.sync(shared.clone()).unwrap().applied, 1);
+    assert_eq!(mac.note(JOHN_3_16).unwrap(), None);
+    assert_eq!(mac.marks("kjv".into(), index("jn 3"))[0].highlight, Some(HighlightColor::Blue));
+    assert_eq!(phone.sync(shared.clone()).unwrap().applied, 0);
+    let names: Vec<_> =
+        std::fs::read_dir(&folder).unwrap().map(|e| e.unwrap().file_name().into_string().unwrap()).collect();
+    assert_eq!(names.len(), 3, "each device's file and the broken one, no temporary files: {names:?}");
+    assert!(names.iter().all(|n| n.ends_with(".json") && !n.starts_with('.')), "{names:?}");
+
+    // A folder the app may no longer open says so in plain words.
+    std::fs::set_permissions(&folder, std::fs::Permissions::from_mode(0o000)).unwrap();
+    let denied = phone.sync(shared.clone());
+    std::fs::set_permissions(&folder, std::fs::Permissions::from_mode(0o755)).unwrap();
+    match denied {
+        Err(BibleError::Failed { message }) => {
+            assert_eq!(message, "The app can no longer open the sync folder. Choose it again.")
+        }
+        other => panic!("{other:?}"),
+    }
+    for dir in [phone_dir, mac_dir, folder] {
+        let _ = std::fs::remove_dir_all(dir);
+    }
 }

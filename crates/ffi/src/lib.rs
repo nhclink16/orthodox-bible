@@ -20,15 +20,19 @@ use bible_core::{BookId, ChapterIdx};
 
 pub mod content;
 pub mod plans;
+pub mod readings;
 pub mod rule;
+pub mod sync;
 pub mod tokens;
 
 pub use content::{Block, BlockKind, ChapterContent, ChapterStatus, ContentOptions, Run};
 pub use plans::{ActivePlan, PlanDay, PlanInfo, PlanPassage, reading_plans};
+pub use readings::{Reading, ReadingConfidence, ReadingKind, ReadingPassage, day_readings};
 pub use rule::{
     FastLevel, MonthDay, Prayer, Rule, RuleBlock, RuleDay, RuleDayBlock, RuleDayItem, RuleItem, RuleKept,
     RuleKind, RuleOpen, RuleSeason, civil_day, prayers, starter_rule,
 };
+pub use sync::SyncReport;
 pub use tokens::{Palette, ThemeName, palette};
 
 uniffi::setup_scaffolding!();

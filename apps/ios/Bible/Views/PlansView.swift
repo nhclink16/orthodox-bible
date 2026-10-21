@@ -117,7 +117,7 @@ struct PlanView: View {
         .confirmationDialog("Stop this plan?", isPresented: $stopping, titleVisibility: .visible) {
             Button("Stop plan", role: .destructive) { store.stopPlan(id) }
         } message: {
-            Text("What you've checked off in it is forgotten.")
+            Text(store.syncOn ? "What you've checked off in it is forgotten, on your Mac too." : "What you've checked off in it is forgotten.")
         }
     }
 }

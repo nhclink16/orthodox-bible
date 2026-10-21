@@ -5,11 +5,12 @@ use std::collections::{HashMap, HashSet};
 
 use bible_core::ChapterIdx;
 use bible_core::calendar::{self, Day, Fast, Style};
+use bible_core::lectionary::{self, Kind as Lesson};
 use bible_core::plans::Plan;
 use bible_core::rule::{self as core, Kind, Season};
 use bible_core::study::StudyStore;
 
-use crate::{Bible, BibleError};
+use crate::{Bible, BibleError, VerseRef};
 
 /// The rule: its parts of the day in order.
 #[derive(Debug, Clone, PartialEq, Eq, uniffi::Record)]
@@ -217,8 +218,15 @@ pub enum RuleOpen {
     JesusPrayer {
         count: u16,
     },
-    /// The day's readings and the Fathers on the Gospel wait for the lectionary.
-    ComingSoon,
+    /// A passage in the reader at its first verse: the day's Gospel, or its first reading.
+    Passage {
+        chapter_index: u16,
+        verse: u8,
+    },
+    /// The Church Fathers on a verse: the first of the day's Gospel.
+    Fathers {
+        verse: VerseRef,
+    },
     /// Nothing to do on this day (no kathisma on Sunday evening): no check box, and it doesn't
     /// count against the day.
     NotToday,
@@ -287,7 +295,7 @@ const GREAT_FEASTS: &[&str] = &[
     "Dormition of the Theotokos",
 ];
 
-fn style(old_calendar: bool) -> Style {
+pub(crate) fn style(old_calendar: bool) -> Style {
     if old_calendar { Style::Old } else { Style::New }
 }
 
@@ -333,6 +341,7 @@ impl Bible {
     /// plans' days.
     pub fn rule_day(&self, year: i32, month: u8, day: u8, old_calendar: bool, midnight: i64) -> RuleDay {
         let d = calendar::civil(year, month, day);
+        let lessons = lectionary::readings(d, style(old_calendar));
         let study = self.study();
         let rule = study.rule();
         let done = study.rule_done(d);
@@ -347,7 +356,7 @@ impl Bible {
                 items: items
                     .into_iter()
                     .map(|i| {
-                        let (open, detail) = opens(i, b, (d, midnight), &study, &under);
+                        let (open, detail) = opens(i, b, (d, midnight), &lessons, &study, &under);
                         // As the Mac counts it: ticked, or a plan's reading for the day read.
                         let done = done.contains(&i.id) || plan_read(i, midnight, &under);
                         RuleDayItem {
@@ -470,11 +479,13 @@ fn idle(item: &core::Item, block: &core::Block, d: Day) -> bool {
     item.kind == Kind::Kathisma && kathismata(block, d).is_empty()
 }
 
-/// What an item opens on day `d` (starting at `midnight`), and the line that says so.
+/// What an item opens on day `d` (starting at `midnight`, with the readings `lessons`), and the
+/// line that says so.
 fn opens(
     item: &core::Item,
     block: &core::Block,
     (d, midnight): (Day, i64),
+    lessons: &[lectionary::Reading],
     study: &StudyStore,
     under: &UnderWay,
 ) -> (RuleOpen, Option<String>) {
@@ -545,7 +556,24 @@ fn opens(
                 None => (RuleOpen::Nothing, Some("No reading on this day".into())),
             }
         }
-        Kind::Readings | Kind::Fathers => (RuleOpen::ComingSoon, Some("Coming soon".into())),
+        Kind::Readings | Kind::Fathers => {
+            let Some((gospel, line)) = crate::readings::gospel(lessons) else {
+                return (RuleOpen::Nothing, None);
+            };
+            let Some(first) = gospel.passages.first().map(|p| p.first()) else {
+                return (RuleOpen::Nothing, None);
+            };
+            if item.kind == Kind::Fathers {
+                return (RuleOpen::Fathers { verse: first.into() }, Some(line));
+            }
+            // The Liturgy's Epistle, then its Gospel.
+            let epistle = lessons.iter().find(|r| r.at_liturgy() && r.kind == Lesson::Epistle);
+            let detail = match epistle {
+                Some(e) if gospel.at_liturgy() => format!("{} · {line}", e.label()),
+                _ => line,
+            };
+            (RuleOpen::Passage { chapter_index: first.chapter_idx().0, verse: first.verse }, Some(detail))
+        }
         Kind::JesusPrayer { count } => {
             (RuleOpen::JesusPrayer { count: *count }, Some(format!("{count} times")))
         }

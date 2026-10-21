@@ -121,7 +121,7 @@ struct MonthView: View {
     private func label(_ d: MonthDay, first: Date, ahead: Bool) -> String {
         var parts = [first.formatted(.dateTime.month(.wide)) + " \(d.date)"]
         if d.greatFeast { parts.append("Great feast") }
-        if d.fast != .none { parts.append(d.fast.short) }
+        if d.fast != .none { parts.append(d.fast.spoken) }
         if !ahead && d.kept == .fully { parts.append("Rule kept") }
         if !ahead && d.kept == .partly { parts.append("Some of the rule kept") }
         return parts.joined(separator: ", ")
@@ -189,27 +189,40 @@ extension FastLevel {
     /// The levels the key shows, from least to most.
     static let shown: [FastLevel] = [.noMeat, .fish, .wineOil, .wine, .strict]
 
+    /// The key's labels, as the Mac's.
     var short: String {
         switch self {
         case .none: "No fast"
         case .noMeat: "No meat"
-        case .fish: "Fish allowed"
+        case .fish: "Fish"
         case .wineOil: "Wine and oil"
-        case .wine: "Wine, no oil"
+        case .wine: "Wine"
         case .strict: "Strict fast"
         }
     }
 
-    /// The highlight swatches the reader uses, for what each level allows: dairy, fish, wine
-    /// and oil, wine; plain ink for a strict fast.
+    /// A day's fast for VoiceOver, as Today names it.
+    var spoken: String {
+        switch self {
+        case .none: "No fast"
+        case .noMeat: "No meat"
+        case .fish: "Fish, wine and oil allowed"
+        case .wineOil: "Wine and oil allowed"
+        case .wine: "Wine allowed"
+        case .strict: "Strict fast"
+        }
+    }
+
+    /// The highlight swatches, as the Mac colours the month: from dairy's yellow to Lent's
+    /// purple.
     func color(_ theme: Theme) -> Color {
         switch self {
         case .none: .clear
         case .noMeat: Color(theme.swatch(.yellow))
         case .fish: Color(theme.swatch(.blue))
-        case .wineOil: Color(theme.swatch(.purple))
+        case .wineOil: Color(theme.swatch(.green))
         case .wine: Color(theme.swatch(.pink))
-        case .strict: Color(theme.ink2)
+        case .strict: Color(theme.swatch(.purple))
         }
     }
 }

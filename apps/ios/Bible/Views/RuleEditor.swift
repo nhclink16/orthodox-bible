@@ -162,9 +162,17 @@ struct RuleEditor: View {
             saved = store.bible.rule()
             rule = saved
         }
+        // A sync brought the Mac's rule: shown while nothing has been changed here.
+        .onChange(of: store.ruleVersion) {
+            guard rule == saved, path.isEmpty else { return }
+            saved = store.bible.rule()
+            rule = saved
+        }
     }
 
     private func save() {
+        // Saving the rule as it was would stamp it newer than the Mac's, and put it back there.
+        guard rule != saved else { return dismiss() }
         for b in rule.blocks.indices {
             if rule.blocks[b].title.trimmingCharacters(in: .whitespaces).isEmpty { rule.blocks[b].title = "Untitled" }
             for i in rule.blocks[b].items.indices
@@ -485,9 +493,9 @@ private enum KindChoice: CaseIterable, Identifiable, Hashable {
         case .prayers: "A prayer from the app, your own words, or a line pointing to your prayer book."
         case .kathisma: "Opens the day’s kathisma: at Matins in Morning or a part of the day before noon, at Vespers in the others."
         case .psalm: "Numbered as in the Septuagint: Psalm 50 is “Have mercy on me, O God”."
-        case .readings: "The day’s Epistle and Gospel are coming soon."
+        case .readings: "Names the day’s Epistle and Gospel, and opens the Gospel."
         case .plan: "Opens the plan’s reading for the day, and is done once that’s read."
-        case .fathers: "The Fathers on the day’s Gospel are coming soon."
+        case .fathers: "Opens the Church Fathers on the day’s Gospel."
         case .jesusPrayer: "Opens a quiet counter."
         case .reflection: "Opens a few lines for looking back over the day."
         case .other: "Anything else, described by its title and note."

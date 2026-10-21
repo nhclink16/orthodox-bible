@@ -136,12 +136,36 @@ final class Store {
     private(set) var ruleVersion = 0
     /// The rule's reminders are on and notifications allowed.
     private(set) var remindersOn = false
+    /// The folder synced with the Mac, as a bookmark; `nil` while sync is off.
+    private(set) var syncBookmark: Data?
+    private(set) var syncing = false
+    private(set) var lastSynced: Date?
+    /// "Orthodox Bible › Sync".
+    private(set) var syncFolder: String?
+    /// Why the last sync failed.
+    private(set) var syncError: String?
+    /// The files the last sync couldn't read, each with why.
+    private(set) var syncSkipped: [String] = []
+    /// The other devices' files the last sync read: none in a folder the Mac doesn't sync.
+    private(set) var syncDevices: UInt32 = 0
+    /// Files the last sync found still coming down from iCloud.
+    private(set) var syncWaiting = 0
 
     @ObservationIgnored let reminders = Reminders()
     /// A reminder was tapped while a note was being written: Today opens once it's closed.
     @ObservationIgnored private var todayPending = false
     @ObservationIgnored private var saveTask: Task<Void, Never>?
     @ObservationIgnored private var toastTask: Task<Void, Never>?
+    @ObservationIgnored private var syncTask: Task<Void, Never>?
+    /// Asked for while a sync ran: one more follows it.
+    @ObservationIgnored private var syncAgain = false
+    /// Called once the syncs asked for are done.
+    @ObservationIgnored private var syncDone: [() -> Void] = []
+    /// Syncs run again in a row for files still coming down from iCloud.
+    @ObservationIgnored private var syncRetries = 0
+    /// The rule as it was before the first sync with another device, which may replace it.
+    @ObservationIgnored private var ruleBeforeSync: Rule?
+    @ObservationIgnored private var backgroundSync = UIBackgroundTaskIdentifier.invalid
 
     init() {
         let bible = Self.openBible()
@@ -164,6 +188,7 @@ final class Store {
         self.translations = translations
         self.settings = settings
         self.position = position
+        syncBookmark = bible.setting(key: Self.syncKey).flatMap { $0.isEmpty ? nil : Data(base64Encoded: $0) }
         setSeptuagintNumbering(on: settings.septuagintPsalms)
         jump = JumpRequest(chapter: position.chapter, verse: position.verse)
         reminders.opened = { [weak self] in self?.openToday() }
@@ -359,7 +384,10 @@ final class Store {
 
     @discardableResult
     private func study(_ change: () throws -> Void) -> Bool {
-        defer { marksVersion += 1 }
+        defer {
+            marksVersion += 1
+            syncSoon()
+        }
         do {
             try change()
             return true
@@ -403,6 +431,7 @@ final class Store {
 
     func saveRule(_ rule: Rule) {
         changing { try bible.setRule(rule: rule) }
+        if ruleBeforeSync != nil { ruleBeforeSync = rule }
         Task { await refreshReminders() }
     }
 
@@ -488,9 +517,162 @@ final class Store {
     }
 
     private func changing(_ change: () throws -> Void) {
-        defer { ruleVersion += 1 }
+        defer {
+            ruleVersion += 1
+            syncSoon()
+        }
         do {
             try change()
+        } catch {
+            show("Couldn’t save: \(error.localizedDescription)")
+        }
+    }
+
+    // MARK: Sync with the Mac
+
+    /// The bookmark of the synced folder, in the study database; this device's own, never synced.
+    private static let syncKey = "ios-sync"
+
+    var syncOn: Bool { syncBookmark != nil }
+
+    /// UI tests sync a folder of their own, at the path in BIBLE_SYNC_FOLDER (the test's own
+    /// temporary folder, which it fills and clears), instead of one picked in iCloud Drive.
+    static var testSyncFolder: URL? {
+        guard ProcessInfo.processInfo.arguments.contains("--uitest"),
+            let path = ProcessInfo.processInfo.environment["BIBLE_SYNC_FOLDER"]
+        else { return nil }
+        return URL(fileURLWithPath: path, isDirectory: true)
+    }
+
+    /// Turns sync on with a picked folder, and syncs.
+    func startSync(folder url: URL) {
+        let scoped = url.startAccessingSecurityScopedResource()
+        defer { if scoped { url.stopAccessingSecurityScopedResource() } }
+        do {
+            saveSyncBookmark(try FolderSync.bookmark(url))
+        } catch {
+            show("Couldn’t use that folder: \(error.localizedDescription)")
+            return
+        }
+        forgetSyncs()
+        syncFolder = FolderSync.name(url)
+        ruleBeforeSync = bible.rule()
+        syncNow()
+    }
+
+    func stopSync() {
+        saveSyncBookmark(nil)
+        forgetSyncs()
+    }
+
+    /// What the last folder's syncs said.
+    private func forgetSyncs() {
+        syncTask?.cancel()
+        lastSynced = nil
+        syncFolder = nil
+        syncError = nil
+        syncSkipped = []
+        syncDevices = 0
+        syncWaiting = 0
+        syncRetries = 0
+        ruleBeforeSync = nil
+    }
+
+    /// Syncs about three seconds after the last of a run of changes.
+    private func syncSoon(after delay: Duration = .seconds(3)) {
+        guard syncOn else { return }
+        syncTask?.cancel()
+        syncTask = Task {
+            try? await Task.sleep(for: delay)
+            guard !Task.isCancelled else { return }
+            syncNow()
+        }
+    }
+
+    /// Syncs now, off the main thread; `done` once it (and any asked for meanwhile) is over.
+    func syncNow(then done: (() -> Void)? = nil) {
+        syncTask?.cancel()
+        if let done { syncDone.append(done) }
+        guard let bookmark = syncBookmark else { return finishSyncing() }
+        guard !syncing else {
+            syncAgain = true
+            return
+        }
+        syncing = true
+        let bible = bible
+        Task {
+            let outcome = await Task.detached(priority: .utility) { FolderSync.run(bible, bookmark: bookmark) }.value
+            synced(outcome, bookmark: bookmark)
+        }
+    }
+
+    /// Syncs as the app goes to the background, which iOS gives it time for.
+    func syncInBackground() {
+        guard syncOn else { return }
+        if backgroundSync == .invalid {
+            backgroundSync = UIApplication.shared.beginBackgroundTask(withName: "Sync") { [weak self] in
+                MainActor.assumeIsolated { self?.endBackgroundSync() }
+            }
+        }
+        syncNow { [weak self] in self?.endBackgroundSync() }
+    }
+
+    private func endBackgroundSync() {
+        guard backgroundSync != .invalid else { return }
+        UIApplication.shared.endBackgroundTask(backgroundSync)
+        backgroundSync = .invalid
+    }
+
+    private func synced(_ outcome: FolderSync.Outcome, bookmark: Data) {
+        syncing = false
+        // Unless sync was turned off, or onto another folder, meanwhile.
+        if syncBookmark == bookmark {
+            if let fresh = outcome.bookmark { saveSyncBookmark(fresh) }
+            syncFolder = outcome.folder ?? syncFolder
+            syncError = outcome.error
+            syncWaiting = outcome.downloading
+            if outcome.downloading == 0 { syncRetries = 0 }
+            if let report = outcome.report {
+                lastSynced = Date()
+                syncSkipped = report.skipped
+                syncDevices = report.devices
+                if report.applied > 0 {
+                    // Everything shown is read again: the reader's marks, Today, the month, plans.
+                    marksVersion += 1
+                    ruleVersion += 1
+                    Task { await refreshReminders() }
+                }
+                // The rule is one record: on the first sync with the Mac, the one changed last
+                // is kept on both.
+                if let before = ruleBeforeSync, report.devices > 0 {
+                    ruleBeforeSync = nil
+                    if bible.rule() != before { show("Your prayer rule now matches your Mac’s.") }
+                }
+            }
+        }
+        if syncAgain {
+            syncAgain = false
+            return syncNow()
+        }
+        // Files asked for from iCloud are usually there in a moment: looked for again a few
+        // times, further apart each time (5 s, 10 s… about 5 minutes in all).
+        if syncBookmark == bookmark, outcome.downloading > 0, syncRetries < 6 {
+            syncSoon(after: .seconds(5 << syncRetries))
+            syncRetries += 1
+        }
+        finishSyncing()
+    }
+
+    private func finishSyncing() {
+        let done = syncDone
+        syncDone = []
+        for f in done { f() }
+    }
+
+    private func saveSyncBookmark(_ data: Data?) {
+        syncBookmark = data
+        do {
+            try bible.setSetting(key: Self.syncKey, value: data?.base64EncodedString() ?? "")
         } catch {
             show("Couldn’t save: \(error.localizedDescription)")
         }
