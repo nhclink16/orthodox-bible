@@ -166,7 +166,7 @@ Original checklist:
 - Hard-coded spots to fix: `ReaderView.swift:95` (`chapterCount = 1189`) and `ChapterLayout.swift:66` (`isPsalm` is book 18).
 - The Fathers panel: add `commentary(verse) -> [CommentaryQuote]` to `ffi/src/lib.rs`, a new `Sheet.commentary` case (`Store.swift:60-74`, `RootView.swift:64-75`) and a button in `SelectionBar`.
 
-## Phase 6: The prayer rule (in progress on `orthodox/rule`)
+## Phase 6: The prayer rule, readings and sync (done 2026-10-21 on `orthodox/rule`)
 
 The goal: one place that keeps Nicholas to a daily rule and helps him grow. No streaks or scores; the calendar only shows which days were kept.
 
@@ -175,7 +175,11 @@ The goal: one place that keeps Nicholas to a daily rule and helps him grow. No s
 - **Prayers** (`crates/core/src/prayers.rs`): public-domain texts only (Hapgood 1906, Blackmore 1845, Robinson 1916), checked against the scans. His own Pocket Prayer Book is under copyright, so the rule says "From your prayer book" instead of quoting it.
 - **Reading plans** (`crates/core/src/plans.rs`): the Psalter by kathisma in 20 days; the whole Orthodox Bible in 180, 365 or 730 days; the New Testament and Psalms in 180.
 - **Add to Note** for a Father's quote, on Mac and iPhone.
-- To do: the rule screens and reminders on both platforms, a month calendar, the daily Epistle and Gospel (our own lectionary), and Mac↔iPhone sync through iCloud Drive.
+- **Today, on both platforms:** the church day, the day's readings, the rule with check boxes, reading plans and a month calendar (fast levels, great feasts, days kept). Rule editor with seasons and optional items. Reminders: daily notifications on the iPhone; in-app messages on the Mac while it's open.
+- **The lectionary** (`crates/core/src/lectionary.rs`, `data/lectionary/`): our own, MIT, references only. Greek (GOARCH) usage by default, because Nicholas's parish is Holy Trinity, Augusta (Metropolis of Atlanta); Antiochian as a setting. Against goarch.org 2024–2027: Epistle 99.4%, Gospel 98.1%; the rest are yearly ordo choices (marked low confidence) or listing quirks. `cargo run -p xtask -- lectionary-check … --against goarch` checks it against the harvests kept in `.sources/harvest/` (gitignored).
+- **The Septuagint column** now maps every Old Testament book's LXX2012 numbering onto the grid (`lxx.rs` MOVED table, splits in xtask), so readings like Jeremiah 31:31 open the right verses.
+- **Sync** (`crates/core/src/sync.rs`): one JSON file per device in iCloud Drive › Orthodox Bible › Sync; newest change wins per record; deletions travel; Erase Everything erases everywhere; each device is bound to its machine (hardware UUID on the Mac, identifierForVendor on the iPhone). Off by default on both.
+- Follow-ups: the Apple TV wake-up automation; saints of the day; Septuagint numbering outside the Psalms; an Erase Everything (with backup) on the iPhone.
 
 ## More Orthodox features (research, 2026-10-20)
 
