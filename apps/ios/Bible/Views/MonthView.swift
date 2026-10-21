@@ -6,9 +6,12 @@ import SwiftUI
 struct MonthView: View {
     @Environment(Store.self) private var store
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.dynamicTypeSize) private var dynamicType
     let theme: Theme
     /// The day Today shows.
     let shown: Date
+    /// Today, as Today has it.
+    let today: Date
     /// Called with the day tapped (days since 1970-01-01).
     let choose: (Int64) -> Void
     @State private var month: Date?
@@ -19,11 +22,12 @@ struct MonthView: View {
         let first = month ?? calendar.date(from: calendar.dateComponents([.year, .month], from: shown)) ?? shown
         let civil = CivilDate(first)
         let days = store.month(year: civil.year, month: civil.month)
-        let today = CivilDate(Date()).number
+        let today = CivilDate(self.today).number
         let selected = CivilDate(shown).number
         let weekStart = calendar.firstWeekday - 1
         let lead = (Int(days.first?.weekday ?? 0) - weekStart + 7) % 7
-        let symbols = calendar.shortStandaloneWeekdaySymbols
+        let large = dynamicType.isAccessibilitySize
+        let symbols = large ? calendar.veryShortStandaloneWeekdaySymbols : calendar.shortStandaloneWeekdaySymbols
         List {
             Section {
                 VStack(spacing: 16) {
@@ -44,6 +48,8 @@ struct MonthView: View {
                             Text(symbols[(i + weekStart) % 7])
                                 .font(.caption2.weight(.medium))
                                 .foregroundStyle(Color(theme.ink3))
+                                .lineLimit(1)
+                                .minimumScaleFactor(0.5)
                                 .padding(.bottom, 4)
                                 .accessibilityHidden(true)
                         }
@@ -67,11 +73,14 @@ struct MonthView: View {
                         }
                     }
                 }
+                // Seven days to a row leave no room for larger text.
+                .dynamicTypeSize(...DynamicTypeSize.accessibility1)
                 .padding(.vertical, 4)
             }
 
             Section {
-                LazyVGrid(columns: [GridItem(.adaptive(minimum: 130), alignment: .leading)], alignment: .leading, spacing: 10) {
+                let columns = large ? [GridItem(.flexible(), alignment: .leading)] : [GridItem(.adaptive(minimum: 130), alignment: .leading)]
+                LazyVGrid(columns: columns, alignment: .leading, spacing: 10) {
                     ForEach(FastLevel.shown, id: \.self) { level in
                         HStack(spacing: 8) {
                             FastBand(level: level, theme: theme).frame(width: 18)
@@ -79,7 +88,9 @@ struct MonthView: View {
                         }
                     }
                     HStack(spacing: 8) {
-                        Text("6").font(.caption.weight(.semibold)).foregroundStyle(Color(theme.rubric)).frame(width: 18)
+                        Text("6").font(.caption.weight(.semibold)).foregroundStyle(Color(theme.rubric))
+                            .fixedSize()
+                            .frame(minWidth: 18)
                         Text("Great feast").font(.caption)
                     }
                     HStack(spacing: 8) {
@@ -127,7 +138,7 @@ private struct DayCell: View {
     var body: some View {
         VStack(spacing: 5) {
             Text("\(day.date)")
-                .font(.system(size: 17, weight: day.greatFeast ? .semibold : .regular).monospacedDigit())
+                .font(.body.monospacedDigit().weight(day.greatFeast ? .semibold : .regular))
                 .foregroundStyle(day.greatFeast ? Color(theme.rubric) : Color(theme.ink))
             KeptDot(kept: ahead ? .nothing : day.kept, theme: theme)
             FastBand(level: day.fast, theme: theme)

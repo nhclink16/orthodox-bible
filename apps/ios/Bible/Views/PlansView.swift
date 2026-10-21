@@ -161,7 +161,7 @@ struct PassageRow: View {
             .accessibilityLabel(passage.label)
             .accessibilityIdentifier("passage-\(plan)-\(day)-\(index)")
             Button {
-                store.read(Int(passage.chapterIndex), verse: Int(passage.verse))
+                store.read(passage, plan: plan, day: day, index: index)
             } label: {
                 HStack {
                     Text(passage.label)
@@ -174,7 +174,7 @@ struct PassageRow: View {
                 .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
-            .accessibilityHint("Opens in the reader")
+            .accessibilityHint("Opens in the reader and checks it off")
             .accessibilityIdentifier("read-\(plan)-\(day)-\(index)")
         }
     }

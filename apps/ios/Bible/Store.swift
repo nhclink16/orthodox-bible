@@ -129,6 +129,8 @@ final class Store {
     private(set) var marksVersion = 0
     var sheet: Sheet?
     var barsHidden = false
+    /// Bumped when a reminder asks for Today, which then goes back to today's date.
+    private(set) var todayRequest = 0
     private(set) var toast: String?
     /// Bumped whenever the prayer rule, a check mark or a reading plan changes.
     private(set) var ruleVersion = 0
@@ -136,6 +138,8 @@ final class Store {
     private(set) var remindersOn = false
 
     @ObservationIgnored let reminders = Reminders()
+    /// A reminder was tapped while a note was being written: Today opens once it's closed.
+    @ObservationIgnored private var todayPending = false
     @ObservationIgnored private var saveTask: Task<Void, Never>?
     @ObservationIgnored private var toastTask: Task<Void, Never>?
 
@@ -162,7 +166,7 @@ final class Store {
         self.position = position
         setSeptuagintNumbering(on: settings.septuagintPsalms)
         jump = JumpRequest(chapter: position.chapter, verse: position.verse)
-        reminders.opened = { [weak self] in self?.sheet = .today }
+        reminders.opened = { [weak self] in self?.openToday() }
     }
 
     /// The study database and imported texts live in Application Support. If that can't be
@@ -371,16 +375,28 @@ final class Store {
     func ruleDay(_ date: Date) -> RuleDay {
         _ = ruleVersion
         let d = CivilDate(date)
-        return bible.ruleDay(year: d.year, month: d.month, day: d.day, oldCalendar: settings.oldCalendar)
+        return bible.ruleDay(
+            year: d.year, month: d.month, day: d.day, oldCalendar: settings.oldCalendar, midnight: Self.midnight(date))
     }
 
     func month(year: Int32, month: UInt8) -> [MonthDay] {
         _ = ruleVersion
-        return bible.churchMonth(year: year, month: month, oldCalendar: settings.oldCalendar)
+        let first = Calendar.current.date(from: DateComponents(year: Int(year), month: Int(month), day: 1)) ?? Date()
+        return bible.churchMonth(
+            year: year, month: month, oldCalendar: settings.oldCalendar, midnight: Self.midnight(first))
     }
 
-    func setDone(_ item: String, day: Int64, _ done: Bool) {
-        changing { try bible.setRuleDone(day: day, item: item, done: done) }
+    /// Checks an item off on `day`, or clears it. A plan's item checks off that day's passages.
+    func setDone(_ item: RuleDayItem, day: Int64, _ done: Bool) {
+        changing {
+            if case .plan(let plan, let planDay) = item.open {
+                for i in (bible.planDay(plan: plan, day: planDay)?.passages ?? []).indices {
+                    try bible.setPlanRead(plan: plan, day: planDay, passage: UInt8(i), read: done)
+                }
+            } else {
+                try bible.setRuleDone(day: day, item: item.id, done: done)
+            }
+        }
     }
 
     func saveRule(_ rule: Rule) {
@@ -422,23 +438,46 @@ final class Store {
         sheet = nil
     }
 
+    /// Opens a plan's passage in the reader, checking it off: the phone can't tell when it's
+    /// been read to the end, as the Mac does.
+    func read(_ passage: PlanPassage, plan: String, day: UInt32, index: Int) {
+        if !passage.read {
+            setRead(plan, day: day, passage: index, true)
+            show("\(passage.label) checked off")
+        }
+        read(Int(passage.chapterIndex), verse: Int(passage.verse))
+    }
+
+    /// Shows Today at today's date, after the note being written, if one is.
+    func openToday() {
+        todayRequest += 1
+        if case .note = sheet { todayPending = true } else { sheet = .today }
+    }
+
+    /// A sheet has gone: Today, if a reminder asked for it meanwhile.
+    func sheetClosed() {
+        guard todayPending, sheet == nil else { return }
+        todayPending = false
+        sheet = .today
+    }
+
     /// Sets the reminders to the saved rule, if they're on and allowed.
     func refreshReminders() async {
         let allowed = await reminders.allowed()
         remindersOn = settings.ruleReminders && allowed
-        await reminders.schedule(bible.rule(), on: remindersOn)
+        let today = Calendar.current.startOfDay(for: Date())
+        let coming = remindersOn ? (0..<Reminders.days).compactMap { Calendar.current.date(byAdding: .day, value: $0, to: today) } : []
+        await reminders.schedule(bible.rule(), days: coming.map { ($0, ruleDay($0)) }, on: remindersOn)
     }
 
-    /// Turns reminders on (asking to send notifications the first time) or off.
-    func setReminders(_ on: Bool) async {
-        if on {
-            guard await reminders.allow() else {
-                show("Notifications are off for this app in Settings")
-                return
-            }
-        }
+    /// Turns reminders on (asking to send notifications the first time) or off; false when
+    /// notifications aren't allowed.
+    @discardableResult
+    func setReminders(_ on: Bool) async -> Bool {
+        if on, !(await reminders.allow()) { return false }
         settings.ruleReminders = on
         await refreshReminders()
+        return true
     }
 
     /// Unix seconds of the local midnight that starts a day, as plans count days.

@@ -1,13 +1,16 @@
 import Foundation
 import UserNotifications
 
-/// The prayer rule's reminders: a notification every day at each part of the day that has a
-/// time ("rule-<block id>"), set again whenever the rule or the switch changes. Tapping one opens
+/// The prayer rule's reminders: a notification at the time of each part of the day, set again
+/// whenever the app comes to the front or the rule or the switch changes. Tapping one opens
 /// Today.
 @MainActor
 final class Reminders: NSObject, UNUserNotificationCenterDelegate {
     private let center = UNUserNotificationCenter.current()
     var opened: (() -> Void)?
+
+    /// How many days ahead a part of the day kept only in or out of Lent is reminded of.
+    static let days = 14
 
     override init() {
         super.init()
@@ -28,20 +31,40 @@ final class Reminders: NSObject, UNUserNotificationCenterDelegate {
         return await allowed()
     }
 
-    /// Replaces the rule's reminders with one per timed part of the day, or none.
-    func schedule(_ rule: Rule, on: Bool) async {
+    /// Replaces the rule's reminders. A part of the day with something in it every day is
+    /// reminded of daily ("rule-<block id>"), naming what's always in it; one kept only in or out
+    /// of Lent, on each of `days` (the coming days and their rule) that it's kept, naming what's
+    /// in it then.
+    func schedule(_ rule: Rule, days: [(Date, RuleDay)], on: Bool) async {
         let old = await center.pendingNotificationRequests().map(\.identifier).filter { $0.hasPrefix("rule-") }
         center.removePendingNotificationRequests(withIdentifiers: old)
         guard on else { return }
         for block in rule.blocks {
             guard let time = RuleTime(block.time) else { continue }
-            let content = UNMutableNotificationContent()
-            content.title = "\(block.title) — \(time.label)"
-            content.body = block.items.filter { $0.season == .always }.map(\.title).joined(separator: " · ")
-            content.sound = .default
-            let trigger = UNCalendarNotificationTrigger(dateMatching: time.components, repeats: true)
-            try? await center.add(UNNotificationRequest(identifier: "rule-\(block.id)", content: content, trigger: trigger))
+            let seasons = Set(block.items.map(\.season))
+            if seasons.contains(.always) || seasons.isSuperset(of: [.greatLent, .outsideLent]) {
+                let always = block.items.filter { $0.season == .always }.map(\.title)
+                await add("rule-\(block.id)", "\(block.title) — \(time.label)", always, at: time.components, repeats: true)
+                continue
+            }
+            for (date, day) in days {
+                guard let items = day.blocks.first(where: { $0.id == block.id })?.items else { continue }
+                var when = Calendar.current.dateComponents([.year, .month, .day], from: date)
+                (when.hour, when.minute) = (time.hour, time.minute)
+                guard let at = Calendar.current.date(from: when), at > Date() else { continue }
+                let id = "rule-\(block.id)-\(CivilDate(date).number)"
+                await add(id, "\(block.title) — \(time.label)", items.map(\.title), at: when, repeats: false)
+            }
         }
+    }
+
+    private func add(_ id: String, _ title: String, _ items: [String], at when: DateComponents, repeats: Bool) async {
+        let content = UNMutableNotificationContent()
+        content.title = title
+        content.body = items.joined(separator: " · ")
+        content.sound = .default
+        let trigger = UNCalendarNotificationTrigger(dateMatching: when, repeats: repeats)
+        try? await center.add(UNNotificationRequest(identifier: id, content: content, trigger: trigger))
     }
 
     nonisolated func userNotificationCenter(

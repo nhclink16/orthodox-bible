@@ -16,14 +16,17 @@ enum TodayRoute: Hashable {
 struct TodayView: View {
     @Environment(Store.self) private var store
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.scenePhase) private var phase
     let theme: Theme
+    /// Read again at midnight and on coming back to the front, so "today" moves on.
+    @State private var now = Date()
     @State private var offset = 0
     @State private var editing = false
     @State private var starting: PlanInfo?
 
     var body: some View {
         @Bindable var store = store
-        let date = Calendar.current.date(byAdding: .day, value: offset, to: Date()) ?? Date()
+        let date = Calendar.current.date(byAdding: .day, value: offset, to: now) ?? now
         let civil = CivilDate(date)
         let day = churchDay(year: civil.year, month: civil.month, day: civil.day, oldCalendar: store.settings.oldCalendar)
         let rule = store.ruleDay(date)
@@ -82,6 +85,9 @@ struct TodayView: View {
                     }
                 }
                 Section {
+                    if rule.blocks.isEmpty {
+                        Text("Nothing in your rule for this day.").foregroundStyle(.secondary)
+                    }
                     Button { editing = true } label: { Label("Edit rule", systemImage: "square.and.pencil") }
                         .accessibilityIdentifier("edit-rule")
                 } footer: {
@@ -123,8 +129,8 @@ struct TodayView: View {
                 Group {
                     switch route {
                     case .month:
-                        MonthView(theme: theme, shown: date) { chosen in
-                            offset = Int(chosen - CivilDate(Date()).number)
+                        MonthView(theme: theme, shown: date, today: now) { chosen in
+                            offset = Int(chosen - CivilDate(now).number)
                         }
                     case .item(let item, let date): RuleItemView(item: item, date: date, theme: theme)
                     case .plans: PlansView(theme: theme)
@@ -138,8 +144,18 @@ struct TodayView: View {
         }
         .sheet(isPresented: $editing) {
             RuleEditor(theme: theme)
+                .toasts(theme)
                 .environment(store)
                 .sheetChrome(theme)
+        }
+        .onReceive(NotificationCenter.default.publisher(for: UIApplication.significantTimeChangeNotification)) { _ in
+            now = Date()
+        }
+        .onChange(of: phase) { if phase == .active { now = Date() } }
+        // A reminder was tapped.
+        .onChange(of: store.todayRequest) {
+            now = Date()
+            offset = 0
         }
         .confirmationDialog(
             "Start “\(starting?.title ?? "")”?", isPresented: Binding(get: { starting != nil }, set: { if !$0 { starting = nil } }),
@@ -151,12 +167,15 @@ struct TodayView: View {
         }
     }
 
-    /// An item of the rule: its check box, and what it opens.
+    /// An item of the rule: its check box (none on a day with nothing to do), and what it opens.
     private func row(_ item: RuleDayItem, day: Int64, date: Date) -> some View {
-        let toggle = { store.setDone(item.id, day: day, !item.done) }
+        let toggle = { store.setDone(item, day: day, !item.done) }
+        let idle = item.open == .notToday
         return HStack(spacing: 12) {
             CheckButton(done: item.done, theme: theme, action: toggle)
-                .disabled(offset > 0)
+                .disabled(offset > 0 || idle)
+                .opacity(idle ? 0 : 1)
+                .accessibilityHidden(idle)
                 .accessibilityLabel(item.title)
                 .accessibilityIdentifier("rule-\(item.id)")
             Group {
@@ -175,6 +194,8 @@ struct TodayView: View {
                     Button(action: toggle) { RuleItemLabel(item: item, theme: theme) }
                         .buttonStyle(.plain)
                         .disabled(offset > 0)
+                case .notToday:
+                    RuleItemLabel(item: item, theme: theme)
                 }
             }
             .accessibilityIdentifier("open-\(item.id)")

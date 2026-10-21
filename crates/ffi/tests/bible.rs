@@ -304,6 +304,15 @@ fn church_days_and_the_fathers() {
     let _ = std::fs::remove_dir_all(dir);
 }
 
+/// The rule on a date, its plans' days counted from UTC midnights.
+fn rule_on(bible: &Bible, year: i32, month: u8, day: u8) -> RuleDay {
+    bible.rule_day(year, month, day, false, civil_day(year, month, day) * 86_400)
+}
+
+fn month(bible: &Bible, year: i32, month: u8, old_calendar: bool) -> Vec<MonthDay> {
+    bible.church_month(year, month, old_calendar, civil_day(year, month, 1) * 86_400)
+}
+
 fn rule_item(day: &RuleDay, id: &str) -> Option<RuleDayItem> {
     day.blocks.iter().flat_map(|b| &b.items).find(|i| i.id == id).cloned()
 }
@@ -324,7 +333,7 @@ fn a_days_rule_opens_what_each_item_needs() {
     let (bible, dir) = open("rule");
     assert_eq!(bible.rule(), starter_rule());
     // Tuesday 20 October 2026, outside Lent.
-    let day = bible.rule_day(2026, 10, 20, false);
+    let day = rule_on(&bible, 2026, 10, 20);
     assert_eq!(day.day, civil_day(2026, 10, 20));
     let blocks: Vec<(&str, Option<&str>)> =
         day.blocks.iter().map(|b| (b.id.as_str(), b.time.as_deref())).collect();
@@ -356,13 +365,13 @@ fn a_days_rule_opens_what_each_item_needs() {
         RuleOpen::Text { source: None, .. }
     ));
 
-    let sunday = bible.rule_day(2026, 10, 25, false);
+    let sunday = rule_on(&bible, 2026, 10, 25);
     let none = rule_item(&sunday, "evening-kathisma").unwrap();
     assert_eq!(
         (none.open, none.detail.as_deref()),
-        (RuleOpen::Nothing, Some("No kathisma on Sunday evening"))
+        (RuleOpen::NotToday, Some("No kathisma on Sunday evening"))
     );
-    assert!(rule_item(&bible.rule_day(2026, 3, 4, false), "evening-ephrem").is_some(), "in Great Lent");
+    assert!(rule_item(&rule_on(&bible, 2026, 3, 4), "evening-ephrem").is_some(), "in Great Lent");
 
     // A kathisma in the morning reads the Matins ones; the person's own words are a text.
     let mut rule = bible.rule();
@@ -372,29 +381,38 @@ fn a_days_rule_opens_what_each_item_needs() {
         text: Some("O Lord, grant me to greet the coming day in peace.".into()),
     };
     rule.blocks[0].items.push(new_item("optina", own));
+    // So does one in a part of the day before noon, whatever it's called.
+    let early = RuleBlock {
+        id: "part-1".into(),
+        title: "Before work".into(),
+        time: Some("06:30".into()),
+        items: vec![new_item("early", RuleKind::Kathisma)],
+    };
+    rule.blocks.push(early);
     bible.set_rule(rule.clone()).unwrap();
     assert_eq!(bible.rule(), rule);
-    let day = bible.rule_day(2026, 10, 20, false);
+    let day = rule_on(&bible, 2026, 10, 20);
     let matins = rule_item(&day, "matins").unwrap();
     assert_eq!(matins.detail.as_deref(), Some("Kathismata 7 and 8 · Psalms 46–54, 55–63"));
     assert_eq!(matins.open, RuleOpen::Chapter { chapter_index: index("ps 46") });
+    assert_eq!(rule_item(&day, "early").unwrap().detail, matins.detail);
     assert!(
         matches!(rule_item(&day, "optina").unwrap().open, RuleOpen::Text { title, .. } if title == "optina")
     );
 
     // Check marks belong to their day.
     bible.set_rule_done(day.day, "morning-prayers".into(), true).unwrap();
-    assert!(rule_item(&bible.rule_day(2026, 10, 20, false), "morning-prayers").unwrap().done);
-    assert!(!rule_item(&bible.rule_day(2026, 10, 21, false), "morning-prayers").unwrap().done);
+    assert!(rule_item(&rule_on(&bible, 2026, 10, 20), "morning-prayers").unwrap().done);
+    assert!(!rule_item(&rule_on(&bible, 2026, 10, 21), "morning-prayers").unwrap().done);
     bible.set_rule_done(day.day, "morning-prayers".into(), false).unwrap();
-    assert!(!rule_item(&bible.rule_day(2026, 10, 20, false), "morning-prayers").unwrap().done);
+    assert!(!rule_item(&rule_on(&bible, 2026, 10, 20), "morning-prayers").unwrap().done);
     let _ = std::fs::remove_dir_all(dir);
 }
 
 #[test]
 fn a_month_shows_fasts_feasts_and_the_days_kept() {
     let (bible, dir) = open("month");
-    let oct = bible.church_month(2026, 10, false);
+    let oct = month(&bible, 2026, 10, false);
     assert_eq!(oct.len(), 31);
     assert_eq!((oct[0].date, oct[0].weekday, oct[0].day), (1, 4, civil_day(2026, 10, 1)));
     assert_eq!((oct[19].fast, oct[20].fast), (FastLevel::None, FastLevel::Strict), "Tuesday, Wednesday");
@@ -415,21 +433,27 @@ fn a_month_shows_fasts_feasts_and_the_days_kept() {
     }
     bible.set_rule_done(oct[18].day, "midday-jesus-prayer".into(), true).unwrap();
     bible.set_rule_done(oct[17].day, "no-longer-in-the-rule".into(), true).unwrap();
-    let oct = bible.church_month(2026, 10, false);
+    let oct = month(&bible, 2026, 10, false);
     let kept: Vec<RuleKept> = oct[17..20].iter().map(|d| d.kept).collect();
     assert_eq!(kept, [RuleKept::Nothing, RuleKept::Partly, RuleKept::Fully]);
 
-    let aug = bible.church_month(2026, 8, false);
+    // On a Sunday there's no kathisma in the evening: the rest keeps the day.
+    for id in required.iter().filter(|&&id| id != "evening-kathisma") {
+        bible.set_rule_done(oct[24].day, (*id).into(), true).unwrap();
+    }
+    assert_eq!(month(&bible, 2026, 10, false)[24].kept, RuleKept::Fully, "Sunday 25 October");
+
+    let aug = month(&bible, 2026, 8, false);
     assert!(aug[5].great_feast && aug[14].great_feast, "Transfiguration, Dormition");
     assert!(!aug[28].great_feast, "the Beheading is a great day but not one of the Twelve");
     assert_eq!((aug[9].fast, aug[5].fast), (FastLevel::Strict, FastLevel::Fish));
-    let april = bible.church_month(2026, 4, false);
+    let april = month(&bible, 2026, 4, false);
     assert!(april[11].great_feast && april[4].great_feast, "Pascha, Palm Sunday");
     assert_eq!(april[10].fast, FastLevel::Wine, "Holy Saturday");
-    let jan = bible.church_month(2027, 1, true);
+    let jan = month(&bible, 2027, 1, true);
     assert!(jan[6].great_feast && !jan[0].great_feast, "the Nativity on the Old calendar");
-    assert_eq!(bible.church_month(2026, 12, false).len(), 31);
-    assert_eq!(bible.church_month(2028, 2, false).len(), 29);
+    assert_eq!(month(&bible, 2026, 12, false).len(), 31);
+    assert_eq!(month(&bible, 2028, 2, false).len(), 29);
     let _ = std::fs::remove_dir_all(dir);
 }
 
@@ -472,12 +496,20 @@ fn plans_start_and_read_day_by_day() {
     rule.blocks[0].items.push(new_item("psalter", RuleKind::Plan { plan: "psalter-20".into() }));
     rule.blocks[0].items.push(new_item("nt", RuleKind::Plan { plan: "nt-psalter-180".into() }));
     bible.set_rule(rule).unwrap();
-    let day = bible.rule_day(2026, 10, 20, false);
+    // The plan began on Monday 19 October: Tuesday is its second day, not read yet.
+    let day = rule_on(&bible, 2026, 10, 20);
     let psalter = rule_item(&day, "psalter").unwrap();
     assert_eq!(psalter.open, RuleOpen::Plan { plan: "psalter-20".into(), day: 2 });
-    assert_eq!(psalter.detail.as_deref(), Some("Day 2 · Psalms 9–16"));
+    assert_eq!((psalter.detail.as_deref(), psalter.done), (Some("Day 2 · Psalms 9–16"), false));
     let nt = rule_item(&day, "nt").unwrap();
     assert!(matches!(nt.open, RuleOpen::StartPlan { ref plan, .. } if plan == "nt-psalter-180"));
+    // Done once that day's reading is read, which keeps the day in the month too.
+    let monday = rule_item(&rule_on(&bible, 2026, 10, 19), "psalter").unwrap();
+    assert_eq!((monday.open, monday.done), (RuleOpen::Plan { plan: "psalter-20".into(), day: 1 }, true));
+    let oct = month(&bible, 2026, 10, false);
+    assert_eq!((oct[18].kept, oct[19].kept), (RuleKept::Partly, RuleKept::Nothing));
+    let before = rule_item(&rule_on(&bible, 2026, 10, 18), "psalter").unwrap();
+    assert_eq!((before.open, before.detail.as_deref()), (RuleOpen::Nothing, Some("No reading on this day")));
 
     bible.stop_plan("psalter-20".into()).unwrap();
     assert!(bible.active_plans(start).is_empty());

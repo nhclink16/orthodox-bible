@@ -38,11 +38,7 @@ struct RootView: View {
             .overlay(alignment: .bottom) {
                 VStack(spacing: 10) {
                     if let toast = store.toast {
-                        Text(toast)
-                            .font(.subheadline.weight(.medium))
-                            .padding(.horizontal, 16)
-                            .padding(.vertical, 10)
-                            .glass(in: Capsule(), theme: theme, interactive: false)
+                        Toast(text: toast, theme: theme)
                             .transition(.move(edge: .bottom).combined(with: .opacity))
                     }
                     if store.selection != nil {
@@ -61,7 +57,7 @@ struct RootView: View {
         .preferredColorScheme(preferredScheme)
         .tint(Color(theme.accent))
         .sensoryFeedback(.selection, trigger: store.selection)
-        .sheet(item: $store.sheet) { sheet in
+        .sheet(item: $store.sheet, onDismiss: { store.sheetClosed() }) { sheet in
             Group {
                 switch sheet {
                 case .books: BookPicker(theme: theme)
@@ -73,6 +69,7 @@ struct RootView: View {
                 case .fathers(let ref): FathersView(ref: ref, theme: theme)
                 }
             }
+            .toasts(theme)
             .environment(store)
             .sheetChrome(theme)
         }
@@ -95,6 +92,43 @@ struct RootView: View {
             size: min(size, 44).rounded(), lineSpacing: CGFloat(s.lineSpacing), redLetters: s.redLetters,
             options: store.contentOptions, theme: theme.name, width: 0)
     }
+}
+
+/// A short message over the page.
+struct Toast: View {
+    let text: String
+    let theme: Theme
+
+    var body: some View {
+        Text(text)
+            .font(.subheadline.weight(.medium))
+            .padding(.horizontal, 16)
+            .padding(.vertical, 10)
+            .glass(in: Capsule(), theme: theme, interactive: false)
+    }
+}
+
+/// The store's messages over a sheet, which covers the reader's.
+private struct SheetToasts: ViewModifier {
+    @Environment(Store.self) private var store
+    let theme: Theme
+
+    func body(content: Content) -> some View {
+        content
+            .overlay(alignment: .bottom) {
+                if let toast = store.toast {
+                    Toast(text: toast, theme: theme)
+                        .padding(.horizontal, 12)
+                        .padding(.bottom, 8)
+                        .transition(.move(edge: .bottom).combined(with: .opacity))
+                }
+            }
+            .animation(.smooth(duration: 0.28), value: store.toast)
+    }
+}
+
+extension View {
+    func toasts(_ theme: Theme) -> some View { modifier(SheetToasts(theme: theme)) }
 }
 
 /// The reference, translation and tools over the top of the page.

@@ -7,8 +7,12 @@ import SwiftUI
 struct RuleEditor: View {
     @Environment(Store.self) private var store
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.openURL) private var openURL
     let theme: Theme
     @State private var rule = Rule(blocks: [])
+    /// The switch as drawn: it goes back off when notifications aren't allowed.
+    @State private var reminders = false
+    @State private var refused = false
     @State private var saved = Rule(blocks: [])
     @State private var path: [ItemRef] = []
     @State private var reordering = false
@@ -22,40 +26,59 @@ struct RuleEditor: View {
             List {
                 Section {
                     Toggle("Reminders", isOn: Binding(
-                        get: { store.remindersOn },
-                        set: { on in Task { await store.setReminders(on) } }
+                        get: { reminders },
+                        set: { on in
+                            reminders = on
+                            Task {
+                                refused = !(await store.setReminders(on))
+                                reminders = store.remindersOn
+                            }
+                        }
                     ))
                     .accessibilityIdentifier("reminders")
                 } footer: {
-                    Text("A notification every day at the time set for each part of the day.")
+                    if refused {
+                        VStack(alignment: .leading, spacing: 6) {
+                            Text("Notifications are off for Orthodox Bible.")
+                            Button("Turn them on in Settings") {
+                                if let url = URL(string: UIApplication.openNotificationSettingsURLString) { openURL(url) }
+                            }
+                            .font(.footnote.weight(.medium))
+                        }
+                    } else {
+                        Text("A notification at the time set for each part of the day, on the days it has something to do.")
+                    }
                 }
 
-                ForEach($rule.blocks, id: \.id) { $block in
+                // By id, not by place: a part removed while it's drawn must not be looked up.
+                ForEach(rule.blocks.map(\.id), id: \.self) { id in
+                    let block = binding(block: id)
                     Section {
-                        TextField("Name", text: $block.title)
+                        TextField("Name", text: block.title)
                             .font(.headline)
-                            .accessibilityLabel("Name of \(block.title)")
-                            .accessibilityIdentifier("name-\(block.id)")
+                            .accessibilityLabel("Name of \(block.wrappedValue.title)")
+                            .accessibilityIdentifier("name-\(id)")
                         Toggle("At a set time", isOn: Binding(
-                            get: { block.time != nil },
-                            set: { block.time = $0 ? (block.time ?? "07:00") : nil }
+                            get: { block.wrappedValue.time != nil },
+                            set: { block.wrappedValue.time = $0 ? (block.wrappedValue.time ?? "07:00") : nil }
                         ))
-                        if let time = RuleTime(block.time) {
+                        if let time = RuleTime(block.wrappedValue.time) {
                             DatePicker(
-                                "Time", selection: Binding(get: { time.date }, set: { block.time = RuleTime($0).text }),
+                                "Time",
+                                selection: Binding(get: { time.date }, set: { block.wrappedValue.time = RuleTime($0).text }),
                                 displayedComponents: .hourAndMinute)
                         }
-                        ForEach(block.items, id: \.id) { item in
-                            NavigationLink(value: ItemRef(block: block.id, item: item.id)) {
+                        ForEach(block.wrappedValue.items, id: \.id) { item in
+                            NavigationLink(value: ItemRef(block: id, item: item.id)) {
                                 ItemSummary(item: item, theme: theme)
                             }
                             .accessibilityIdentifier("item-\(item.id)")
                         }
-                        .onDelete { block.items.remove(atOffsets: $0) }
-                        .onMove { block.items.move(fromOffsets: $0, toOffset: $1) }
+                        .onDelete { block.wrappedValue.items.remove(atOffsets: $0) }
+                        .onMove { block.wrappedValue.items.move(fromOffsets: $0, toOffset: $1) }
                         Menu {
                             ForEach(KindChoice.allCases) { choice in
-                                Button(choice.label) { add(choice, to: block.id) }
+                                Button(choice.label) { add(choice, to: id) }
                             }
                         } label: {
                             // The whole row opens the menu, as a button's would.
@@ -63,10 +86,10 @@ struct RuleEditor: View {
                                 .frame(maxWidth: .infinity, alignment: .leading)
                                 .contentShape(Rectangle())
                         }
-                        .accessibilityIdentifier("add-\(block.id)")
-                        Button("Remove “\(block.title)”", role: .destructive) { removing = block }
+                        .accessibilityIdentifier("add-\(id)")
+                        Button("Remove “\(block.wrappedValue.title)”", role: .destructive) { removing = block.wrappedValue }
                             .foregroundStyle(Color(theme.danger))
-                            .accessibilityIdentifier("remove-\(block.id)")
+                            .accessibilityIdentifier("remove-\(id)")
                     }
                 }
 
@@ -134,6 +157,7 @@ struct RuleEditor: View {
         }
         .interactiveDismissDisabled(rule != saved)
         .onAppear {
+            reminders = store.remindersOn
             guard saved.blocks.isEmpty else { return }
             saved = store.bible.rule()
             rule = saved
@@ -181,6 +205,16 @@ struct RuleEditor: View {
     private func remove(_ ref: ItemRef) {
         guard let b = rule.blocks.firstIndex(where: { $0.id == ref.block }) else { return }
         rule.blocks[b].items.removeAll { $0.id == ref.item }
+    }
+
+    /// A part of the day, looked up by id each time (it may be removed while drawn).
+    private func binding(block id: String) -> Binding<RuleBlock> {
+        Binding(
+            get: { rule.blocks.first { $0.id == id } ?? RuleBlock(id: id, title: "", time: nil, items: []) },
+            set: { block in
+                guard let b = rule.blocks.firstIndex(where: { $0.id == id }) else { return }
+                rule.blocks[b] = block
+            })
     }
 
     /// An item of the rule, looked up by id each time (it may be removed while open).
@@ -233,15 +267,18 @@ private struct ItemEditor: View {
     @Binding var item: RuleItem
     let theme: Theme
     let remove: () -> Void
-    @FocusState private var titleFocused: Bool
+    @FocusState private var focus: Field?
+    /// The psalm's number as typed; the psalm saved once it's a number.
+    @State private var psalm = ""
 
     var body: some View {
         Form {
             Section {
                 TextField("Title", text: $item.title)
-                    .focused($titleFocused)
+                    .focused($focus, equals: .title)
                     .accessibilityIdentifier("item-title")
                 TextField("Note", text: $item.note, axis: .vertical)
+                    .focused($focus, equals: .note)
                     .accessibilityIdentifier("item-note")
             } footer: {
                 Text("The note is the line under the title on Today.")
@@ -275,9 +312,16 @@ private struct ItemEditor: View {
                 .foregroundStyle(Color(theme.danger))
             }
         }
+        .scrollDismissesKeyboard(.interactively)
+        .toolbar {
+            ToolbarItemGroup(placement: .keyboard) {
+                Spacer()
+                Button("Done") { focus = nil }
+            }
+        }
         .navigationTitle(item.title.isEmpty ? "Item" : item.title)
         .navigationBarTitleDisplayMode(.inline)
-        .onAppear { if item.title.isEmpty { titleFocused = true } }
+        .onAppear { if item.title.isEmpty { focus = .title } }
     }
 
     /// What the kind needs: the prayer, the psalm, the plan or the count.
@@ -303,20 +347,27 @@ private struct ItemEditor: View {
                 ), axis: .vertical)
                 .lineLimit(4...12)
                 .font(.reading(17))
+                .focused($focus, equals: .words)
                 .accessibilityIdentifier("own-words")
             }
         case .psalm(let lxx):
             LabeledContent("Psalm") {
-                TextField("Psalm", value: Binding(
-                    get: { Int(lxx) },
-                    set: { n in
-                        let n = UInt8(n.clamped(to: 1...151))
-                        if item.title == RuleKind.psalm(lxx: lxx).defaultTitle { item.title = RuleKind.psalm(lxx: n).defaultTitle }
-                        item.kind = .psalm(lxx: n)
+                // Emptied to type a new number over the one it shows; the number saved once
+                // typing is over.
+                TextField("\(lxx)", text: $psalm)
+                    .keyboardType(.numberPad)
+                    .multilineTextAlignment(.trailing)
+                    .focused($focus, equals: .psalm)
+                    .accessibilityLabel("Psalm number")
+                    .accessibilityIdentifier("psalm")
+                    .onAppear { psalm = "\(lxx)" }
+                    .onChange(of: psalm) {
+                        guard let n = Int(psalm), n >= 1 else { return }
+                        let new = UInt8(min(n, 151))
+                        if item.title == RuleKind.psalm(lxx: lxx).defaultTitle { item.title = RuleKind.psalm(lxx: new).defaultTitle }
+                        item.kind = .psalm(lxx: new)
                     }
-                ), format: .number)
-                .keyboardType(.numberPad)
-                .multilineTextAlignment(.trailing)
+                    .onChange(of: focus) { psalm = focus == .psalm ? "" : "\(lxx)" }
             }
         case .plan(let plan):
             Picker("Plan", selection: Binding(
@@ -336,6 +387,8 @@ private struct ItemEditor: View {
             EmptyView()
         }
     }
+
+    private enum Field { case title, note, words, psalm }
 
     private func change(_ choice: KindChoice) {
         let old = KindChoice(item.kind)
@@ -430,10 +483,10 @@ private enum KindChoice: CaseIterable, Identifiable, Hashable {
     var footer: String {
         switch self {
         case .prayers: "A prayer from the app, your own words, or a line pointing to your prayer book."
-        case .kathisma: "Opens the day’s kathisma: at Matins in Morning, at Vespers in any other part of the day."
+        case .kathisma: "Opens the day’s kathisma: at Matins in Morning or a part of the day before noon, at Vespers in the others."
         case .psalm: "Numbered as in the Septuagint: Psalm 50 is “Have mercy on me, O God”."
         case .readings: "The day’s Epistle and Gospel are coming soon."
-        case .plan: "Opens the next day of the plan you haven’t read."
+        case .plan: "Opens the plan’s reading for the day, and is done once that’s read."
         case .fathers: "The Fathers on the day’s Gospel are coming soon."
         case .jesusPrayer: "Opens a quiet counter."
         case .reflection: "Opens a few lines for looking back over the day."

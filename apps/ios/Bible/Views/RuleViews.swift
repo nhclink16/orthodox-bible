@@ -31,7 +31,7 @@ struct RuleItemLabel: View {
         HStack {
             VStack(alignment: .leading, spacing: 2) {
                 Text(item.title)
-                    .foregroundStyle(item.done ? Color(theme.ink2) : Color(theme.ink))
+                    .foregroundStyle(item.done || item.open == .notToday ? Color(theme.ink2) : Color(theme.ink))
                 let line = [item.optional ? "Optional" : nil, item.note.isEmpty ? nil : item.note].compactMap { $0 }
                 if !line.isEmpty {
                     Text(line.joined(separator: " · "))
@@ -41,7 +41,8 @@ struct RuleItemLabel: View {
                 if let detail = item.detail {
                     Text(detail)
                         .font(.footnote)
-                        .foregroundStyle(item.open == .nothing || item.open == .comingSoon ? Color(theme.ink3) : Color(theme.accent))
+                        .foregroundStyle(
+                            [.nothing, .comingSoon, .notToday].contains(item.open) ? Color(theme.ink3) : Color(theme.accent))
                 }
             }
             Spacer(minLength: 0)
@@ -106,7 +107,7 @@ struct RuleItemView: View {
     }
 
     private func set(_ on: Bool) {
-        store.setDone(item.id, day: CivilDate(date).number, on)
+        store.setDone(item, day: CivilDate(date).number, on)
     }
 }
 
@@ -158,12 +159,23 @@ private struct JesusPrayerCounter: View {
         ?? "Lord Jesus Christ, Son of God, have mercy upon me a sinner."
 
     var body: some View {
+        // The whole prayer always shows: the page scrolls when it can't fit (large text, or the
+        // phone on its side), and the tap target fills what's left when it can.
+        ViewThatFits(in: .vertical) {
+            page
+            ScrollView { page }
+        }
+        .background(Color(theme.paper))
+    }
+
+    private var page: some View {
         VStack(spacing: 24) {
             Text(words)
                 .font(.reading(20))
                 .lineSpacing(6)
                 .multilineTextAlignment(.center)
                 .foregroundStyle(Color(theme.ink))
+                .fixedSize(horizontal: false, vertical: true)
                 .padding(.horizontal, 8)
             Button {
                 guard !done else { return }
@@ -190,7 +202,7 @@ private struct JesusPrayerCounter: View {
                             .foregroundStyle(Color(theme.ink2))
                     }
                 }
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .frame(maxWidth: .infinity, minHeight: 160, maxHeight: .infinity)
                 .background(Color(theme.fill), in: RoundedRectangle(cornerRadius: 28, style: .continuous))
                 .contentShape(RoundedRectangle(cornerRadius: 28, style: .continuous))
             }
@@ -206,6 +218,5 @@ private struct JesusPrayerCounter: View {
                 .disabled(said == 0)
         }
         .padding(20)
-        .background(Color(theme.paper))
     }
 }

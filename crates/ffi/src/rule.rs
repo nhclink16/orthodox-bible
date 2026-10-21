@@ -1,10 +1,11 @@
 //! The prayer rule (Orthodox fork, `bible_core::rule`): the rule to edit, a day's rule with what
 //! was checked off and what each item opens, and a month of fasts, feasts and kept days.
 
-use std::collections::HashSet;
+use std::collections::{HashMap, HashSet};
 
 use bible_core::ChapterIdx;
-use bible_core::calendar::{self, Fast, Style};
+use bible_core::calendar::{self, Day, Fast, Style};
+use bible_core::plans::Plan;
 use bible_core::rule::{self as core, Kind, Season};
 use bible_core::study::StudyStore;
 
@@ -19,7 +20,8 @@ pub struct Rule {
 /// A part of the day: "Morning", "Before meals".
 #[derive(Debug, Clone, PartialEq, Eq, uniffi::Record)]
 pub struct RuleBlock {
-    /// Stable; "morning" reads the Matins kathismata, any other the Vespers ones.
+    /// Stable. A kathisma reads at Matins in "morning" or a part of the day before noon, at
+    /// Vespers in the others.
     pub id: String,
     pub title: String,
     /// "HH:MM" local time, for the reminder; `None` for a part without a set time.
@@ -201,7 +203,8 @@ pub enum RuleOpen {
     Chapter {
         chapter_index: u16,
     },
-    /// The next day of a plan under way that isn't read yet.
+    /// The plan's day that falls on the day; its check box ticks the day's passages, and it's
+    /// done once they're read.
     Plan {
         plan: String,
         day: u32,
@@ -216,6 +219,9 @@ pub enum RuleOpen {
     },
     /// The day's readings and the Fathers on the Gospel wait for the lectionary.
     ComingSoon,
+    /// Nothing to do on this day (no kathisma on Sunday evening): no check box, and it doesn't
+    /// count against the day.
+    NotToday,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, uniffi::Enum)]
@@ -323,11 +329,14 @@ impl Bible {
     }
 
     /// The rule on a civil date: its items in season, what was checked off and what each opens.
-    pub fn rule_day(&self, year: i32, month: u8, day: u8, old_calendar: bool) -> RuleDay {
+    /// `midnight` (Unix seconds of the local midnight that starts the date) places the reading
+    /// plans' days.
+    pub fn rule_day(&self, year: i32, month: u8, day: u8, old_calendar: bool, midnight: i64) -> RuleDay {
         let d = calendar::civil(year, month, day);
         let study = self.study();
         let rule = study.rule();
         let done = study.rule_done(d);
+        let under = under_way(&rule, &study);
         let blocks = rule
             .for_day(d, style(old_calendar))
             .into_iter()
@@ -338,13 +347,17 @@ impl Bible {
                 items: items
                     .into_iter()
                     .map(|i| {
-                        let (open, detail) = opens(i, b, calendar::weekday(d), &study);
+                        let (open, detail) = opens(i, b, (d, midnight), &study, &under);
+                        let done = match open {
+                            RuleOpen::Plan { .. } => plan_read(i, midnight, &under),
+                            _ => done.contains(&i.id),
+                        };
                         RuleDayItem {
                             id: i.id.clone(),
                             title: i.title.clone(),
                             note: i.note.clone(),
                             optional: i.optional,
-                            done: done.contains(&i.id),
+                            done,
                             detail,
                             open,
                         }
@@ -361,30 +374,41 @@ impl Bible {
     }
 
     /// Every day of a civil month: its fast, whether it's a great feast, and how much of the rule
-    /// was kept.
-    pub fn church_month(&self, year: i32, month: u8, old_calendar: bool) -> Vec<MonthDay> {
+    /// was kept: what was ticked, a plan's item once that day's reading was read, and what had
+    /// nothing to do that day counting as kept. `midnight` starts the 1st, as for
+    /// [`Bible::rule_day`].
+    pub fn church_month(&self, year: i32, month: u8, old_calendar: bool, midnight: i64) -> Vec<MonthDay> {
         let style = style(old_calendar);
         let first = calendar::civil(year, month, 1);
         let next =
             if month >= 12 { calendar::civil(year + 1, 1, 1) } else { calendar::civil(year, month + 1, 1) };
         let study = self.study();
         let rule = study.rule();
-        let done = study.rule_done_between(first, next - 1);
-        let none = HashSet::new();
+        let mut done = study.rule_done_between(first, next - 1);
+        let under = under_way(&rule, &study);
         (first..next)
             .map(|d| {
                 let info = calendar::day(d, style);
-                let done = done.get(&d).unwrap_or(&none);
-                let any =
-                    rule.for_day(d, style).iter().flat_map(|(_, items)| items).any(|i| done.contains(&i.id));
-                let (n, required) = rule.kept(d, style, done);
+                let midnight = midnight + (d - first) * 86_400;
+                let items: Vec<(&core::Block, &core::Item)> = rule
+                    .for_day(d, style)
+                    .into_iter()
+                    .flat_map(|(b, items)| items.into_iter().map(move |i| (b, i)))
+                    .collect();
+                let mut ticked = done.remove(&d).unwrap_or_default();
+                ticked.extend(
+                    items.iter().filter(|(_, i)| plan_read(i, midnight, &under)).map(|(_, i)| i.id.clone()),
+                );
+                let some = items.iter().any(|(_, i)| ticked.contains(&i.id));
+                ticked.extend(items.iter().filter(|(b, i)| idle(i, b, d)).map(|(_, i)| i.id.clone()));
+                let (n, required) = rule.kept(d, style, &ticked);
                 MonthDay {
                     day: d,
                     date: calendar::civil_date(d).2,
                     weekday: info.weekday,
                     fast: info.fast.into(),
                     great_feast: info.feasts.iter().any(|f| GREAT_FEASTS.iter().any(|g| f.starts_with(g))),
-                    kept: match (any, n == required) {
+                    kept: match (some, required > 0 && n == required) {
                         (false, _) => RuleKept::Nothing,
                         (true, true) => RuleKept::Fully,
                         (true, false) => RuleKept::Partly,
@@ -395,12 +419,66 @@ impl Bible {
     }
 }
 
-/// What an item opens on a day of the week, and the line that says so.
+/// The plans under way that the rule's items follow, by id: when each began and what's read.
+type UnderWay = HashMap<String, (i64, HashSet<(u16, u8)>)>;
+
+fn under_way(rule: &core::Rule, study: &StudyStore) -> UnderWay {
+    let followed: HashSet<&str> = rule
+        .blocks
+        .iter()
+        .flat_map(|b| &b.items)
+        .filter_map(|i| match &i.kind {
+            Kind::Plan { plan } => Some(plan.as_str()),
+            _ => None,
+        })
+        .collect();
+    study
+        .plans()
+        .into_iter()
+        .filter(|s| s.finished.is_none() && followed.contains(s.id.as_str()))
+        .map(|s| {
+            let reads = study.plan_reads(&s.id);
+            (s.id, (s.started, reads))
+        })
+        .collect()
+}
+
+/// A plan's day on the day that starts at `midnight`, if it has one then.
+fn plan_day(plan: &Plan, started: i64, midnight: i64) -> Option<usize> {
+    let day = crate::plans::day_of(started, midnight);
+    (1..=plan.len() as i64).contains(&day).then_some(day as usize)
+}
+
+/// Whether `item` follows a plan under way whose reading for the day starting at `midnight` is
+/// read.
+fn plan_read(item: &core::Item, midnight: i64, under: &UnderWay) -> bool {
+    let Kind::Plan { plan } = &item.kind else { return false };
+    let (Some(p), Some((started, reads))) = (bible_core::plans::get(plan), under.get(plan)) else {
+        return false;
+    };
+    plan_day(p, *started, midnight).is_some_and(|day| crate::plans::day_read(p, day, reads))
+}
+
+/// The day's kathismata for a kathisma item, as the Mac reads them: at Matins in "morning" or a
+/// part of the day before noon, at Vespers in the others.
+fn kathismata(block: &core::Block, d: Day) -> &'static [u8] {
+    let (matins, vespers) = calendar::kathismata(calendar::weekday(d));
+    let hour = block.time.as_deref().and_then(|t| t.split_once(':')?.0.trim().parse::<u8>().ok());
+    if block.id == "morning" || hour.is_some_and(|h| h < 12) { matins } else { vespers }
+}
+
+/// Nothing to do on day `d`: a kathisma where the day has none (Sunday evening).
+fn idle(item: &core::Item, block: &core::Block, d: Day) -> bool {
+    item.kind == Kind::Kathisma && kathismata(block, d).is_empty()
+}
+
+/// What an item opens on day `d` (starting at `midnight`), and the line that says so.
 fn opens(
     item: &core::Item,
     block: &core::Block,
-    weekday: u8,
+    (d, midnight): (Day, i64),
     study: &StudyStore,
+    under: &UnderWay,
 ) -> (RuleOpen, Option<String>) {
     match &item.kind {
         Kind::Prayers { prayer, text } => {
@@ -414,16 +492,22 @@ fn opens(
             }
         }
         Kind::Kathisma => {
-            let (matins, vespers) = calendar::kathismata(weekday);
-            let ks = if block.id == "morning" { matins } else { vespers };
+            let ks = kathismata(block, d);
+            if ks.is_empty() {
+                let none = if calendar::weekday(d) == 0 {
+                    "No kathisma on Sunday evening"
+                } else {
+                    "No kathisma today"
+                };
+                return (RuleOpen::NotToday, Some(none.into()));
+            }
             let Some(chapter_index) = ks
                 .first()
                 .and_then(|&n| calendar::kathisma_start(n))
                 .and_then(|(b, c)| ChapterIdx::new(b, c))
                 .map(|c| c.0)
             else {
-                let none = if weekday == 0 { "No kathisma on Sunday evening" } else { "No kathisma today" };
-                return (RuleOpen::Nothing, Some(none.into()));
+                return (RuleOpen::Nothing, None);
             };
             let psalms: Vec<String> = ks.iter().map(|&n| calendar::kathisma_psalms(n)).collect();
             let detail = match ks {
@@ -447,16 +531,20 @@ fn opens(
         }
         Kind::Plan { plan } => {
             let Some(p) = bible_core::plans::get(plan) else { return (RuleOpen::Nothing, None) };
-            if !study.plans().iter().any(|s| s.id == *plan && s.finished.is_none()) {
+            let Some((started, _)) = under.get(plan) else {
+                // Finished (on the Mac): ticked like any other item.
+                if study.plans().iter().any(|s| s.id == *plan) {
+                    return (RuleOpen::Nothing, Some("Finished".into()));
+                }
                 let open = RuleOpen::StartPlan { plan: plan.clone(), title: p.title.into() };
                 return (open, Some("Not started".into()));
-            }
-            match crate::plans::next_unread(p, &study.plan_reads(plan)) {
+            };
+            match plan_day(p, *started, midnight) {
                 Some(day) => {
                     let detail = format!("Day {day} · {}", crate::plans::day_label(p.day(day)));
                     (RuleOpen::Plan { plan: plan.clone(), day: day as u32 }, Some(detail))
                 }
-                None => (RuleOpen::Nothing, Some("Every day read".into())),
+                None => (RuleOpen::Nothing, Some("No reading on this day".into())),
             }
         }
         Kind::Readings | Kind::Fathers => (RuleOpen::ComingSoon, Some("Coming soon".into())),

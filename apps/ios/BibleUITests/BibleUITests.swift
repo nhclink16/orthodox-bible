@@ -266,6 +266,13 @@ final class BibleUITests: XCTestCase {
         let title = app.textFields["item-title"]
         XCTAssertTrue(title.waitForExistence(timeout: 3))
         XCTAssertEqual(title.value as? String, "Psalm 50")
+        // Its number, on the number pad, which Done puts away.
+        let number = app.textFields["psalm"]
+        number.tap()
+        number.typeText("118")
+        app.toolbars.buttons["Done"].tap()
+        XCTAssertTrue(app.keyboards.firstMatch.waitForNonExistence(timeout: 3))
+        XCTAssertEqual(title.value as? String, "Psalm 118")
         app.navigationBars.buttons["Your rule"].tap()
 
         // Remove the examination of conscience.
@@ -281,7 +288,7 @@ final class BibleUITests: XCTestCase {
         for _ in 0..<6 where !(dawn.exists && dawn.isHittable) { app.swipeDown(velocity: .slow) }
         XCTAssertTrue(dawn.isHittable)
         XCTAssertTrue(app.buttons["rule-morning-prayers"].exists)
-        XCTAssertTrue(scrolledTo(app.buttons.matching(NSPredicate(format: "label BEGINSWITH 'Psalm 50'")).firstMatch).exists)
+        XCTAssertTrue(scrolledTo(app.buttons.matching(NSPredicate(format: "label BEGINSWITH 'Psalm 118'")).firstMatch).exists)
         scrolledTo(app.buttons["edit-rule"])
         XCTAssertFalse(app.buttons["rule-evening-reflection"].exists)
 
@@ -291,6 +298,19 @@ final class BibleUITests: XCTestCase {
         app.buttons["Reset"].tap()
         app.buttons["Save"].tap()
         XCTAssertTrue(app.buttons["rule-evening-reflection"].waitForExistence(timeout: 3))
+    }
+
+    func testRemovesEveryPartOfTheDay() {
+        app.buttons["today"].tap()
+        scrolledTo(app.buttons["edit-rule"]).tap()
+        for id in ["morning", "meals", "midday", "evening"] {
+            scrolledTo(app.buttons["remove-\(id)"]).tap()
+            app.buttons["Remove"].tap()
+            XCTAssertFalse(app.buttons["remove-\(id)"].waitForExistence(timeout: 1), id)
+        }
+        app.buttons["Save"].tap()
+        XCTAssertTrue(app.staticTexts["Nothing in your rule for this day."].waitForExistence(timeout: 3))
+        XCTAssertFalse(app.buttons["rule-morning-prayers"].exists)
     }
 
     func testRemindersTurnOnOnceNotificationsAreAllowed() {
@@ -344,8 +364,12 @@ final class BibleUITests: XCTestCase {
         XCTAssertTrue(first.waitForExistence(timeout: 3))
         first.tap()
         XCTAssertEqual(first.value as? String, "Done")
+        // Opening a passage checks it off.
         app.buttons["read-psalter-20-1-1"].tap()
+        XCTAssertTrue(app.staticTexts["Psalm 2 checked off"].waitForExistence(timeout: 3))
         expectChapter("Psalm 2")
+        app.buttons["today"].tap()
+        XCTAssertEqual(scrolledTo(app.buttons["passage-psalter-20-1-1"]).value as? String, "Done")
     }
 
     func testFathersAskToBeInstalledFirst() {

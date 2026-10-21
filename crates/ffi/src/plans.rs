@@ -92,6 +92,18 @@ pub(crate) fn next_unread(plan: &Plan, reads: &HashSet<(u16, u8)>) -> Option<usi
     (1..=plan.len()).find(|&d| (0..plan.day(d).len()).any(|i| !reads.contains(&(d as u16, i as u8))))
 }
 
+/// Whether every passage of a plan's day is read.
+pub(crate) fn day_read(plan: &Plan, day: usize, reads: &HashSet<(u16, u8)>) -> bool {
+    let n = plan.day(day).len();
+    n > 0 && (0..n).all(|i| reads.contains(&(day as u16, i as u8)))
+}
+
+/// The day of a plan begun at `started` that the day starting at `midnight` is: 1 on the day it
+/// began. Rounded, so a day of 23 or 25 hours (summer time) still counts as one.
+pub(crate) fn day_of(started: i64, midnight: i64) -> i64 {
+    (midnight - started + 43_200).div_euclid(86_400) + 1
+}
+
 fn day(plan: &Plan, n: usize, reads: &HashSet<(u16, u8)>) -> PlanDay {
     let passages: Vec<PlanPassage> = plan
         .day(n)
@@ -133,8 +145,7 @@ impl Bible {
             .filter(|s| s.finished.is_none())
             .filter_map(|s| {
                 let p = plans::get(&s.id)?;
-                // Rounded, so a day of 23 or 25 hours (summer time) still counts as one.
-                let day = (today - s.started + 43_200).div_euclid(86_400) + 1;
+                let day = day_of(s.started, today);
                 let next = next_unread(p, &study.plan_reads(&s.id)).map(|d| d as u32);
                 Some(ActivePlan { plan: info(p), started: s.started, day, next })
             })
