@@ -660,118 +660,10 @@ pub fn show(
             y = shown.bottom;
         }
         Open::Fathers(parts) => {
-            let verses: Vec<VerseRef> =
-                parts.iter().flat_map(|p| p.passages.iter().flat_map(|q| q.verses())).collect();
-            let panel = s.fathers.get_or_insert_with(|| {
-                let mut f =
-                    FathersPanel::new(verses.first().copied().unwrap_or(parts[0].passages[0].first()));
-                f.step = true;
-                f
-            });
-            if let Some(n) = s.demo_verse.take() {
-                panel.verse = VerseRef::new(panel.verse.book, panel.verse.chapter, n);
-                s.show_focus = true;
-            }
-            if !verses.contains(&panel.verse) {
-                panel.verse = verses[0];
-            }
-            // J and K, as ‹ and ›.
-            let typing = ui.ctx().egui_wants_keyboard_input();
-            let step_by = ui.input_mut(|i| {
-                if typing {
-                    0
-                } else if i.consume_key(Modifiers::NONE, Key::J) {
-                    1
-                } else if i.consume_key(Modifiers::NONE, Key::K) {
-                    -1
-                } else {
-                    0
-                }
-            });
-            move_verse(panel, &verses, step_by, &mut s.show_focus);
-            let focus = panel.verse;
-            if side {
-                panel.within = verses.clone();
-                let shown_goto = goto.take().or(s.show_focus.then_some(Goto::Show(focus)));
-                s.show_focus = false;
-                let shown =
-                    s.passage.show(ui, env, parts, (x, y, col), view_top, Some(focus), true, shown_goto);
-                scroll_to = shown.scroll_to;
-                if let Some(v) = shown.clicked.filter(|v| verses.contains(v)) {
-                    panel.verse = v;
-                }
-                y = shown.bottom;
-                panel_slot =
-                    Some(Rect::from_min_max(pos2(content.right() - CARD_W, y), pos2(content.right(), y)));
-            } else {
-                // Narrow: the verse alone, ‹ › above it, and the panel under it.
-                panel.within.clear();
-                let at = panel.verse;
-                let prev = Rect::from_min_size(pos2(x, y), vec2(28.0, 28.0));
-                let i = verses.iter().position(|v| *v == at).unwrap_or(0);
-                if i > 0
-                    && widgets::round_button(
-                        ui,
-                        p,
-                        prev,
-                        crate::icons::chevron_left,
-                        ui.id().with("prev-verse"),
-                    )
-                    .clicked()
-                {
-                    move_verse(panel, &verses, -1, &mut s.show_focus);
-                }
-                let label = at.to_string();
-                let w = text(
-                    &painter,
-                    prev.right() + 8.0,
-                    y + 4.0,
-                    20.0,
-                    &label,
-                    theme::ui_semibold(13.0),
-                    p.ink,
-                    false,
-                );
-                let next_r = Rect::from_min_size(pos2(prev.right() + 16.0 + w, y), vec2(28.0, 28.0));
-                if i + 1 < verses.len()
-                    && widgets::round_button(
-                        ui,
-                        p,
-                        next_r,
-                        crate::icons::chevron_right,
-                        ui.id().with("next-verse"),
-                    )
-                    .clicked()
-                {
-                    move_verse(panel, &verses, 1, &mut s.show_focus);
-                }
-                y += 40.0;
-                let one = Part {
-                    label: String::new(),
-                    reference: String::new(),
-                    passages: vec![lectionary::Passage {
-                        book: at.book,
-                        from: (at.chapter, at.verse),
-                        to: (at.chapter, at.verse),
-                    }],
-                    end: String::new(),
-                };
-                let shown = s.passage.show(
-                    ui,
-                    env,
-                    std::slice::from_ref(&one),
-                    (x, y, col),
-                    view_top,
-                    None,
-                    false,
-                    None,
-                );
-                y = shown.bottom + 24.0;
-                let h = (clip.bottom() - view_top - 120.0).max(360.0);
-                let r = Rect::from_min_size(pos2(x, y), vec2(col, h));
-                fathers_panel(ui, env, p, panel, r, actions);
-                y = r.bottom() + 8.0;
-            }
+            (y, scroll_to) =
+                fathers_body(s, ui, env, parts, (x, y, col), (view_top, side), goto.take(), actions);
+            let slot = Rect::from_min_max(pos2(content.right() - CARD_W, y), pos2(content.right(), y));
+            panel_slot = side.then_some(slot);
         }
         Open::NotToday => {}
     }
@@ -889,6 +781,107 @@ pub fn show(
         s.goto = goto;
     }
     out
+}
+
+/// The Fathers' step: the reading with the verse the panel is on tinted, the panel beside it
+/// (`side`), or in a narrow window that verse alone under ‹ ›, with the panel under it. Returns
+/// the bottom and where to scroll.
+#[allow(clippy::too_many_arguments)]
+fn fathers_body(
+    s: &mut Session,
+    ui: &mut Ui,
+    env: &PageEnv<'_>,
+    parts: &[Part],
+    (x, mut y, col): (f32, f32, f32),
+    (view_top, side): (f32, bool),
+    goto: Option<Goto>,
+    actions: &mut Vec<Action>,
+) -> (f32, Option<f32>) {
+    let p = env.settings.theme.palette();
+    let painter = ui.painter().clone();
+    let clip = ui.clip_rect();
+    let (mut scroll_to, mut goto) = (None, goto);
+    let verses: Vec<VerseRef> =
+        parts.iter().flat_map(|p| p.passages.iter().flat_map(|q| q.verses())).collect();
+    let panel = s.fathers.get_or_insert_with(|| {
+        let mut f = FathersPanel::new(verses.first().copied().unwrap_or(parts[0].passages[0].first()));
+        f.step = true;
+        f
+    });
+    if let Some(n) = s.demo_verse.take() {
+        panel.verse = VerseRef::new(panel.verse.book, panel.verse.chapter, n);
+        s.show_focus = true;
+    }
+    if !verses.contains(&panel.verse) {
+        panel.verse = verses[0];
+    }
+    // J and K, as ‹ and ›.
+    let typing = ui.ctx().egui_wants_keyboard_input();
+    let step_by = ui.input_mut(|i| {
+        if typing {
+            0
+        } else if i.consume_key(Modifiers::NONE, Key::J) {
+            1
+        } else if i.consume_key(Modifiers::NONE, Key::K) {
+            -1
+        } else {
+            0
+        }
+    });
+    move_verse(panel, &verses, step_by, &mut s.show_focus);
+    let focus = panel.verse;
+    if side {
+        panel.within = verses.clone();
+        let shown_goto = goto.take().or(s.show_focus.then_some(Goto::Show(focus)));
+        s.show_focus = false;
+        let shown = s.passage.show(ui, env, parts, (x, y, col), view_top, Some(focus), true, shown_goto);
+        scroll_to = shown.scroll_to;
+        if let Some(v) = shown.clicked.filter(|v| verses.contains(v)) {
+            panel.verse = v;
+        }
+        y = shown.bottom;
+    } else {
+        // Narrow: the verse alone, ‹ › above it, and the panel under it.
+        panel.within.clear();
+        let at = panel.verse;
+        let prev = Rect::from_min_size(pos2(x, y), vec2(28.0, 28.0));
+        let i = verses.iter().position(|v| *v == at).unwrap_or(0);
+        if i > 0
+            && widgets::round_button(ui, p, prev, crate::icons::chevron_left, ui.id().with("prev-verse"))
+                .clicked()
+        {
+            move_verse(panel, &verses, -1, &mut s.show_focus);
+        }
+        let label = at.to_string();
+        let w =
+            text(&painter, prev.right() + 8.0, y + 4.0, 20.0, &label, theme::ui_semibold(13.0), p.ink, false);
+        let next_r = Rect::from_min_size(pos2(prev.right() + 16.0 + w, y), vec2(28.0, 28.0));
+        if i + 1 < verses.len()
+            && widgets::round_button(ui, p, next_r, crate::icons::chevron_right, ui.id().with("next-verse"))
+                .clicked()
+        {
+            move_verse(panel, &verses, 1, &mut s.show_focus);
+        }
+        y += 40.0;
+        let one = Part {
+            label: String::new(),
+            reference: String::new(),
+            passages: vec![lectionary::Passage {
+                book: at.book,
+                from: (at.chapter, at.verse),
+                to: (at.chapter, at.verse),
+            }],
+            end: String::new(),
+        };
+        let shown =
+            s.passage.show(ui, env, std::slice::from_ref(&one), (x, y, col), view_top, None, false, None);
+        y = shown.bottom + 24.0;
+        let h = (clip.bottom() - view_top - 120.0).max(360.0);
+        let r = Rect::from_min_size(pos2(x, y), vec2(col, h));
+        fathers_panel(ui, env, p, panel, r, actions);
+        y = r.bottom() + 8.0;
+    }
+    (y, scroll_to)
 }
 
 /// "Psalm 87", from a stop's number.
