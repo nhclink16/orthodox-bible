@@ -119,21 +119,27 @@ Greek Orthodox Archdiocese of America as goarch.org prints it, because Nicholas'
 Trinity in Augusta, is a GOARCH parish whose bulletins print goarch.org's readings. **Antiochian**
 follows the Antiochian Archdiocese's own service texts and charts, with its saints (Raphael of
 Brooklyn, Joseph of Damascus, Nicholas and Habib Khasha, Julian of Homs, Xenia of St Petersburg,
-All Saints of Antioch) and its verse boundaries. The tables record both where they differ: a
-reading or entry marked `"in"` belongs to one usage, and an entry's `"greek"` or `"antiochian"`
-object changes its name, rules or confidence there; a few rules in the code differ too (a saint
-moved into Bright Week, St Ignatius before the Nativity, St Theodore's and the Ascetics'
-Saturdays, saints on the Saturday of Souls or the Ascension, St Mark and a Gospel-only saint in
-the Paschal season).
+Vincent of Lerins, All Saints of Antioch) and its verse boundaries. The tables record both where
+they differ: a reading or entry marked `"in"` belongs to one usage, and an entry's `"greek"` or
+`"antiochian"` object changes its name, rules or confidence there; a few rules in the code differ
+too (a saint moved into Bright Week, St Ignatius before the Nativity, St Theodore's and the
+Ascetics' Saturdays, saints on the Saturday of Souls or the Ascension, St Mark in the Paschal
+season, a Gospel-only saint until the 2nd Sunday after Pentecost, St Athanasius on Mid-Pentecost,
+and the winter Sundays after an autumn that read the 14th of Luke, which the Archdiocese ordered
+one way in 2019 and the other in 2024, so in Antiochian usage they are low confidence).
 `xtask lectionary-check` compares a usage with orthocal.info's Greek tradition (the default), or
 with a local harvest of goarch.org (`--against goarch`) or of the Antiochian service texts
 (`--against antiochian`); it is a check, not a source. Against goarch.org for 2024-2027 the Greek
 usage reads the same Epistle on 99.4% of days and the same Gospel on 98.1% (98.9% counting Holy
-Week's double listings); what remains is the ordo's yearly choices (the free days between the
-Nativity and Theophany, 19, 24 and 26 January), goarch.org filing Holy Week's Matins Gospels and
-the Lamentations readings differently, and 2 Cor 13, whose Greek numbering ends a verse earlier. The days the yearly ordo
-settles are marked low confidence rather than guessed silently. Slavic usage isn't implemented;
-its differences are kept in the tables' `variants` for later.
+Week's double listings); what remains is the ordo's yearly choices, goarch.org filing Holy Week's
+Matins Gospels and the Lamentations readings differently, and 2 Cor 13, whose Greek numbering ends
+a verse earlier. The ordo's choices are the free days between the Nativity and Theophany and 19,
+24 and 26 January, where goarch.org reads Sunday lessons left unread earlier in the year
+("Previously skipped", as the Digital Chant Stand heads them): which of them, and on which of
+those days, changes from year to year, and neither the first nor the last ones left unread fit
+2018-2027. The days the yearly ordo settles are marked low confidence rather than guessed
+silently. Slavic usage isn't implemented; its differences are kept in the tables' `variants` for
+later.
 
 `.bbl` files store that model as column arrays compressed with zstd (level 19 for bundled data):
 the 4.1 MB KJV is 1.04 MB, all seven bundled translations ≈ 7 MB. The JSON metadata header is

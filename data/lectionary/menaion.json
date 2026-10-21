@@ -26,7 +26,7 @@
   "Saturdays follow the weekday rule. On a Saturday with its own readings (before or after the Elevation, the Nativity and Theophany) a saint yields unless saturday says otherwise: epistle = its Epistle with the Saturday's Gospel; gospel = the Saturday's Epistle with its Gospel. On a Sunday with its own readings the sunday rule applies as on any Sunday.",
   "Vespers readings belong to the Great Vespers served the evening before the date (on the eves of the Nativity and Theophany, the Vespers joined to the Liturgy).",
   "In Great Lent only the Annunciation, the Forty Martyrs and the Finding of the Forerunner's Head are read on weekdays; in Holy Week and on Pascha only the Annunciation. In Bright Week only an entry with bright reads: on its own day only that reading (Epistle or Gospel) with the day's other; moved into Bright Week, in Antiochian usage its Epistle with the day's Gospel, in Greek usage still its bright reading. St George moves to Bright Monday when 23 April falls on or before Pascha; the other bright entries that fall from Palm Sunday to Pascha move to the next Bright Week days.",
-  "Days that keep their own readings: a great feast (own) on Pascha, in Holy Week, on Pentecost or in Bright Week is shown beside the day's readings at low confidence. On the Ascension only Sts Constantine and Helen give their Epistle. All Saints Sunday and the Monday of the Holy Spirit keep their Epistle: a feast gives only its Gospel. The leave-takings of Pascha and of Pentecost keep both readings unless a great feast falls. On St Theodore's and the Ascetics' Saturdays a saint with sunday epistle gives, in Antiochian usage, its Gospel with the commemoration's Epistle; in Greek usage both its readings. A saint falling on a Saturday of Souls (Meatfare, before Pentecost) is read the day before (in Greek usage only one with a Matins Gospel of its own; another yields); a great feast stays on its day and replaces the Saturday's readings. In Greek usage a saint with a Matins Gospel of its own falling on the Ascension is read the day after (except Sts Constantine and Helen), an entry with weekday gospel yields from Pascha to the leave-taking of Pentecost, and St Mark yields on a weekday of that season."
+  "Days that keep their own readings: a great feast (own) on Pascha, in Holy Week, on Pentecost or in Bright Week is shown beside the day's readings at low confidence. On the Ascension only Sts Constantine and Helen give their Epistle. All Saints Sunday and the Monday of the Holy Spirit keep their Epistle: a feast gives only its Gospel. The leave-takings of Pascha and of Pentecost keep both readings unless a great feast falls. On St Theodore's and the Ascetics' Saturdays a saint with sunday epistle gives, in Antiochian usage, its Gospel with the commemoration's Epistle; in Greek usage both its readings. A saint falling on a Saturday of Souls (Meatfare, before Pentecost) is read the day before (in Greek usage only one with a Matins Gospel of its own; another yields); a great feast stays on its day and replaces the Saturday's readings. In Greek usage a saint with a Matins Gospel of its own falling on the Ascension is read the day after (except Sts Constantine and Helen; at medium confidence, but for the Third Finding of the Forerunner's Head), an entry with weekday gospel yields from Pascha to the 2nd Sunday after Pentecost, St Mark yields on a weekday of the Paschal season, and St Athanasius (2 May) gives his Epistle on Mid-Pentecost."
  ],
  "entries": [
   {
@@ -3011,7 +3011,23 @@
    ],
    "confidence": "medium",
    "sources": ["ANT-OLG", "GOA", "GOA-DCS"],
-   "note": "The service books print these readings (GOA DCS 2026, headed \"For the Devout Man\"), but the published Antiochian and Greek calendars read the day's readings. Use them only when this commemoration is celebrated, e.g. as a patronal feast. A saint of the Antiochian Church."
+   "note": "The service books print these readings (GOA DCS 2026, headed \"For the Devout Man\"), but the published Antiochian and Greek calendars read the day's readings for him (in Antiochian usage St Vincent of Lerins', below). Use them only when this commemoration is celebrated, e.g. as a patronal feast. A saint of the Antiochian Church."
+  },
+  {
+   "id": "0524.vincent_lerins",
+   "date": "05-24",
+   "in": "antiochian",
+   "rank": "venerable",
+   "weekday": "replaces",
+   "sunday": "sunday",
+   "name": "Venerable Vincent of Lerins",
+   "readings": [
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Gal 5:22-6:2"]},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Luke 6:17-23"]}
+   ],
+   "confidence": "medium",
+   "sources": ["ANT-OLG"],
+   "note": "Antiochian usage only: the Archdiocese's service texts read his Epistle and Gospel, headed \"For St. Vincent of Lerins\", on weekdays of the Paschal season (24 May 2018, 2019), and the Sunday's readings on a Sunday (2020, 2026). goarch.org does not keep him."
   },
   {
    "id": "0525.head_forerunner_3",

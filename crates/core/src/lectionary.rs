@@ -866,8 +866,10 @@ impl Cx {
             let w = if week <= 32 { week } else { 33u8.saturating_sub(publican_week.saturating_sub(week)) };
             t.epistles.get(&(w, self.wd))
         };
-        // The Epistle never jumps; only on 26 January does the ordo choose it too.
-        Cycle { epistle, gospel, epistle_low: low && self.md == (1, 26), gospel_low: low }
+        // The Epistle never jumps; the ordo chooses it too only on 26 January and where it goes with
+        // the Gospel (the winter Sundays).
+        let epistle_low = low && (self.md == (1, 26) || sunday_epistle.is_some());
+        Cycle { epistle, gospel, epistle_low, gospel_low: low }
     }
 
     /// The Gospel of a day after the Monday of the Holy Spirit, the Sunday Epistle that goes with
@@ -906,8 +908,11 @@ impl Cx {
             let back = ((publican - d + 6) / 7) as u8;
             let week = 17u8.saturating_sub(back).max(1);
             // On 19 and 26 January (monastic saints), and in Greek usage on 24 January (St Xenia of
-            // Rome), the ordo reads a Sunday Gospel of Matthew left unread in the summer; which one
-            // follows no rule found (goarch.org 2018-2027; antiochian.org differed in 2021 and 2024).
+            // Rome), the ordo reads a Sunday Gospel left unread earlier in the year (on 26 January
+            // often with such an Epistle; GOA DCS 2026 heads them "Previously skipped"). Which of
+            // them, and on which of these days, follows no rule found: neither the first nor the
+            // last ones left unread fit every year (goarch.org 2018-2027; antiochian.org differed in
+            // 2021 and 2024).
             let ordo =
                 matches!(self.md, (1, 19) | (1, 26)) || (self.usage == Usage::Greek && self.md == (1, 24));
             (t.luke.get(&(week, wd)), None, back > 3 || ordo)
@@ -963,6 +968,9 @@ impl Cx {
     /// 16th and 15th of Matthew, leaving out a Luke Gospel read in the autumn (goarch.org every
     /// winter 2018-2027; antiochian.org in 8 of 9). The Epistle goes with the Gospel: the Nth of
     /// Luke takes the Epistle of the (N+17)th Sunday after Pentecost, the Nth of Matthew the Nth's.
+    /// The Antiochian Archdiocese left the autumn's Gospel out in 2019 but read it again in 2024
+    /// (its charts and service texts), so in Antiochian usage a Sunday that leaving it out changes
+    /// is the ordo's.
     fn winter_sunday(
         &self,
         t: &'static Tables,
@@ -982,18 +990,24 @@ impl Cx {
             return if n >= 4 { matthew(17) } else { luke(15) };
         }
         let autumn = self.autumn_lukes(jump);
-        let mut pool: Vec<(bool, u8)> = [(false, 12), (false, 15), (false, 14), (true, 16), (true, 15)]
-            .into_iter()
-            .filter(|&(matt, k)| matt || !autumn.contains(&k))
-            .take(n - 2)
-            .collect();
-        pool.sort();
-        match pool.get(slot - 1) {
-            Some(&(false, k)) => luke(k),
-            Some(&(true, k)) => matthew(k),
+        let pool = |leave_out: bool| -> Vec<(bool, u8)> {
+            let mut pool: Vec<(bool, u8)> = [(false, 12), (false, 15), (false, 14), (true, 16), (true, 15)]
+                .into_iter()
+                .filter(|&(matt, k)| matt || !leave_out || !autumn.contains(&k))
+                .take(n - 2)
+                .collect();
+            pool.sort();
+            pool
+        };
+        let chosen = pool(true).get(slot - 1).copied();
+        let ordo = self.usage == Usage::Antiochian && pool(false).get(slot - 1).copied() != chosen;
+        let (gospel, epistle, low) = match chosen {
+            Some((false, k)) => luke(k),
+            Some((true, k)) => matthew(k),
             // A seven-Sunday winter after an autumn that read the 14th: no rule found.
             None => (t.matthew.get(&(14, 0)), Some(14), true),
-        }
+        };
+        (gospel, epistle, low || ordo)
     }
 
     /// The Gospels of Luke read on the autumn Sundays up to the Forefathers.
@@ -1048,8 +1062,9 @@ impl Cx {
                     f.when.matches(md, wd) || (moves && f.when.matches(self.md_of(self.d + 1), 6))
                 }
                 // In Greek usage such a saint falling on the Ascension is read the day after (the
-                // Third Finding of the Forerunner's Head: goarch.org 2023, 2028); Sts Constantine
-                // and Helen give their Epistle on the feast (see `menaion`).
+                // Third Finding of the Forerunner's Head: goarch.org 2023, 2028; another saint at
+                // medium confidence); Sts Constantine and Helen give their Epistle on the feast (see
+                // `menaion`).
                 _ if self.usage == Usage::Greek
                     && self.d - self.pascha == 40
                     && f.own_matins()
@@ -1172,6 +1187,12 @@ impl Cx {
                 "0521.constantine_helen" if self.d - self.pascha == 39 => {
                     // On the Ascension the saints' Epistle is read with the feast's Gospel (the
                     // Archdiocese's service text, GOA DCS and goarch.org, 2026).
+                    plan.replace(Kind::Epistle, e);
+                    continue;
+                }
+                "0502.athanasius_relics" if self.usage == Usage::Greek && self.d - self.pascha == 24 => {
+                    // In Greek usage St Athanasius's Epistle is read on Mid-Pentecost with the feast's
+                    // Gospel (goarch.org 2018, 2029), though other saints yield to it.
                     plan.replace(Kind::Epistle, e);
                     continue;
                 }
@@ -1300,19 +1321,32 @@ impl Cx {
                 Class::Weekday
                     if self.usage == Usage::Greek && f.id == "0425.mark" && self.d - self.pascha <= 55 => {}
                 Class::Saturday | Class::Weekday => {
+                    let p = self.d - self.pascha;
                     match f.weekday {
                         OnWeekday::Own | OnWeekday::Replaces => plan.replace_both(e),
                         OnWeekday::Epistle => plan.replace(Kind::Epistle, e),
                         // In Greek usage a saint who gives only his Gospel yields to the Gospels of
-                        // the Paschal season and of the week after Pentecost (the Prophet Elisha:
-                        // goarch.org 2019, 2021, 2022, 2024, 2027, 2030).
-                        OnWeekday::Gospel if self.usage == Usage::Greek && self.d - self.pascha <= 55 => {
+                        // the Paschal season and of the first two weeks after Pentecost (the Prophet
+                        // Elisha: goarch.org 2019, 2021, 2022, 2024, 2027 and 2030, and 2023 on the
+                        // Wednesday of the 2nd week; read in 2018 on the Thursday of the 3rd). Past
+                        // the last day seen, the day's Gospel is less sure.
+                        OnWeekday::Gospel if self.usage == Usage::Greek && p <= 63 => {
+                            for r in &mut plan.readings {
+                                if p > 59 && r.service == "Liturgy" && r.kind == Kind::Gospel {
+                                    r.confidence = r.confidence.min(Confidence::Medium);
+                                }
+                            }
                             continue;
                         }
                         OnWeekday::Gospel => plan.replace(Kind::Gospel, e),
                         OnWeekday::Optional => continue,
                     }
                     plan.extras(e, true, false);
+                    // Moved off the Ascension (see `feasts`): only the Third Finding of the Head has
+                    // been seen there.
+                    if p == 40 && !f.when.matches(self.md, self.wd) && f.id != "0525.head_forerunner_3" {
+                        plan.cap(e, Confidence::Medium);
+                    }
                 }
             }
         }
@@ -1593,6 +1627,12 @@ mod tests {
         );
         // St Nektarios on a Sunday gives his Epistle (service text 2025).
         assert_eq!(ant(2025, 11, 9), "Epistle Ephesians 5:8–19 | Gospel Luke 8:41–56");
+        // St Vincent of Lerins on a weekday (service texts 2018, 2019), but not on a Sunday (2020) or
+        // in Greek usage.
+        assert_eq!(ant(2018, 5, 24), "Epistle Galatians 5:22–6:2 | Gospel Luke 6:17–23");
+        assert_eq!(ant(2019, 5, 24), ant(2018, 5, 24));
+        assert_eq!(ant(2020, 5, 24), "Epistle Acts 16:16–34 | Gospel John 9:1–38");
+        assert_eq!(new(2018, 5, 24), "Epistle Acts 25:13–19 | Gospel John 16:23–33");
         // St Ignatius on the Sunday before the Nativity is kept the Saturday before, with the
         // Saturday's Gospel (service text 2020).
         assert_eq!(ant(2026, 12, 19), "Epistle Hebrews 10:32–38 | Gospel Luke 13:19–29");
@@ -1657,6 +1697,20 @@ mod tests {
         // weekday of it (2028), though not on a Saturday (2026).
         assert_eq!(new(2024, 6, 14), "Epistle Acts 19:1–8 | Gospel John 14:1–11");
         assert_eq!(ant(2024, 6, 14), "Epistle Acts 19:1–8 | Gospel Luke 4:22–30");
+        // Elisha also yields in the first two weeks after Pentecost (2023, and 2028 with the same
+        // Pascha) and is read in the 3rd (2018); between the two, the day's Gospel is less sure (2031).
+        assert_eq!(new(2023, 6, 14), "Epistle Romans 4:13–25 | Gospel Matthew 7:21–23");
+        assert_eq!(new(2028, 6, 14), new(2023, 6, 14));
+        assert_eq!(new(2018, 6, 14), "Epistle Romans 8:22–27 | Gospel Luke 4:22–30");
+        assert_eq!(sure(2023, 6, 14, Kind::Gospel, G), Confidence::High);
+        assert_eq!(new(2031, 6, 14), "Epistle Romans 3:19–24 | Gospel Matthew 7:1–8");
+        assert_eq!(sure(2031, 6, 14, Kind::Gospel, G), Confidence::Medium);
+        // St Athanasius on Mid-Pentecost gives his Epistle (2018, 2029), though not in Antiochian
+        // usage or on Thomas Sunday (2038).
+        assert_eq!(new(2018, 5, 2), "Epistle Hebrews 13:7–16 | Gospel John 7:14–30");
+        assert_eq!(new(2029, 5, 2), new(2018, 5, 2));
+        assert_eq!(ant(2018, 5, 2), "Epistle Acts 14:6–18 | Gospel John 7:14–30");
+        assert_eq!(new(2038, 5, 2), "Epistle Acts 5:12–20 | Gospel John 20:19–31");
         assert_eq!(new(2028, 4, 25), "Epistle Acts 4:1–10 | Gospel John 3:16–21");
         assert_eq!(new(2026, 4, 25), "Epistle 1 Peter 5:6–14 | Gospel Luke 10:16–21");
         // The Third Finding of the Head on the Ascension is read the day after (2028); Sts
@@ -1664,6 +1718,11 @@ mod tests {
         assert_eq!(new(2028, 5, 26), "Epistle 2 Corinthians 4:6–15 | Gospel Matthew 11:2–15");
         assert_eq!(ant(2028, 5, 26), "Epistle Acts 19:1–8 | Gospel John 14:1–11");
         assert_eq!(new(2026, 5, 22), "Epistle Acts 19:1–8 | Gospel John 14:1–11");
+        // No other saint moved off the Ascension has been seen: Sts Bartholomew and Barnabas (2043)
+        // are read the day after at medium confidence, the Third Finding at high.
+        assert_eq!(new(2043, 6, 12), "Epistle Acts 11:19–30 | Gospel Luke 10:16–21");
+        assert_eq!(sure(2043, 6, 12, Kind::Gospel, G), Confidence::Medium);
+        assert_eq!(sure(2028, 5, 26, Kind::Gospel, G), Confidence::High);
         // St Jude on the Saturday of Souls yields (2027); Sts Bartholomew and Barnabas, with a Matins
         // Gospel of their own, are read the day before (2022), in both usages.
         let jude = |usage| {
@@ -1790,6 +1849,20 @@ mod tests {
         assert_eq!(new(2027, 1, 24), "Epistle 1 Timothy 1:15–17 | Gospel Luke 18:35–43");
         assert_eq!(new(2027, 2, 7), "Epistle 2 Corinthians 6:1–10 | Gospel Matthew 25:14–30");
         assert_eq!(new(2027, 2, 14), "Epistle 2 Corinthians 6:16–7:1 | Gospel Matthew 15:21–28");
+        // 2024 (n = 6), after an autumn that read the 14th of Luke: goarch.org leaves it out, as the
+        // Antiochian chart did in 2019 but not in 2024, so in Antiochian usage the two Sundays that
+        // leaving it out changes are the ordo's (2024, 2019).
+        assert_eq!(new(2024, 1, 28), "Epistle 1 Timothy 4:9–15 | Gospel Luke 19:1–10");
+        assert_eq!(new(2024, 2, 4), "Epistle 2 Corinthians 4:6–15 | Gospel Matthew 22:35–46");
+        assert_eq!(ant(2024, 1, 28), new(2024, 1, 28));
+        for (m, d) in [(1, 28), (2, 4)] {
+            for kind in [Kind::Epistle, Kind::Gospel] {
+                assert_eq!(sure(2024, m, d, kind, Usage::Greek), Confidence::High);
+                assert_eq!(sure(2024, m, d, kind, Usage::Antiochian), Confidence::Low);
+            }
+        }
+        assert_eq!(sure(2024, 2, 11, Kind::Gospel, Usage::Antiochian), Confidence::High);
+        assert_eq!(sure(2019, 2, 3, Kind::Gospel, Usage::Antiochian), Confidence::Low);
     }
 
     #[test]
