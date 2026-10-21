@@ -114,8 +114,10 @@ Sundays around the feasts, in Lent, Holy Week and Bright Week. References are st
 numbering and read by their own parser, never `reference::parse`, so the Septuagint-numbering
 setting can't move a reading. `xtask lectionary-check` compares the Liturgy's Epistle and Gospel
 with orthocal.info's Greek tradition; it is a check, not a source, and where they differ the
-tables follow the Antiochian evidence. The days the yearly ordo settles (the free days between the
-Nativity and Theophany, 19, 24 and 26 January, long winters) are marked low confidence rather than
+tables follow the Antiochian evidence. Where the Archdiocese's own service texts and charts differ
+from the GOARCH feed that antiochian.org shows, the tables follow the service texts and keep the
+feed's reading as a variant. The days the yearly ordo settles (the free days between the
+Nativity and Theophany, 19 and 26 January, long winters) are marked low confidence rather than
 guessed silently. Slavic usage isn't implemented; its differences are kept in the tables'
 `variants` for later.
 

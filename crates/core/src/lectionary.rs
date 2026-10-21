@@ -560,8 +560,9 @@ enum Class {
     BrightWeek,
     /// Lenten weekdays and Cheesefare Wednesday and Friday: no Liturgy.
     LentWeekday,
-    /// Mid-Pentecost, the Saturdays of Souls, the Monday of the Holy Spirit, the Saturdays of
-    /// Lent and Cheesefare: the Sunday rule.
+    /// Mid-Pentecost, the leave-taking of Pascha, the Saturdays of Souls, the Monday of the Holy
+    /// Spirit, the leave-taking of Pentecost, the Saturdays of Lent and Cheesefare: the Sunday
+    /// rule (with the exceptions in `Cx::menaion`).
     Strong,
     Sunday,
     Saturday,
@@ -614,6 +615,13 @@ impl Plan {
     fn add_all(&mut self, with: &Entry, lent: bool) {
         self.readings.extend(with.readings.iter().filter(|r| r.service == "Liturgy").cloned());
         self.extras(with, true, lent);
+    }
+
+    /// Lowers to `c` the confidence of the readings `with` gave.
+    fn cap(&mut self, with: &Entry, c: Confidence) {
+        for r in self.readings.iter_mut().filter(|r| r.occasion == with.name) {
+            r.confidence = r.confidence.min(c);
+        }
     }
 }
 
@@ -706,7 +714,7 @@ impl Cx {
             let class = match p {
                 0 | 39 | 49 => Class::Paschal,
                 1..=6 => Class::BrightWeek,
-                24 | 48 | 50 => Class::Strong,
+                24 | 38 | 48 | 50 => Class::Strong,
                 _ => weekly(wd),
             };
             (t.pentecostarion[p as usize].readings.clone(), class, false)
@@ -782,9 +790,10 @@ impl Cx {
             // decides: goarch.org repeats weeks, antiochian.org has differed).
             let back = ((publican - d + 6) / 7) as u8;
             let week = 17u8.saturating_sub(back).max(1);
-            // On 19, 24 and 26 January (monastic saints) the ordo reads a Sunday Gospel of Matthew
-            // left unread in the summer; which one varies (goarch.org, antiochian.org 2019-2027).
-            let ordo = matches!(self.md, (1, 19) | (1, 24) | (1, 26));
+            // On 19 and 26 January (monastic saints) the ordo reads a Sunday Gospel of Matthew
+            // left unread in the summer; which one follows no rule found (goarch.org 2018-2027;
+            // antiochian.org differed in 2021 and 2024).
+            let ordo = matches!(self.md, (1, 19) | (1, 26));
             (t.luke.get(&(week, wd)), None, back > 3 || ordo)
         } else {
             // Between the Nativity and Theophany the yearly ordo decides. A free weekday reads here
@@ -909,9 +918,15 @@ impl Cx {
                 "float.sat_before_theophany" | "float.sun_before_theophany" => {
                     f.when.matches(md, wd) || (md == (1, 3) && !self.has_week_day(f))
                 }
+                // St Ignatius on the Sunday before the Nativity is kept the day before (the
+                // Archdiocese's service text, 2020).
+                "1220.ignatius" => {
+                    f.when.matches(md, wd) || (wd == 6 && f.when.matches(self.md_of(self.d + 1), 0))
+                }
                 // A saint falling on a Saturday of Souls is read the day before (St Haralambos 2018,
-                // Sts Bartholomew and Barnabas 2022, the Forty Martyrs 2024: goarch.org).
-                _ if !f.float() && self.souls(self.d + 1) => {
+                // Sts Bartholomew and Barnabas 2022, the Forty Martyrs 2024: goarch.org). A great
+                // feast stays on its day.
+                _ if !f.float() && f.weekday != OnWeekday::Own && self.souls(self.d + 1) => {
                     f.when.matches(md, wd) || f.when.matches(self.md_of(self.d + 1), 6)
                 }
                 _ => f.when.matches(md, wd),
@@ -1021,9 +1036,25 @@ impl Cx {
                     plan.feast_matins = true;
                     continue;
                 }
-                "0325.annunciation" if matches!(plan.class, Class::Paschal | Class::BrightWeek) => {
-                    // In Holy Week, on Pascha and in Bright Week the Typikon's special orders apply;
-                    // the feast's readings are shown beside the day's.
+                "0521.constantine_helen" if self.d - self.pascha == 39 => {
+                    // On the Ascension the saints' Epistle is read with the feast's Gospel (the
+                    // Archdiocese's service text, GOA DCS and goarch.org, 2026).
+                    plan.replace(Kind::Epistle, e);
+                    continue;
+                }
+                "0326.synaxis_gabriel" if matches!(self.d - self.next, -36 | -29 | -22) => {
+                    // The leave-taking of the Annunciation: on the 2nd to 4th Saturdays of Lent its
+                    // readings are read (the Archdiocese's service text, goarch.org and
+                    // antiochian.org, 2022).
+                    plan.replace_both(e);
+                    continue;
+                }
+                _ if f.weekday == OnWeekday::Own
+                    && matches!(plan.class, Class::Paschal | Class::BrightWeek) =>
+                {
+                    // The Annunciation in Holy Week, on Pascha or in Bright Week, the Forerunner's
+                    // Nativity on Pentecost: the Typikon's special orders apply; the feast's
+                    // readings are shown beside the day's.
                     plan.readings.extend(e.readings.iter().filter(|r| r.service != "Vespers").cloned().map(
                         |mut r| {
                             r.confidence = Confidence::Low;
@@ -1039,9 +1070,18 @@ impl Cx {
                 Class::Paschal => {}
                 Class::BrightWeek => {
                     if let Some(k) = f.bright {
-                        plan.replace(k, e);
+                        // Moved here, the saint gives his Epistle with the day's Gospel (the
+                        // Archdiocese's texts for St George on Bright Monday and St Mark on Bright
+                        // Tuesday). On his own day he gives his `bright` reading, as its 2025 text
+                        // for St George and the published calendars did, though its 2020 texts
+                        // for St George and St Mark read both of his.
+                        let own = f.when.matches(self.md, self.wd);
+                        plan.replace(if own { k } else { Kind::Epistle }, e);
                         plan.extras(e, true, false);
                         plan.readings.retain(|r| r.service != "Vespers" || r.occasion != e.name);
+                        if own {
+                            plan.cap(e, Confidence::Medium);
+                        }
                     }
                 }
                 // Only the great feasts and the saints the calendars print every year (antiochian.org
@@ -1063,10 +1103,30 @@ impl Cx {
                         }
                         continue;
                     }
+                    // All Saints and the Monday of the Holy Spirit keep their Epistle: a feast gives
+                    // only its Gospel, and other saints yield (the Twelve Apostles on All Saints
+                    // 2024: the Archdiocese's chart and service text, goarch.org; the Forerunner on
+                    // the Monday of the Holy Spirit 2024: goarch.org only).
+                    let p = self.d - self.pascha;
+                    if matches!(p, 50 | 56) {
+                        if f.sunday == OnSunday::Feast {
+                            plan.replace(Kind::Gospel, e);
+                            plan.extras(e, f.feast_matins || self.wd != 0, false);
+                            plan.feast_matins |= f.feast_matins;
+                            if p == 50 {
+                                plan.cap(e, Confidence::Medium);
+                            }
+                        }
+                        continue;
+                    }
                     // St Theodore's and the Ascetics' Saturdays are commemorations themselves: a great
-                    // saint replaces both readings (the Finding of the Head 2018, the Forty Martyrs
-                    // 2019: goarch.org).
+                    // saint gives its Gospel with the commemoration's Epistle (the Forty Martyrs on
+                    // the Ascetics' Saturday 2019: the Archdiocese's service text; goarch.org read
+                    // both of the saint's, and both of the Finding of the Head's in 2018).
                     let commemoration = matches!(self.d - self.next, -50 | -43);
+                    // The leave-takings of Pascha and of Pentecost keep their readings against a
+                    // saint's Epistle (the Typikon; no published example).
+                    let leave_taking = matches!(p, 38 | 55);
                     match f.sunday {
                         OnSunday::Feast if f.weekday == OnWeekday::Own || plan.class == Class::Sunday => {
                             plan.replace_both(e);
@@ -1074,10 +1134,10 @@ impl Cx {
                             plan.feast_matins |= f.feast_matins;
                         }
                         OnSunday::Epistle if commemoration => {
-                            plan.replace_both(e);
+                            plan.replace(Kind::Gospel, e);
                             plan.extras(e, true, false);
                         }
-                        OnSunday::Epistle => {
+                        OnSunday::Epistle if !leave_taking => {
                             plan.replace(Kind::Epistle, e);
                             plan.extras(e, false, false);
                         }
@@ -1223,21 +1283,129 @@ mod tests {
         let thomas = readings(civil(2026, 4, 19), Style::New);
         assert_eq!(thomas[0].title, Some("Eothinon 1"));
         assert_eq!(new(2026, 4, 14), "Epistle Acts 2:14–21 | Gospel Luke 24:12–35", "Bright Tuesday");
-        assert_eq!(new(2026, 5, 21), "Epistle Acts 1:1–12 | Gospel Luke 24:36–53", "Ascension");
+        assert_eq!(new(2027, 6, 10), "Epistle Acts 1:1–12 | Gospel Luke 24:36–53", "Ascension");
         assert_eq!(new(2026, 5, 31), "Epistle Acts 2:1–11 | Gospel John 7:37–52; 8:12", "Pentecost");
         // St George on a weekday after Thomas Sunday.
         assert_eq!(new(2026, 4, 23), "Epistle Acts 12:1–11 | Gospel John 15:17–16:2");
     }
 
+    /// The confidence of the day's Liturgy reading of `kind`.
+    fn sure(y: i32, m: u8, d: u8, kind: Kind) -> Confidence {
+        let rs = readings(civil(y, m, d), Style::New);
+        rs.iter().find(|r| r.service == "Liturgy" && r.kind == kind).unwrap().confidence
+    }
+
     #[test]
     fn bright_week_saints() {
-        // 2027: St George (23 April, in Lent) moves to Bright Monday and gives his Epistle; St Mark
-        // (25 April, Palm Sunday) moves to Bright Tuesday and gives his Gospel (goarch.org).
+        // 2027: St George (23 April, in Lent) moves to Bright Monday and St Mark (25 April, Palm
+        // Sunday) to Bright Tuesday; each gives his Epistle with the day's Gospel (the
+        // Archdiocese's service texts).
         assert_eq!(new(2027, 5, 3), "Epistle Acts 12:1–11 | Gospel John 1:18–28");
-        assert_eq!(new(2027, 5, 4), "Epistle Acts 2:14–21 | Gospel Luke 10:16–21");
+        assert_eq!(new(2027, 5, 4), "Epistle 1 Peter 5:6–14 | Gospel Luke 24:12–35");
         assert_eq!(new(2027, 4, 23), "", "Lenten Friday: no Liturgy");
-        // 2025: St George on Bright Wednesday.
+        // 2025: St George on his own day, Bright Wednesday (service text 2025), at medium
+        // confidence: the 2020 texts read both of a saint's readings on his own day.
         assert_eq!(new(2025, 4, 23), "Epistle Acts 12:1–11 | Gospel John 1:35–51");
+        assert_eq!(sure(2025, 4, 23, Kind::Epistle), Confidence::Medium);
+        assert_eq!(sure(2027, 5, 3, Kind::Epistle), Confidence::High);
+        // The Life-giving Spring: the Theotokos's Epistle with the day's Gospel.
+        assert_eq!(new(2026, 4, 17), "Epistle Philippians 2:5–11 | Gospel John 2:12–22");
+    }
+
+    #[test]
+    fn feasts_meeting_the_great_days() {
+        // Sts Constantine and Helen on the Ascension give their Epistle (service text 2026).
+        assert_eq!(new(2026, 5, 21), "Epistle Acts 26:1, 12–20 | Gospel Luke 24:36–53");
+        // All Saints keeps its Epistle; the Twelve Apostles give their Gospel (chart 2024), and a
+        // lesser saint yields (Sts Cosmas and Damian, 2040).
+        assert_eq!(new(2024, 6, 30), "Epistle Hebrews 11:33–12:2 | Gospel Matthew 9:36–10:8");
+        assert_eq!(new(2040, 7, 1), "Epistle Hebrews 11:33–12:2 | Gospel Matthew 10:32–33, 37–38; 19:27–30");
+        // So does the Monday of the Holy Spirit, with the Forerunner's Gospel (goarch.org 2024).
+        assert_eq!(new(2024, 6, 24), "Epistle Ephesians 5:8–19 | Gospel Luke 1:1–25, 57–68, 76, 80");
+        assert_eq!(sure(2024, 6, 24, Kind::Gospel), Confidence::Medium);
+        assert_eq!(new(2037, 5, 25), "Epistle Ephesians 5:8–19 | Gospel Matthew 18:10–20");
+        // The leave-takings of Pascha and of Pentecost keep their readings.
+        assert_eq!(new(2031, 5, 21), "Epistle Acts 18:22–28 | Gospel John 12:36–47");
+        assert_eq!(new(2051, 7, 1), "Epistle Romans 1:7–12 | Gospel Matthew 5:42–48");
+        // A great feast on the Saturday of Souls stays on its day: not read on the Friday too.
+        let forerunner = |d: u8| {
+            readings(civil(2051, 6, d), Style::New)
+                .iter()
+                .filter(|r| r.occasion.contains("Forerunner"))
+                .count()
+        };
+        assert_eq!((forerunner(23), forerunner(24)), (0, 6));
+        // The Forerunner's Nativity on Pentecost (2040) is shown beside it, at low confidence.
+        let pentecost = readings(civil(2040, 6, 24), Style::New);
+        let feast: Vec<_> = pentecost.iter().filter(|r| r.occasion.contains("Forerunner")).collect();
+        assert_eq!(feast.len(), 3);
+        assert!(feast.iter().all(|r| r.confidence == Confidence::Low));
+        assert!(pentecost.iter().any(|r| r.label() == "Acts 2:1–11"));
+    }
+
+    #[test]
+    fn saints_in_lent_and_the_triodion() {
+        // The Synaxis of Gabriel (the Annunciation's leave-taking) on a Saturday of Lent (service
+        // text 2022), but not on a Sunday of Lent (2023).
+        assert_eq!(new(2022, 3, 26), "Epistle Hebrews 2:2–10 | Gospel Luke 10:16–21");
+        assert_eq!(new(2023, 3, 26), "Epistle Hebrews 6:13–20 | Gospel Mark 9:17–31");
+        // The Forty Martyrs on the Ascetics' Saturday give their Gospel (service text 2019).
+        assert_eq!(new(2019, 3, 9), "Epistle Galatians 5:22–6:2 | Gospel Matthew 20:1–16");
+        // St Raphael on 27 February before Lent.
+        assert_eq!(new(2027, 2, 27), "Epistle Hebrews 7:26–8:2 | Gospel John 10:9–16");
+        assert_eq!(new(2026, 2, 27), "", "Lenten Friday: no Liturgy");
+    }
+
+    #[test]
+    fn antiochian_saints() {
+        // The Archdiocese's service texts.
+        assert_eq!(
+            new(2026, 7, 10),
+            "Epistle 2 Timothy 2:1–10 | Gospel John 15:17–16:2",
+            "Joseph of Damascus"
+        );
+        assert_eq!(new(2022, 7, 10), "Epistle 2 Timothy 2:1–10 | Gospel Matthew 8:5–13", "on a Sunday");
+        assert_eq!(new(2026, 7, 16), "Epistle Acts 12:1–11 | Gospel John 15:17–16:2", "Nicholas and Habib");
+        assert_eq!(new(2026, 7, 18), "Epistle Hebrews 7:26–8:2 | Gospel John 10:9–16", "Raphael");
+        assert_eq!(
+            new(2026, 11, 7),
+            "Epistle Hebrews 7:26–8:2 | Gospel John 10:9–16",
+            "first Saturday of November"
+        );
+        assert_eq!(new(2026, 2, 6), "Epistle 2 Timothy 2:1–10 | Gospel John 15:17–16:2", "Julian of Homs");
+        assert_eq!(
+            new(2026, 1, 24),
+            "Epistle Galatians 3:23–4:5 | Gospel Mark 5:24–34",
+            "Xenia of St Petersburg"
+        );
+        assert_eq!(new(2026, 9, 24), "Epistle 2 Timothy 3:10–15 | Gospel Matthew 25:1–13", "Thekla");
+        assert_eq!(new(2026, 11, 16), "Epistle 1 Corinthians 4:9–16 | Gospel Matthew 9:9–13", "Matthew");
+        assert_eq!(new(2026, 6, 30), "Epistle 1 Corinthians 4:9–16 | Gospel Matthew 9:36–10:8");
+        assert_eq!(new(2026, 5, 8), "Epistle 1 John 1:1–7 | Gospel John 19:25–27; 21:24–25");
+        assert_eq!(
+            new(2026, 9, 14),
+            "Epistle 1 Corinthians 1:18–24 | Gospel John 19:6–11, 13–20, 25–28, 30–35",
+            "Elevation"
+        );
+        // St Nektarios on a Sunday gives his Epistle (service text 2025).
+        assert_eq!(new(2025, 11, 9), "Epistle Ephesians 5:8–19 | Gospel Luke 8:41–56");
+        // St Ignatius on the Sunday before the Nativity is kept the Saturday before, with the
+        // Saturday's Gospel (service text 2020).
+        assert_eq!(new(2026, 12, 19), "Epistle Hebrews 10:32–38 | Gospel Luke 13:19–29");
+        assert_eq!(new(2020, 12, 19), "Epistle Hebrews 10:32–38 | Gospel Luke 13:19–29");
+        // The Protection on 28 October is not kept: the day's readings.
+        assert_eq!(new(2026, 10, 28), "Epistle Colossians 3:17–4:1 | Gospel Luke 11:9–13");
+        assert_eq!(new(2018, 10, 28), "Epistle Galatians 6:11–18 | Gospel Luke 8:41–56");
+        // Matins: Eothinon 11 and the Apostles' Gospel on 11 June.
+        let matins = |y, m, d| {
+            let rs = readings(civil(y, m, d), Style::New);
+            rs.iter().find(|r| r.service == "Matins" && r.kind == Kind::Gospel).unwrap().label()
+        };
+        assert_eq!(matins(2026, 1, 25), "John 21:14–25");
+        assert_eq!(matins(2026, 6, 11), "Matthew 9:36–10:8");
+        // Holy Wednesday's Exodus with the naming of Eliezer.
+        let wednesday = readings(civil(2026, 4, 8), Style::New);
+        assert!(wednesday.iter().any(|r| r.label() == "Exodus 2:11–22; 18:4"));
     }
 
     #[test]

@@ -88,16 +88,17 @@
    "pascha": 5,
    "name": "Bright Friday (Life-giving Spring of the Theotokos)",
    "readings": [
-    {"service": "Liturgy", "kind": "Epistle", "refs": ["Acts 3:1-8"]},
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Phil 2:5-11"], "title": "Life-giving Spring", "confidence": "medium"},
     {"service": "Liturgy", "kind": "Gospel", "refs": ["John 2:12-22"]}
    ],
    "confidence": "high",
-   "sources": ["GOA", "OCA", "SCR", "MCI"],
+   "sources": ["ANT-OLG", "GOA", "OCA", "SCR", "MCI"],
    "variants": [
+    {"usage": "GOA (goarch.org, GOA DCS; antiochian.org's feed): the day's Acts", "service": "Liturgy", "kind": "Epistle", "refs": ["Acts 3:1-8"]},
     {"usage": "Slavic (OCA/Russian)", "service": "Liturgy", "kind": "Epistle", "refs": ["Acts 3:1-8", "Phil 2:5-11"]},
     {"usage": "Slavic (OCA/Russian)", "service": "Liturgy", "kind": "Gospel", "refs": ["John 2:12-22", "Luke 10:38-42", "Luke 11:27-28"]}
    ],
-   "note": "Greek and Antiochian usage reads only the day's Acts and John at the Life-giving Spring."
+   "note": "The Archdiocese's service text reads the Theotokos's Epistle for the Life-giving Spring with the day's Gospel. goarch.org and antiochian.org's feed read the day's Acts 3:1-8 (2025, 2026)."
   },
   {
    "pascha": 6,

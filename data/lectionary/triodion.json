@@ -880,7 +880,7 @@
    "readings": [
     {"service": "Matins", "kind": "Gospel", "refs": ["John 12:17-50"], "served": "Tuesday evening (Bridegroom Matins)"},
     {"service": "Sixth Hour", "kind": "Old Testament", "refs": ["Ezek 2:3-3:3"], "confidence": "medium", "note": "Only OCA checked for this reading."},
-    {"service": "Presanctified Liturgy", "kind": "Old Testament", "refs": ["Exod 2:11-22"], "note": "The Septuagint adds at 2:22 the naming of Eliezer, which the Antiochian text marks as Exod 18:4."},
+    {"service": "Presanctified Liturgy", "kind": "Old Testament", "refs": ["Exod 2:11-22", "Exod 18:4"], "note": "The Septuagint adds at 2:22 the naming of Eliezer, which the Antiochian text (and English Bibles) give as Exod 18:4."},
     {"service": "Presanctified Liturgy", "kind": "Old Testament", "refs": ["Job 2:1-10"]},
     {"service": "Presanctified Liturgy", "kind": "Gospel", "refs": ["Matt 26:6-16"]},
     {"service": "Holy Unction", "kind": "Epistle", "refs": ["Jas 5:10-16"], "title": "1st", "served": "Wednesday evening"},

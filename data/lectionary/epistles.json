@@ -166,12 +166,12 @@
    "readings": [
     {"service": "Liturgy", "kind": "Epistle", "refs": ["Acts 11:19-30"], "note": "Sunday of All Saints of Antioch (and of North America)"}
    ],
-   "confidence": "high",
-   "sources": ["ANT-OLG", "ANT", "GOA", "GOA-DCS", "OCA", "HAP", "GRE"],
+   "confidence": "medium",
+   "sources": ["ANT-OLG", "ANT-CHART"],
    "variants": [
     {"usage": "Cycle Epistle of the 2nd Sunday (GOA, OCA, 1853 index, Hapgood 1906; Antiochian service text 2023)", "service": "Liturgy", "kind": "Epistle", "refs": ["Rom 2:10-16"]}
    ],
-   "note": "Antiochian usage: since 2025 the Archdiocese keeps the 2nd Sunday after Pentecost as the Sunday of All Saints of Antioch and of North America, reading Acts 11:19-30 in place of the cycle Epistle Rom 2:10-16. In 2023 its service text read Rom 2:10-16; in 2024 St Kyriaki (July 7) took the day. Use Rom 2:10-16 where the Antiochian commemoration is not kept."
+   "note": "Antiochian usage: since 2025 the Archdiocese keeps the 2nd Sunday after Pentecost as the Sunday of All Saints of Antioch and of North America, reading Acts 11:19-30 in place of the cycle Epistle Rom 2:10-16. Only two years agree: the service texts read Rom 2:10-16 in 2018-2023 (in 2024 St Kyriaki, 7 July, took the day), and the 2019-2025 charts print Rom 2:10-16, even in 2025 when the service text read Acts 11:19-30; the 2026 chart and service text agree. For earlier years, and where the Antiochian commemoration is not kept, read Rom 2:10-16."
   },
   {
    "week": 3,
