@@ -10,7 +10,7 @@ use bible_core::plans::Plan;
 use bible_core::rule::{self as core, Kind, Season};
 use bible_core::study::StudyStore;
 
-use crate::{Bible, BibleError, VerseRef};
+use crate::{Bible, BibleError, ReadingUsage, VerseRef};
 
 /// The rule: its parts of the day in order.
 #[derive(Debug, Clone, PartialEq, Eq, uniffi::Record)]
@@ -336,12 +336,20 @@ impl Bible {
         Ok(self.study().set_rule(&rule.into())?)
     }
 
-    /// The rule on a civil date: its items in season, what was checked off and what each opens.
-    /// `midnight` (Unix seconds of the local midnight that starts the date) places the reading
-    /// plans' days.
-    pub fn rule_day(&self, year: i32, month: u8, day: u8, old_calendar: bool, midnight: i64) -> RuleDay {
+    /// The rule on a civil date: its items in season, what was checked off and what each opens,
+    /// with the readings in `usage`. `midnight` (Unix seconds of the local midnight that starts the
+    /// date) places the reading plans' days.
+    pub fn rule_day(
+        &self,
+        year: i32,
+        month: u8,
+        day: u8,
+        old_calendar: bool,
+        usage: ReadingUsage,
+        midnight: i64,
+    ) -> RuleDay {
         let d = calendar::civil(year, month, day);
-        let lessons = lectionary::readings(d, style(old_calendar));
+        let lessons = lectionary::readings_in(d, style(old_calendar), usage.into());
         let study = self.study();
         let rule = study.rule();
         let done = study.rule_done(d);

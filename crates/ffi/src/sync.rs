@@ -20,6 +20,13 @@ pub struct SyncReport {
 
 #[uniffi::export]
 impl Bible {
+    /// Ties the study database to this device and install (the iPhone's identifierForVendor), so
+    /// a copy restored onto another phone syncs under an id of its own rather than writing over
+    /// this one's file (`StudyStore::bind_machine`). Call it once after opening, before any sync.
+    pub fn bind_machine(&self, machine: String) -> Result<(), BibleError> {
+        Ok(self.study().bind_machine(&machine)?)
+    }
+
     /// Merges every device's file in `folder` (made if missing), then writes this device's own,
     /// as `bible_core::sync::sync_folder` does. iCloud Drive can keep a read waiting while it
     /// downloads the file, so the files are read and written without the study store's lock,

@@ -19,6 +19,8 @@ struct ReaderSettings: Codable, Equatable {
     var septuagintPsalms = true
     /// Feasts and fasts on the Old (Julian) calendar rather than the New.
     var oldCalendar = false
+    /// Whose calendar of readings to follow: the Greek Orthodox Archdiocese's or the Antiochian's.
+    var usage = ReadingUsage.greek
     /// Reminders at the rule's set times, once notifications are allowed.
     var ruleReminders = true
 
@@ -45,7 +47,20 @@ struct ReaderSettings: Codable, Equatable {
         wholeWords = value(.wholeWords, d.wholeWords)
         septuagintPsalms = value(.septuagintPsalms, d.septuagintPsalms)
         oldCalendar = value(.oldCalendar, d.oldCalendar)
+        usage = value(.usage, d.usage)
         ruleReminders = value(.ruleReminders, d.ruleReminders)
+    }
+}
+
+/// Saved under the names the core gives them: "greek", "antiochian".
+extension ReadingUsage: Codable {
+    public init(from decoder: Decoder) throws {
+        self = try decoder.singleValueContainer().decode(String.self) == "antiochian" ? .antiochian : .greek
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var c = encoder.singleValueContainer()
+        try c.encode(self == .antiochian ? "antiochian" : "greek")
     }
 }
 
@@ -169,6 +184,11 @@ final class Store {
 
     init() {
         let bible = Self.openBible()
+        // Before any sync: a copy of the database restored onto another phone syncs under an id
+        // of its own.
+        if let machine = UIDevice.current.identifierForVendor?.uuidString {
+            try? bible.bindMachine(machine: machine)
+        }
         let bookList = books()
         let translations = bible.translations()
         var settings = ReaderSettings()
@@ -404,7 +424,8 @@ final class Store {
         _ = ruleVersion
         let d = CivilDate(date)
         return bible.ruleDay(
-            year: d.year, month: d.month, day: d.day, oldCalendar: settings.oldCalendar, midnight: Self.midnight(date))
+            year: d.year, month: d.month, day: d.day, oldCalendar: settings.oldCalendar, usage: settings.usage,
+            midnight: Self.midnight(date))
     }
 
     func month(year: Int32, month: UInt8) -> [MonthDay] {
