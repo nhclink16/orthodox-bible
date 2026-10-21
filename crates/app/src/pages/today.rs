@@ -1117,7 +1117,9 @@ mod tests {
         let artemius = [Some("St Artemius".into()), None];
         assert_eq!(read_for_on(2026, 10, 20), artemius, "the saint's Epistle");
         let thekla = "Protomartyr Thekla, Equal to the Apostles";
-        assert_eq!(read_for_on(2026, 9, 24), both(thekla), "the saint's readings in the day's place");
+        // In Greek usage St Thekla gives the Epistle and the Myrtidiotissa icon the Gospel.
+        let thekla_and_icon = [Some(thekla.into()), Some("Theotokos Myrtidiotissa".into())];
+        assert_eq!(read_for_on(2026, 9, 24), thekla_and_icon, "the saints' readings in the day's place");
         assert_eq!(read_for_on(2026, 10, 25), [None, None], "a Sunday after Pentecost");
         assert_eq!(read_for_on(2026, 12, 25), [None, None], "the Nativity, named above");
         assert_eq!(read_for_on(2026, 4, 12), [None, None], "Pascha");
