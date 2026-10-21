@@ -2,9 +2,9 @@
  "title": "Menaion: fixed feasts and saints, 1 September to 31 August",
  "scope": "Readings proper to fixed-date commemorations (date: month-day, on the church's calendar) and to the Saturdays and Sundays defined by dates around the great feasts (range: that weekday falling between from and to).",
  "licence": "Released with bible-rs under the MIT licence. The table holds Scripture references only: no Bible text and no prose from the sources. Notes are our own.",
- "usage": "Antiochian Orthodox Christian Archdiocese of North America: Byzantine (Greek) usage, Revised Julian fixed feasts, Julian Paschalion. Slavic (OCA) and Greek (GOARCH) differences are kept in 'variants' and 'slavic' and never replace the main reading.",
+ "usage": "Byzantine usage, Revised Julian fixed feasts, Julian Paschalion, in two usages: Greek (the Greek Orthodox Archdiocese of America as goarch.org prints it; the default) and Antiochian (the Antiochian Orthodox Christian Archdiocese of North America's service texts and charts). Where they differ both are recorded: a reading or an entry marked \"in\": \"greek\" or \"antiochian\" is read only in that usage, and an entry's \"greek\" or \"antiochian\" object changes its name, its rules (weekday, sunday, saturday, bright; none = no reading) or its confidence there. Slavic (OCA) and other alternatives (a patron's readings) are kept in 'variants' and 'slavic' and are never read.",
  "numbering": "English Bible (KJV/Hebrew) chapter and verse, the grid's numbering, with half-verse letters dropped. Each string in refs is one contiguous range ('Book C:V', 'Book C:V-V' or 'Book C:V-C:V', with the grid's book abbreviations); a reading's refs are read together, in order, as one lesson.",
- "confidence": "high: an Antiochian-facing source agrees with at least one independent source. medium: the sources differ (usually by a verse at the start or end) or the reference rests on one source. low: no Antiochian or Greek source was found, or the yearly ordo decides.",
+ "confidence": "high: a source of the usage (the Antiochian service texts and charts; goarch.org) agrees with at least one independent source. medium: the sources differ (usually by a verse at the start or end) or the reference rests on one source. low: no Antiochian or Greek source was found, or the yearly ordo decides.",
  "sources": {
   "ANT-OLG": "Antiochian Archdiocese, Department of Liturgics: Online Liturgical Guide service texts, 2023-2026 (antiochian.org/servicetexts). References only.",
   "ANT-CHART": "Antiochian Archdiocese, Sunday Liturgical Readings Chart 2026 (antiochian.org/liturgicalinstructions).",
@@ -25,8 +25,8 @@
   "matins_on_sunday: feast = the feast's Matins Gospel replaces the Sunday eothinon (the Twelve Great Feasts).",
   "Saturdays follow the weekday rule. On a Saturday with its own readings (before or after the Elevation, the Nativity and Theophany) a saint yields unless saturday says otherwise: epistle = its Epistle with the Saturday's Gospel; gospel = the Saturday's Epistle with its Gospel. On a Sunday with its own readings the sunday rule applies as on any Sunday.",
   "Vespers readings belong to the Great Vespers served the evening before the date (on the eves of the Nativity and Theophany, the Vespers joined to the Liturgy).",
-  "In Great Lent only the Annunciation, the Forty Martyrs and the Finding of the Forerunner's Head are read on weekdays; in Holy Week and on Pascha only the Annunciation. In Bright Week only an entry with bright reads: on its own day only that reading (Epistle or Gospel) with the day's other; moved into Bright Week, its Epistle with the day's Gospel. St George moves to Bright Monday when 23 April falls on or before Pascha; the other bright entries that fall from Palm Sunday to Pascha move to the next Bright Week days.",
-  "Days that keep their own readings: a great feast (own) on Pascha, in Holy Week, on Pentecost or in Bright Week is shown beside the day's readings at low confidence. On the Ascension only Sts Constantine and Helen give their Epistle. All Saints Sunday and the Monday of the Holy Spirit keep their Epistle: a feast gives only its Gospel. The leave-takings of Pascha and of Pentecost keep both readings unless a great feast falls. On St Theodore's and the Ascetics' Saturdays a saint with sunday epistle gives its Gospel with the commemoration's Epistle. A saint falling on a Saturday of Souls (Meatfare, before Pentecost) is read the day before; a great feast stays on its day and replaces the Saturday's readings."
+  "In Great Lent only the Annunciation, the Forty Martyrs and the Finding of the Forerunner's Head are read on weekdays; in Holy Week and on Pascha only the Annunciation. In Bright Week only an entry with bright reads: on its own day only that reading (Epistle or Gospel) with the day's other; moved into Bright Week, in Antiochian usage its Epistle with the day's Gospel, in Greek usage still its bright reading. St George moves to Bright Monday when 23 April falls on or before Pascha; the other bright entries that fall from Palm Sunday to Pascha move to the next Bright Week days.",
+  "Days that keep their own readings: a great feast (own) on Pascha, in Holy Week, on Pentecost or in Bright Week is shown beside the day's readings at low confidence. On the Ascension only Sts Constantine and Helen give their Epistle. All Saints Sunday and the Monday of the Holy Spirit keep their Epistle: a feast gives only its Gospel. The leave-takings of Pascha and of Pentecost keep both readings unless a great feast falls. On St Theodore's and the Ascetics' Saturdays a saint with sunday epistle gives, in Antiochian usage, its Gospel with the commemoration's Epistle; in Greek usage both its readings. A saint falling on a Saturday of Souls (Meatfare, before Pentecost) is read the day before (in Greek usage only one with a Matins Gospel of its own; another yields); a great feast stays on its day and replaces the Saturday's readings. In Greek usage a saint with a Matins Gospel of its own falling on the Ascension is read the day after (except Sts Constantine and Helen), an entry with weekday gospel yields from Pascha to the leave-taking of Pentecost, and St Mark yields on a weekday of that season."
  ],
  "entries": [
   {
@@ -309,7 +309,8 @@
     {"service": "Vespers", "kind": "Old Testament", "refs": ["Isa 60:11-16"], "served": "evening before"},
     {"service": "Matins", "kind": "Gospel", "refs": ["John 12:28-36"]},
     {"service": "Liturgy", "kind": "Epistle", "refs": ["1 Cor 1:18-24"]},
-    {"service": "Liturgy", "kind": "Gospel", "refs": ["John 19:6-11", "John 19:13-20", "John 19:25-28", "John 19:30-35"], "note": "The Antiochian service text and 2025 chart, Hapgood (1906) and the Slavic books read 19:30-35; goarch.org, antiochian.org's feed and GOA DCS end at v.30."}
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["John 19:6-11", "John 19:13-20", "John 19:25-28", "John 19:30-35"], "in": "antiochian", "note": "The Antiochian service text and 2025 chart, Hapgood (1906) and the Slavic books read 19:30-35."},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["John 19:6-11", "John 19:13-20", "John 19:25-28", "John 19:30"], "in": "greek", "note": "goarch.org (2018-2027), antiochian.org's feed and GOA DCS end at v.30."}
    ],
    "confidence": "high",
    "sources": ["ANT-OLG", "ANT", "GOA", "GOA-DCS", "OCA", "HAP", "SCR"],
@@ -444,18 +445,20 @@
    "weekday": "replaces",
    "sunday": "epistle",
    "name": "Protomartyr Thekla, Equal to the Apostles; Venerable Silouan of Athos",
+   "greek": {"name": "Protomartyr Thekla, Equal to the Apostles; Theotokos Myrtidiotissa"},
    "readings": [
+    {"service": "Matins", "kind": "Gospel", "refs": ["Luke 1:39-49", "Luke 1:56"], "in": "greek", "title": "Theotokos Myrtidiotissa"},
     {"service": "Liturgy", "kind": "Epistle", "refs": ["2 Tim 3:10-15"]},
-    {"service": "Liturgy", "kind": "Gospel", "refs": ["Matt 25:1-13"]}
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Matt 25:1-13"], "in": "antiochian"},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Luke 10:38-42", "Luke 11:27-28"], "in": "greek", "title": "Theotokos Myrtidiotissa"}
    ],
    "confidence": "high",
    "sources": ["ANT-OLG", "ANT-CHART", "GOA-DCS", "ANT", "GOA"],
-   "note": "St Thekla is especially venerated in the Antiochian Church (Maaloula, Syria) and is on the Archdiocese's list of Antiochian saints (2026 chart). The Archdiocese's service text gives both her readings, then St Silouan's, and says to read the set of the parish's patron, or the pastor's choice. GOA DCS gives the same readings for St Thekla. goarch.org (and antiochian.org's feed from 2022) print her Epistle with the Gospel of the Greek icon feast of the Theotokos Myrtidiotissa. The Antiochian Orthros text leaves the Matins Gospel to the parish.",
+   "note": "St Thekla is especially venerated in the Antiochian Church (Maaloula, Syria) and is on the Archdiocese's list of Antiochian saints (2026 chart). The Archdiocese's service text gives both her readings, then St Silouan's, and says to read the set of the parish's patron, or the pastor's choice. GOA DCS gives the same readings for St Thekla. Greek usage: goarch.org (2018-2027, and antiochian.org's feed from 2022) print her Epistle with the Gospel and Matins Gospel of the Greek icon feast of the Theotokos Myrtidiotissa. The Antiochian Orthros text leaves the Matins Gospel to the parish.",
    "variants": [
     {"usage": "St Silouan of Athos (Antiochian service text, where he is the patron)", "service": "Liturgy", "kind": "Epistle", "refs": ["Gal 5:22-6:2"]},
     {"usage": "St Silouan of Athos (Antiochian service text, where he is the patron)", "service": "Liturgy", "kind": "Gospel", "refs": ["Matt 11:27-30"]},
-    {"usage": "Theotokos Myrtidiotissa (goarch.org)", "service": "Liturgy", "kind": "Gospel", "refs": ["Luke 10:38-42", "Luke 11:27-28"]},
-    {"usage": "Theotokos Myrtidiotissa (goarch.org)", "service": "Matins", "kind": "Gospel", "refs": ["Luke 1:39-49", "Luke 1:56"]}
+    {"usage": "St Thekla kept as the main feast (GOA DCS; the Antiochian reading)", "service": "Liturgy", "kind": "Gospel", "refs": ["Matt 25:1-13"]}
    ]
   },
   {
@@ -946,6 +949,7 @@
    "rank": "theotokos_feast",
    "weekday": "optional",
    "sunday": "sunday",
+   "greek": {"weekday": "replaces", "sunday": "epistle", "confidence": "high"},
    "name": "Holy Protection of the Theotokos (Greek date)",
    "readings": [
     {"service": "Matins", "kind": "Gospel", "refs": ["Luke 1:39-49", "Luke 1:56"]},
@@ -954,7 +958,7 @@
    ],
    "confidence": "medium",
    "sources": ["ANT", "GOA", "GOA-DCS", "OCA"],
-   "note": "A Greek feast, kept on 28 October since 1952. The Archdiocese's service texts do not keep it: on Sunday 28 October 2018 the dismissal names the day's saints and not the Protection, and the readings are the Sunday's; its 2026 chart lists 28 October for St Stephen the Melodist; and its service text for 1 October 2023 says the Church of Antioch keeps the Apostle Ananias and St Romanos that day, not the Protection. So the table reads the day's readings. goarch.org prints these readings every year (on a Sunday this Epistle with the Sunday Gospel), as antiochian.org's feed did on weekdays (2019, 2021, 2023, 2026; not 2025). Use them where a parish keeps the feast."
+   "note": "A Greek feast, kept on 28 October since 1952: in Greek usage goarch.org prints these readings every year (2018-2027; on a Sunday this Epistle with the Sunday Gospel, 2018), as antiochian.org's feed did on weekdays (2019, 2021, 2023, 2026; not 2025). The Archdiocese's service texts do not keep it: on Sunday 28 October 2018 the dismissal names the day's saints and not the Protection, and the readings are the Sunday's; its 2026 chart lists 28 October for St Stephen the Melodist; and its service text for 1 October 2023 says the Church of Antioch keeps the Apostle Ananias and St Romanos that day, not the Protection. So in Antiochian usage the table reads the day's readings; use these where a parish keeps the feast."
   },
   {
    "id": "1031.apostles_70",
@@ -986,6 +990,7 @@
   {
    "id": "float.raphael_brooklyn",
    "range": {"day": "sat", "from": "11-01", "to": "11-07"},
+   "in": "antiochian",
    "rank": "hierarch",
    "weekday": "replaces",
    "name": "St Raphael (Hawaweeny), Bishop of Brooklyn (Antiochian Archdiocese: first Saturday of November)",
@@ -1103,6 +1108,7 @@
    "rank": "hierarch",
    "weekday": "replaces",
    "sunday": "epistle",
+   "greek": {"sunday": "sunday"},
    "name": "St Nektarios of Pentapolis, Wonderworker of Aegina",
    "readings": [
     {"service": "Vespers", "kind": "Old Testament", "refs": ["Prov 10:7", "Prov 10:6", "Prov 3:13-16", "Prov 3:18", "Prov 8:32", "Prov 8:34", "Prov 8:4", "Prov 8:12", "Prov 8:14", "Prov 8:17", "Prov 8:5-9", "Prov 22:24", "Prov 22:22", "Prov 15:4"], "composite": true, "note": "Composite of Proverbs verses beginning \"The memory of the righteous is praised\". Order as in the Greek books (GOA DCS 2026). The opening verses are Prov 10:7 and 10:6 in English Bibles (the Greek books print 10:8a, 7a); the remaining verse numbers are as printed there (Septuagint numbering) and may not match English Bibles exactly. Slavic books: same composite (OCA \"Composite 2\").", "served": "evening before"},
@@ -1114,7 +1120,7 @@
    ],
    "confidence": "medium",
    "sources": ["ANT-OLG", "ANT", "GOA", "GOA-DCS", "OCA"],
-   "note": "On a Sunday his Epistle is read with the Sunday Gospel (the Archdiocese's service text and chart, 2025); goarch.org read both Sunday readings (2025). The Matins Gospel and the Liturgy readings are those printed every year by goarch.org and antiochian.org; they are not the usual hierarch readings."
+   "note": "On a Sunday, in Antiochian usage his Epistle is read with the Sunday Gospel (the Archdiocese's service text and chart, 2025); in Greek usage both Sunday readings (goarch.org 2025). The Matins Gospel and the Liturgy readings are those printed every year by goarch.org and antiochian.org; they are not the usual hierarch readings."
   },
   {
    "id": "1110.apostles_70",
@@ -1230,15 +1236,13 @@
    "sunday": "feast",
    "name": "Holy Apostle and Evangelist Matthew",
    "readings": [
-    {"service": "Liturgy", "kind": "Epistle", "refs": ["1 Cor 4:9-16"]},
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["1 Cor 4:9-16"], "in": "antiochian"},
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Rom 10:11-11:2"], "in": "greek"},
     {"service": "Liturgy", "kind": "Gospel", "refs": ["Matt 9:9-13"]}
    ],
    "confidence": "high",
    "sources": ["ANT-OLG", "ANT-CHART", "OCA", "GOA", "GOA-DCS", "SCR"],
-   "note": "The Antiochian service texts (the day's, and Sunday 16 November 2025) and the 2025 chart read 1 Cor 4:9-16, as the Slavic books do. On a Sunday both readings of the Evangelist are read (2025).",
-   "variants": [
-    {"usage": "GOA (goarch.org, GOA DCS; antiochian.org's feed)", "service": "Liturgy", "kind": "Epistle", "refs": ["Rom 10:11-11:2"]}
-   ]
+   "note": "The Antiochian service texts (the day's, and Sunday 16 November 2025) and the 2025 chart read 1 Cor 4:9-16, as the Slavic books do; goarch.org (2018-2027), GOA DCS and antiochian.org's feed read Rom 10:11-11:2. On a Sunday both readings of the Evangelist are read (2025)."
   },
   {
    "id": "1117.gregory_wonderworker",
@@ -1780,6 +1784,7 @@
    "weekday": "replaces",
    "sunday": "sunday",
    "saturday": "epistle",
+   "greek": {"saturday": "none"},
    "name": "Hieromartyr Ignatius the God-bearer, Bishop of Antioch; forefeast of the Nativity",
    "readings": [
     {"service": "Liturgy", "kind": "Epistle", "refs": ["Heb 10:32-38"]},
@@ -1787,7 +1792,7 @@
    ],
    "confidence": "high",
    "sources": ["ANT-OLG", "ANT", "GOA", "GOA-DCS", "OCA", "SCR"],
-   "note": "Patron of the Antiochian Church (third bishop of Antioch). On a Sunday it is the Sunday before the Nativity, which is read (goarch.org 2020, 2026), and the Archdiocese moves St Ignatius to the Saturday before (service text 2020). On the Saturday before the Nativity his Epistle is read with the Saturday's Gospel (the Archdiocese's service texts); goarch.org and antiochian.org's feed print the Saturday's readings.",
+   "note": "Patron of the Antiochian Church (third bishop of Antioch). On a Sunday it is the Sunday before the Nativity, which is read (goarch.org 2020, 2026); in Antiochian usage the Archdiocese moves St Ignatius to the Saturday before (service text 2020). On the Saturday before the Nativity, in Antiochian usage his Epistle is read with the Saturday's Gospel (the Archdiocese's service texts); in Greek usage the Saturday's readings (goarch.org 2020, 2025, 2026, and antiochian.org's feed).",
    "slavic": "Epistle Heb 4:14-5:6 (also in Scrivener's 19th-century table)."
   },
   {
@@ -2442,17 +2447,16 @@
    "weekday": "replaces",
    "sunday": "sunday",
    "name": "Blessed Xenia of St Petersburg, Fool for Christ; Venerable Xenia of Rome",
+   "greek": {"name": "Venerable Xenia of Rome", "weekday": "epistle", "confidence": "high"},
    "readings": [
-    {"service": "Matins", "kind": "Gospel", "refs": ["Matt 25:1-13"]},
-    {"service": "Liturgy", "kind": "Epistle", "refs": ["Gal 3:23-4:5"]},
-    {"service": "Liturgy", "kind": "Gospel", "refs": ["Mark 5:24-34"]}
+    {"service": "Matins", "kind": "Gospel", "refs": ["Matt 25:1-13"], "in": "antiochian"},
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Gal 3:23-4:5"], "in": "antiochian"},
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Gal 5:22-6:2"], "in": "greek"},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Mark 5:24-34"], "in": "antiochian"}
    ],
    "confidence": "medium",
-   "sources": ["ANT-OLG", "ANT"],
-   "note": "The Archdiocese's service texts put St Xenia of St Petersburg first, with these readings and Matins Gospel; antiochian.org printed them in 2026. In 2019-2025 antiochian.org printed St Xenia of Rome's Epistle with the day's Gospel, as goarch.org does. On a Sunday the Sunday readings are read (service text 2021).",
-   "variants": [
-    {"usage": "Venerable Xenia of Rome (goarch.org, GOA DCS, OCA; antiochian.org 2019-2025): her Epistle with the day's Gospel", "service": "Liturgy", "kind": "Epistle", "refs": ["Gal 5:22-6:2"]}
-   ]
+   "sources": ["ANT-OLG", "ANT", "GOA", "GOA-DCS", "OCA"],
+   "note": "Antiochian usage: the Archdiocese's service texts put St Xenia of St Petersburg first, with these readings and Matins Gospel; antiochian.org printed them in 2026. Greek usage: St Xenia of Rome's Epistle with the day's Gospel (goarch.org 2018-2027, GOA DCS, OCA; antiochian.org 2019-2025). On a Sunday the Sunday readings are read (service text 2021)."
   },
   {
    "id": "0125.gregory_theologian",
@@ -2527,6 +2531,7 @@
    "rank": "hierarch",
    "weekday": "replaces",
    "sunday": "epistle",
+   "greek": {"sunday": "feast"},
    "name": "Synaxis of the Three Hierarchs: Basil the Great, Gregory the Theologian and John Chrysostom",
    "readings": [
     {"service": "Vespers", "kind": "Old Testament", "refs": ["Deut 1:8-11", "Deut 1:15-17"], "served": "evening before"},
@@ -2538,7 +2543,7 @@
    ],
    "confidence": "high",
    "sources": ["ANT-OLG", "ANT", "GOA", "GOA-DCS", "OCA"],
-   "note": "On a Sunday antiochian.org printed Heb 13:7-16 with the Sunday Gospel (2022), while goarch.org printed both readings of the feast; this table follows the Antiochian practice.",
+   "note": "On a Sunday, in Antiochian usage Heb 13:7-16 with the Sunday Gospel (antiochian.org 2022); in Greek usage both readings of the feast, with the Sunday's Matins Gospel (goarch.org 2022).",
    "slavic": "Vespers third reading as above; OCA joins the second as Deut 10:14-21."
   },
   {
@@ -2561,6 +2566,7 @@
    "rank": "martyr",
    "weekday": "replaces",
    "sunday": "sunday",
+   "greek": {"sunday": "epistle"},
    "name": "Forefeast of the Meeting of the Lord; Martyr Tryphon",
    "readings": [
     {"service": "Liturgy", "kind": "Epistle", "refs": ["Rom 8:28-39"]},
@@ -2568,7 +2574,7 @@
    ],
    "confidence": "medium",
    "sources": ["ANT", "GOA", "OCA"],
-   "note": "On a Sunday goarch.org printed the martyr's Epistle with the Sunday Gospel (2026, Sunday of the Publican), but antiochian.org kept both Sunday readings (2 Tim 3:10-15; Luke 18:10-14). This table follows antiochian.org: Sunday readings only."
+   "note": "On a Sunday, in Greek usage the martyr's Epistle with the Sunday Gospel (goarch.org 2026, Sunday of the Publican); in Antiochian usage both Sunday readings (antiochian.org 2026: 2 Tim 3:10-15; Luke 18:10-14)."
   },
   {
    "id": "0202.meeting",
@@ -2611,19 +2617,18 @@
    "weekday": "replaces",
    "sunday": "sunday",
    "name": "Martyr Julian (Elian) of Homs; St Photios the Great, Patriarch of Constantinople",
+   "greek": {"name": "St Photios the Great, Patriarch of Constantinople", "sunday": "epistle", "confidence": "high"},
    "readings": [
-    {"service": "Matins", "kind": "Gospel", "refs": ["Luke 21:12-19"]},
-    {"service": "Liturgy", "kind": "Epistle", "refs": ["2 Tim 2:1-10"]},
-    {"service": "Liturgy", "kind": "Gospel", "refs": ["John 15:17-16:2"]}
+    {"service": "Matins", "kind": "Gospel", "refs": ["Luke 21:12-19"], "in": "antiochian"},
+    {"service": "Matins", "kind": "Gospel", "refs": ["John 10:1-9"], "in": "greek"},
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["2 Tim 2:1-10"], "in": "antiochian"},
+    {"service": "Liturgy", "kind": "Epistle", "refs": ["Heb 7:26-8:2"], "in": "greek"},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["John 15:17-16:2"], "in": "antiochian"},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["John 10:9-16"], "in": "greek"}
    ],
    "confidence": "medium",
-   "sources": ["ANT-OLG", "ANT-CHART", "ANT"],
-   "note": "St Julian (Elian) of Homs, a martyr of Syria, is on the Archdiocese's list of Antiochian saints (2026 chart). Its service texts give his readings and Matins Gospel, and antiochian.org printed them in 2026; in 2019-2025 antiochian.org printed St Photios's, as goarch.org does (see variants). On a Sunday antiochian.org kept both Sunday readings (2022).",
-   "variants": [
-    {"usage": "St Photios the Great (goarch.org; antiochian.org 2019-2025)", "service": "Matins", "kind": "Gospel", "refs": ["John 10:1-9"]},
-    {"usage": "St Photios the Great (goarch.org; antiochian.org 2019-2025)", "service": "Liturgy", "kind": "Epistle", "refs": ["Heb 7:26-8:2"]},
-    {"usage": "St Photios the Great (goarch.org; antiochian.org 2019-2025)", "service": "Liturgy", "kind": "Gospel", "refs": ["John 10:9-16"]}
-   ]
+   "sources": ["ANT-OLG", "ANT-CHART", "ANT", "GOA"],
+   "note": "Antiochian usage: St Julian (Elian) of Homs, a martyr of Syria, is on the Archdiocese's list of Antiochian saints (2026 chart); its service texts give his readings and Matins Gospel, and antiochian.org printed them in 2026. Greek usage: St Photios's hierarch readings and Matins Gospel (goarch.org 2018-2027; antiochian.org 2019-2025). On a Sunday goarch.org printed the hierarch's Epistle with the Sunday Gospel (2022), while antiochian.org kept both Sunday readings."
   },
   {
    "id": "0208.theodore_stratelates",
@@ -2718,6 +2723,7 @@
   {
    "id": "0227.raphael_brooklyn",
    "date": "02-27",
+   "in": "antiochian",
    "rank": "hierarch",
    "weekday": "replaces",
    "sunday": "sunday",
@@ -2907,9 +2913,11 @@
     {"service": "Vespers", "kind": "Epistle", "refs": ["1 John 3:21-4:6"], "served": "evening before"},
     {"service": "Vespers", "kind": "Epistle", "refs": ["1 John 4:11-16"], "served": "evening before"},
     {"service": "Vespers", "kind": "Epistle", "refs": ["1 John 4:20-5:5"], "served": "evening before"},
-    {"service": "Matins", "kind": "Gospel", "refs": ["John 21:14-25"], "note": "Antiochian Orthros text 2025; goarch.org prints John 21:15-25."},
+    {"service": "Matins", "kind": "Gospel", "refs": ["John 21:14-25"], "in": "antiochian", "note": "Antiochian Orthros text 2025."},
+    {"service": "Matins", "kind": "Gospel", "refs": ["John 21:15-25"], "in": "greek", "note": "goarch.org 2018-2027."},
     {"service": "Liturgy", "kind": "Epistle", "refs": ["1 John 1:1-7"]},
-    {"service": "Liturgy", "kind": "Gospel", "refs": ["John 19:25-27", "John 21:24-25"], "note": "Antiochian service texts 2020 and 2025, GOA DCS, OCA and Scrivener, as on 26 September. antiochian.org and goarch.org print John 19:25-28."}
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["John 19:25-27", "John 21:24-25"], "in": "antiochian", "note": "Antiochian service texts 2020 and 2025, GOA DCS, OCA and Scrivener, as on 26 September."},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["John 19:25-28", "John 21:24-25"], "in": "greek", "note": "goarch.org 2018-2027 and antiochian.org's feed."}
    ],
    "confidence": "high",
    "sources": ["ANT-OLG", "ANT", "GOA", "GOA-DCS", "OCA", "SCR"],
@@ -3087,13 +3095,14 @@
    "sunday": "sunday",
    "name": "Holy Apostles Bartholomew and Barnabas",
    "readings": [
-    {"service": "Matins", "kind": "Gospel", "refs": ["Matt 9:36-10:8"], "confidence": "medium", "note": "Antiochian Orthros texts 2024 and 2025; goarch.org repeats the Liturgy Gospel Luke 10:16-21."},
+    {"service": "Matins", "kind": "Gospel", "refs": ["Matt 9:36-10:8"], "in": "antiochian", "confidence": "medium", "note": "Antiochian Orthros texts 2024 and 2025."},
+    {"service": "Matins", "kind": "Gospel", "refs": ["Luke 10:16-21"], "in": "greek", "note": "goarch.org 2018-2027 repeats the Liturgy Gospel."},
     {"service": "Liturgy", "kind": "Epistle", "refs": ["Acts 11:19-30"]},
     {"service": "Liturgy", "kind": "Gospel", "refs": ["Luke 10:16-21"]}
    ],
    "confidence": "high",
    "sources": ["ANT-OLG", "ANT", "GOA", "GOA-DCS", "OCA"],
-   "note": "Barnabas preached in Antioch (Acts 11:19-30). On the Saturday of Souls and on All Saints Sunday those days' readings are read (goarch.org 2022, 2023).",
+   "note": "Barnabas preached in Antioch (Acts 11:19-30). On All Saints Sunday that day's readings are read (goarch.org 2023). On the Saturday of Souls before Pentecost they are read the day before, at the leave-taking of the Ascension (goarch.org 2022).",
    "slavic": "Epistle Acts 11:19-26, 29-30. Scrivener's table (older manuscripts) gives Mark 6:7-13 as the Gospel."
   },
   {
@@ -3258,7 +3267,8 @@
    "name": "Synaxis of the Holy, Glorious and All-praised Twelve Apostles",
    "readings": [
     {"service": "Liturgy", "kind": "Epistle", "refs": ["1 Cor 4:9-16"]},
-    {"service": "Liturgy", "kind": "Gospel", "refs": ["Matt 9:36-10:8"], "note": "Antiochian service texts and charts (2019, 2024) and GOA DCS (9:36-38; 10:1-8). goarch.org and antiochian.org's feed print Matt 9:36; 10:1-8."}
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Matt 9:36-10:8"], "in": "antiochian", "note": "Antiochian service texts and charts (2019, 2024) and GOA DCS (9:36-38; 10:1-8)."},
+    {"service": "Liturgy", "kind": "Gospel", "refs": ["Matt 9:36", "Matt 10:1-8"], "in": "greek", "note": "goarch.org (2018-2027) and antiochian.org's feed."}
    ],
    "confidence": "high",
    "sources": ["ANT-OLG", "ANT-CHART", "ANT", "GOA", "GOA-DCS", "OCA"],
@@ -3366,6 +3376,7 @@
   {
    "id": "0710.joseph_damascus",
    "date": "07-10",
+   "in": "antiochian",
    "rank": "hieromartyr",
    "weekday": "replaces",
    "sunday": "epistle",
@@ -3472,6 +3483,7 @@
   {
    "id": "0716.nicholas_habib_khasha",
    "date": "07-16",
+   "in": "antiochian",
    "rank": "hieromartyr",
    "weekday": "replaces",
    "sunday": "sunday",
@@ -3515,6 +3527,7 @@
   {
    "id": "0718.raphael_brooklyn",
    "date": "07-18",
+   "in": "antiochian",
    "rank": "hierarch",
    "weekday": "replaces",
    "sunday": "sunday",
