@@ -327,7 +327,7 @@ Other tasks:
 | `cargo test --workspace` | core (model, format, importers, search, references, study, online with a mock server), typesetting and FFI tests |
 | `cargo run -p xtask -- build-data` | re-download the pinned public-domain sources and regenerate `data/translations/*.bbl` |
 | `scripts/screenshots.sh` | regenerate `docs/screenshots/` under Xvfb |
-| `BIBLE_RS_HOME=/some/dir bible-rs` | use another data folder |
+| `BIBLE_RS_HOME=/some/dir bible-rs` | use another data folder (it syncs with the iPhone only through `BIBLE_RS_SYNC_DIR`) |
 
 The binary doubles as a small CLI:
 

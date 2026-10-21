@@ -1,11 +1,13 @@
-//! Today in the Church (Orthodox fork): the day's feasts, the prayer rule with its check boxes
-//! (`rule`), the reading plans under way, the fast, the Psalter's kathismata and what's coming
-//! up, from `bible_core::calendar`; beside them a month of fasts, feasts and days the rule was
-//! kept. Days step back and forward; the church's calendar (New or Old) is a setting.
+//! Today in the Church (Orthodox fork): the day's feasts and readings, the prayer rule with its
+//! check boxes (`rule`), the reading plans under way, the fast, the Psalter's kathismata and
+//! what's coming up, from `bible_core::calendar` and `bible_core::lectionary`; beside them a
+//! month of fasts, feasts and days the rule was kept. Days step back and forward; the church's
+//! calendar (New or Old) is a setting.
 
 use eframe::egui::{self, Align2, Color32, FontId, Rect, Sense, Stroke, StrokeKind, Ui, pos2, vec2};
 
 use bible_core::calendar::{self, Day, Fast, Style};
+use bible_core::lectionary::{self, Confidence, Reading};
 use bible_core::rule::Rule;
 use bible_core::study::HighlightColor;
 use bible_core::{ChapterIdx, plans};
@@ -54,6 +56,8 @@ pub struct State {
     restore: Option<f32>,
     /// A day was picked lower down the page (the month, Coming up): show it from the top.
     to_top: bool,
+    /// The day whose readings all show, when it has more than [`FULL`] and they were asked for.
+    all_readings: Option<Day>,
 }
 
 pub(super) fn today() -> Day {
@@ -153,6 +157,226 @@ fn paragraph(
     lines.len() as f32 * lh
 }
 
+/// Whether a reading's occasion is a day of the moving cycle, named by its week or its place in
+/// it ("Tuesday of the 5th week of Luke", "21st Sunday after Pentecost", "Palm Sunday", "Great
+/// and Holy Friday", "Bright Monday") rather than by a saint or a fixed feast.
+fn moving(occasion: &str) -> bool {
+    const PLACES: [&str; 7] = [
+        "Great and Holy",
+        "Holy Pascha",
+        "Holy Pentecost",
+        "Bright ",
+        "Eothinon",
+        "Mid-Pentecost",
+        "Ascension",
+    ];
+    let mut words = occasion.split(' ');
+    let (first, second) = (words.next().unwrap_or(""), words.next().unwrap_or(""));
+    WEEKDAYS.contains(&first)
+        || WEEKDAYS.contains(&second)
+        || first.starts_with(|c: char| c.is_ascii_digit())
+        || PLACES.iter().any(|p| occasion.starts_with(p))
+}
+
+/// Whether a day of the moving cycle is an ordinary day of its week ("Tuesday of the 5th week of
+/// Luke", "21st Sunday after Pentecost", "Bright Monday", "Great and Holy Friday"), which says
+/// nothing of why its readings are read; a named day ("Second Saturday of Great Lent (Saturday
+/// of Souls)", "Sunday before Theophany") does.
+fn ordinary(occasion: &str) -> bool {
+    let head = occasion.split(" (").next().unwrap_or(occasion).to_lowercase();
+    head.contains("week")
+        || head.contains(" after the publican")
+        || head.starts_with(|c: char| c.is_ascii_digit())
+        || ["bright ", "great and holy", "eothinon"].iter().any(|p| head.starts_with(p))
+}
+
+/// An occasion's name, without what follows a colon or the day's other saints and feasts:
+/// "Eve of Theophany: Vespers with…", "Forefeast of Theophany; St Sylvester". What's in brackets
+/// stays whole.
+fn name(occasion: &str) -> &str {
+    let mut depth = 0;
+    for (i, c) in occasion.char_indices() {
+        match c {
+            '(' => depth += 1,
+            ')' => depth -= 1,
+            ':' | ';' if depth == 0 => return &occasion[..i],
+            _ => {}
+        }
+    }
+    occasion
+}
+
+fn capitalized(s: &str) -> String {
+    let mut chars = s.chars();
+    chars.next().map_or_else(String::new, |c| c.to_uppercase().chain(chars).collect())
+}
+
+/// What a Liturgy reading is read for when the page doesn't say already: its title ("St
+/// Artemius"), else the saint, feast or named day it belongs to. A title that only tells two
+/// lessons apart ("of the saint", "forefeast") says whose. On a great `feast` the feast named
+/// above is the day, and so is a day of the moving cycle when the day section `named` one.
+fn read_for(r: &Reading, feast: bool, named: bool) -> Option<String> {
+    let told = feast || (named && moving(r.occasion));
+    match r.title {
+        Some(t) if t.starts_with(char::is_lowercase) => {
+            // "forefeast" in "Synaxis of the Seventy Apostles; forefeast of Theophany".
+            let word = t.split(' ').next().unwrap_or(t);
+            let part = r.occasion.split("; ").find(|p| p.to_lowercase().starts_with(word));
+            let short = |s: &'static str| s.split(" (").next().unwrap_or(s);
+            Some(match part {
+                Some(part) => capitalized(short(part)),
+                None if told => t.to_string(),
+                None => format!("{} · {t}", short(name(r.occasion))),
+            })
+        }
+        Some(t) => Some(t.to_string()),
+        None => (!told && !ordinary(r.occasion)).then(|| name(r.occasion).to_string()),
+    }
+}
+
+/// How many of the other services' readings show in full. A day with more (Holy Week, the eves
+/// of the Nativity and Theophany: up to 30) shows each service's first until asked for all, so
+/// the rule stays near the top.
+const FULL: usize = 9;
+
+/// The day's `lessons` (`bible_core::lectionary`) at `top`: the Liturgy's Epistle and Gospel
+/// first, a row each with what it's read for (`feast` and `named` as for [`read_for`]), then the
+/// other services' readings smaller, under each service, folded on a day of many unless `all`.
+/// A row opens its passage in the reader; a reading the tables are unsure of says to check the
+/// parish calendar, first. Returns the bottom.
+#[allow(clippy::too_many_arguments)]
+fn readings(
+    ui: &mut Ui,
+    env: &PageEnv<'_>,
+    left: f32,
+    width: f32,
+    top: f32,
+    lessons: &[Reading],
+    (feast, named): (bool, bool),
+    all: &mut bool,
+    actions: &mut Vec<Action>,
+) -> f32 {
+    let p = env.settings.theme.palette();
+    let painter = ui.painter().clone();
+    let right = left + width;
+    group_label(&painter, p, left, top, "Readings");
+    let mut y = top + 26.0;
+    if lessons.is_empty() {
+        text(&painter, left, y, 20.0, "No readings for this day.", theme::ui_font(13.0), p.ink_2, false);
+        return y + 20.0;
+    }
+    const CHECK: &str = "check your parish calendar";
+    let unsure = |r: &Reading| r.confidence == Confidence::Low;
+    let liturgy = |r: &Reading| r.at_liturgy() && r.kind != lectionary::Kind::OldTestament;
+    // A row that opens a reading, with its fill and focus ring; returns whether it was clicked.
+    let row = |ui: &mut Ui, r: Rect, i: usize| {
+        let resp = ui.interact(r, ui.id().with(("reading", i)), Sense::click());
+        if let Some(fill) = widgets::hover_fill(ui, &resp, p, false) {
+            painter.rect_filled(r, 10.0, fill);
+        }
+        widgets::focus_ring(&painter, p, &resp, r, 10.0);
+        resp.on_hover_cursor(egui::CursorIcon::PointingHand).clicked()
+    };
+    // Every passage starts in one column, after the widest kind ("Old Testament").
+    let kind_w = painter.layout_no_wrap("Old Testament".into(), theme::ui_font(12.0), p.ink_3).size().x;
+    let x = left + (12.0 + kind_w + 16.0).max(96.0);
+
+    // The Liturgy's: the kind, the passage and under it what it's read for.
+    for (i, r) in lessons.iter().enumerate().filter(|(_, r)| liturgy(r)) {
+        let at = Rect::from_min_size(pos2(left, y), vec2(width, 48.0));
+        let clicked = row(ui, at, i);
+        // The hint first, so a narrow window cuts the rest.
+        let mut note: Vec<String> = Vec::new();
+        if unsure(r) {
+            note.push(CHECK.into());
+        }
+        if r.service != "Liturgy" {
+            note.push(r.service.into());
+        }
+        note.extend(read_for(r, feast, named));
+        note.extend(r.served.map(String::from));
+        let note = capitalized(&note.join(" · "));
+        let ty = if note.is_empty() { at.top() + 14.0 } else { at.top() + 5.0 };
+        text(&painter, left + 12.0, ty, 20.0, r.kind.label(), theme::ui_semibold(13.0), p.ink, false);
+        let read = text(
+            &painter,
+            right - 12.0,
+            at.top() + 14.0,
+            20.0,
+            "Read",
+            theme::ui_medium(13.0),
+            p.accent,
+            true,
+        );
+        let room = right - 12.0 - read - 16.0 - x;
+        let label = super::elide(&painter, &r.label(), &theme::ui_medium(14.0), room);
+        text(&painter, x, ty, 20.0, &label, theme::ui_medium(14.0), p.ink, false);
+        if !note.is_empty() {
+            let note = super::elide(&painter, &note, &theme::ui_font(12.0), room);
+            text(&painter, x, at.top() + 25.0, 18.0, &note, theme::ui_font(12.0), p.ink_3, false);
+        }
+        if clicked {
+            actions.push(Action::ReadPassage(r.passages));
+        }
+        y += 48.0;
+    }
+
+    // The other services', smaller, under each service (and when it's served, if not then).
+    let others: Vec<(usize, &Reading)> = lessons.iter().enumerate().filter(|(_, r)| !liturgy(r)).collect();
+    let fold = others.len() > FULL && !*all;
+    let mut last: Option<(&str, Option<&str>)> = None;
+    for (i, r) in others {
+        let first = last != Some((r.service, r.served));
+        if fold && !first {
+            continue;
+        }
+        if first {
+            y += if last.is_some() || y > top + 26.0 { 8.0 } else { 0.0 };
+            let head = r.served.map_or(r.service.to_string(), |s| format!("{} · {s}", r.service));
+            let head = super::elide(&painter, &head, &theme::ui_semibold(12.0), width - 24.0);
+            text(&painter, left + 12.0, y + 4.0, 16.0, &head, theme::ui_semibold(12.0), p.ink_2, false);
+            y += 24.0;
+            last = Some((r.service, r.served));
+        }
+        // A reading the tables are unsure of has a second line saying so (and its title), as the
+        // Liturgy's do, so neither the hint nor the passage is cut for the other.
+        let h = if unsure(r) { 48.0 } else { 32.0 };
+        let at = Rect::from_min_size(pos2(left, y), vec2(width, h));
+        let clicked = row(ui, at, i);
+        let ty = if unsure(r) { at.top() + 5.0 } else { at.top() + 6.0 };
+        text(&painter, left + 12.0, ty, 20.0, r.kind.label(), theme::ui_font(12.0), p.ink_3, false);
+        let ry = if unsure(r) { at.top() + 14.0 } else { at.top() + 6.0 };
+        let read = text(&painter, right - 12.0, ry, 20.0, "Read", theme::ui_medium(12.0), p.accent, true);
+        let room = right - 12.0 - read - 16.0 - x;
+        let label = super::elide(&painter, &r.label(), &theme::ui_font(13.0), room);
+        let w = text(&painter, x, ty, 20.0, &label, theme::ui_font(13.0), p.ink, false);
+        if unsure(r) {
+            let note = capitalized(&[CHECK].into_iter().chain(r.title).collect::<Vec<_>>().join(" · "));
+            let note = super::elide(&painter, &note, &theme::ui_font(12.0), room);
+            text(&painter, x, at.top() + 25.0, 18.0, &note, theme::ui_font(12.0), p.ink_3, false);
+        } else if let Some(title) = r.title
+            && room - w > 40.0
+        {
+            let title = super::elide(&painter, &format!(" · {title}"), &theme::ui_font(12.0), room - w);
+            text(&painter, x + w, ty, 20.0, &title, theme::ui_font(12.0), p.ink_3, false);
+        }
+        if clicked {
+            actions.push(Action::ReadPassage(r.passages));
+        }
+        y += h;
+    }
+    if fold {
+        let at = Rect::from_min_size(pos2(left, y + 8.0), vec2(width, 32.0));
+        if row(ui, at, lessons.len()) {
+            *all = true;
+        }
+        let show = format!("Show all {} readings", lessons.len());
+        text(&painter, left + 12.0, at.top() + 6.0, 20.0, &show, theme::ui_medium(12.0), p.accent, false);
+        y = at.bottom();
+    }
+    y
+}
+
 impl State {
     /// The Jesus Prayer's counter is open (Space counts).
     pub fn counting(&self) -> bool {
@@ -225,6 +449,9 @@ impl State {
         let style = env.settings.calendar;
         let prayer_rule = env.study.rule();
         self.run_demo(env, &prayer_rule, actions);
+        if let Some(View::Edit(editor)) = &mut self.view {
+            editor.follow(&prayer_rule);
+        }
         if let Some(view) = &mut self.view {
             let (bottom, back) = view.show(ui, content, env, actions);
             if back {
@@ -357,6 +584,17 @@ impl State {
             }
         }
         y += 20.0;
+        rule(y);
+        y += 20.0;
+
+        // The day's readings.
+        let told = (info.feasts.iter().any(|f| great(f)), !info.feasts.is_empty());
+        let mut all = self.all_readings == Some(d);
+        let lessons = lectionary::readings(d, style);
+        y = readings(ui, env, left, width, y, &lessons, told, &mut all, actions) + 20.0;
+        if all {
+            self.all_readings = Some(d);
+        }
         rule(y);
         y += 20.0;
 
@@ -797,5 +1035,106 @@ impl State {
         );
         painter.set(card_bg, shape);
         y
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    /// The names of a lectionary table's entries.
+    fn names(json: &str) -> Vec<String> {
+        let v: serde_json::Value = serde_json::from_str(json).unwrap();
+        v["entries"].as_array().unwrap().iter().map(|e| e["name"].as_str().unwrap().to_string()).collect()
+    }
+
+    macro_rules! table {
+        ($name:literal) => {
+            include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/../../data/lectionary/", $name, ".json"))
+        };
+    }
+
+    #[test]
+    fn the_moving_cycles_days_are_told_from_saints_and_feasts() {
+        for json in [table!("pentecostarion"), table!("triodion"), table!("epistles"), table!("gospels")] {
+            for name in names(json) {
+                assert!(moving(&name), "{name}");
+            }
+        }
+        // The Menaion's are saints and feasts, but for the Saturdays and Sundays around the
+        // great feasts, which are named days too.
+        for name in names(table!("menaion")) {
+            let around = ["Saturday", "Sunday"].iter().any(|d| name.starts_with(d));
+            assert_eq!(moving(&name), around, "{name}");
+        }
+    }
+
+    #[test]
+    fn ordinary_days_are_told_from_named_ones() {
+        // The weekly cycle's days, but for All Saints.
+        for json in [table!("epistles"), table!("gospels")] {
+            for name in names(json) {
+                assert_eq!(ordinary(&name), !name.starts_with("Sunday of All Saints"), "{name}");
+            }
+        }
+        for name in [
+            "Tuesday of the 4th Week of Pascha (Eve of Mid-Pentecost)",
+            "Bright Monday",
+            "Great and Holy Friday",
+            "Monday after the Publican and Pharisee",
+        ] {
+            assert!(ordinary(name), "{name}");
+        }
+        for name in [
+            "Second Saturday of Great Lent (Saturday of Souls)",
+            "Saturday of the Akathist (Fifth Saturday of Great Lent)",
+            "Palm Sunday (Entry of the Lord into Jerusalem)",
+        ] {
+            assert!(!ordinary(name), "{name}");
+        }
+        // The Menaion's saints and feasts, and its Saturdays and Sundays around the great feasts.
+        for name in names(table!("menaion")) {
+            assert!(!ordinary(&name), "{name}");
+        }
+    }
+
+    /// What the day's Liturgy readings are read for, as the page shows it.
+    fn read_for_on(y: i32, m: u8, d: u8) -> Vec<Option<String>> {
+        let d = calendar::civil(y, m, d);
+        let feasts = calendar::day(d, Style::New).feasts;
+        let (feast, named) = (feasts.iter().any(|f| great(f)), !feasts.is_empty());
+        let lessons = lectionary::readings(d, Style::New);
+        let liturgy = lessons.iter().filter(|r| r.at_liturgy() && r.kind != lectionary::Kind::OldTestament);
+        liturgy.map(|r| read_for(r, feast, named)).collect()
+    }
+
+    fn both(s: &str) -> [Option<String>; 2] {
+        [Some(s.into()), Some(s.into())]
+    }
+
+    #[test]
+    fn a_reading_says_what_its_read_for_unless_the_page_does() {
+        let artemius = [Some("St Artemius".into()), None];
+        assert_eq!(read_for_on(2026, 10, 20), artemius, "the saint's Epistle");
+        let thekla = "Protomartyr Thekla, Equal to the Apostles";
+        assert_eq!(read_for_on(2026, 9, 24), both(thekla), "the saint's readings in the day's place");
+        assert_eq!(read_for_on(2026, 10, 25), [None, None], "a Sunday after Pentecost");
+        assert_eq!(read_for_on(2026, 12, 25), [None, None], "the Nativity, named above");
+        assert_eq!(read_for_on(2026, 4, 12), [None, None], "Pascha");
+        assert_eq!(read_for_on(2026, 3, 1), [None, None], "the Sunday of Orthodoxy, named above");
+        // Named days the day section doesn't name.
+        let fathers = "Sunday of the Holy Fathers of the Seventh Ecumenical Council";
+        assert_eq!(read_for_on(2026, 10, 11), both(fathers));
+        assert_eq!(read_for_on(2026, 3, 7), both("Second Saturday of Great Lent (Saturday of Souls)"));
+        let genealogy = "Sunday before the Nativity of Christ (Holy Fathers; the Genealogy)";
+        assert_eq!(read_for_on(2026, 12, 20), both(genealogy));
+        // A title that only tells two lessons apart says whose they are.
+        let theodore = "Saturday of St Theodore the Recruit";
+        assert_eq!(
+            read_for_on(2026, 2, 28),
+            [Some(format!("{theodore} · of the saint")), Some(format!("{theodore} · of the day"))]
+        );
+        let forefeast = [Some("St Sylvester".into()), Some("Forefeast of Theophany".into())];
+        assert_eq!(read_for_on(2026, 1, 2), forefeast);
     }
 }

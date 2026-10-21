@@ -66,6 +66,11 @@ pub struct Settings {
     pub calendar: bible_core::calendar::Style,
     /// Remind at the times of the prayer rule's blocks while the app is open.
     pub rule_reminders: bool,
+    /// Sync study data with the iPhone through iCloud Drive (`crate::sync`).
+    pub sync: bool,
+    /// A sync has finished here: what's erased or restored here reaches the iPhone the next time
+    /// sync runs, even if it's off now, and Settings says so.
+    pub synced: bool,
 }
 
 fn yes() -> bool {
@@ -102,6 +107,8 @@ impl Default for Settings {
             onboarded: false,
             calendar: Default::default(),
             rule_reminders: false,
+            sync: false,
+            synced: false,
         }
     }
 }
@@ -283,6 +290,8 @@ pub struct BibleApp {
     reminded: Option<i64>,
     /// The prayer rule's reminders, when they're on.
     rule_reminders: crate::pages::rule::Reminders,
+    /// Sync with the iPhone, when it's on.
+    sync: crate::sync::Sync,
     /// The page in the main area (the reader unless a library or study page is open).
     pub pages: crate::pages::Pages,
     /// `BIBLE_RS_DEMO`: steps that put the window into a given state (screenshots), one per frame.
@@ -408,6 +417,7 @@ impl BibleApp {
             compare: None,
             reminded: None,
             rule_reminders: Default::default(),
+            sync: Default::default(),
             focus: false,
             focus_reveal: false,
             backup_checked: None,
@@ -434,6 +444,24 @@ impl BibleApp {
                 .columns()
                 .iter()
                 .any(|id| !matches!(self.library.chapter(id, c), bible_core::library::Chapter::Missing))
+    }
+
+    /// Says that no open translation has chapter `c` (of a deuterocanonical book), and that the
+    /// Septuagint does when it does: "KJV doesn't include Wisdom of Solomon. LXX does."
+    fn not_included(&mut self, ctx: &egui::Context, c: ChapterIdx) {
+        let cols = self.columns();
+        let abbrev = |id: &String| self.library.get(id).map_or(id.clone(), |e| e.meta.abbrev.clone());
+        let open: Vec<String> = cols.iter().map(abbrev).collect();
+        let who = if open.len() == 1 {
+            format!("{} doesn't", open[0])
+        } else {
+            format!("{} don't", open.join(" and "))
+        };
+        let lxx = bible_core::bundled::DEFAULT_ID.to_string();
+        let has = !cols.contains(&lxx)
+            && matches!(self.library.chapter(&lxx, c), bible_core::library::Chapter::Ready(_));
+        let also = if has { format!(" {} does.", abbrev(&lxx)) } else { String::new() };
+        self.toast(ctx, format!("{who} include {}.{also}", c.book().name()));
     }
 
     pub fn columns(&self) -> Vec<String> {
@@ -602,12 +630,31 @@ impl BibleApp {
 
     fn apply_one(&mut self, ctx: &egui::Context, a: Action) {
         match a {
+            // Where no column has a deuterocanonical chapter it takes no room, and the jump would
+            // land on the next book.
+            Action::Jump { chapter, .. } if !self.shown(chapter) => self.not_included(ctx, chapter),
             Action::Jump { chapter, verse, flash } => {
                 self.pages.open(crate::pages::Page::Reader);
                 self.jump(chapter, verse, flash);
                 // Landing on a specific verse selects it, so N/B/C/1–6 act on it right away.
                 if let (Some(v), true) = (verse, flash) {
                     self.reader.set_selection(Some(VerseRef::new(chapter.book(), chapter.chapter(), v)));
+                }
+            }
+            // At its first verse, the reading selected as far as it goes in that chapter, verses
+            // skipped between its parts and all (a selection stays in one chapter); a reading
+            // that goes on past it says so.
+            Action::ReadPassage(passages) => {
+                let Some((selection, more)) = reading_selection(passages) else { return };
+                let chapter = selection.0.chapter_idx();
+                if !self.shown(chapter) {
+                    self.not_included(ctx, chapter);
+                    return;
+                }
+                self.apply_one(ctx, Action::Jump { chapter, verse: Some(selection.0.verse), flash: true });
+                self.reader.selection = Some(selection);
+                if let Some(more) = more {
+                    self.toast(ctx, more);
                 }
             }
             // From a page, Back returns to the reader.
@@ -2245,6 +2292,15 @@ impl eframe::App for BibleApp {
             ctx.request_repaint();
         }
         self.poll_tasks(&ctx);
+        // Sync with the iPhone once the first frames are up, before anything shows the study
+        // data, so changes merged from it show in this frame.
+        if self.startup.frames > 2 && !crate::probing() {
+            if self.sync.tick(&ctx, &mut self.study, self.settings.sync) {
+                // The rule may have come with new times.
+                self.rule_reminders.reset();
+            }
+            self.settings.synced |= self.sync.status().synced.is_some();
+        }
         let mut actions = Vec::new();
         if let Some(probe) = &mut self.sidebar_probe
             && probe.begin(&ctx, frame_start)
@@ -2589,6 +2645,7 @@ impl eframe::App for BibleApp {
                 &mut self.library,
                 &mut self.settings,
                 &self.study,
+                self.sync.status(),
                 &mut actions,
                 &tx,
                 &mut import,
@@ -2655,6 +2712,7 @@ impl eframe::App for BibleApp {
         self.settings.chapter = self.reader.location.0.0;
         self.settings.verse = self.reader.location.1;
         self.settings.save(&self.study);
+        self.sync.quit(&self.study, self.settings.sync);
     }
 }
 
@@ -2668,6 +2726,32 @@ fn open_reader_window(ctx: &egui::Context) {
         let _ = outer;
         ctx.send_viewport_cmd(egui::ViewportCommand::OuterPosition(pos.to_pos2()));
     }
+}
+
+/// What Read selects of a reading of the day (`bible_core::lectionary`): from its first verse
+/// as far as it goes in that chapter, verses skipped between its parts and all, since a
+/// selection stays in one chapter; and when the reading goes on past that, a line saying so:
+/// "John 13:31–18:1 · continues to 18:1".
+fn reading_selection(
+    passages: &[bible_core::lectionary::Passage],
+) -> Option<((VerseRef, VerseRef), Option<String>)> {
+    let first = *passages.first()?;
+    let in_chapter = |p: &&bible_core::lectionary::Passage| p.book == first.book && p.from.0 == first.from.0;
+    let mut end = first.from.1;
+    for p in passages.iter().take_while(in_chapter) {
+        end = if p.to.0 == p.from.0 { p.to.1 } else { first.chapter().kjv_verses() };
+    }
+    let last = passages[passages.len() - 1];
+    let more = ((last.book, last.to.0) != (first.book, first.from.0)).then(|| {
+        let to = if last.book == first.book {
+            let (c, v) = last.last().shown_numbers();
+            format!("{c}:{v}")
+        } else {
+            last.last().to_string()
+        };
+        format!("{} · continues to {to}", bible_core::lectionary::label(passages))
+    });
+    Some(((first.first(), VerseRef::new(first.book, first.from.0, end)), more))
 }
 
 /// Where automatic backups go.
@@ -2739,5 +2823,34 @@ mod tests {
             assert!(now.capsule <= last.capsule && last.capsule - now.capsule < 0.01, "{last:?} → {now:?}");
             last = now;
         }
+    }
+
+    /// What Read selects of a reading, as "John 13:31–38", and what it says of the rest.
+    fn selects(refs: &[&str]) -> (String, Option<String>) {
+        let passages: Vec<_> =
+            refs.iter().map(|r| bible_core::lectionary::parse_passage(r).unwrap()).collect();
+        let ((a, b), more) = super::reading_selection(&passages).unwrap();
+        (format!("{a}–{}", b.verse), more)
+    }
+
+    #[test]
+    fn read_selects_a_reading_as_far_as_its_first_chapter_goes() {
+        let whole = |s: &str| (s.to_string(), None);
+        assert_eq!(selects(&["Luke 9:23-27"]), whole("Luke 9:23–27"));
+        // Its parts, and the verses skipped between them.
+        assert_eq!(
+            selects(&["Mark 15:20", "Mark 15:22", "Mark 15:25", "Mark 15:33-41"]),
+            whole("Mark 15:20–41")
+        );
+        assert_eq!(selects(&["Luke 2:20-21", "Luke 2:40-52"]), whole("Luke 2:20–52"));
+        // A reading that goes on into the next chapters says so.
+        let friday = selects(&["John 13:31-18:1"]);
+        assert_eq!(friday, ("John 13:31–38".into(), Some("John 13:31–18:1 · continues to 18:1".into())));
+        let proverbs = selects(&["Prov 10:32", "Prov 11:2-12"]);
+        assert_eq!(
+            proverbs,
+            ("Proverbs 10:32–32".into(), Some("Proverbs 10:32; 11:2–12 · continues to 11:12".into()))
+        );
+        assert_eq!(super::reading_selection(&[]), None);
     }
 }

@@ -156,6 +156,8 @@ impl State {
         let t = super::reading_text(env);
         let notes = env.study.notes();
 
+        self.follow(env.study);
+
         // Keep the editor on the selected note (the newest when none is).
         let selected = self.selected.or_else(|| {
             let mut n = notes.clone();
@@ -191,6 +193,22 @@ impl State {
             } else {
                 ui.ctx().request_repaint_after(std::time::Duration::from_millis(650));
             }
+        }
+    }
+
+    /// The open note changed elsewhere (synced from the iPhone, restored) while nothing was typed
+    /// here: shows it as it is now, or lets it go when it's gone, so typing never saves the old
+    /// text over it or brings it back.
+    fn follow(&mut self, study: &bible_core::study::StudyStore) {
+        let Some(e) = &self.editor else { return };
+        if e.changed.is_some() {
+            return;
+        }
+        match study.note(e.verse).map(|n| n.body.as_str()) {
+            Some(body) if body != e.saved => self.editor = Some(Editor::new(e.verse, body)),
+            // (Saving only whitespace deletes the note: that new note stays open.)
+            None if !e.saved.trim().is_empty() => (self.selected, self.editor) = (None, None),
+            _ => {}
         }
     }
 
@@ -912,5 +930,36 @@ mod tests {
         assert_eq!(t, "a\n• b");
         assert!(styles_at("x *it* y", 4).italic);
         assert!(!styles_at("x *it* y", 7).italic);
+    }
+
+    #[test]
+    fn the_open_note_follows_a_change_made_elsewhere_unless_typed_in() {
+        let v = VerseRef::new(bible_core::BookId::from_code("JHN").unwrap(), 3, 16);
+        let mut study = bible_core::study::StudyStore::open_in_memory().unwrap();
+        study.set_note(v, "- from the Mac").unwrap();
+        let mut s =
+            State { selected: Some(v), editor: Some(Editor::new(v, "- from the Mac")), ..Default::default() };
+        // Edited on the iPhone, synced: the editor shows it.
+        study.set_note(v, "from the iPhone").unwrap();
+        s.follow(&study);
+        let e = s.editor.as_ref().unwrap();
+        assert_eq!((e.text.as_str(), e.saved.as_str()), ("from the iPhone", "from the iPhone"));
+        // Typing here wins over a change that comes in meanwhile, as it's saved after it.
+        s.editor.as_mut().unwrap().changed = Some(1.0);
+        study.set_note(v, "again from the iPhone").unwrap();
+        s.follow(&study);
+        assert_eq!(s.editor.as_ref().unwrap().text, "from the iPhone");
+        // Deleted there: the editor lets it go rather than bring it back.
+        s.editor.as_mut().unwrap().changed = None;
+        study.set_note(v, "").unwrap();
+        s.follow(&study);
+        assert!(s.editor.is_none() && s.selected.is_none());
+        // A new note not yet written stays open, as does one only begun with a space.
+        s.editor = Some(Editor::new(v, ""));
+        s.follow(&study);
+        assert!(s.editor.is_some());
+        s.editor.as_mut().unwrap().saved = " ".into();
+        s.follow(&study);
+        assert!(s.editor.is_some());
     }
 }
