@@ -410,7 +410,7 @@ final class BibleUITests: XCTestCase {
         openDay(2026, 4, 9)
         let thursday = scrolledTo(app.buttons["reading-0"])
         XCTAssertTrue(thursday.label.hasPrefix("Epistle · Vesperal Liturgy of St Basil, 1 Corinthians 11:23–32"), thursday.label)
-        XCTAssertTrue(app.buttons["reading-1"].label.hasPrefix("Gospel, Matthew 26:2–20; John 13:3–17"), app.buttons["reading-1"].label)
+        XCTAssertTrue(app.buttons["reading-1"].label.hasPrefix("Gospel, Matthew 26:1–20; John 13:3–17"), app.buttons["reading-1"].label)
         app.buttons["Done"].tap()
 
         // Readings the parishes differ on say so once, under them.
