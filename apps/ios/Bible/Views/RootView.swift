@@ -12,7 +12,8 @@ struct RootView: View {
             let safeTop = geo.safeAreaInsets.top
             ZStack(alignment: .top) {
                 ReaderContainer(
-                    store: store, theme: theme, style: typography(theme), translation: store.settings.translation,
+                    store: store, theme: theme, style: store.typography(theme, dynamicType: dynamicType),
+                    translation: store.settings.translation,
                     readingLine: safeTop + 60, selection: store.selection, marksVersion: store.marksVersion,
                     jump: store.jump
                 )
@@ -57,6 +58,9 @@ struct RootView: View {
         .preferredColorScheme(preferredScheme)
         .tint(Color(theme.accent))
         .sensoryFeedback(.selection, trigger: store.selection)
+        .sheet(isPresented: .constant(PassageGate.item != nil)) {
+            PassageGate(item: PassageGate.item ?? "", theme: theme).environment(store).sheetChrome(theme)
+        }
         .sheet(item: $store.sheet, onDismiss: { store.sheetClosed() }) { sheet in
             Group {
                 switch sheet {
@@ -82,15 +86,18 @@ struct RootView: View {
         case .dark: .dark
         }
     }
+}
 
-    /// The reading size follows Dynamic Type: the setting is the size at the default text size.
-    private func typography(_ theme: Theme) -> Typography {
-        let s = store.settings
+extension Store {
+    /// How the reader sets type, and so a reading in Today. The reading size follows Dynamic Type:
+    /// the setting is the size at the default text size.
+    func typography(_ theme: Theme, dynamicType: DynamicTypeSize) -> Typography {
+        let s = settings
         let traits = UITraitCollection(preferredContentSizeCategory: UIContentSizeCategory(dynamicType))
         let size = UIFontMetrics(forTextStyle: .body).scaledValue(for: CGFloat(s.textSize), compatibleWith: traits)
         return Typography(
             size: min(size, 44).rounded(), lineSpacing: CGFloat(s.lineSpacing), redLetters: s.redLetters,
-            options: store.contentOptions, theme: theme.name, width: 0)
+            options: contentOptions, theme: theme.name, width: 0)
     }
 }
 
