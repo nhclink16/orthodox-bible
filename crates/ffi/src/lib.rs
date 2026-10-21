@@ -19,9 +19,16 @@ use bible_core::study::{self, StudyStore};
 use bible_core::{BookId, ChapterIdx};
 
 pub mod content;
+pub mod plans;
+pub mod rule;
 pub mod tokens;
 
 pub use content::{Block, BlockKind, ChapterContent, ChapterStatus, ContentOptions, Run};
+pub use plans::{ActivePlan, PlanDay, PlanInfo, PlanPassage, reading_plans};
+pub use rule::{
+    FastLevel, MonthDay, Prayer, Rule, RuleBlock, RuleDay, RuleDayBlock, RuleDayItem, RuleItem, RuleKept,
+    RuleKind, RuleOpen, RuleSeason, civil_day, prayers, starter_rule,
+};
 pub use tokens::{Palette, ThemeName, palette};
 
 uniffi::setup_scaffolding!();

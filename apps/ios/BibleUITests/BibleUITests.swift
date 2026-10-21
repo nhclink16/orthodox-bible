@@ -204,12 +204,172 @@ final class BibleUITests: XCTestCase {
 
     func testTodayShowsTheChurchDayAndOpensTheKathisma() {
         app.buttons["today"].tap()
-        let kathisma = app.buttons.matching(NSPredicate(format: "label CONTAINS 'Kathisma'")).firstMatch
-        XCTAssertTrue(kathisma.waitForExistence(timeout: 3))
-        XCTAssertTrue(app.staticTexts["Fasting"].exists || app.staticTexts["FASTING"].exists)
+        XCTAssertTrue(app.staticTexts["Fasting"].waitForExistence(timeout: 3) || app.staticTexts["FASTING"].exists)
+        let kathisma = scrolledTo(app.buttons.matching(NSPredicate(format: "label CONTAINS 'Kathisma'")).firstMatch)
         kathisma.tap()
         let psalm = NSPredicate(format: "label BEGINSWITH 'Psalm'")
         XCTAssertEqual(XCTWaiter.wait(for: [XCTNSPredicateExpectation(predicate: psalm, object: reference)], timeout: 5), .completed, reference.label)
+    }
+
+    func testChecksOffTheRuleForTheDay() {
+        app.buttons["today"].tap()
+        let prayers = app.buttons["rule-morning-prayers"]
+        XCTAssertTrue(prayers.waitForExistence(timeout: 3))
+        XCTAssertEqual(prayers.value as? String, "Not done")
+        prayers.tap()
+        XCTAssertEqual(prayers.value as? String, "Done")
+
+        // A prayer opens to be read, and is checked off from there.
+        scrolledTo(app.buttons["open-meal-prayer"]).tap()
+        XCTAssertTrue(app.staticTexts.matching(NSPredicate(format: "label BEGINSWITH 'Our Father'")).firstMatch.waitForExistence(timeout: 3))
+        app.buttons["mark-done"].tap()
+        app.navigationBars.buttons.firstMatch.tap()
+        XCTAssertEqual(scrolledTo(app.buttons["rule-meal-prayer"]).value as? String, "Done")
+
+        // The Jesus Prayer counts to its number, and then is done.
+        scrolledTo(app.buttons["open-midday-jesus-prayer"]).tap()
+        let count = app.buttons["count"]
+        XCTAssertTrue(count.waitForExistence(timeout: 3))
+        for _ in 0..<33 { count.tap() }
+        XCTAssertTrue(count.label.hasPrefix("Finished"), count.label)
+        app.navigationBars.buttons.firstMatch.tap()
+        XCTAssertEqual(scrolledTo(app.buttons["rule-midday-jesus-prayer"]).value as? String, "Done")
+
+        // The check marks are that day's, and are kept.
+        app.terminate()
+        app.launchArguments = ["--uitest", "--keep-data"]
+        app.launch()
+        XCTAssertTrue(reference.waitForExistence(timeout: 10))
+        app.buttons["today"].tap()
+        XCTAssertTrue(app.buttons["rule-morning-prayers"].waitForExistence(timeout: 3))
+        XCTAssertEqual(app.buttons["rule-morning-prayers"].value as? String, "Done")
+        app.buttons["Previous day"].tap()
+        XCTAssertEqual(app.buttons["rule-morning-prayers"].value as? String, "Not done")
+    }
+
+    func testEditsTheRule() {
+        app.buttons["today"].tap()
+        scrolledTo(app.buttons["edit-rule"]).tap()
+
+        // Rename Morning, which keeps its items and their check marks.
+        let name = app.textFields["name-morning"]
+        XCTAssertTrue(name.waitForExistence(timeout: 3))
+        name.tap()
+        name.typeText(String(repeating: XCUIKeyboardKey.delete.rawValue, count: 12) + "Dawn\n")
+        XCTAssertEqual(name.value as? String, "Dawn")
+
+        // Add a psalm to Midday.
+        scrolledTo(app.buttons["add-midday"]).tap()
+        let psalm = app.buttons["A psalm"]
+        XCTAssertTrue(psalm.waitForExistence(timeout: 3))
+        psalm.tap()
+        let title = app.textFields["item-title"]
+        XCTAssertTrue(title.waitForExistence(timeout: 3))
+        XCTAssertEqual(title.value as? String, "Psalm 50")
+        // Its number, on the number pad, which Done puts away.
+        let number = app.textFields["psalm"]
+        number.tap()
+        number.typeText("118")
+        app.toolbars.buttons["Done"].tap()
+        XCTAssertTrue(app.keyboards.firstMatch.waitForNonExistence(timeout: 3))
+        XCTAssertEqual(title.value as? String, "Psalm 118")
+        app.navigationBars.buttons["Your rule"].tap()
+
+        // Remove the examination of conscience.
+        let reflection = scrolledTo(app.buttons["item-evening-reflection"])
+        reflection.swipeLeft()
+        app.buttons["Delete"].tap()
+        XCTAssertFalse(app.buttons["item-evening-reflection"].exists)
+        app.buttons["Save"].tap()
+
+        // Back on Today, up to the renamed part of the day.
+        XCTAssertTrue(app.buttons["edit-rule"].waitForExistence(timeout: 3))
+        let dawn = app.staticTexts.matching(NSPredicate(format: "label BEGINSWITH[c] 'Dawn'")).firstMatch
+        for _ in 0..<6 where !(dawn.exists && dawn.isHittable) { app.swipeDown(velocity: .slow) }
+        XCTAssertTrue(dawn.isHittable)
+        XCTAssertTrue(app.buttons["rule-morning-prayers"].exists)
+        XCTAssertTrue(scrolledTo(app.buttons.matching(NSPredicate(format: "label BEGINSWITH 'Psalm 118'")).firstMatch).exists)
+        scrolledTo(app.buttons["edit-rule"])
+        XCTAssertFalse(app.buttons["rule-evening-reflection"].exists)
+
+        // And back to the starter rule.
+        app.buttons["edit-rule"].tap()
+        scrolledTo(app.buttons["Reset to the starter rule"]).tap()
+        app.buttons["Reset"].tap()
+        app.buttons["Save"].tap()
+        XCTAssertTrue(app.buttons["rule-evening-reflection"].waitForExistence(timeout: 3))
+    }
+
+    func testRemovesEveryPartOfTheDay() {
+        app.buttons["today"].tap()
+        scrolledTo(app.buttons["edit-rule"]).tap()
+        for id in ["morning", "meals", "midday", "evening"] {
+            scrolledTo(app.buttons["remove-\(id)"]).tap()
+            app.buttons["Remove"].tap()
+            XCTAssertFalse(app.buttons["remove-\(id)"].waitForExistence(timeout: 1), id)
+        }
+        app.buttons["Save"].tap()
+        XCTAssertTrue(app.staticTexts["Nothing in your rule for this day."].waitForExistence(timeout: 3))
+        XCTAssertFalse(app.buttons["rule-morning-prayers"].exists)
+    }
+
+    func testRemindersTurnOnOnceNotificationsAreAllowed() {
+        app.buttons["today"].tap()
+        scrolledTo(app.buttons["edit-rule"]).tap()
+        let reminders = app.switches["reminders"]
+        XCTAssertTrue(reminders.waitForExistence(timeout: 3))
+        // The switch itself sits at the end of the row.
+        let flip = reminders.coordinate(withNormalizedOffset: CGVector(dx: 0.92, dy: 0.5))
+        if reminders.value as? String != "1" {
+            flip.tap()
+            // The first time, iOS asks.
+            let allow = XCUIApplication(bundleIdentifier: "com.apple.springboard").buttons["Allow"]
+            if allow.waitForExistence(timeout: 5) { allow.tap() }
+        }
+        expect(reminders, value: "1")
+        flip.tap()
+        expect(reminders, value: "0")
+        app.buttons["Cancel"].tap()
+    }
+
+    func testMonthCalendarMarksTheDayAndOpensAnother() {
+        app.buttons["today"].tap()
+        let prayers = app.buttons["rule-morning-prayers"]
+        XCTAssertTrue(prayers.waitForExistence(timeout: 3))
+        prayers.tap()
+
+        app.buttons["month"].tap()
+        let today = Calendar.current.component(.day, from: Date())
+        let cell = app.buttons["day-\(today)"]
+        XCTAssertTrue(cell.waitForExistence(timeout: 3))
+        XCTAssertTrue(cell.label.contains("Some of the rule kept"), cell.label)
+        XCTAssertTrue(app.staticTexts["Strict fast"].exists, "the key")
+
+        let other = today == 1 ? 2 : 1
+        app.buttons["day-\(other)"].tap()
+        var parts = Calendar.current.dateComponents([.year, .month], from: Date())
+        parts.day = other
+        let shown = Calendar.current.date(from: parts)!.formatted(.dateTime.weekday(.wide).day().month(.wide))
+        XCTAssertTrue(app.staticTexts[shown].waitForExistence(timeout: 3), shown)
+        XCTAssertTrue(app.buttons["Back to Today"].exists)
+        XCTAssertEqual(app.buttons["rule-morning-prayers"].value as? String, "Not done")
+    }
+
+    func testStartsAReadingPlanAndOpensItsReading() {
+        app.buttons["today"].tap()
+        scrolledTo(app.buttons["plans"]).tap()
+        scrolledTo(app.buttons.matching(NSPredicate(format: "label BEGINSWITH 'The Psalter in 20 Days'")).firstMatch).tap()
+        app.buttons["start-plan"].tap()
+        let first = app.buttons["passage-psalter-20-1-0"]
+        XCTAssertTrue(first.waitForExistence(timeout: 3))
+        first.tap()
+        XCTAssertEqual(first.value as? String, "Done")
+        // Opening a passage checks it off.
+        app.buttons["read-psalter-20-1-1"].tap()
+        XCTAssertTrue(app.staticTexts["Psalm 2 checked off"].waitForExistence(timeout: 3))
+        expectChapter("Psalm 2")
+        app.buttons["today"].tap()
+        XCTAssertEqual(scrolledTo(app.buttons["passage-psalter-20-1-1"]).value as? String, "Done")
     }
 
     func testFathersAskToBeInstalledFirst() {
@@ -225,6 +385,26 @@ final class BibleUITests: XCTestCase {
         measure(metrics: [XCTOSSignpostMetric.scrollDecelerationMetric], options: options) {
             app.swipeUp(velocity: .fast)
         }
+    }
+
+    private func expect(_ element: XCUIElement, value: String, file: StaticString = #filePath, line: UInt = #line) {
+        let shown = XCTNSPredicateExpectation(predicate: NSPredicate(format: "value == %@", value), object: element)
+        XCTAssertEqual(XCTWaiter.wait(for: [shown], timeout: 5), .completed, "\(element.value ?? "nil")", file: file, line: line)
+    }
+
+    /// Scrolls the frontmost list up until `element` is on screen, clear of a bottom toolbar.
+    @discardableResult
+    private func scrolledTo(_ element: XCUIElement, file: StaticString = #filePath, line: UInt = #line) -> XCUIElement {
+        let bottom = app.windows.firstMatch.frame.maxY - 100
+        var swiped = false
+        for _ in 0..<10 where !(element.exists && element.isHittable && element.frame.maxY < bottom) {
+            app.swipeUp(velocity: .slow)
+            swiped = true
+        }
+        // A tap while the list still glides only stops it.
+        if swiped { usleep(600_000) }
+        XCTAssertTrue(element.isHittable, "\(element) not found", file: file, line: line)
+        return element
     }
 
     private func row(_ reference: String) -> XCUIElement {
