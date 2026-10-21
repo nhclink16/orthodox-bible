@@ -10,9 +10,9 @@ enum TodayRoute: Hashable {
     case planDay(String, UInt32)
 }
 
-/// Today in the Church (Orthodox fork): the day's feasts and fast, the prayer rule to keep, the
-/// reading plans under way and the Psalter's kathismata, on the New or Old calendar. Days step
-/// back and forward, or are picked from the month.
+/// Today in the Church (Orthodox fork): the day's feasts, readings and fast, the prayer rule to
+/// keep, the reading plans under way and the Psalter's kathismata, on the New or Old calendar.
+/// Days step back and forward, or are picked from the month.
 struct TodayView: View {
     @Environment(Store.self) private var store
     @Environment(\.dismiss) private var dismiss
@@ -23,6 +23,10 @@ struct TodayView: View {
     @State private var offset = 0
     @State private var editing = false
     @State private var starting: PlanInfo?
+    /// The Fathers sheet is up, on this verse.
+    @State private var fathers: VerseRef?
+    /// Every one of a long day's readings is shown.
+    @State private var allReadings = false
 
     var body: some View {
         @Bindable var store = store
@@ -62,6 +66,8 @@ struct TodayView: View {
                         }
                     }
                 }
+
+                readings(civil)
 
                 Section {
                     VStack(alignment: .leading, spacing: 4) {
@@ -148,10 +154,19 @@ struct TodayView: View {
                 .environment(store)
                 .sheetChrome(theme)
         }
+        .sheet(isPresented: Binding(get: { fathers != nil }, set: { if !$0 { fathers = nil } })) {
+            if let fathers {
+                FathersView(ref: fathers, theme: theme)
+                    .toasts(theme)
+                    .environment(store)
+                    .sheetChrome(theme)
+            }
+        }
         .onReceive(NotificationCenter.default.publisher(for: UIApplication.significantTimeChangeNotification)) { _ in
             now = Date()
         }
         .onChange(of: phase) { if phase == .active { now = Date() } }
+        .onChange(of: offset) { allReadings = false }
         // A reminder was tapped.
         .onChange(of: store.todayRequest) {
             now = Date()
@@ -190,7 +205,15 @@ struct TodayView: View {
                 case .startPlan(let plan, _):
                     Button { starting = reading(plan) } label: { RuleItemLabel(item: item, theme: theme) }
                         .buttonStyle(.plain)
-                case .nothing, .comingSoon:
+                case .passage(let chapter, let verse):
+                    Button { store.read(Int(chapter), verse: Int(verse)) } label: {
+                        RuleItemLabel(item: item, theme: theme, reads: true)
+                    }
+                    .buttonStyle(.plain)
+                case .fathers(let verse):
+                    Button { fathers = verse } label: { RuleItemLabel(item: item, theme: theme) }
+                        .buttonStyle(.plain)
+                case .nothing:
                     Button(action: toggle) { RuleItemLabel(item: item, theme: theme) }
                         .buttonStyle(.plain)
                         .disabled(offset > 0)
@@ -204,6 +227,45 @@ struct TodayView: View {
 
     private func reading(_ plan: String) -> PlanInfo? {
         readingPlans().first { $0.id == plan }
+    }
+
+    /// The day's readings, each opening in the reader: the Liturgy's Epistle and Gospel first,
+    /// then the other services' smaller, saying once where a run of them is read and what for. A
+    /// long day (Holy Friday's twenty-nine) shows its first few until asked for the rest.
+    @ViewBuilder
+    private func readings(_ civil: CivilDate) -> some View {
+        let all = dayReadings(year: civil.year, month: civil.month, day: civil.day, oldCalendar: store.settings.oldCalendar)
+        let main = all.filter(\.isMain)
+        let rest = all.filter { !$0.isMain }
+        let shown = allReadings || rest.count <= 4 ? rest.count : 3
+        if !all.isEmpty {
+            Section("Readings") {
+                ForEach(Array(main.enumerated()), id: \.offset) { i, r in
+                    readingButton(r, after: nil, id: i)
+                }
+                ForEach(0..<shown, id: \.self) { i in
+                    readingButton(rest[i], after: i > 0 ? rest[i - 1] : nil, id: main.count + i)
+                }
+                if shown < rest.count {
+                    Button("\(rest.count - shown) more readings") { allReadings = true }
+                        .accessibilityIdentifier("more-readings")
+                }
+            }
+        }
+    }
+
+    /// A reading, after `previous` in the same list.
+    private func readingButton(_ r: Reading, after previous: Reading?, id: Int) -> some View {
+        Button {
+            guard let p = r.passages.first else { return }
+            store.read(Int(p.chapterIndex), verse: Int(p.from.verse))
+        } label: {
+            ReadingRow(
+                reading: r, occasion: previous?.occasion == r.occasion ? nil : r.occasion,
+                service: previous.map { $0.service != r.service || $0.served != r.served } ?? true, theme: theme)
+        }
+        .buttonStyle(.plain)
+        .accessibilityIdentifier("reading-\(id)")
     }
 
     /// The plans under way: the day's passages, to check off and open.
@@ -259,6 +321,76 @@ struct TodayView: View {
         case 0: "Christ is risen!"
         case 1: "Pascha is tomorrow"
         default: "Pascha in \(days) days"
+        }
+    }
+}
+
+/// A reading: the Liturgy's large, with its kind over it; the other services' smaller, with
+/// where and when they're read under them.
+private struct ReadingRow: View {
+    let reading: Reading
+    /// What it's read for, if not the day itself.
+    let occasion: String?
+    /// Names its service, and when that's held.
+    let service: Bool
+    let theme: Theme
+
+    var body: some View {
+        HStack {
+            VStack(alignment: .leading, spacing: 2) {
+                if reading.isMain {
+                    // An occasion says what the title would.
+                    Text([reading.kind.label, occasion == nil ? reading.title : nil].compactMap { $0 }.joined(separator: " · "))
+                        .font(.subheadline)
+                        .foregroundStyle(Color(theme.ink2))
+                    Text(reading.label)
+                        .font(.reading(19))
+                        .foregroundStyle(Color(theme.ink))
+                } else {
+                    Text(reading.label)
+                        .font(.subheadline)
+                        .foregroundStyle(Color(theme.ink))
+                    let line = service
+                        ? [reading.service, reading.title, reading.kind.label, reading.served]
+                        : [reading.title, reading.kind.label]
+                    Text(line.compactMap { $0 }.joined(separator: " · "))
+                        .font(.footnote)
+                        .foregroundStyle(Color(theme.ink2))
+                }
+                if let occasion {
+                    Text(occasion)
+                        .font(.footnote)
+                        .foregroundStyle(Color(theme.ink2))
+                }
+                if reading.confidence == .low {
+                    Text("Check your parish calendar")
+                        .font(.footnote)
+                        .foregroundStyle(Color(theme.ink3))
+                }
+            }
+            Spacer(minLength: 0)
+            Image(systemName: "book")
+                .font(.footnote)
+                .foregroundStyle(Color(theme.ink3))
+                .accessibilityHidden(true)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .contentShape(Rectangle())
+        .padding(.vertical, reading.isMain ? 4 : 1)
+    }
+}
+
+extension Reading {
+    /// The Liturgy's Epistle or Gospel, shown first.
+    var isMain: Bool { atLiturgy && kind != .oldTestament }
+}
+
+extension ReadingKind {
+    var label: String {
+        switch self {
+        case .oldTestament: "Old Testament"
+        case .epistle: "Epistle"
+        case .gospel: "Gospel"
         }
     }
 }

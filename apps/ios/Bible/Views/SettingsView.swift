@@ -1,10 +1,14 @@
 import SwiftUI
+import UniformTypeIdentifiers
 
 /// Theme, type and reading options, applied as you change them.
 struct SettingsView: View {
     @Environment(Store.self) private var store
     @Environment(\.dismiss) private var dismiss
     let theme: Theme
+    /// Turning sync on: which folder to choose, then the Files picker for it.
+    @State private var choosing = false
+    @State private var picking = false
 
     var body: some View {
         @Bindable var store = store
@@ -68,6 +72,24 @@ struct SettingsView: View {
                     ExportButton(title: "Export as JSON", format: .json, file: "Bible notes.json")
                 }
 
+                Section {
+                    Toggle("Sync with your Mac", isOn: Binding(get: { store.syncOn }, set: turnSync))
+                        .accessibilityIdentifier("sync")
+                    if store.syncOn {
+                        if let folder = store.syncFolder {
+                            LabeledContent("Folder", value: folder)
+                        }
+                        Button("Sync now") { store.syncNow() }
+                            .disabled(store.syncing)
+                            .accessibilityIdentifier("sync-now")
+                    }
+                } footer: {
+                    VStack(alignment: .leading, spacing: 6) {
+                        if store.syncOn { SyncStatus() }
+                        Text("Through iCloud Drive: notes, highlights, bookmarks, reading plans, your prayer rule and what you’ve ticked.")
+                    }
+                }
+
                 if let t = store.translation {
                     Section("About the \(t.abbrev)") {
                         VStack(alignment: .leading, spacing: 6) {
@@ -97,6 +119,26 @@ struct SettingsView: View {
         }
         .presentationDetents([.medium, .large])
         .presentationBackgroundInteraction(.enabled(upThrough: .medium))
+        // The Files picker can't carry a line of its own: which folder to choose comes first.
+        .confirmationDialog("Sync with your Mac", isPresented: $choosing, titleVisibility: .visible) {
+            Button("Choose folder") { picking = true }
+        } message: {
+            Text("Choose iCloud Drive › Orthodox Bible › Sync. The Mac app makes this folder; you can also make it in Files.")
+        }
+        .fileImporter(isPresented: $picking, allowedContentTypes: [.folder]) { result in
+            if case .success(let url) = result { store.startSync(folder: url) }
+        }
+    }
+
+    /// On asks for the folder (a UI test's own, if it named one); off forgets it.
+    private func turnSync(_ on: Bool) {
+        guard on else { return store.stopSync() }
+        if let folder = Store.testSyncFolder {
+            try? FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+            store.startSync(folder: folder)
+        } else {
+            choosing = true
+        }
     }
 
     static var version: String {
@@ -144,6 +186,28 @@ private struct ThemeSwatch: View {
         .buttonStyle(.plain)
         .accessibilityLabel("\(appearance.label) theme")
         .accessibilityAddTraits(selected ? .isSelected : [])
+    }
+}
+
+/// When the Mac was last synced with, or why it couldn't be.
+private struct SyncStatus: View {
+    @Environment(Store.self) private var store
+
+    var body: some View {
+        TimelineView(.everyMinute) { context in
+            VStack(alignment: .leading, spacing: 2) {
+                if let error = store.syncError {
+                    Text("Couldn’t sync: \(error)")
+                } else if let last = store.lastSynced {
+                    Text(context.date.timeIntervalSince(last) < 60
+                        ? "Last synced just now"
+                        : "Last synced \(last.formatted(.relative(presentation: .named, unitsStyle: .wide)))")
+                } else if store.syncing {
+                    Text("Syncing…")
+                }
+                ForEach(store.syncSkipped, id: \.self) { Text("Couldn’t read \($0)") }
+            }
+        }
     }
 }
 

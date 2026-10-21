@@ -42,7 +42,7 @@ struct RuleItemLabel: View {
                     Text(detail)
                         .font(.footnote)
                         .foregroundStyle(
-                            [.nothing, .comingSoon, .notToday].contains(item.open) ? Color(theme.ink3) : Color(theme.accent))
+                            [.nothing, .notToday].contains(item.open) ? Color(theme.ink3) : Color(theme.accent))
                 }
             }
             Spacer(minLength: 0)

@@ -213,8 +213,9 @@ final class BibleUITests: XCTestCase {
 
     func testChecksOffTheRuleForTheDay() {
         app.buttons["today"].tap()
-        let prayers = app.buttons["rule-morning-prayers"]
-        XCTAssertTrue(prayers.waitForExistence(timeout: 3))
+        // Under the day's readings.
+        XCTAssertTrue(app.buttons["Previous day"].waitForExistence(timeout: 3))
+        let prayers = scrolledTo(app.buttons["rule-morning-prayers"])
         XCTAssertEqual(prayers.value as? String, "Not done")
         prayers.tap()
         XCTAssertEqual(prayers.value as? String, "Done")
@@ -241,10 +242,14 @@ final class BibleUITests: XCTestCase {
         app.launch()
         XCTAssertTrue(reference.waitForExistence(timeout: 10))
         app.buttons["today"].tap()
-        XCTAssertTrue(app.buttons["rule-morning-prayers"].waitForExistence(timeout: 3))
-        XCTAssertEqual(app.buttons["rule-morning-prayers"].value as? String, "Done")
+        XCTAssertTrue(app.buttons["Previous day"].waitForExistence(timeout: 3))
         app.buttons["Previous day"].tap()
-        XCTAssertEqual(app.buttons["rule-morning-prayers"].value as? String, "Not done")
+        XCTAssertEqual(scrolledTo(app.buttons["rule-morning-prayers"]).value as? String, "Not done")
+        // Today opens again at today, from the top.
+        app.buttons["Done"].tap()
+        app.buttons["today"].tap()
+        XCTAssertTrue(app.buttons["Previous day"].waitForExistence(timeout: 3))
+        XCTAssertEqual(scrolledTo(app.buttons["rule-morning-prayers"]).value as? String, "Done")
     }
 
     func testEditsTheRule() {
@@ -334,9 +339,11 @@ final class BibleUITests: XCTestCase {
 
     func testMonthCalendarMarksTheDayAndOpensAnother() {
         app.buttons["today"].tap()
-        let prayers = app.buttons["rule-morning-prayers"]
-        XCTAssertTrue(prayers.waitForExistence(timeout: 3))
-        prayers.tap()
+        XCTAssertTrue(app.buttons["Previous day"].waitForExistence(timeout: 3))
+        scrolledTo(app.buttons["rule-morning-prayers"]).tap()
+        // Today again, from the top.
+        app.buttons["Done"].tap()
+        app.buttons["today"].tap()
 
         app.buttons["month"].tap()
         let today = Calendar.current.component(.day, from: Date())
@@ -352,7 +359,7 @@ final class BibleUITests: XCTestCase {
         let shown = Calendar.current.date(from: parts)!.formatted(.dateTime.weekday(.wide).day().month(.wide))
         XCTAssertTrue(app.staticTexts[shown].waitForExistence(timeout: 3), shown)
         XCTAssertTrue(app.buttons["Back to Today"].exists)
-        XCTAssertEqual(app.buttons["rule-morning-prayers"].value as? String, "Not done")
+        XCTAssertEqual(scrolledTo(app.buttons["rule-morning-prayers"]).value as? String, "Not done")
     }
 
     func testStartsAReadingPlanAndOpensItsReading() {
@@ -377,6 +384,133 @@ final class BibleUITests: XCTestCase {
         app.selectionAction("Fathers").tap()
         XCTAssertTrue(app.staticTexts["Quotes from the Fathers aren't installed yet."].waitForExistence(timeout: 3))
         XCTAssertTrue(app.buttons["Install from Files…"].exists)
+    }
+
+    func testTodayShowsTheDaysReadings() {
+        openDay(2026, 10, 20)
+        // The Liturgy's Epistle and Gospel first: St Artemius's Epistle with the weekday's Gospel.
+        let epistle = scrolledTo(app.buttons["reading-0"])
+        XCTAssertTrue(epistle.label.hasPrefix("Epistle, 2 Timothy 2:1–10"), epistle.label)
+        XCTAssertTrue(epistle.label.contains("Great Martyr Artemius"), epistle.label)
+        let gospel = app.buttons["reading-1"]
+        XCTAssertTrue(gospel.label.hasPrefix("Gospel, Luke 9:23–27"), gospel.label)
+        XCTAssertFalse(app.buttons["reading-2"].exists)
+        gospel.tap()
+        expectChapter("Luke 9")
+        XCTAssertTrue(verse("Luke 9:23").waitForExistence(timeout: 3))
+
+        // A Lenten weekday has no Liturgy of its own: what there is, at the Hours and Vespers.
+        openDay(2026, 3, 4)
+        let isaiah = scrolledTo(app.buttons["reading-0"])
+        XCTAssertTrue(isaiah.label.hasPrefix("Isaiah 5:16–25, Sixth Hour"), isaiah.label)
+        XCTAssertEqual(app.buttons["reading-1"].label, "Genesis 4:16–26, Presanctified Liturgy · Old Testament")
+        XCTAssertEqual(app.buttons["reading-2"].label, "Proverbs 5:15–6:3, Old Testament", "the service named once")
+        XCTAssertFalse(app.buttons.matching(NSPredicate(format: "label BEGINSWITH 'Epistle'")).firstMatch.exists)
+        app.buttons["Done"].tap()
+
+        // Holy Friday's twenty-nine readings: the first few, then the rest when asked.
+        openDay(2026, 4, 10)
+        let first = scrolledTo(app.buttons["reading-0"])
+        XCTAssertTrue(first.label.hasPrefix("John 13:31–18:1, Matins of the Twelve Passion Gospels · 1st"), first.label)
+        let more = scrolledTo(app.buttons["more-readings"])
+        XCTAssertEqual(more.label, "26 more readings")
+        more.tap()
+        let vespers = scrolledTo(app.buttons["reading-24"])
+        XCTAssertTrue(vespers.label.hasPrefix("Exodus 33:11–23, Vespers of the Taking-Down from the Cross"), vespers.label)
+        XCTAssertEqual(scrolledTo(app.buttons["reading-28"]).label.suffix(8), ", Gospel")
+    }
+
+    func testRuleReadingsOpenTheGospelAndTheFathers() {
+        openDay(2026, 10, 20)
+        let readings = scrolledTo(app.buttons["open-morning-reading"])
+        XCTAssertTrue(readings.label.contains("2 Timothy 2:1–10 · Luke 9:23–27"), readings.label)
+        readings.tap()
+        expectChapter("Luke 9")
+
+        // The Fathers on the Gospel's first verse, offering to be installed first.
+        openDay(2026, 10, 20)
+        scrolledTo(app.buttons["open-evening-fathers"]).tap()
+        XCTAssertTrue(app.staticTexts["Quotes from the Fathers aren't installed yet."].waitForExistence(timeout: 3))
+        XCTAssertTrue(app.staticTexts["Luke 9:23"].exists)
+        app.navigationBars["Church Fathers"].buttons["Done"].tap()
+        app.buttons["Done"].firstMatch.tap()
+
+        // No Gospel on a Lenten weekday: the first reading, and the item says so.
+        openDay(2026, 3, 4)
+        let lent = scrolledTo(app.buttons["open-morning-reading"])
+        XCTAssertTrue(lent.label.contains("No Gospel today · Isaiah 5:16–25 at the Sixth Hour"), lent.label)
+        lent.tap()
+        expectChapter("Isaiah 5")
+    }
+
+    func testSyncsThroughAFolder() {
+        // Never iCloud Drive: a folder of the test's own, in the app's temporary folder.
+        let folder = "uitest-sync-\(UUID().uuidString)"
+        app.terminate()
+        app.launchEnvironment["BIBLE_SYNC_FOLDER"] = folder
+        app.launch()
+        XCTAssertTrue(reference.waitForExistence(timeout: 10))
+        // A note written before sync is turned on goes too.
+        verse("John 1:3").tap()
+        app.selectionAction("Note").tap()
+        let note = app.textFields["Write a note"].exists ? app.textFields["Write a note"] : app.textViews.firstMatch
+        XCTAssertTrue(note.waitForExistence(timeout: 3))
+        note.typeText("Written on the other device.")
+        app.buttons["Save"].tap()
+        turnOnSync()
+        XCTAssertTrue(
+            app.staticTexts["Through iCloud Drive: notes, highlights, bookmarks, reading plans, your prayer rule and what you’ve ticked."].exists)
+        app.buttons["sync-now"].tap()
+        XCTAssertTrue(lastSynced.waitForExistence(timeout: 5))
+
+        // Another device: nothing of its own, the same folder.
+        app.terminate()
+        app.launch()
+        XCTAssertTrue(reference.waitForExistence(timeout: 10))
+        turnOnSync()
+        app.buttons["Done"].tap()
+        app.buttons["study"].tap()
+        app.buttons["Notes"].tap()
+        XCTAssertTrue(row("John 1:3").waitForExistence(timeout: 3))
+        XCTAssertTrue(row("John 1:3").label.contains("Written on the other device."), row("John 1:3").label)
+
+        // Off forgets the folder.
+        app.buttons["Done"].tap()
+        app.buttons["settings"].tap()
+        let sync = scrolledTo(app.switches["sync"])
+        sync.coordinate(withNormalizedOffset: CGVector(dx: 0.92, dy: 0.5)).tap()
+        expect(sync, value: "0")
+        XCTAssertFalse(app.buttons["sync-now"].exists)
+    }
+
+    private var lastSynced: XCUIElement {
+        app.staticTexts.matching(NSPredicate(format: "label BEGINSWITH 'Last synced'")).firstMatch
+    }
+
+    /// Turns on Settings' sync with the folder the test named, and waits for its first sync.
+    private func turnOnSync() {
+        app.buttons["settings"].tap()
+        let sync = scrolledTo(app.switches["sync"])
+        XCTAssertEqual(sync.value as? String, "0")
+        // The switch itself sits at the end of the row.
+        sync.coordinate(withNormalizedOffset: CGVector(dx: 0.92, dy: 0.5)).tap()
+        expect(sync, value: "1")
+        // In the footer, under Sync now.
+        scrolledTo(lastSynced)
+    }
+
+    /// Opens Today on a date, picked from the month.
+    private func openDay(_ year: Int, _ month: Int, _ day: Int) {
+        app.buttons["today"].tap()
+        let now = Calendar.current.dateComponents([.year, .month], from: Date())
+        let steps = (year - now.year!) * 12 + month - now.month!
+        app.buttons["month"].tap()
+        let step = app.buttons[steps < 0 ? "Previous month" : "Next month"]
+        XCTAssertTrue(step.waitForExistence(timeout: 3))
+        for _ in 0..<abs(steps) { step.tap() }
+        app.buttons["day-\(day)"].tap()
+        let date = Calendar.current.date(from: DateComponents(year: year, month: month, day: day))!
+        XCTAssertTrue(app.staticTexts[date.formatted(.dateTime.weekday(.wide).day().month(.wide))].waitForExistence(timeout: 3))
     }
 
     func testScrollingDoesNotHitch() {
