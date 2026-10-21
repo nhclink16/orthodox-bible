@@ -5,7 +5,7 @@
 //! geometry (see [`Block::char_rects`]), so clicking a verse or highlighting it never forces a
 //! relayout.
 
-use std::ops::Range;
+use std::ops::{Range, RangeInclusive};
 use std::sync::Arc;
 
 use bible_core::model::{MarkKind, Style, Translation, VerseView};
@@ -813,13 +813,30 @@ pub fn layout_chapter(
     t: &Translation,
     c: ChapterIdx,
 ) -> ChapterLayout {
+    layout_verses(fonts, cx, t, c, None)
+}
+
+/// Lays out the verses `verses` of a chapter (all of it when `None`) in a single column. Only
+/// those verses are typeset, so none of a paragraph's other verses shows, and the chapter's
+/// heading comes only with its first verse. A step on Today reads a reading this way.
+pub fn layout_verses(
+    fonts: &mut FontsView<'_>,
+    cx: &Ctx<'_>,
+    t: &Translation,
+    c: ChapterIdx,
+    verses: Option<RangeInclusive<u8>>,
+) -> ChapterLayout {
     let cx = &cx.measured(fonts);
     let mut b = Builder::new(cx, fonts);
-    chapter_head(&mut b, Some(t), c, true);
+    if verses.as_ref().is_none_or(|r| *r.start() <= 1) {
+        chapter_head(&mut b, Some(t), c, true);
+    }
     let em = b.em();
     let per_line = cx.typo.mode == Mode::VersePerLine;
     let mut kind = Kind::Prose { indent: false };
-    for v in t.verses_in(c) {
+    let wanted =
+        |v: &VerseView<'_>| verses.as_ref().is_none_or(|r| v.number <= *r.end() && v.number_end >= *r.start());
+    for v in t.verses_in(c).filter(wanted) {
         let styles = style_mask(&v);
         // Break points inside the verse: (offset, mark).
         let mut cursor = 0usize;
