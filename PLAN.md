@@ -181,6 +181,15 @@ The goal: one place that keeps Nicholas to a daily rule and helps him grow. No s
 - **Sync** (`crates/core/src/sync.rs`): one JSON file per device in iCloud Drive › Orthodox Bible › Sync; newest change wins per record; deletions travel; Erase Everything erases everywhere; each device is bound to its machine (hardware UUID on the Mac, identifierForVendor on the iPhone). Off by default on both.
 - Follow-ups: the Apple TV wake-up automation; saints of the day; Septuagint numbering outside the Psalms; an Erase Everything (with backup) on the iPhone.
 
+## Phase 7: The guided routine (phase 1 done 2026-10-22)
+
+Nicholas: being sent to the reader and hunting back through the sidebar "isnt really the experience i want", on the iPhone too. The approved design is in `.sources/design/routine-design.md` (gitignored), chosen from three by two judges.
+- **Begin** on the part of the day that's due (the Now card at the top of Today) or on any block's header walks it one item at a time inside Today: prayer text, the Epistle then the Gospel set in place and bounded to the reading, the kathisma psalm by psalm, the Fathers verse by verse beside the Gospel, the counter, the examination. Done ticks and moves on; Skip passes by; Back always means Today; a short end page ("Glory to God for all things.") closes it. The reader is never moved.
+- Reminders open the block at its first item not done. Open in reader (⌘O / the book button) keeps a way back to the step.
+- Core: `rule::parts`, `Rule::now` (never calls back an earlier part once a later one's time has come), `Rule::next_item`, `calendar::kathisma_passages`; bridge `chapter_span`, `rule_next`, `fathers_counts`.
+- Later (phase 2): selecting verses inside a step for highlights and notes, feeding History from steps, keeping a long reading's place across a quit. Phase 3: "Glory…" dividers between the stases, a Gospel-only choice.
+- To check: the Mac reader's scroll timing with `BIBLE_RS_SCROLL_PROBE` after the painting was split out (the build couldn't run it with the screen asleep).
+
 ## More Orthodox features (research, 2026-10-20)
 
 All of these build on one piece: **computing Pascha, with an Old/New calendar setting**.
