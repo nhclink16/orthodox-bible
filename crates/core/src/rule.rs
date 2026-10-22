@@ -263,10 +263,12 @@ impl Rule {
         items.filter(|(b, i)| idle(i, b, d)).map(|(_, i)| i.id.clone()).collect()
     }
 
-    /// The part of day `d` to offer at `minute` (after midnight): the latest whose time has come
-    /// and that still has a required item to do, or else the next such part later in the day.
-    /// One without a time (before meals) is never offered, nor one `ended` today (by id). `done`
-    /// holds the ids to pass over, as for [`Rule::next_item`].
+    /// The part of day `d` to offer at `minute` (after midnight): the latest whose time has come,
+    /// while it still has a required item to do, or else the next such part later in the day.
+    /// An earlier part left undone isn't offered again once a later one's time has come (it keeps
+    /// its own Begin in the list), so nothing calls him back to midday at night. One without a
+    /// time (before meals) is never offered, nor one `ended` today (by id). `done` holds the ids
+    /// to pass over, as for [`Rule::next_item`].
     pub fn now(
         &self,
         d: Day,
@@ -275,18 +277,22 @@ impl Rule {
         done: &HashSet<String>,
         ended: &HashSet<String>,
     ) -> Option<Now<'_>> {
-        let open: Vec<(&Block, i64)> = self
+        // Each timed part, whether it's still open, and its time.
+        let timed: Vec<(&Block, bool, i64)> = self
             .for_day(d, style)
             .into_iter()
-            .filter(|(b, items)| {
-                !ended.contains(&b.id)
-                    && items.iter().any(|i| !i.optional && !done.contains(&i.id) && !idle(i, b, d))
+            .filter_map(|(b, items)| {
+                let open = !ended.contains(&b.id)
+                    && items.iter().any(|i| !i.optional && !done.contains(&i.id) && !idle(i, b, d));
+                Some((b, open, b.time.as_deref().and_then(minutes)?))
             })
-            .filter_map(|(b, _)| Some((b, b.time.as_deref().and_then(minutes)?)))
             .collect();
-        let due = open.iter().filter(|(_, at)| *at <= minute).max_by_key(|(_, at)| *at);
-        let next = open.iter().filter(|(_, at)| *at > minute).min_by_key(|(_, at)| *at);
-        due.map(|(b, _)| Now::Due(b)).or_else(|| next.map(|(b, _)| Now::Next(b)))
+        let latest = timed.iter().filter(|(_, _, at)| *at <= minute).max_by_key(|(_, _, at)| *at);
+        if let Some(&(b, true, _)) = latest {
+            return Some(Now::Due(b));
+        }
+        let next = timed.iter().filter(|(_, open, at)| *open && *at > minute).min_by_key(|(_, _, at)| *at);
+        next.map(|&(b, _, _)| Now::Next(b))
     }
 
     /// The item of block `block` to open on day `d` after the item `after` (from the top when
@@ -464,14 +470,16 @@ mod tests {
         assert_eq!(now(&his, wed, at(4, 30), &[], &[]), Some(("morning", false)));
         assert_eq!(now(&his, wed, at(5, 10), &[], &[]), Some(("morning", true)));
         assert_eq!(now(&his, wed, at(5, 10), &MORNING, &[]), Some(("midday", false)));
-        // The latest block whose time has come, even with the morning still to do.
+        // The latest block whose time has come, with the morning still to do.
         assert_eq!(now(&his, wed, at(12, 30), &[], &[]), Some(("midday", true)));
         let day: Vec<&str> = MORNING.into_iter().chain(["midday-psalm"]).collect();
         assert_eq!(now(&his, wed, at(12, 30), &day, &[]), Some(("evening", false)));
         assert_eq!(now(&his, wed, at(20, 45), &day, &[]), Some(("evening", true)));
         assert_eq!(now(&his, wed, at(23, 59), &day, &[]), Some(("evening", true)));
-        // With the evening done, an earlier block still to do is offered again.
-        assert_eq!(now(&his, wed, at(23, 59), &EVENING, &[]), Some(("midday", true)));
+        // With the evening done, an earlier block left undone isn't offered again.
+        assert_eq!(now(&his, wed, at(23, 59), &EVENING, &[]), None);
+        // Nor the morning at midday once the midday is done; the evening comes next.
+        assert_eq!(now(&his, wed, at(12, 30), &["midday-psalm"], &[]), Some(("evening", false)));
         // Nothing when everything is done or ended, and never the meals, which have no time.
         let all: Vec<&str> = day.iter().copied().chain(EVENING).collect();
         assert_eq!(now(&his, wed, at(23, 59), &all, &[]), None);
