@@ -411,6 +411,37 @@ final class BibleUITests: XCTestCase {
         XCTAssertFalse(reference.isHittable)
     }
 
+    func testSkipPassesAnItemByWithoutTickingIt() {
+        app.buttons["today"].tap()
+        scrolledTo(app.buttons["block-begin-evening"]).tap()
+        XCTAssertTrue(app.navigationBars["Evening Prayers"].waitForExistence(timeout: 3))
+        scrolledTo(app.buttons["session-skip"]).tap()
+        for _ in 0..<6 where !app.buttons["end-today"].exists {
+            doneInStep()
+        }
+        app.buttons["end-today"].tap()
+        // Only Done ticks; what was skipped is left for Continue.
+        XCTAssertEqual(scrolledTo(app.buttons["block-begin-evening"]).label, "Continue evening")
+        XCTAssertEqual(scrolledTo(app.buttons["rule-evening-prayers"]).value as? String, "Not done")
+        for id in ["evening-fathers", "evening-reflection"] {
+            XCTAssertEqual(scrolledTo(app.buttons["rule-\(id)"]).value as? String, "Done", id)
+        }
+    }
+
+    func testTheNowCardBeginsThePartOfTheDayDue() {
+        app.buttons["today"].tap()
+        // Whatever the hour, a part of the day is due or comes next, at the top.
+        let begin = app.buttons["now-begin"]
+        XCTAssertTrue(begin.waitForExistence(timeout: 3))
+        XCTAssertTrue(begin.label.hasPrefix("Begin "), begin.label)
+        begin.tap()
+        XCTAssertTrue(app.buttons["mark-done"].waitForExistence(timeout: 5))
+        // Left partway, it reads Continue.
+        back()
+        XCTAssertTrue(begin.waitForExistence(timeout: 3))
+        XCTAssertTrue(begin.label.hasPrefix("Continue "), begin.label)
+    }
+
     func testSwipingTodayAwayKeepsTheStep() {
         app.buttons["today"].tap()
         scrolledTo(app.buttons["open-midday-psalm"]).tap()

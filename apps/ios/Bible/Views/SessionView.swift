@@ -97,8 +97,11 @@ struct SessionView: View {
                 }
             ) { footer }
         case .fathers:
+            // "On the day's Gospel · Luke 9:44–50"; on a day without one, only the line that says so.
+            let gospel = item.detail?.hasPrefix("No Gospel") != true
             FathersStep(
-                parts: item.parts, intro: [item.note, item.detail ?? ""].filter { !$0.isEmpty }.joined(separator: " · "),
+                parts: item.parts,
+                intro: [gospel ? item.note : "", item.detail ?? ""].filter { !$0.isEmpty }.joined(separator: " · "),
                 key: key, theme: theme
             ) { footer }
         case .startPlan(let plan, let title):
@@ -110,7 +113,8 @@ struct SessionView: View {
         }
     }
 
-    /// Done and Skip, or Next on an item already done or a day still to come.
+    /// Done and Skip, or Next on an item already done or a day still to come (Back to Today after
+    /// its last).
     private func footer(_ item: RuleDayItem, block: RuleDayBlock, date: Date) -> StepFooter {
         let ahead = Store.ahead(date)
         // A plan's day with another passage to read reads it next.
@@ -123,7 +127,7 @@ struct SessionView: View {
         }
         let done = item.done && !ahead
         return StepFooter(
-            theme: theme, primary: done || ahead ? "Next" : "Done",
+            theme: theme, primary: ahead && next == nil ? "Back to Today" : done || ahead ? "Next" : "Done",
             action: {
                 dones += 1
                 store.done()
@@ -134,9 +138,12 @@ struct SessionView: View {
             undo: done ? ("Mark as not done", { store.setDone(item, day: CivilDate(date).number, false) }) : nil)
     }
 
-    /// The title menu: the part of the day's items to go back to, then Done, Skip and Today.
+    /// The title menu: the part of the day's items to go back to, then Done, Skip and Today, as
+    /// the footer has them. What's done and what's open say so in words, which every text size
+    /// shows (the menu's icons go at the largest) and VoiceOver reads; a menu item takes no traits.
     @ViewBuilder
     private func menu(_ block: RuleDayBlock, current: RuleDayItem, date: Date) -> some View {
+        let ahead = Store.ahead(date)
         Section {
             ForEach(block.items, id: \.id) { i in
                 Button {
@@ -147,8 +154,10 @@ struct SessionView: View {
                         Text(i.detail ?? "")
                     } else if i.done {
                         Label(i.title, systemImage: "checkmark")
+                        Text("Done today")
                     } else if i.id == current.id {
                         Label(i.title, systemImage: "circle.fill")
+                        Text("You’re here")
                     } else {
                         Text(i.title)
                     }
@@ -157,13 +166,13 @@ struct SessionView: View {
             }
         }
         Section {
-            if !isStart(current) {
-                Button(current.done || Store.ahead(date) ? "Next" : "Done") {
+            if !isStart(current), !ahead || store.ruleNext(block.id, after: current.id, on: date) != nil {
+                Button(current.done || ahead ? "Next" : "Done") {
                     dones += 1
                     store.done()
                 }
             }
-            Button("Skip") { store.skip() }
+            if !current.done, !ahead { Button("Skip") { store.skip() } }
             Button("Back to Today") { store.todayPath = [] }
         }
     }
@@ -290,7 +299,7 @@ struct WalkView: View {
             if let later {
                 return StepFooter(
                     theme: theme, primary: "Next reading", action: { store.walk(to: walk.index + 1) },
-                    next: later.parts.first?.reference)
+                    next: later.parts.first.map { "Next: \($0.reference)" })
             }
             return StepFooter(theme: theme, primary: "Back to Today", id: "end-today", action: { store.todayPath = [] })
         }
@@ -563,6 +572,7 @@ private struct FathersStep<Footer: View>: View {
                         }
                         .buttonStyle(.plain)
                         .accessibilityLabel(rangeLabel(from: v.verse, to: v.verse))
+                        .accessibilityValue(v.quotes == 0 ? "Nothing from the Fathers" : "")
                         .accessibilityAddTraits(i == at ? .isSelected : [])
                         .id(i)
                     }

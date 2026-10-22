@@ -151,8 +151,11 @@ struct FathersInstall: View {
             HStack(spacing: 12) {
                 Link("Download Page", destination: FathersView.sourceURL)
                     .buttonStyle(.bordered)
-                Button("Install from Files…") { importing = true }
-                    .buttonStyle(.borderedProminent)
+                // The theme's own ink on its accent, which is light in the dark themes.
+                Button { importing = true } label: {
+                    Text("Install from Files…").foregroundStyle(Color(theme.onAccent))
+                }
+                .buttonStyle(.borderedProminent)
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)

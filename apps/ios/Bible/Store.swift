@@ -663,12 +663,12 @@ final class Store {
     }
 
     /// The next item not done below `item`; after the last, the end page, or Today straight away
-    /// for a part of the day with one item.
+    /// for a part of the day with one item or on a day still to come (nothing was prayed).
     private func advance(after item: String) {
         guard let s = session else { return }
         if let next = ruleNext(s.block, after: item, on: s.date) {
             session?.item = next
-        } else if (block(s.block, on: s.date)?.items.count ?? 0) > 1 {
+        } else if !Self.ahead(s.date), (block(s.block, on: s.date)?.items.count ?? 0) > 1 {
             session?.item = nil
         } else {
             finish()
@@ -676,21 +676,25 @@ final class Store {
     }
 
     /// Back to Today from the end page (or after a part of the day's only item): it's over for
-    /// today, and the Now card moves on.
+    /// today, and the Now card moves on. A day still to come keeps its parts of the day.
     func finish() {
         guard let s = session, !s.over else { return }
-        ended[CivilDate(s.date).number, default: []].insert(s.block)
+        if !Self.ahead(s.date) { ended[CivilDate(s.date).number, default: []].insert(s.block) }
         session?.over = true
         todayPath = []
     }
 
-    /// The end page's last line: the part of the day the Now card offers next (none for another
-    /// day than today), or tomorrow's first.
+    /// The end page's last line: the part of the day the Now card offers next, when it comes later
+    /// in the day than this one (none for another day than today); else tomorrow's first. Midday
+    /// left undone is not what comes after the evening.
     func nextInRule(after block: String, on date: Date) -> String? {
         guard Self.sameDay(date, Date()) else { return nil }
         let today = ruleDay(date, now: Date(), ending: block)
         let at = { (b: RuleDayBlock) in RuleTime(b.time).map { "\(b.title) at \($0.label)" } }
-        if let id = today.now?.block, let next = today.blocks.first(where: { $0.id == id }).flatMap(at) {
+        let finished = today.blocks.first { $0.id == block }.flatMap { RuleTime($0.time)?.text } ?? "00:00"
+        if let id = today.now?.block, let b = today.blocks.first(where: { $0.id == id }),
+            let time = RuleTime(b.time), time.text > finished, let next = at(b)
+        {
             return "Next in your rule: \(next)"
         }
         let tomorrow = Calendar.current.date(byAdding: .day, value: 1, to: date) ?? date

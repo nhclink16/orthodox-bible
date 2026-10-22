@@ -126,9 +126,16 @@ struct TodayView: View {
                     .pickerStyle(.segmented)
                 }
             }
-            .navigationTitle(offset == 0 ? "Today" : "Church Calendar")
+            // Titled Today on every day, so a step's ‹ always reads Today; another day shows
+            // Church Calendar.
+            .navigationTitle("Today")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
+                if offset != 0 {
+                    ToolbarItem(placement: .principal) {
+                        Text("Church Calendar").font(.headline).accessibilityAddTraits(.isHeader)
+                    }
+                }
                 ToolbarItem(placement: .topBarLeading) {
                     NavigationLink(value: TodayRoute.month) { Image(systemName: "calendar") }
                         .accessibilityLabel("Month")
