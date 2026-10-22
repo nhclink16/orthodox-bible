@@ -10,6 +10,13 @@ struct BibleApp: App {
             RootView()
                 .environment(store)
                 .task {
+                    // UI tests: as if a reminder for this part of the day were tapped.
+                    let arguments = ProcessInfo.processInfo.arguments
+                    if arguments.contains("--uitest"), let i = arguments.firstIndex(of: "--open-block"),
+                        arguments.indices.contains(i + 1)
+                    {
+                        store.openToday(block: arguments[i + 1])
+                    }
                     store.syncNow()
                     // The search text is built once the first page is up.
                     try? await Task.sleep(for: .milliseconds(300))

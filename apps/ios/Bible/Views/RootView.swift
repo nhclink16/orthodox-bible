@@ -31,10 +31,26 @@ struct RootView: View {
                 }
                 .ignoresSafeArea()
 
-                TopBar(theme: theme)
-                    .padding(.top, 4)
-                    .offset(y: store.barsHidden ? -(safeTop + 72) : 0)
-                    .opacity(store.barsHidden ? 0 : 1)
+                VStack(alignment: .leading, spacing: 8) {
+                    TopBar(theme: theme)
+                    if store.returnToToday {
+                        // The reader opened from a step in Today, and the way back to it.
+                        Button { store.backToToday() } label: {
+                            Label("Back to Today", systemImage: "chevron.left")
+                                .font(.subheadline.weight(.semibold))
+                                .padding(.horizontal, 16)
+                                .frame(minHeight: 44)
+                        }
+                        .foregroundStyle(Color(theme.ink))
+                        .glass(in: Capsule(), theme: theme)
+                        .padding(.leading, 16)
+                        .accessibilityIdentifier("reader-back-today")
+                        .transition(.opacity)
+                    }
+                }
+                .padding(.top, 4)
+                .offset(y: store.barsHidden ? -(safeTop + 124) : 0)
+                .opacity(store.barsHidden ? 0 : 1)
             }
             .overlay(alignment: .bottom) {
                 VStack(spacing: 10) {
@@ -52,15 +68,13 @@ struct RootView: View {
             }
         }
         .animation(.smooth(duration: 0.28), value: store.barsHidden)
+        .animation(.smooth(duration: 0.28), value: store.returnToToday)
         .animation(.smooth(duration: 0.28), value: store.selection != nil)
         .animation(.smooth(duration: 0.28), value: store.toast)
         .statusBarHidden(store.barsHidden)
         .preferredColorScheme(preferredScheme)
         .tint(Color(theme.accent))
         .sensoryFeedback(.selection, trigger: store.selection)
-        .sheet(isPresented: .constant(PassageGate.item != nil)) {
-            PassageGate(item: PassageGate.item ?? "", theme: theme).environment(store).sheetChrome(theme)
-        }
         .sheet(item: $store.sheet, onDismiss: { store.sheetClosed() }) { sheet in
             Group {
                 switch sheet {

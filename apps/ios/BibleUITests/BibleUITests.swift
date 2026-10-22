@@ -207,8 +207,11 @@ final class BibleUITests: XCTestCase {
         XCTAssertTrue(app.staticTexts["Fasting"].waitForExistence(timeout: 3) || app.staticTexts["FASTING"].exists)
         let kathisma = scrolledTo(app.buttons.matching(NSPredicate(format: "label CONTAINS 'Kathisma'")).firstMatch)
         kathisma.tap()
-        let psalm = NSPredicate(format: "label BEGINSWITH 'Psalm'")
-        XCTAssertEqual(XCTWaiter.wait(for: [XCTNSPredicateExpectation(predicate: psalm, object: reference)], timeout: 5), .completed, reference.label)
+        // Its psalms open in Today, which stays open over the reader.
+        XCTAssertTrue(passage.waitForExistence(timeout: 5))
+        let psalm = app.staticTexts.matching(NSPredicate(format: "identifier BEGINSWITH 'Psalm '")).firstMatch
+        XCTAssertTrue(psalm.waitForExistence(timeout: 5))
+        XCTAssertFalse(reference.isHittable)
     }
 
     func testChecksOffTheRuleForTheDay() {
@@ -220,11 +223,11 @@ final class BibleUITests: XCTestCase {
         prayers.tap()
         XCTAssertEqual(prayers.value as? String, "Done")
 
-        // A prayer opens to be read, and is checked off from there.
+        // A prayer opens to be read, and Done checks it off; a part of the day with only it goes
+        // straight back to Today.
         scrolledTo(app.buttons["open-meal-prayer"]).tap()
         XCTAssertTrue(app.staticTexts.matching(NSPredicate(format: "label BEGINSWITH 'Our Father'")).firstMatch.waitForExistence(timeout: 3))
-        app.buttons["mark-done"].tap()
-        app.navigationBars.buttons.firstMatch.tap()
+        scrolledTo(app.buttons["mark-done"]).tap()
         XCTAssertEqual(scrolledTo(app.buttons["rule-meal-prayer"]).value as? String, "Done")
 
         // The Jesus Prayer counts to its number, and then is done.
@@ -232,8 +235,8 @@ final class BibleUITests: XCTestCase {
         let count = app.buttons["count"]
         XCTAssertTrue(count.waitForExistence(timeout: 3))
         for _ in 0..<33 { count.tap() }
-        XCTAssertTrue(count.label.hasPrefix("Finished"), count.label)
-        app.navigationBars.buttons.firstMatch.tap()
+        XCTAssertTrue(count.label.hasPrefix("Glory to God"), count.label)
+        back()
         XCTAssertEqual(scrolledTo(app.buttons["rule-midday-jesus-prayer"]).value as? String, "Done")
 
         // The check marks are that day's, and are kept.
@@ -371,12 +374,96 @@ final class BibleUITests: XCTestCase {
         XCTAssertTrue(first.waitForExistence(timeout: 3))
         first.tap()
         XCTAssertEqual(first.value as? String, "Done")
-        // Opening a passage checks it off.
+        // A passage opens to be read in Today, and isn't checked off by opening it.
         app.buttons["read-psalter-20-1-1"].tap()
-        XCTAssertTrue(app.staticTexts["Psalm 2 checked off"].waitForExistence(timeout: 3))
-        expectChapter("Psalm 2")
+        XCTAssertTrue(verse("Psalm 2:1").waitForExistence(timeout: 5))
+        back()
+        let second = app.buttons["passage-psalter-20-1-1"]
+        XCTAssertEqual(second.value as? String, "Not done")
+        // Done at the end of it checks it off, and opens the day's next.
+        app.buttons["read-psalter-20-1-1"].tap()
+        scrolledTo(app.buttons["mark-done"]).tap()
+        XCTAssertTrue(verse("Psalm 3:1").waitForExistence(timeout: 5))
+        back()
+        XCTAssertEqual(second.value as? String, "Done")
+        XCTAssertEqual(app.buttons["passage-psalter-20-1-2"].value as? String, "Not done")
+    }
+
+    func testPraysThroughAPartOfTheDayInToday() {
         app.buttons["today"].tap()
-        XCTAssertEqual(scrolledTo(app.buttons["passage-psalter-20-1-1"]).value as? String, "Done")
+        let begin = scrolledTo(app.buttons["block-begin-evening"])
+        XCTAssertEqual(begin.label, "Begin evening")
+        begin.tap()
+        // Evening Prayers, from his own book.
+        XCTAssertTrue(app.staticTexts["Pray from your prayer book. When you’ve finished, tap Done."].waitForExistence(timeout: 3))
+        // Done on each item (Evening Prayers, the kathisma, the Fathers, the examination of
+        // conscience, and St Ephrem's prayer in Lent), to the end page.
+        for _ in 0..<6 where !app.buttons["end-today"].exists {
+            doneInStep()
+        }
+        XCTAssertTrue(app.staticTexts["Glory to God for all things."].waitForExistence(timeout: 3))
+        app.buttons["end-today"].tap()
+        // Every evening item is checked off, and Today is still open.
+        for id in ["evening-prayers", "evening-fathers", "evening-reflection"] {
+            XCTAssertEqual(scrolledTo(app.buttons["rule-\(id)"]).value as? String, "Done", id)
+        }
+        XCTAssertTrue(app.navigationBars["Today"].exists)
+        XCTAssertFalse(reference.isHittable)
+    }
+
+    func testSwipingTodayAwayKeepsTheStep() {
+        app.buttons["today"].tap()
+        scrolledTo(app.buttons["open-midday-psalm"]).tap()
+        XCTAssertTrue(verse("Psalm 90:1").waitForExistence(timeout: 5))
+        for _ in 0..<2 { app.swipeUp(velocity: .slow) }
+        sleep(1)
+        let before = topVerse("Psalm 90:")
+        XCTAssertNotEqual(before, "Psalm 90:1")
+        // Swiped away, the reader shows; the calendar opens the same step at the same verse.
+        dismissSheet()
+        XCTAssertTrue(reference.waitForExistence(timeout: 3) && reference.isHittable)
+        app.buttons["today"].tap()
+        XCTAssertTrue(app.navigationBars["Psalm 90"].waitForExistence(timeout: 3))
+        sleep(1)
+        XCTAssertEqual(topVerse("Psalm 90:"), before)
+    }
+
+    func testTheJesusPrayerKeepsItsCountWhenLeft() {
+        app.buttons["today"].tap()
+        scrolledTo(app.buttons["open-midday-jesus-prayer"]).tap()
+        let count = app.buttons["count"]
+        XCTAssertTrue(count.waitForExistence(timeout: 3))
+        for _ in 0..<5 { count.tap() }
+        back()
+        scrolledTo(app.buttons["open-midday-jesus-prayer"]).tap()
+        XCTAssertTrue(count.waitForExistence(timeout: 3))
+        XCTAssertTrue(count.label.hasPrefix("5 of 33"), count.label)
+        back()
+        XCTAssertEqual(scrolledTo(app.buttons["rule-midday-jesus-prayer"]).value as? String, "Not done")
+    }
+
+    func testAReminderOpensItsPartOfTheDay() {
+        app.terminate()
+        app.launchArguments = ["--uitest", "--open-block", "evening"]
+        app.launch()
+        XCTAssertTrue(app.navigationBars["Evening Prayers"].waitForExistence(timeout: 10))
+        XCTAssertTrue(app.staticTexts["Pray from your prayer book. When you’ve finished, tap Done."].exists)
+    }
+
+    func testOpenInReaderComesBackToTheStep() {
+        app.buttons["today"].tap()
+        scrolledTo(app.buttons["open-midday-psalm"]).tap()
+        let book = app.buttons["session-reader"]
+        XCTAssertTrue(book.waitForExistence(timeout: 5))
+        book.tap()
+        // The reader, at the psalm, with the way back.
+        expectChapter("Psalm 90")
+        let back = app.buttons["reader-back-today"]
+        XCTAssertTrue(back.waitForExistence(timeout: 3))
+        back.tap()
+        XCTAssertTrue(app.navigationBars["Psalm 90"].waitForExistence(timeout: 3))
+        XCTAssertTrue(verse("Psalm 90:1").exists)
+        XCTAssertFalse(back.exists)
     }
 
     func testFathersAskToBeInstalledFirst() {
@@ -395,9 +482,14 @@ final class BibleUITests: XCTestCase {
         let gospel = app.buttons["reading-1"]
         XCTAssertTrue(gospel.label.hasPrefix("Gospel, Luke 9:23–27"), gospel.label)
         XCTAssertFalse(app.buttons["reading-2"].exists)
+        // Read in Today, which stays open; nothing either side of the reading shows.
         gospel.tap()
-        expectChapter("Luke 9")
-        XCTAssertTrue(verse("Luke 9:23").waitForExistence(timeout: 3))
+        XCTAssertTrue(verse("Luke 9:23").waitForExistence(timeout: 5))
+        XCTAssertTrue(verse("Luke 9:27").exists)
+        XCTAssertFalse(verse("Luke 9:22").exists)
+        XCTAssertFalse(verse("Luke 9:28").exists)
+        back()
+        app.buttons["Done"].tap()
 
         // A saint's whole day names the saint once, under the Epistle.
         openDay(2026, 10, 26)
@@ -444,22 +536,29 @@ final class BibleUITests: XCTestCase {
         let readings = scrolledTo(app.buttons["open-morning-reading"])
         XCTAssertTrue(readings.label.contains("2 Timothy 2:1–10 · Luke 9:23–27"), readings.label)
         readings.tap()
-        expectChapter("Luke 9")
+        // The Epistle, then the Gospel, a tap away.
+        XCTAssertTrue(verse("2 Timothy 2:1").waitForExistence(timeout: 5))
+        app.buttons["go-to-gospel"].tap()
+        XCTAssertTrue(verse("Luke 9:23").waitForExistence(timeout: 3))
+        expect(verse("Luke 9:23"), hittable: true)
+        back()
 
-        // The Fathers on the Gospel's first verse, offering to be installed first.
-        openDay(2026, 10, 20)
+        // The Fathers on the Gospel, offering to be installed first; Done still checks it off.
         scrolledTo(app.buttons["open-evening-fathers"]).tap()
         XCTAssertTrue(app.staticTexts["Quotes from the Fathers aren't installed yet."].waitForExistence(timeout: 3))
-        XCTAssertTrue(app.staticTexts["Luke 9:23"].exists)
-        app.navigationBars["Church Fathers"].buttons["Done"].tap()
-        app.buttons["Done"].firstMatch.tap()
+        XCTAssertTrue(app.staticTexts.matching(NSPredicate(format: "label ENDSWITH 'Luke 9:23–27'")).firstMatch.exists)
+        scrolledTo(app.buttons["mark-done"]).tap()
+        back()
+        XCTAssertEqual(scrolledTo(app.buttons["rule-evening-fathers"]).value as? String, "Done")
+        app.buttons["Done"].tap()
 
         // No Gospel on a Lenten weekday: the first reading, and the item says so.
         openDay(2026, 3, 4)
         let lent = scrolledTo(app.buttons["open-morning-reading"])
         XCTAssertTrue(lent.label.contains("No Gospel today · Isaiah 5:16–25 at the Sixth Hour"), lent.label)
         lent.tap()
-        expectChapter("Isaiah 5")
+        XCTAssertTrue(verse("Isaiah 5:16").waitForExistence(timeout: 5))
+        XCTAssertTrue(app.staticTexts["No Gospel today · Isaiah 5:16–25 at the Sixth Hour"].exists)
     }
 
     func testTheReadingsFollowTheArchdioceseChosen() {
@@ -605,6 +704,43 @@ final class BibleUITests: XCTestCase {
         measure(metrics: [XCTOSSignpostMetric.scrollDecelerationMetric], options: options) {
             app.swipeUp(velocity: .fast)
         }
+    }
+
+    private var passage: XCUIElement { app.descendants(matching: .any)["passage"] }
+
+    /// ‹ Today, or back a page in it.
+    private func back() {
+        app.navigationBars.buttons["BackButton"].firstMatch.tap()
+        usleep(600_000)
+    }
+
+    /// Swipes the sheet away by its top bar.
+    private func dismissSheet() {
+        let top = app.navigationBars.firstMatch.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
+        top.press(forDuration: 0.05, thenDragTo: app.windows.firstMatch.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.98)))
+        usleep(800_000)
+    }
+
+    /// Done at the end of the step's text, scrolled to however long the reading.
+    private func doneInStep() {
+        let done = app.buttons["mark-done"]
+        XCTAssertTrue(done.waitForExistence(timeout: 3))
+        for _ in 0..<40 where !done.isHittable { app.swipeUp(velocity: .fast) }
+        usleep(600_000)
+        done.tap()
+        usleep(600_000)
+    }
+
+    /// The verse whose id starts so at the top of the page, just under the bar.
+    private func topVerse(_ prefix: String) -> String? {
+        let verses = app.staticTexts.matching(NSPredicate(format: "identifier BEGINSWITH %@", prefix))
+        let line = app.navigationBars.firstMatch.frame.maxY + 14
+        return verses.allElementsBoundByIndex.first { $0.frame.maxY > line && $0.isHittable }?.identifier
+    }
+
+    private func expect(_ element: XCUIElement, hittable: Bool, file: StaticString = #filePath, line: UInt = #line) {
+        let shown = XCTNSPredicateExpectation(predicate: NSPredicate(format: "hittable == %@", NSNumber(value: hittable)), object: element)
+        XCTAssertEqual(XCTWaiter.wait(for: [shown], timeout: 5), .completed, "\(element)", file: file, line: line)
     }
 
     private func expect(_ element: XCUIElement, value: String, file: StaticString = #filePath, line: UInt = #line) {

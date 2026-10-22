@@ -137,6 +137,8 @@ struct PassageView<Footer: View>: View {
                     }
                     SpanCanvasView(layout: layout, theme: theme, tracker: tracker, index: starts[i] + j)
                         .frame(height: layout.textBottom)
+                        // A chapter or psalm of its own, as far below the last as the reader has it.
+                        .padding(.top, j > 0 ? (layout.content.head ? style.s(56) : 0) : style.s(parts.count > 1 ? 12 : 24))
                 }
                 EndLine(text: parts[i].end, style: style, theme: theme)
                     .frame(width: column.width)
@@ -204,6 +206,7 @@ struct PassageView<Footer: View>: View {
         }
         guard !Task.isCancelled else { return }
         tracker.contents = typeset.flatMap { $0.map(\.content) }
+        tracker.lines = [:]
         layouts = typeset
     }
 
@@ -264,8 +267,16 @@ final class PassageTracker {
     /// The spans' chapters, in order.
     var contents: [ChapterContent] = []
     var reached: (PassagePlace, ChapterContent) -> Void = { _, _ in }
+    /// Where the line under the bar falls in each span (from its top), how tall the span is, and
+    /// the verse there.
+    var lines: [Int: (line: CGFloat, height: CGFloat, verse: Int)] = [:]
 
-    func report(_ place: PassagePlace) {
+    /// A span has moved: the reading is at the first span the line hasn't passed the end of, so
+    /// with the Epistle's end and the Gospel's label under the bar, it's at the Gospel.
+    func moved(_ span: Int, line: CGFloat, height: CGFloat, verse: Int) {
+        lines[span] = (line, height, verse)
+        guard let at = lines.keys.sorted().first(where: { lines[$0]!.line < lines[$0]!.height }) else { return }
+        let place = PassagePlace(span: at, verse: lines[at]!.verse)
         guard place != last, contents.indices.contains(place.span) else { return }
         last = place
         reached(place, contents[place.span])
@@ -273,7 +284,7 @@ final class PassageTracker {
 }
 
 /// One typeset span in SwiftUI.
-private struct SpanCanvasView: UIViewRepresentable {
+struct SpanCanvasView: UIViewRepresentable {
     let layout: ChapterLayout
     let theme: Theme
     let tracker: PassageTracker
@@ -289,7 +300,7 @@ private struct SpanCanvasView: UIViewRepresentable {
 /// A span drawn in tiles as it comes into view, as the reader draws its chapters: a long one
 /// (Holy Friday's John 14) is taller than any one layer should be. It follows the scroll view
 /// it sits in, so it can say which verse is at the top and open at one.
-private final class SpanCanvas: UIView {
+final class SpanCanvas: UIView {
     private var layout: ChapterLayout?
     private var theme = Theme.light
     private weak var tracker: PassageTracker?
@@ -339,10 +350,13 @@ private final class SpanCanvas: UIView {
         scrolled()
         guard let layout, let tracker, let place = tracker.pending, place.span == index, let scroll else { return }
         tracker.pending = nil
+        // A span's first verse opens at its head; the reading's, at the top of the page.
+        let first = place.verse <= (layout.verseTops.first?.verse ?? 1)
+        guard index > 0 || !first else { return }
         // Once SwiftUI has sized the whole page: the verse just under the bar, as the reader opens.
         DispatchQueue.main.async { [weak self] in
             guard let self, self.window != nil else { return }
-            let top = place.verse > 1 ? (layout.top(of: place.verse) ?? 0) - layout.typography.s(12) : 0
+            let top = first ? 0 : (layout.top(of: place.verse) ?? 0) - layout.typography.s(4)
             let y = self.convert(CGPoint(x: 0, y: top), to: scroll).y - scroll.adjustedContentInset.top
             let most = scroll.contentSize.height + scroll.adjustedContentInset.bottom - scroll.bounds.height
             scroll.contentOffset.y = max(-scroll.adjustedContentInset.top, min(y, most))
@@ -377,18 +391,15 @@ private final class SpanCanvas: UIView {
         }
         // The line just under the navigation bar.
         let line = visible.minY + scroll.adjustedContentInset.top + layout.typography.s(12)
-        if line >= 0, line < bounds.height {
-            tracker?.report(PassagePlace(span: index, verse: layout.verse(atY: line)))
-        } else if index == 0, line < 0 {
-            tracker?.report(PassagePlace(span: 0, verse: layout.verseTops.first?.verse ?? 1))
-        }
+        tracker?.moved(index, line: line, height: bounds.height, verse: layout.verse(atY: max(line, 0)))
     }
 
     private final class Tile: UIView {
         weak var canvas: SpanCanvas?
 
         override func draw(_ rect: CGRect) {
-            guard let canvas, let layout = canvas.layout else { return }
+            guard let canvas, let layout = canvas.layout, let ctx = UIGraphicsGetCurrentContext() else { return }
+            ctx.translateBy(x: 0, y: -frame.minY)
             layout.draw(rect.offsetBy(dx: 0, dy: frame.minY), decorations: .init(theme: canvas.theme))
         }
     }
