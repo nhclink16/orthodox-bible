@@ -24,8 +24,12 @@ struct CheckButton: View {
 struct RuleItemLabel: View {
     let item: RuleDayItem
     let theme: Theme
-    /// Opens a chapter in the reader.
+    /// Reads Scripture.
     var reads = false
+    /// Opens a page of its own.
+    var opens = false
+    /// The step left open in Today when it was closed.
+    var paused = false
 
     var body: some View {
         HStack {
@@ -38,22 +42,28 @@ struct RuleItemLabel: View {
                         .font(.subheadline)
                         .foregroundStyle(Color(theme.ink2))
                 }
-                if let detail = item.detail {
-                    Text(detail)
+                let detail = [item.detail, paused ? "paused here" : nil].compactMap { $0 }
+                if !detail.isEmpty {
+                    Text(detail.joined(separator: " · "))
                         .font(.footnote)
                         .foregroundStyle(
-                            [.nothing, .notToday].contains(item.open) ? Color(theme.ink3) : Color(theme.accent))
+                            [.nothing, .notToday].contains(item.open) && !paused ? Color(theme.ink3) : Color(theme.accent))
                 }
             }
             Spacer(minLength: 0)
-            if reads {
-                Image(systemName: "book")
-                    .font(.footnote)
-                    .foregroundStyle(Color(theme.ink3))
-            } else if case .fathers = item.open {
+            if case .fathers = item.open {
                 // As the reader's Fathers action shows it.
                 Image(systemName: "text.book.closed")
                     .font(.footnote)
+                    .foregroundStyle(Color(theme.ink3))
+                    .accessibilityHidden(true)
+            } else if reads {
+                Image(systemName: "book")
+                    .font(.footnote)
+                    .foregroundStyle(Color(theme.ink3))
+            } else if opens {
+                Image(systemName: "chevron.right")
+                    .font(.footnote.weight(.semibold))
                     .foregroundStyle(Color(theme.ink3))
                     .accessibilityHidden(true)
             }
@@ -64,62 +74,11 @@ struct RuleItemLabel: View {
     }
 }
 
-/// A prayer to read, or the Jesus Prayer to count, with its check box for the day.
-struct RuleItemView: View {
-    @Environment(Store.self) private var store
-    let item: RuleDayItem
-    let date: Date
-    let theme: Theme
-
-    /// Whether it's checked off now (it may change here).
-    private var done: Bool {
-        store.ruleDay(date).blocks.flatMap(\.items).first { $0.id == item.id }?.done ?? item.done
-    }
-
-    private var future: Bool { CivilDate(date).number > CivilDate(Date()).number }
-
-    var body: some View {
-        Group {
-            switch item.open {
-            case .text(let title, let text, let source):
-                PrayerText(title: title, text: text, source: source, theme: theme) { mark }
-            case .jesusPrayer(let count):
-                JesusPrayerCounter(count: Int(count), theme: theme) {
-                    if !done && !future { set(true) }
-                }
-            default:
-                EmptyView()
-            }
-        }
-        // A prayer carries its title on the page.
-        .navigationTitle(isCount ? item.title : "")
-        .navigationBarTitleDisplayMode(.inline)
-    }
-
-    private var isCount: Bool {
-        if case .jesusPrayer = item.open { return true }
-        return false
-    }
-
-    private var mark: some View {
-        Button {
-            set(!done)
-        } label: {
-            Label(done ? "Done" : "Mark as done", systemImage: done ? "checkmark.circle.fill" : "circle")
-        }
-        .buttonStyle(.bordered)
-        .disabled(future)
-        .accessibilityIdentifier("mark-done")
-    }
-
-    private func set(_ on: Bool) {
-        store.setDone(item, day: CivilDate(date).number, on)
-    }
-}
-
 /// A prayer in the reader's type, on its paper.
-private struct PrayerText<Footer: View>: View {
+struct PrayerText<Footer: View>: View {
     let title: String
+    /// "Optional · With prostrations, in Great Lent".
+    var note: String?
     let text: String
     let source: String?
     let theme: Theme
@@ -128,10 +87,15 @@ private struct PrayerText<Footer: View>: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
-                Text(title)
-                    .font(.reading(24))
-                    .foregroundStyle(Color(theme.ink))
-                    .accessibilityAddTraits(.isHeader)
+                VStack(alignment: .leading, spacing: 6) {
+                    Text(title)
+                        .font(.reading(24))
+                        .foregroundStyle(Color(theme.ink))
+                        .accessibilityAddTraits(.isHeader)
+                    if let note {
+                        Text(note).font(.subheadline).foregroundStyle(Color(theme.ink2))
+                    }
+                }
                 Text(text)
                     .font(.reading(20))
                     .lineSpacing(9)
@@ -152,12 +116,13 @@ private struct PrayerText<Footer: View>: View {
 }
 
 /// The Jesus Prayer, counted on a large, quiet tap target: a light tick each time and a clear
-/// finish at the count.
-private struct JesusPrayerCounter: View {
+/// finish at the count. The count is kept by the step, so it stays while Today is left.
+struct JesusPrayerCounter<Footer: View>: View {
     let count: Int
+    @Binding var said: Int
     let theme: Theme
     let finished: () -> Void
-    @State private var said = 0
+    @ViewBuilder let footer: Footer
 
     private var done: Bool { said >= count }
     /// The words, as the core's public-domain source prints them.
@@ -193,7 +158,7 @@ private struct JesusPrayerCounter: View {
                         Image(systemName: "checkmark")
                             .font(.system(size: 40, weight: .light))
                             .foregroundStyle(Color(theme.accent))
-                        Text("Finished")
+                        Text("Glory to God")
                             .font(.headline)
                             .foregroundStyle(Color(theme.ink))
                     } else {
@@ -213,7 +178,7 @@ private struct JesusPrayerCounter: View {
                 .contentShape(RoundedRectangle(cornerRadius: 28, style: .continuous))
             }
             .buttonStyle(.plain)
-            .accessibilityLabel(done ? "Finished, \(count) of \(count)" : "\(said) of \(count). Tap to count one")
+            .accessibilityLabel(done ? "Glory to God, \(count) of \(count)" : "\(said) of \(count). Tap to count one")
             .accessibilityIdentifier("count")
             .sensoryFeedback(trigger: said) { old, new in
                 new == count ? .success : new > old ? .impact(weight: .light, intensity: 0.6) : nil
@@ -222,7 +187,10 @@ private struct JesusPrayerCounter: View {
                 .font(.subheadline)
                 .opacity(said == 0 ? 0 : 1)
                 .disabled(said == 0)
+            footer
         }
         .padding(20)
+        .frame(maxWidth: 640)
+        .frame(maxWidth: .infinity)
     }
 }

@@ -12,7 +12,8 @@ struct RootView: View {
             let safeTop = geo.safeAreaInsets.top
             ZStack(alignment: .top) {
                 ReaderContainer(
-                    store: store, theme: theme, style: typography(theme), translation: store.settings.translation,
+                    store: store, theme: theme, style: store.typography(theme, dynamicType: dynamicType),
+                    translation: store.settings.translation,
                     readingLine: safeTop + 60, selection: store.selection, marksVersion: store.marksVersion,
                     jump: store.jump
                 )
@@ -30,10 +31,26 @@ struct RootView: View {
                 }
                 .ignoresSafeArea()
 
-                TopBar(theme: theme)
-                    .padding(.top, 4)
-                    .offset(y: store.barsHidden ? -(safeTop + 72) : 0)
-                    .opacity(store.barsHidden ? 0 : 1)
+                VStack(alignment: .leading, spacing: 8) {
+                    TopBar(theme: theme)
+                    if store.returnToToday {
+                        // The reader opened from a step in Today, and the way back to it.
+                        Button { store.backToToday() } label: {
+                            Label("Back to Today", systemImage: "chevron.left")
+                                .font(.subheadline.weight(.semibold))
+                                .padding(.horizontal, 16)
+                                .frame(minHeight: 44)
+                        }
+                        .foregroundStyle(Color(theme.ink))
+                        .glass(in: Capsule(), theme: theme)
+                        .padding(.leading, 16)
+                        .accessibilityIdentifier("reader-back-today")
+                        .transition(.opacity)
+                    }
+                }
+                .padding(.top, 4)
+                .offset(y: store.barsHidden ? -(safeTop + 124) : 0)
+                .opacity(store.barsHidden ? 0 : 1)
             }
             .overlay(alignment: .bottom) {
                 VStack(spacing: 10) {
@@ -51,6 +68,7 @@ struct RootView: View {
             }
         }
         .animation(.smooth(duration: 0.28), value: store.barsHidden)
+        .animation(.smooth(duration: 0.28), value: store.returnToToday)
         .animation(.smooth(duration: 0.28), value: store.selection != nil)
         .animation(.smooth(duration: 0.28), value: store.toast)
         .statusBarHidden(store.barsHidden)
@@ -82,15 +100,18 @@ struct RootView: View {
         case .dark: .dark
         }
     }
+}
 
-    /// The reading size follows Dynamic Type: the setting is the size at the default text size.
-    private func typography(_ theme: Theme) -> Typography {
-        let s = store.settings
+extension Store {
+    /// How the reader sets type, and so a reading in Today. The reading size follows Dynamic Type:
+    /// the setting is the size at the default text size.
+    func typography(_ theme: Theme, dynamicType: DynamicTypeSize) -> Typography {
+        let s = settings
         let traits = UITraitCollection(preferredContentSizeCategory: UIContentSizeCategory(dynamicType))
         let size = UIFontMetrics(forTextStyle: .body).scaledValue(for: CGFloat(s.textSize), compatibleWith: traits)
         return Typography(
             size: min(size, 44).rounded(), lineSpacing: CGFloat(s.lineSpacing), redLetters: s.redLetters,
-            options: store.contentOptions, theme: theme.name, width: 0)
+            options: contentOptions, theme: theme.name, width: 0)
     }
 }
 

@@ -3,11 +3,12 @@ import UserNotifications
 
 /// The prayer rule's reminders: a notification at the time of each part of the day, set again
 /// whenever the app comes to the front or the rule or the switch changes. Tapping one opens
-/// Today.
+/// Today at that part of the day's first item not done.
 @MainActor
 final class Reminders: NSObject, UNUserNotificationCenterDelegate {
     private let center = UNUserNotificationCenter.current()
-    var opened: (() -> Void)?
+    /// A reminder was tapped: its part of the day's id, if it names one.
+    var opened: ((String?) -> Void)?
 
     /// How many days ahead a part of the day kept only in or out of Lent is reminded of.
     static let days = 14
@@ -44,7 +45,9 @@ final class Reminders: NSObject, UNUserNotificationCenterDelegate {
             let seasons = Set(block.items.map(\.season))
             if seasons.contains(.always) || seasons.isSuperset(of: [.greatLent, .outsideLent]) {
                 let always = block.items.filter { $0.season == .always }.map(\.title)
-                await add("rule-\(block.id)", "\(block.title) — \(time.label)", always, at: time.components, repeats: true)
+                await add(
+                    "rule-\(block.id)", block: block.id, "\(block.title) — \(time.label)", always, at: time.components,
+                    repeats: true)
                 continue
             }
             for (date, day) in days {
@@ -53,16 +56,19 @@ final class Reminders: NSObject, UNUserNotificationCenterDelegate {
                 (when.hour, when.minute) = (time.hour, time.minute)
                 guard let at = Calendar.current.date(from: when), at > Date() else { continue }
                 let id = "rule-\(block.id)-\(CivilDate(date).number)"
-                await add(id, "\(block.title) — \(time.label)", items.map(\.title), at: when, repeats: false)
+                await add(id, block: block.id, "\(block.title) — \(time.label)", items.map(\.title), at: when, repeats: false)
             }
         }
     }
 
-    private func add(_ id: String, _ title: String, _ items: [String], at when: DateComponents, repeats: Bool) async {
+    private func add(
+        _ id: String, block: String, _ title: String, _ items: [String], at when: DateComponents, repeats: Bool
+    ) async {
         let content = UNMutableNotificationContent()
         content.title = title
         content.body = items.joined(separator: " · ")
         content.sound = .default
+        content.userInfo = ["block": block]
         let trigger = UNCalendarNotificationTrigger(dateMatching: when, repeats: repeats)
         try? await center.add(UNNotificationRequest(identifier: id, content: content, trigger: trigger))
     }
@@ -74,7 +80,8 @@ final class Reminders: NSObject, UNUserNotificationCenterDelegate {
     }
 
     nonisolated func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse) async {
-        await MainActor.run { opened?() }
+        let block = response.notification.request.content.userInfo["block"] as? String
+        await MainActor.run { opened?(block) }
     }
 }
 

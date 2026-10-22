@@ -144,7 +144,8 @@ struct PlanDayView: View {
     }
 }
 
-/// A passage of a plan's day: a check box, and the passage to open in the reader.
+/// A passage of a plan's day: a check box, and the passage to read in Today, checked off by Done
+/// there.
 struct PassageRow: View {
     @Environment(Store.self) private var store
     let plan: String
@@ -161,7 +162,11 @@ struct PassageRow: View {
             .accessibilityLabel(passage.label)
             .accessibilityIdentifier("passage-\(plan)-\(day)-\(index)")
             Button {
-                store.read(passage, plan: plan, day: day, index: index)
+                let passages = store.planDay(plan, day)?.passages ?? [passage]
+                let steps = passages.indices.map { i in
+                    WalkStep(plan: PlanPassageRef(id: plan, day: day, passage: i), passages[i], store: store)
+                }
+                store.read(steps, at: index, on: Date())
             } label: {
                 HStack {
                     Text(passage.label)
@@ -174,8 +179,24 @@ struct PassageRow: View {
                 .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
-            .accessibilityHint("Opens in the reader and checks it off")
+            .accessibilityHint("Opens it to read")
             .accessibilityIdentifier("read-\(plan)-\(day)-\(index)")
         }
+    }
+}
+
+extension WalkStep {
+    /// A plan's passage, to read in Today: a whole chapter, or the verses its label names
+    /// ("Psalm 116:1–9", where the Septuagint splits a psalm).
+    @MainActor
+    init(plan: PlanPassageRef, _ p: PlanPassage, store: Store) {
+        let last = p.label.contains(":") ? p.label.split(separator: "–").last.flatMap { UInt8($0) } : nil
+        let passage = ReadingPassage(
+            from: store.ref(chapter: Int(p.chapterIndex), verse: Int(p.verse)),
+            to: store.ref(chapter: Int(p.chapterIndex), verse: Int(last ?? 255)), chapterIndex: p.chapterIndex)
+        self.init(
+            title: p.label, service: "Day \(plan.day)", intro: nil,
+            parts: [RulePart(label: "Day \(plan.day)", reference: p.label, passages: [passage], end: "End of \(p.label)")],
+            plan: plan)
     }
 }

@@ -47,6 +47,8 @@ final class ChapterLayout {
     let content: ChapterContent
     let typography: Typography
     let height: CGFloat
+    /// Where the text ends, without the space the reader leaves before the next chapter.
+    let textBottom: CGFloat
     /// Each verse's top, in order.
     let verseTops: [(verse: Int, y: CGFloat)]
     /// Highlights, notes and bookmarks by verse.
@@ -79,7 +81,7 @@ final class ChapterLayout {
         headings = set.headings
 
         let column = t.column
-        let top = content.book == 25 ? 0 : t.s(16)
+        let top = content.book == 25 || !content.head ? 0 : t.s(16)
         let origin = CGPoint(x: column.x, y: top)
         let container = NSTextContainer(size: CGSize(width: column.width, height: .greatestFiniteMagnitude))
         container.lineFragmentPadding = 0
@@ -91,6 +93,7 @@ final class ChapterLayout {
         manager.ensureLayout(for: container)
         let used = manager.usedRect(for: container)
         height = (top + used.maxY + t.s(80) + 32).rounded()
+        textBottom = (top + used.maxY).rounded(.up)
         self.storage = storage
         self.manager = manager
         self.container = container
@@ -343,7 +346,9 @@ private struct Typesetter {
     mutating func chapter(_ c: ChapterContent) {
         let s = t.s
         var firstSpace: CGFloat = 0
-        if c.book == 25 {
+        if !c.head {
+            // Verses from later in the chapter (a reading in Today): no head over them.
+        } else if c.book == 25 {
             label("PSALM \(c.shownChapter)", before: 0, align: .natural)
         } else if c.chapter == 1 {
             display(c.bookName, before: 0)

@@ -448,19 +448,28 @@ What differs is the toolkit, and here the Mac's choice is overruled.
   local notifications: daily for a part of the day with something in it every day
   (`rule-<block id>`), and for one kept only in or out of Lent, on each of its days in the coming
   two weeks. They're set again whenever the app comes to the front or the rule or the switch
-  changes; the app asks to send notifications only when the switch is first turned on. The
-  phone doesn't see when a chapter has been read to the end, so opening a plan's passage checks
-  it off.
+  changes; the app asks to send notifications only when the switch is first turned on. A
+  plan's passage is checked off by Done at the end of its text in Today, not by opening it.
+- **Praying through a part of the day** (Orthodox fork) happens inside Today's sheet, on a
+  navigation path `Store` keeps: Begin (on the Now card or a part's header), a row, a reminder
+  (its part of the day is in the notification's `userInfo`) or a reading opens a step there, Done
+  ticks it and opens the next (`rule_next`), and a part with more than one item ends on a short
+  page. `Store` also keeps the verse each reading reached and the Jesus Prayer's count, so Today
+  can be swiped away, or the reader opened from a step (with a Back to Today capsule), and the
+  step comes back as it was. Steps read Scripture in `PassageView`: one `ChapterLayout` for each
+  run of verses from `chapter_span`, so it is the reader's own typesetting and drawing with
+  nothing either side of the reading laid out. It doesn't use `ReaderView`, whose coordinator
+  writes the reader's place, so a step never moves the reader.
 - **The day's readings** (`day_readings`) come with the passages the reader opens and the
   occasion each is read for, when the day's great feast doesn't name it: St Artemius's Epistle
   beside a weekday's Gospel, and St Demetrius's whole day, but not the Nativity's (nor its Royal
   Hours). A saint's or fixed feast's occasion is told from the weekly cycles' by whether it's read
   on the same date two years running (any of 2024–2032); the cycles' and Pascha's never are, since
   the date's weekday moves on. It's known by name, so St George moved to Bright Monday is too. The
-  rule's Readings item opens the Liturgy's Gospel (on a Lenten weekday, the first reading, and
-  says so), and the Fathers item opens the Fathers on its first verse. The readings, and so these
-  items, follow the usage chosen in Settings (Readings: the Greek or the Antiochian Archdiocese),
-  which stays on the phone and isn't synced.
+  rule's Readings item reads the Liturgy's Epistle and Gospel (on a Lenten weekday, the first
+  reading, and says so), and the Fathers item the Fathers on that Gospel, verse by verse. The
+  readings, and so these items, follow the usage chosen in Settings (Readings: the Greek or the
+  Antiochian Archdiocese), which stays on the phone and isn't synced.
 - **Sync with the Mac** goes through a folder the person picks in Files (iCloud Drive › Orthodox
   Bible › Sync, which the Mac makes), kept as a bookmark, so the app needs no iCloud entitlement.
   Another folder is asked about first, and one moved since (into Recently Deleted, say) isn't

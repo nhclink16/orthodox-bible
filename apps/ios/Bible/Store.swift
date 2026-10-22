@@ -100,6 +100,44 @@ struct JumpRequest: Equatable {
     var flash = false
 }
 
+/// A part of the rule being prayed through in Today (Orthodox fork): its day, fixed at Begin, and
+/// the item open, or none for the end page.
+struct RuleSession: Equatable {
+    var date: Date
+    var block: String
+    var item: String?
+    /// Passed over without a tick; only Continue minds them.
+    var skipped: Set<String> = []
+    /// Back to Today after the last item: kept only so the page shows as it goes.
+    var over = false
+}
+
+/// Readings opened from Today's Readings, Psalter or a plan, read in Today one after another.
+struct ReadingWalk: Equatable {
+    var date: Date
+    var steps: [WalkStep]
+    var index: Int
+}
+
+struct WalkStep: Equatable {
+    /// "Gospel", "Kathisma 12", "Psalm 2".
+    let title: String
+    /// Where it's read, for the subtitle and the menu's groups: "Liturgy", "Day 3".
+    let service: String
+    /// The line over the text: "Luke 9:23–27 · Great Martyr Artemius".
+    let intro: String?
+    let parts: [RulePart]
+    /// A plan's passage, which Done checks off.
+    var plan: PlanPassageRef?
+}
+
+/// A passage of a plan's day: the plan, the day and its place in the day (from 0).
+struct PlanPassageRef: Equatable {
+    let id: String
+    let day: UInt32
+    let passage: Int
+}
+
 enum Sheet: Identifiable, Equatable {
     case books, search, settings, study, today
     case note(VerseRef)
@@ -142,13 +180,36 @@ final class Store {
     var selection: VerseSelection?
     /// Bumped whenever highlights, notes or bookmarks change.
     private(set) var marksVersion = 0
-    var sheet: Sheet?
+    var sheet: Sheet? {
+        didSet {
+            if sheet == .today { returnToToday = false }
+            if oldValue == .today, sheet != .today { todayClosed() }
+        }
+    }
     var barsHidden = false
     /// Bumped when a reminder asks for Today, which then goes back to today's date.
     private(set) var todayRequest = 0
     private(set) var toast: String?
     /// Bumped whenever the prayer rule, a check mark or a reading plan changes.
-    private(set) var ruleVersion = 0
+    private(set) var ruleVersion = 0 {
+        didSet { keepSessionInRule() }
+    }
+    /// Where Today is: the pages pushed on it, and the day shown (from today).
+    var todayPath: [TodayRoute] = []
+    var todayOffset = 0
+    /// The part of the rule under way in Today, kept while Today is closed.
+    private(set) var session: RuleSession?
+    private(set) var walk: ReadingWalk?
+    /// Parts of the day finished today (their end page reached), by day: the Now card moves on.
+    private(set) var ended: [Int64: Set<String>] = [:]
+    /// The Jesus Prayer counted so far, by day and item.
+    var counts: [String: Int] = [:]
+    /// Where each reading of a step had got to (by `placeKey`), so it opens there again; and
+    /// which of its verses the Fathers step was on.
+    @ObservationIgnored var places: [String: PassagePlace] = [:]
+    @ObservationIgnored var fathersAt: [String: Int] = [:]
+    /// The reader was opened from a step in Today: a capsule leads back to it.
+    private(set) var returnToToday = false
     /// The rule's reminders are on and notifications allowed.
     private(set) var remindersOn = false
     /// The folder synced with the Mac, as a bookmark; `nil` while sync is off.
@@ -211,7 +272,7 @@ final class Store {
         syncBookmark = bible.setting(key: Self.syncKey).flatMap { $0.isEmpty ? nil : Data(base64Encoded: $0) }
         setSeptuagintNumbering(on: settings.septuagintPsalms)
         jump = JumpRequest(chapter: position.chapter, verse: position.verse)
-        reminders.opened = { [weak self] in self?.openToday() }
+        reminders.opened = { [weak self] block in self?.openToday(block: block) }
     }
 
     /// The study database and imported texts live in Application Support. If that can't be
@@ -419,13 +480,17 @@ final class Store {
 
     // MARK: Prayer rule and plans
 
-    /// The rule on a day, with what was checked off.
-    func ruleDay(_ date: Date) -> RuleDay {
+    /// The rule on a day, with what was checked off; given the time it is `now` (on that day), it
+    /// also says which part of the day the Now card offers.
+    func ruleDay(_ date: Date, now: Date? = nil, ending block: String? = nil) -> RuleDay {
         _ = ruleVersion
         let d = CivilDate(date)
+        let minute = now.map { Calendar.current.dateComponents([.hour, .minute], from: $0) }
+            .map { UInt16(($0.hour ?? 0) * 60 + ($0.minute ?? 0)) }
+        let ended = (ended[d.number] ?? []).union(block.map { [$0] } ?? [])
         return bible.ruleDay(
             year: d.year, month: d.month, day: d.day, oldCalendar: settings.oldCalendar, usage: settings.usage,
-            midnight: Self.midnight(date))
+            midnight: Self.midnight(date), minute: minute, ended: now == nil ? [] : Array(ended))
     }
 
     func month(year: Int32, month: UInt8) -> [MonthDay] {
@@ -484,25 +549,17 @@ final class Store {
         changing { try bible.setPlanRead(plan: plan, day: day, passage: UInt8(passage), read: read) }
     }
 
-    /// Opens a chapter in the reader and closes the sheet over it.
-    func read(_ chapter: Int, verse: Int = 1) {
-        go(to: chapter, verse: verse, flash: verse > 1)
-        sheet = nil
-    }
-
-    /// Opens a plan's passage in the reader, checking it off: the phone can't tell when it's
-    /// been read to the end, as the Mac does.
-    func read(_ passage: PlanPassage, plan: String, day: UInt32, index: Int) {
-        if !passage.read {
-            setRead(plan, day: day, passage: index, true)
-            show("\(passage.label) checked off")
-        }
-        read(Int(passage.chapterIndex), verse: Int(passage.verse))
-    }
-
-    /// Shows Today at today's date, after the note being written, if one is.
-    func openToday() {
+    /// Shows Today at today's date, after the note being written, if one is. A reminder names its
+    /// part of the day, which opens at its first item not done (Today itself once it's all done);
+    /// one set before reminders named it opens Today.
+    func openToday(block: String? = nil) {
         todayRequest += 1
+        todayOffset = 0
+        if let block, let item = startItem(block, on: Date()) {
+            open(item, block: block, on: Date())
+        } else {
+            todayPath = []
+        }
         if case .note = sheet { todayPending = true } else { sheet = .today }
     }
 
@@ -512,6 +569,222 @@ final class Store {
         todayPending = false
         sheet = .today
     }
+
+    // MARK: Praying through a part of the day
+
+    /// A part of the day on `date`, with its items then.
+    func block(_ id: String, on date: Date) -> RuleDayBlock? {
+        ruleDay(date).blocks.first { $0.id == id }
+    }
+
+    /// What an item of the rule is (the day's items say what they open, not what they are).
+    func kind(of item: String) -> RuleKind? {
+        _ = ruleVersion
+        return bible.rule().blocks.lazy.flatMap(\.items).first { $0.id == item }?.kind
+    }
+
+    /// The item of part of the day `block` on `date` after `after` (from the top when `nil`) that
+    /// isn't done and has something to do then.
+    func ruleNext(_ block: String, after: String?, on date: Date) -> String? {
+        let d = CivilDate(date)
+        return bible.ruleNext(
+            year: d.year, month: d.month, day: d.day, oldCalendar: settings.oldCalendar,
+            midnight: Self.midnight(date), block: block, after: after)
+    }
+
+    /// What Begin or Continue opens in part of the day `block` on `date`: the step paused there,
+    /// or once it's done the next not done after it (passing over those skipped), or else the
+    /// first not done. `nil` when there's nothing left to do.
+    func startItem(_ block: String, on date: Date) -> String? {
+        guard let s = session, !s.over, s.block == block, Self.sameDay(s.date, date), let paused = s.item else {
+            return ruleNext(block, after: nil, on: date)
+        }
+        if self.block(block, on: date)?.items.first(where: { $0.id == paused })?.done == false { return paused }
+        var next = ruleNext(block, after: paused, on: date)
+        while let n = next, s.skipped.contains(n) { next = ruleNext(block, after: n, on: date) }
+        return next ?? ruleNext(block, after: nil, on: date)
+    }
+
+    /// Whether Begin reads Continue: something in the part of the day is done, or paused.
+    func begun(_ block: RuleDayBlock, on date: Date) -> Bool {
+        block.items.contains(where: \.done) || paused(in: block.id, on: date) != nil
+    }
+
+    /// The item paused in part of the day `block` on `date`, if one is.
+    func paused(in block: String, on date: Date) -> String? {
+        guard let s = session, !s.over, s.block == block, Self.sameDay(s.date, date) else { return nil }
+        return s.item
+    }
+
+    /// Begin or Continue (a reminder too): the part of the day opens at `startItem` in Today.
+    func begin(_ block: String, on date: Date) {
+        guard let item = startItem(block, on: date) else { return }
+        open(item, block: block, on: date)
+    }
+
+    /// Opens an item as a step of its part of the day, from its row or the title menu. Another
+    /// part of the day paused meanwhile is forgotten; its ticks stay.
+    func open(_ item: String, block: String, on date: Date) {
+        if session.map({ $0.over || $0.block != block || !Self.sameDay($0.date, date) }) ?? true {
+            session = RuleSession(date: Calendar.current.startOfDay(for: date), block: block)
+        }
+        session?.item = item
+        if todayPath.last != .session { todayPath = [.session] }
+    }
+
+    /// The step's item, as the day has it now.
+    var sessionItem: RuleDayItem? {
+        guard let s = session, let item = s.item else { return nil }
+        return block(s.block, on: s.date)?.items.first { $0.id == item }
+    }
+
+    /// Done: ticks the item (on a day still to come, nothing) and opens the next. A plan's item
+    /// checks off the passage shown; while the day has another, that one opens in its place.
+    func done() {
+        guard let s = session, let item = sessionItem else { return }
+        let day = CivilDate(s.date).number
+        if !Self.ahead(s.date) {
+            if case .plan(let plan, let planDay) = item.open, let i = unreadPassage(plan, day: planDay) {
+                setRead(plan, day: planDay, passage: i, true)
+                places[Self.placeKey(item.id, on: s.date)] = nil
+                if unreadPassage(plan, day: planDay) != nil { return }
+            } else if !item.done {
+                setDone(item, day: day, true)
+            }
+        }
+        advance(after: item.id)
+    }
+
+    /// Skip: on to the next without a tick.
+    func skip() {
+        guard let item = session?.item else { return }
+        session?.skipped.insert(item)
+        advance(after: item)
+    }
+
+    /// The next item not done below `item`; after the last, the end page, or Today straight away
+    /// for a part of the day with one item or on a day still to come (nothing was prayed).
+    private func advance(after item: String) {
+        guard let s = session else { return }
+        if let next = ruleNext(s.block, after: item, on: s.date) {
+            session?.item = next
+        } else if !Self.ahead(s.date), (block(s.block, on: s.date)?.items.count ?? 0) > 1 {
+            session?.item = nil
+        } else {
+            finish()
+        }
+    }
+
+    /// Back to Today from the end page (or after a part of the day's only item): it's over for
+    /// today, and the Now card moves on. A day still to come keeps its parts of the day.
+    func finish() {
+        guard let s = session, !s.over else { return }
+        if !Self.ahead(s.date) { ended[CivilDate(s.date).number, default: []].insert(s.block) }
+        session?.over = true
+        todayPath = []
+    }
+
+    /// The end page's last line: the part of the day the Now card offers next, when it comes later
+    /// in the day than this one (none for another day than today); else tomorrow's first. Midday
+    /// left undone is not what comes after the evening.
+    func nextInRule(after block: String, on date: Date) -> String? {
+        guard Self.sameDay(date, Date()) else { return nil }
+        let today = ruleDay(date, now: Date(), ending: block)
+        let at = { (b: RuleDayBlock) in RuleTime(b.time).map { "\(b.title) at \($0.label)" } }
+        let finished = today.blocks.first { $0.id == block }.flatMap { RuleTime($0.time)?.text } ?? "00:00"
+        if let id = today.now?.block, let b = today.blocks.first(where: { $0.id == id }),
+            let time = RuleTime(b.time), time.text > finished, let next = at(b)
+        {
+            return "Next in your rule: \(next)"
+        }
+        let tomorrow = Calendar.current.date(byAdding: .day, value: 1, to: date) ?? date
+        let first = ruleDay(tomorrow).blocks.filter { RuleTime($0.time) != nil }
+            .min { RuleTime($0.time)!.text < RuleTime($1.time)!.text }
+        return first.flatMap(at).map { "Tomorrow: \($0)" }
+    }
+
+    /// Where a step's reading is kept in `places`: by day and item.
+    static func placeKey(_ item: String, on date: Date) -> String { "\(CivilDate(date).number)-\(item)" }
+
+    /// The first passage not read of a plan's day.
+    func unreadPassage(_ plan: String, day: UInt32) -> Int? {
+        planDay(plan, day)?.passages.firstIndex { !$0.read }
+    }
+
+    /// The rule changed (here or on the Mac): an open item that has gone gives way to the next.
+    private func keepSessionInRule() {
+        guard let s = session, !s.over else { return }
+        guard let block = block(s.block, on: s.date) else {
+            // The part of the day has gone from the rule.
+            session = nil
+            todayPath.removeAll { $0 == .session }
+            return
+        }
+        guard let item = s.item, !block.items.contains(where: { $0.id == item }) else { return }
+        // From the top: where the item stood is gone with it.
+        session?.item = ruleNext(s.block, after: item, on: s.date)
+    }
+
+    /// Opens readings from Today's Readings, Psalter or plans, at `index`.
+    func read(_ steps: [WalkStep], at index: Int, on date: Date) {
+        guard steps.indices.contains(index) else { return }
+        walk = ReadingWalk(date: Calendar.current.startOfDay(for: date), steps: steps, index: index)
+        todayPath.append(.walk)
+    }
+
+    /// The walk's next reading, or another picked from its menu.
+    func walk(to index: Int) {
+        guard walk?.steps.indices.contains(index) == true else { return }
+        walk?.index = index
+    }
+
+    /// Done on a plan's passage: checks it off, and opens the day's next not read, or goes back.
+    func walkDone() {
+        guard let w = walk else { return }
+        if let plan = w.steps[w.index].plan, !Self.ahead(w.date) {
+            setRead(plan.id, day: plan.day, passage: plan.passage, true)
+        }
+        let unread = { (i: Int) in
+            w.steps[i].plan.map { self.planDay($0.id, $0.day)?.passages.dropFirst($0.passage).first?.read == false }
+                ?? true
+        }
+        if let next = w.steps.indices.first(where: { $0 > w.index && unread($0) }) {
+            walk?.index = next
+        } else if todayPath.last == .walk {
+            todayPath.removeLast()
+        }
+    }
+
+    /// The book button: the reader at the verse in view, with a way back to the step.
+    func openInReader(chapter: Int, verse: Int) {
+        go(to: chapter, verse: verse, flash: true)
+        sheet = nil
+        returnToToday = true
+    }
+
+    /// The reader's Back to Today: Today again, at the step it left.
+    func backToToday() {
+        selection = nil
+        sheet = .today
+    }
+
+    /// Today has closed. Unless a step is open in it, it opens next time at today, from the top.
+    private func todayClosed() {
+        if session?.item == nil { finish() }
+        guard !todayPath.contains(where: { $0 == .session || $0 == .walk }) else { return }
+        todayPath = []
+        todayOffset = 0
+    }
+
+    /// The chapter (0–1364) a verse is in.
+    func chapterIndex(of ref: VerseRef) -> Int {
+        Int(bookList.first { $0.index == ref.book }?.firstChapter ?? 0) + Int(ref.chapter) - 1
+    }
+
+    static func sameDay(_ a: Date, _ b: Date) -> Bool { Calendar.current.isDate(a, inSameDayAs: b) }
+
+    /// A day still to come, when nothing is checked off.
+    static func ahead(_ date: Date) -> Bool { CivilDate(date).number > CivilDate(Date()).number }
 
     /// Sets the reminders to the saved rule, if they're on and allowed.
     func refreshReminders() async {
