@@ -634,10 +634,9 @@ pub fn counter(
     if resp.has_focus() {
         painter.circle_stroke(c, radius + 1.5, egui::Stroke::new(3.0, p.focus));
     }
-    // Space counts unless a field (the toolbar's search) is being typed in.
-    let space = !finished
-        && !ui.ctx().egui_wants_keyboard_input()
-        && ui.input_mut(|i| i.consume_key(Modifiers::NONE, Key::Space));
+    // Space counts unless a field (the toolbar's search) is being typed in, or something is open
+    // over the page.
+    let space = !finished && env.keyboard && ui.input_mut(|i| i.consume_key(Modifiers::NONE, Key::Space));
     if !finished && (resp.clicked() || space) {
         *n += 1;
         if *n >= target && day <= super::today::today() {

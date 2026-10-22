@@ -702,6 +702,10 @@ impl BibleApp {
                     self.toast(ctx, more);
                 }
             }
+            // On Today, bookmarking and copying (⌘D, ⌘C, ⌘⇧C, Go › Bookmark) would act on the
+            // reader's verses out of sight, so they wait for the reader.
+            Action::ToggleBookmark | Action::Copy | Action::CopyText
+                if self.pages.page == crate::pages::Page::Today => {}
             // Back from a view on Today (a step, the rule's editor) is Today; from the reader
             // opened from a step, once it is back where it arrived, the step.
             Action::Back if self.pages.page == crate::pages::Page::Today && self.pages.today.viewing() => {
@@ -2639,6 +2643,10 @@ impl eframe::App for BibleApp {
                     query: &query,
                     toolbar: self.chrome.height,
                     fathers: self.fathers_db.as_ref(),
+                    keyboard: !ctx.egui_wants_keyboard_input()
+                        && self.palette.is_none()
+                        && !self.shortcuts_open
+                        && self.settings_ui.is_none(),
                 };
                 self.pages.show(ui, full, &env, &mut actions);
                 let material = ctx.animate_bool_with_time(

@@ -176,6 +176,7 @@ fn the_empty_notes_page_scrolls_to_its_last_row_in_a_short_window() {
         query: "",
         toolbar: 52.0,
         fathers: None,
+        keyboard: true,
     };
     let mut pages = Pages::default();
     pages.open(Page::Notes);

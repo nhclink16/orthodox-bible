@@ -6,7 +6,7 @@
 //! its items, the readings, the Psalter and the plans all open as steps in the page's place
 //! (`step`).
 
-use std::collections::HashSet;
+use std::collections::{HashMap, HashSet};
 
 use eframe::egui::{
     self, Align2, Color32, FontId, Key, Modifiers, Rect, Sense, Stroke, StrokeKind, Ui, pos2, vec2,
@@ -69,6 +69,8 @@ pub struct State {
     session: Option<Session>,
     /// The blocks whose end page was reached, on that day: the Now card passes over them.
     ended: (Day, HashSet<String>),
+    /// The Jesus Prayer's count for each counter on each day, kept whichever block is begun.
+    counts: HashMap<(Day, String), u16>,
     /// A block to begin on the next frame (a reminder's Begin, the palette), by id.
     begin: Option<String>,
     /// Points to scroll down on the next frame (the arrow and page keys).
@@ -413,9 +415,17 @@ impl State {
         self.session.as_ref()
     }
 
-    /// Back to Today from a view: a step is paused, for Continue.
+    /// The Jesus Prayer's count so far on day `d` for the counter `item`.
+    pub fn count(&self, d: Day, item: &str) -> u16 {
+        self.counts.get(&(d, item.to_string())).copied().unwrap_or(0)
+    }
+
+    /// Back to Today from a view: a step is paused, for Continue. The rule's editor stays while
+    /// it has changes to save, as with Escape.
     pub fn close(&mut self) {
-        self.view = None;
+        if !matches!(&self.view, Some(View::Edit(editor)) if editor.changed()) {
+            self.view = None;
+        }
     }
 
     /// Begins block `id` today on the next frame, at its first item not done: a reminder's
@@ -461,10 +471,10 @@ impl State {
             }
             "day" => self.offset = arg.parse().unwrap_or(0),
             "count" => {
-                if let Some(s) = &mut self.session
+                if let Some(s) = &self.session
                     && let Some(id) = s.item.clone()
                 {
-                    s.counts.insert(id, arg.parse().unwrap_or(0));
+                    self.counts.insert((s.day, id), arg.parse().unwrap_or(0));
                 }
             }
             "begin" => self.begin_block(env, rule, arg, d, None),
@@ -588,7 +598,8 @@ impl State {
             self.ended = (today(), HashSet::new());
         }
         if let (Some(View::Step), Some(s)) = (&self.view, &mut self.session) {
-            let shown = step::show(s, ui, content, env, &prayer_rule, actions);
+            let shown =
+                step::show(s, ui, content, env, &prayer_rule, &self.ended.1, &mut self.counts, actions);
             if let (true, Walk::Block(b)) = (shown.ended, &s.walk)
                 && s.day == self.ended.0
             {
@@ -603,8 +614,8 @@ impl State {
         if let Some(view) = &mut self.view {
             let (bottom, back) = match view {
                 View::Edit(editor) => {
-                    let escape = !ui.ctx().egui_wants_keyboard_input()
-                        && ui.input_mut(|i| i.consume_key(Modifiers::NONE, Key::Escape));
+                    let escape =
+                        env.keyboard && ui.input_mut(|i| i.consume_key(Modifiers::NONE, Key::Escape));
                     let (bottom, back) = editor.show(ui, content, env, actions);
                     (bottom, back || escape && !editor.changed())
                 }
@@ -1022,7 +1033,8 @@ impl State {
         };
         let paused = self.session.as_ref().and_then(|s| s.paused_in(d)).is_some_and(|(b, _)| b == block.id);
         let begun = paused || steps.iter().any(|s| s.done);
-        // Its items, done ones ticked in the tertiary ink.
+        // Its items, done ones ticked in the tertiary ink; a line breaks after a dot, never
+        // inside a name.
         let mut job = egui::text::LayoutJob::default();
         for (i, st) in steps.iter().filter(|s| !s.idle).enumerate() {
             let ink = if st.done { p.ink_3 } else { p.ink_2 };
@@ -1033,10 +1045,10 @@ impl State {
                 ..Default::default()
             };
             if i > 0 {
-                job.append(" · ", 0.0, egui::TextFormat { color: p.ink_3, ..format.clone() });
+                job.append("\u{a0}· ", 0.0, egui::TextFormat { color: p.ink_3, ..format.clone() });
             }
             let name = if st.done { format!("✓ {}", st.title) } else { st.title.clone() };
-            job.append(&name, 0.0, format);
+            job.append(&name.replace(' ', "\u{a0}"), 0.0, format);
         }
         job.wrap.max_width = width - 32.0;
         let names = painter.layout_job(job);
@@ -1064,8 +1076,7 @@ impl State {
         }
         let b = Button::new(Kind::Primary, if begun { "Continue" } else { "Begin" });
         let (_, resp) = b.show_right(ui, p, card.right() - 16.0, top + 28.0, ui.id().with("now-begin"));
-        let enter = !ui.ctx().egui_wants_keyboard_input()
-            && ui.input_mut(|i| i.consume_key(Modifiers::COMMAND, Key::Enter));
+        let enter = env.keyboard && ui.input_mut(|i| i.consume_key(Modifiers::COMMAND, Key::Enter));
         if resp.on_hover_text("⌘↩").clicked() || enter {
             let id = block.id.clone();
             self.begin_block(env, rule, &id, d, None);

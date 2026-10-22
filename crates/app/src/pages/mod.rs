@@ -79,6 +79,9 @@ pub struct PageEnv<'a> {
     pub toolbar: f32,
     /// The Church Fathers' quotes, once installed (a step on Today shows them).
     pub fathers: Option<&'a bible_core::fathers::Fathers>,
+    /// The page may take keys: no field is being typed in and nothing (the palette, the
+    /// shortcuts, Settings) is open over it.
+    pub keyboard: bool,
 }
 
 /// The open page and each page's own state.

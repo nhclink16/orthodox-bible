@@ -29,6 +29,8 @@ const CARD_GAP: f32 = 40.0;
 const NARROW: f32 = 440.0;
 /// From the crumb to a step's title.
 const TITLE_TOP: f32 = 48.0;
+/// The strip, one line high.
+const STRIP_LINE: f32 = 16.0 + 22.0;
 
 /// What a session walks through.
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -84,8 +86,6 @@ pub struct Session {
     pub skipped: HashSet<String>,
     /// The verse each step was left at, for Continue.
     places: HashMap<String, VerseRef>,
-    /// The Jesus Prayer's count for each counter, kept for the day.
-    pub counts: HashMap<String, u16>,
     /// The Fathers step's panel, on its verse.
     fathers: Option<FathersPanel>,
     /// The step's Scripture, typeset.
@@ -116,7 +116,6 @@ impl Session {
             item,
             skipped: HashSet::new(),
             places: HashMap::new(),
-            counts: HashMap::new(),
             fathers: None,
             passage: PassageView::default(),
             top: true,
@@ -382,12 +381,17 @@ struct Footer {
 }
 
 /// Draws the step open in `s` in the page's `content` (in the page's scrolling coordinates).
+/// `ended` holds the blocks finished today, and `counts` the Jesus Prayer's count for each
+/// counter and day.
+#[allow(clippy::too_many_arguments)]
 pub fn show(
     s: &mut Session,
     ui: &mut Ui,
     content: Rect,
     env: &PageEnv<'_>,
     rule: &Rule,
+    ended: &HashSet<String>,
+    counts: &mut HashMap<(Day, String), u16>,
     actions: &mut Vec<Action>,
 ) -> Shown {
     let p = env.settings.theme.palette();
@@ -407,11 +411,11 @@ pub fn show(
             }
         }
     }
-    // Presses from the keyboard and the card are handled with the footer's.
+    // Presses from the keyboard and the card are handled with the footer's; the keys are left to
+    // the palette or a sheet open over the step.
     let press = s.press.take().or_else(|| {
-        let enter = ui.input_mut(|i| i.consume_key(Modifiers::COMMAND, Key::Enter));
-        let escape = !ui.ctx().egui_wants_keyboard_input()
-            && ui.input_mut(|i| i.consume_key(Modifiers::NONE, Key::Escape));
+        let enter = env.keyboard && ui.input_mut(|i| i.consume_key(Modifiers::COMMAND, Key::Enter));
+        let escape = env.keyboard && ui.input_mut(|i| i.consume_key(Modifiers::NONE, Key::Escape));
         if escape {
             Some(Press::Back)
         } else if enter {
@@ -424,7 +428,11 @@ pub fn show(
     let Some(id) = s.item.clone() else {
         // The end page.
         out.ended = true;
-        let back = end_page(ui, env, content, (&home, &name), rule, s.day);
+        let this = match &s.walk {
+            Walk::Block(b) => b.as_str(),
+            _ => "",
+        };
+        let back = end_page(ui, env, content, (&home, &name), rule, s.day, (this, ended));
         out.bottom = back.0;
         out.back = back.1 || press == Some(Press::Back) || press == Some(Press::Done);
         return out;
@@ -433,7 +441,8 @@ pub fn show(
     s.counting = matches!(step.open, Open::Count(_));
     let mut scroll_to = None;
     let future = s.day > today;
-    let counted = matches!(step.open, Open::Count(n) if s.counts.get(&id).is_some_and(|c| *c >= n));
+    let count = (s.day, id.clone());
+    let counted = matches!(step.open, Open::Count(n) if counts.get(&count).is_some_and(|c| *c >= n));
     let done = step.done && !counted;
     let then = next(rule, env, &s.walk, s.day, &steps, &id, true);
     let ticks = !future && step.tick != Tick::Nothing;
@@ -528,7 +537,7 @@ pub fn show(
     };
     let open_reader = text_parts.is_some()
         && (std::mem::take(&mut s.demo_reader)
-            || ui.input_mut(|i| i.consume_key(Modifiers::COMMAND, Key::O))
+            || env.keyboard && ui.input_mut(|i| i.consume_key(Modifiers::COMMAND, Key::O))
             || {
                 let b = Button::new(Kind::Ghost, "Open in reader ⌘O").small();
                 let at = content.right() - 12.0 + b.rest_inset();
@@ -540,9 +549,12 @@ pub fn show(
         actions.push(Action::OpenInReader { passages, at, from: format!("{name} › {}", step.title) });
     }
     y += 28.0;
-    // The strip's place, under the crumb.
+    // The strip's place, under the crumb: the block's names there, and one line of them once it
+    // stays under the toolbar while the text scrolls.
     let strip_top = y;
     let strip_h = if strip { strip_height(ui, p, &steps, &id, content.width()) } else { 0.0 };
+    let stuck = strip && strip_top < below_toolbar - 0.5;
+    let shown_h = if stuck { STRIP_LINE } else { strip_h };
     if strip {
         y += strip_h + 8.0;
     }
@@ -562,15 +574,9 @@ pub fn show(
     if step.optional {
         widgets::badge(&painter, p, tail + 12.0, y - 18.0, BadgeKind::Neutral, "Optional");
     }
-    // "Optional" shows as the tag by the title.
-    let mut detail = step.detail.trim_end_matches("Optional").trim_end_matches(" · ").to_string();
+    // "Optional" shows as the tag by the title. A line that wraps does so after a dot.
+    let detail = step.detail.trim_end_matches("Optional").trim_end_matches(" · ").replace(" · ", "\u{a0}· ");
     let stops = s.passage.stops();
-    if strip && !stops.is_empty() {
-        // The psalm or chapter in view, since no card shows it.
-        let stop = stops.get(s.stop).cloned().unwrap_or_default();
-        let stop = if stop.chars().all(|c| c.is_ascii_digit()) { psalm_name(&step, &stop) } else { stop };
-        detail = format!("{detail} · {stop}");
-    }
     if !detail.is_empty() {
         y += 2.0
             + super::today::paragraph(
@@ -606,7 +612,7 @@ pub fn show(
     y += 24.0;
 
     // The step's body.
-    let view_top = below_toolbar + if strip { strip_h + 8.0 } else { 0.0 };
+    let view_top = below_toolbar + if strip { shown_h + 8.0 } else { 0.0 };
     let mut panel_slot: Option<Rect> = None;
     match &step.open {
         Open::Nothing => {
@@ -628,7 +634,7 @@ pub fn show(
         }
         Open::Text { text, source } => y = rule::reading(ui, env, x, y, col.min(640.0), text, source),
         Open::Count(target) => {
-            let n = s.counts.entry(id.clone()).or_insert(0);
+            let n = counts.entry(count).or_insert(0);
             y = rule::counter(ui, env, (x + col / 2.0, y), col, (s.day, &id), (*target).max(1), n, actions);
         }
         Open::Start(plan) => {
@@ -733,8 +739,14 @@ pub fn show(
     }
     if strip {
         let top = strip_top.max(below_toolbar);
-        let r = Rect::from_min_size(pos2(content.left(), top), vec2(content.width(), strip_h));
-        let st = strip_list(ui, p, r, &steps, &id, offer_done, (strip_top - top).abs() > 0.5);
+        let r = Rect::from_min_size(pos2(content.left(), top), vec2(content.width(), shown_h));
+        let st = if stuck {
+            // The psalm or chapter in view, since no card shows it.
+            let stop = stops.get(s.stop).map(|n| stop_name(&step, n));
+            strip_line(ui, p, r, &steps, &id, stop.as_deref(), offer_done)
+        } else {
+            strip_list(ui, p, r, &steps, &id, offer_done)
+        };
         picked = st.0.or(picked);
         if st.1 {
             press = Some(Press::Done);
@@ -767,11 +779,13 @@ pub fn show(
         }
         None => {}
     }
-    // Scrolling last: the card's and the panel's own scroll areas would take the request.
+    // Scrolling last: the card's and the panel's own scroll areas would take the request. egui
+    // leaves the item spacing above what it scrolls to the top, so a verse lands where the
+    // passage reads the verse at the top.
     let top = s.top.then(|| content.top() - env.toolbar - super::TOP);
     s.top = false;
     if let Some(y) = top.or(scroll_to) {
-        let at = Rect::from_min_size(pos2(content.left(), y), vec2(1.0, 1.0));
+        let at = Rect::from_min_size(pos2(content.left(), y + ui.spacing().item_spacing.y), vec2(1.0, 1.0));
         ui.scroll_to_rect_animation(at, Some(egui::Align::TOP), egui::style::ScrollAnimation::none());
         ui.ctx().request_repaint();
         out.scrolled = true;
@@ -816,9 +830,8 @@ fn fathers_body(
         panel.verse = verses[0];
     }
     // J and K, as ‹ and ›.
-    let typing = ui.ctx().egui_wants_keyboard_input();
     let step_by = ui.input_mut(|i| {
-        if typing {
+        if !env.keyboard {
             0
         } else if i.consume_key(Modifiers::NONE, Key::J) {
             1
@@ -836,6 +849,7 @@ fn fathers_body(
         s.show_focus = false;
         let shown = s.passage.show(ui, env, parts, (x, y, col), view_top, Some(focus), true, shown_goto);
         scroll_to = shown.scroll_to;
+        s.stop = shown.stop;
         if let Some(v) = shown.clicked.filter(|v| verses.contains(v)) {
             panel.verse = v;
         }
@@ -884,17 +898,16 @@ fn fathers_body(
     (y, scroll_to)
 }
 
-/// "Psalm 87", from a stop's number.
-fn psalm_name(step: &Step, n: &str) -> String {
-    match &step.open {
-        Open::Reading(parts)
-            if parts
-                .iter()
-                .any(|p| p.passages.first().is_some_and(|q| q.book == bible_core::BookId::PSALMS)) =>
-        {
-            format!("Psalm {n}")
-        }
-        _ => n.to_string(),
+/// A stop by its full name: "Psalm 87" or "John 14" for a number, else as it is ("Gospel").
+fn stop_name(step: &Step, n: &str) -> String {
+    let book = match &step.open {
+        Open::Reading(parts) | Open::Fathers(parts) => parts.iter().find_map(|p| p.passages.first()),
+        _ => None,
+    };
+    match book.map(|q| q.book).filter(|_| n.chars().all(|c| c.is_ascii_digit())) {
+        Some(bible_core::BookId::PSALMS) => format!("Psalm {n}"),
+        Some(b) => format!("{} {n}", b.ref_name()),
+        None => n.to_string(),
     }
 }
 
@@ -991,13 +1004,39 @@ fn done_button(
     (rect, resp)
 }
 
+/// A step's name in the strip: done ones with ✓, the current one in ink, ones with nothing to do
+/// today dimmed.
+fn strip_name(p: &Palette, st: &Step, current: bool) -> (String, FontId, egui::Color32) {
+    if current {
+        (st.title.clone(), theme::ui_semibold(13.0), p.ink)
+    } else if st.done {
+        (format!("✓ {}", st.title), theme::ui_font(13.0), p.ink_3)
+    } else if st.idle {
+        (st.title.clone(), theme::ui_font(13.0), p.ink_3.gamma_multiply(0.7))
+    } else {
+        (st.title.clone(), theme::ui_font(13.0), p.ink_2)
+    }
+}
+
+/// The room Done ⌘↩ takes at the end of the strip.
+fn strip_done_width(painter: &egui::Painter) -> f32 {
+    Button::new(Kind::Primary, "Done ⌘↩").small().width(painter) + 16.0
+}
+
+/// Done ⌘↩ at the end of the strip at `r`, while the footer is out of view; whether it was pressed.
+fn strip_done(ui: &mut Ui, p: &Palette, r: Rect, offer: bool) -> bool {
+    let b = Button::new(Kind::Primary, "Done ⌘↩").small();
+    offer && b.show_right(ui, p, r.right(), r.bottom() - 19.0, ui.id().with("strip-done")).1.clicked()
+}
+
 /// How tall the strip of the block's names is, `width` wide.
 fn strip_height(ui: &Ui, p: &Palette, steps: &[Step], at: &str, width: f32) -> f32 {
-    let rows = strip_rows(ui, p, steps, at, width - 24.0 - 96.0);
+    let rows = strip_rows(ui, p, steps, at, width);
     16.0 + rows.iter().map(|r| r.0).max().map_or(1, |n| n + 1) as f32 * 22.0
 }
 
-/// The strip's names placed in rows: (row, x, step index, galley).
+/// The strip's names placed in rows `width` wide, each row with room for the dot that ends it and
+/// the last for Done ⌘↩: (row, x, step index, galley).
 fn strip_rows(
     ui: &Ui,
     p: &Palette,
@@ -1006,23 +1045,16 @@ fn strip_rows(
     width: f32,
 ) -> Vec<(usize, f32, usize, std::sync::Arc<egui::Galley>)> {
     let painter = ui.painter();
-    let sep = painter.layout_no_wrap(" · ".into(), theme::ui_font(13.0), p.ink_3).size().x;
+    let size = |s: &str| painter.layout_no_wrap(s.into(), theme::ui_font(13.0), p.ink_3).size().x;
+    let (sep, dot, done) = (size(" · "), size(" ·"), strip_done_width(painter));
     let (mut row, mut x) = (0, 0.0);
     let mut out = Vec::new();
     for (i, st) in steps.iter().enumerate() {
-        let current = st.id == at;
-        let (label, font, ink) = if current {
-            (st.title.clone(), theme::ui_semibold(13.0), p.ink)
-        } else if st.done {
-            (format!("✓ {}", st.title), theme::ui_font(13.0), p.ink_3)
-        } else if st.idle {
-            (st.title.clone(), theme::ui_font(13.0), p.ink_3.gamma_multiply(0.7))
-        } else {
-            (st.title.clone(), theme::ui_font(13.0), p.ink_2)
-        };
+        let (label, font, ink) = strip_name(p, st, st.id == at);
         let g = painter.layout_no_wrap(label, font, ink);
         let w = g.size().x;
-        if i > 0 && x + sep + w > width {
+        let end = if i + 1 == steps.len() { done } else { dot };
+        if i > 0 && x + sep + w + end > width {
             row += 1;
             x = 0.0;
         } else if i > 0 {
@@ -1034,7 +1066,7 @@ fn strip_rows(
     out
 }
 
-/// The block's names in a strip at `r`: done ones with ✓, the current one in ink, and Done ⌘↩
+/// The block's names in a strip at `r` at the top of a step, wrapped after a dot, and Done ⌘↩
 /// at the end while the footer is out of view. Returns the step clicked and whether Done was.
 fn strip_list(
     ui: &mut Ui,
@@ -1043,19 +1075,18 @@ fn strip_list(
     steps: &[Step],
     at: &str,
     offer_done: bool,
-    stuck: bool,
 ) -> (Option<String>, bool) {
     let painter = ui.painter().clone();
-    if stuck {
-        painter.rect_filled(r.expand2(vec2(super::SIDE, 0.0)), 0.0, p.paper);
-    }
     painter.hline(r.left()..=r.right(), r.bottom() - 0.5, Stroke::new(1.0, p.separator));
     let sep = painter.layout_no_wrap(" · ".into(), theme::ui_font(13.0), p.ink_3);
     let mut picked = None;
-    for (row, x, i, g) in strip_rows(ui, p, steps, at, r.width() - 24.0 - 96.0) {
+    // Where the name before ended, for the dot after it.
+    let mut end = r.left_top();
+    for (row, x, i, g) in strip_rows(ui, p, steps, at, r.width()) {
         let at_pos = pos2(r.left() + x, r.top() + 8.0 + row as f32 * 22.0);
-        if x > 0.0 {
-            painter.galley(pos2(at_pos.x - sep.size().x, at_pos.y), sep.clone(), p.ink_3);
+        if i > 0 {
+            let dot = if x > 0.0 { pos2(at_pos.x - sep.size().x, at_pos.y) } else { end };
+            painter.galley(dot, sep.clone(), p.ink_3);
         }
         let hit = Rect::from_min_size(at_pos, g.size());
         let st = &steps[i];
@@ -1065,14 +1096,100 @@ fn strip_list(
                 picked = Some(st.id.clone());
             }
         }
+        end = hit.right_top();
         painter.galley(at_pos, g, p.ink);
     }
-    let mut done = false;
-    if offer_done {
-        let b = Button::new(Kind::Primary, "Done ⌘↩").small();
-        done = b.show_right(ui, p, r.right(), r.bottom() - 19.0, ui.id().with("strip-done")).1.clicked();
+    (picked, strip_done(ui, p, r, offer_done))
+}
+
+/// The strip once it stays under the toolbar while the text scrolls: one line at `r` with the
+/// current step and the psalm or chapter in view (`stop`), as many of its neighbours as fit with
+/// "…" for the rest, and Done ⌘↩ at the end while the footer is out of view. Returns the step
+/// clicked and whether Done was.
+fn strip_line(
+    ui: &mut Ui,
+    p: &Palette,
+    r: Rect,
+    steps: &[Step],
+    at: &str,
+    stop: Option<&str>,
+    offer_done: bool,
+) -> (Option<String>, bool) {
+    let painter = ui.painter().clone();
+    painter.rect_filled(r.expand2(vec2(super::SIDE, 0.0)), 0.0, p.paper);
+    painter.hline(r.left()..=r.right(), r.bottom() - 0.5, Stroke::new(1.0, p.separator));
+    let sep = painter.layout_no_wrap(" · ".into(), theme::ui_font(13.0), p.ink_3);
+    let more = painter.layout_no_wrap("…".into(), theme::ui_font(13.0), p.ink_3);
+    let (sw, mw) = (sep.size().x, more.size().x);
+    let room = r.width() - if offer_done { strip_done_width(&painter) } else { 0.0 };
+    let c = steps.iter().position(|st| st.id == at).unwrap_or(0);
+    let label = |i: usize| {
+        let (name, font, ink) = strip_name(p, &steps[i], i == c);
+        match stop.filter(|_| i == c) {
+            Some(stop) => (format!("{name} › {stop}"), font, ink),
+            None => (name, font, ink),
+        }
+    };
+    let mut names: Vec<_> = (0..steps.len())
+        .map(|i| {
+            let (name, font, ink) = label(i);
+            painter.layout_no_wrap(name, font, ink)
+        })
+        .collect();
+    // From the current step out, the next one first, while they fit.
+    let n = names.len();
+    let cut =
+        |lo: usize, hi: usize| (if lo > 0 { mw + sw } else { 0.0 }) + if hi + 1 < n { sw + mw } else { 0.0 };
+    let width = |names: &[std::sync::Arc<egui::Galley>], lo: usize, hi: usize| {
+        names[lo..=hi].iter().map(|g| g.size().x).sum::<f32>() + sw * (hi - lo) as f32 + cut(lo, hi)
+    };
+    let (mut lo, mut hi) = (c, c);
+    loop {
+        let right = hi + 1 < n && width(&names, lo, hi + 1) <= room;
+        if right {
+            hi += 1;
+        }
+        let left = lo > 0 && width(&names, lo - 1, hi) <= room;
+        if left {
+            lo -= 1;
+        }
+        if !(right || left) {
+            break;
+        }
     }
-    (picked, done)
+    if width(&names, c, c) > room {
+        let (name, font, ink) = label(c);
+        let name = super::elide(&painter, &name, &font, room - cut(c, c));
+        names[c] = painter.layout_no_wrap(name, font, ink);
+    }
+    let y = r.top() + 8.0;
+    let mut x = r.left();
+    let mut picked = None;
+    if lo > 0 {
+        painter.galley(pos2(x, y), more.clone(), p.ink_3);
+        painter.galley(pos2(x + mw, y), sep.clone(), p.ink_3);
+        x += mw + sw;
+    }
+    for (i, g) in names.into_iter().enumerate().take(hi + 1).skip(lo) {
+        if i > lo {
+            painter.galley(pos2(x, y), sep.clone(), p.ink_3);
+            x += sw;
+        }
+        let hit = Rect::from_min_size(pos2(x, y), g.size());
+        if !steps[i].idle {
+            let resp = ui.interact(hit, ui.id().with(("strip", i)), Sense::click());
+            if resp.on_hover_cursor(egui::CursorIcon::PointingHand).clicked() {
+                picked = Some(steps[i].id.clone());
+            }
+        }
+        x = hit.right();
+        painter.galley(hit.min, g, p.ink);
+    }
+    if hi + 1 < n {
+        painter.galley(pos2(x, y), sep, p.ink_3);
+        painter.galley(pos2(x + sw, y), more, p.ink_3);
+    }
+    (picked, strip_done(ui, p, r, offer_done))
 }
 
 /// The block's card at `card` (its height capped there): its name and time, a row for each
@@ -1273,7 +1390,8 @@ fn card_list(
 }
 
 /// The end of a block: the cross, its name, "Glory to God for all things.", what comes next in
-/// the rule, and Back to Today. Returns the bottom and whether Back to Today was pressed.
+/// the rule (as [`next_in_rule`]), and Back to Today. Returns the bottom and whether Back to
+/// Today was pressed.
 fn end_page(
     ui: &mut Ui,
     env: &PageEnv<'_>,
@@ -1281,6 +1399,7 @@ fn end_page(
     (home, name): (&str, &str),
     rule: &Rule,
     d: Day,
+    ended: (&str, &HashSet<String>),
 ) -> (f32, bool) {
     let p = env.settings.theme.palette();
     let painter = ui.painter().clone();
@@ -1303,7 +1422,7 @@ fn end_page(
     y += 44.0;
     centred("Glory to God for all things.", FontId::new(20.0, theme::family(theme::SERIF)), 28.0, p.ink_2, y);
     y += 56.0;
-    if let Some(line) = next_in_rule(env, rule, d) {
+    if let Some(line) = next_in_rule(env, rule, d, ended) {
         centred(&line, theme::ui_font(13.0), 20.0, p.ink_2, y);
         y += 44.0;
     }
@@ -1312,9 +1431,16 @@ fn end_page(
     (y + 32.0, back || resp.clicked())
 }
 
-/// What comes next in the rule after a block ended on day `d`: "Next in your rule: Midday at
-/// 12:00" later today, else "Tomorrow: Morning at 5:00". Nothing on another day.
-fn next_in_rule(env: &PageEnv<'_>, rule: &Rule, d: Day) -> Option<String> {
+/// What comes next in the rule after block `this` ended on day `d`: "Next in your rule: Midday
+/// at 12:00", the first block later today with something still to do, passing over `this` (it
+/// can end before its own time) and the others `ended` today; else "Tomorrow: Morning at 5:00".
+/// Nothing on another day.
+fn next_in_rule(
+    env: &PageEnv<'_>,
+    rule: &Rule,
+    d: Day,
+    (this, ended): (&str, &HashSet<String>),
+) -> Option<String> {
     let today = super::today::today();
     if d != today {
         return None;
@@ -1322,9 +1448,10 @@ fn next_in_rule(env: &PageEnv<'_>, rule: &Rule, d: Day) -> Option<String> {
     let t = crate::time::local(bible_core::study::now());
     let minute = i64::from(t.hour) * 60 + i64::from(t.minute);
     let style = env.settings.calendar;
-    let later = rule
-        .for_day(d, style)
+    let to_do = |steps: &[Step]| steps.iter().any(|s| !s.optional && !s.done && !s.idle);
+    let later = rule::day_steps(rule, d, env)
         .into_iter()
+        .filter(|(b, steps)| b.id != this && !ended.contains(&b.id) && to_do(steps))
         .filter_map(|(b, _)| Some((b, b.time.as_deref().and_then(minutes)?)))
         .filter(|(_, at)| *at > minute)
         .min_by_key(|(_, at)| *at);
@@ -1382,6 +1509,7 @@ mod tests {
             query: "",
             toolbar: 52.0,
             fathers: None,
+            keyboard: true,
         };
         let rule = study.rule();
         let block = |id: &str| Walk::Block(id.to_string());
@@ -1447,6 +1575,7 @@ mod tests {
             query: "",
             toolbar: 52.0,
             fathers: None,
+            keyboard: true,
         };
         let rule = study.rule();
         let d = calendar::civil(2026, 10, 21);

@@ -287,8 +287,6 @@ impl PassageView {
         let pointer = ui.input(|i| i.pointer.hover_pos()).filter(|pt| view.contains(*pt));
         let mut shown = Shown { bottom: top + self.height, ..Default::default() };
         let mut hit = None;
-        // The verse at the top: the first whose text reaches below the top of the view.
-        let line = view_top + 8.0;
         for (i, part) in self.parts.iter().enumerate() {
             let pt = top + self.part_tops[i];
             if self.parts.len() > 1 && pt < clip.bottom() && pt + LABEL_H > clip.top() {
@@ -316,12 +314,6 @@ impl PassageView {
                         }
                         let painted = paint_blocks(&painter, p, l, origin, clip, &marks, pointer);
                         hit = painted.hit.or(hit);
-                        for a in l.anchors.iter().filter(|a| a.column == 0) {
-                            if shown.top.is_none() && y + a.bottom > line {
-                                shown.top =
-                                    Some(VerseRef::new(l.chapter.book(), l.chapter.chapter(), a.number));
-                            }
-                        }
                     }
                     Text::Message(m, retry) => {
                         let font = FontId::new(typo.size, theme::family(theme::SERIF_ITALIC));
@@ -347,8 +339,27 @@ impl PassageView {
                 shown.end_seen = true;
             }
         }
-        // The stop in view: the last to start above the upper third of the view.
-        let third = view_top + (clip.bottom() - view_top) / 3.0;
+        // The verse at the top: the last to start at or above the top of the view (where
+        // `Goto::Verse` puts it, give or take a rounded point), as the reader's `verse_at_y` finds
+        // it, else the first. In paragraphs a verse's last line is the next one's first, so going
+        // by where verses end would take the one before.
+        let line = view_top + 8.0 + 1.0;
+        let verses = self.pieces.iter().flatten().filter_map(|piece| match &piece.text {
+            Text::Laid(l) => Some((piece.top, l)),
+            Text::Message(..) => None,
+        });
+        let mut starts = verses.flat_map(|(at, l)| {
+            let c = l.chapter;
+            let col0 = l.anchors.iter().filter(|a| a.column == 0);
+            col0.map(move |a| (top + at + a.top, VerseRef::new(c.book(), c.chapter(), a.number)))
+        });
+        if let Some(first) = starts.next() {
+            let above = std::iter::once(first).chain(starts).take_while(|(y, _)| *y <= line).last();
+            shown.top = Some(above.unwrap_or(first).1);
+        }
+        // The stop in view: the last to start above the upper third of the view, or once the end
+        // is in view, the last on screen (a short last psalm or chapter never reaches the third).
+        let third = if shown.end_seen { clip.bottom() } else { view_top + (clip.bottom() - view_top) / 3.0 };
         shown.stop = self.stops.iter().rposition(|(_, y)| top + y <= third).unwrap_or(0);
         if clickable {
             let area = Rect::from_min_max(pos2(x - 8.0, top), pos2(x + width + 8.0, top + self.height));

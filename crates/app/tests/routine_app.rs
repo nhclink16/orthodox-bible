@@ -1,7 +1,8 @@
 //! A block of the prayer rule prayed through on Today in the running app (Orthodox fork): ⌘↩ is
-//! Done and plain ↩ does nothing, Escape and ⌘[ go back to Today, Space counts only in the Jesus
-//! Prayer's counter, the arrows leave the reader alone, Open in reader comes back with ⌘[, and
-//! after a whole evening the reader is where it was. Its own test binary because it sets
+//! Done and plain ↩ does nothing, Escape and ⌘[ go back to Today, the palette and the shortcuts
+//! over a step take its keys, Space counts only in the Jesus Prayer's counter and the count is
+//! kept, the arrows and ⌘D leave the reader alone, Open in reader comes back with ⌘[, and after a
+//! whole evening the reader is where it was. Its own test binary because it sets
 //! `BIBLE_RS_OFFSCREEN` (no macOS menu bar, which needs the main thread) before anything runs.
 
 use std::sync::Arc;
@@ -65,10 +66,21 @@ fn a_block_is_prayed_through_on_today_and_the_reader_is_left_alone() {
         press(&mut h, Modifiers::NONE, key);
         assert_eq!(step(&h).as_ref(), Some(&first), "{key:?}");
     }
+    // The palette and the Keyboard Shortcuts over a step take its keys: Escape closes them, not
+    // the step, and ⌘↩ ticks nothing behind them. ⌘D doesn't bookmark the reader's verse.
+    press(&mut h, Modifiers::COMMAND, Key::K);
+    press(&mut h, Modifiers::NONE, Key::Escape);
+    assert_eq!(step(&h).as_ref(), Some(&first), "Escape behind the palette");
+    press(&mut h, Modifiers::COMMAND, Key::Slash);
+    press(&mut h, Modifiers::COMMAND, Key::Enter);
+    press(&mut h, Modifiers::NONE, Key::Escape);
+    assert_eq!(step(&h).as_ref(), Some(&first), "⌘↩ or Escape behind the shortcuts");
+    press(&mut h, Modifiers::COMMAND, Key::D);
+    assert!(!h.state().study.is_bookmarked(VerseRef::new(JOHN, 1, 1)), "⌘D on Today");
     let day = bible_core::calendar::civil;
     let t = bible_rs::time::local(bible_core::study::now());
     let d = day(t.year, t.month, t.day);
-    assert!(!h.state().study.rule_done(d).contains(&first), "↩ ticked {first}");
+    assert!(!h.state().study.rule_done(d).contains(&first), "↩ or ⌘↩ ticked {first}");
 
     // Escape goes back to Today, paused there; a second Escape leaves the reader's selection.
     press(&mut h, Modifiers::NONE, Key::Escape);
@@ -101,9 +113,13 @@ fn a_block_is_prayed_through_on_today_and_the_reader_is_left_alone() {
     for _ in 0..3 {
         press(&mut h, Modifiers::NONE, Key::Space);
     }
-    let counts = h.state().pages.today.session().map(|s| s.counts.get("midday-jesus-prayer").copied());
-    assert_eq!(counts, Some(Some(3)));
+    assert_eq!(h.state().pages.today.count(d, "midday-jesus-prayer"), 3);
     assert_eq!(reader(&h), before, "Space in the counter left the reader alone");
+    // The count is kept for the day, whatever is begun meanwhile.
+    today(&mut h, "meal-prayer");
+    today(&mut h, "midday-jesus-prayer");
+    press(&mut h, Modifiers::NONE, Key::Space);
+    assert_eq!(h.state().pages.today.count(d, "midday-jesus-prayer"), 4);
 
     // Back from a prayer's view closes it, on Today.
     today(&mut h, "meal-prayer");
