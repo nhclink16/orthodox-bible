@@ -58,6 +58,8 @@ pub struct SidebarEnv<'a> {
     /// The page in the main area: its row is selected, and the books follow the reader only
     /// while it is shown.
     pub page: crate::pages::Page,
+    /// The books follow the reader (not while it was opened from a step on Today).
+    pub follow: bool,
 }
 
 pub struct Sidebar {
@@ -262,7 +264,7 @@ impl Sidebar {
             }
             self.revealed = None;
         }
-        let reveal = reading && self.revealed != Some(current_book);
+        let reveal = reading && env.follow && self.revealed != Some(current_book);
         if reveal {
             self.revealed = Some(current_book);
             let t = usize::from(current_book >= FIRST_NT_BOOK);

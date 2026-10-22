@@ -2,17 +2,24 @@
 //! check boxes (`rule`), the reading plans under way, the fast, the Psalter's kathismata and
 //! what's coming up, from `bible_core::calendar` and `bible_core::lectionary`; beside them a
 //! month of fasts, feasts and days the rule was kept. Days step back and forward; the church's
-//! calendar (New or Old) is a setting.
+//! calendar (New or Old) is a setting. At the top, the part of the rule due now, with Begin:
+//! its items, the readings, the Psalter and the plans all open as steps in the page's place
+//! (`step`).
 
-use eframe::egui::{self, Align2, Color32, FontId, Rect, Sense, Stroke, StrokeKind, Ui, pos2, vec2};
+use std::collections::{HashMap, HashSet};
+
+use eframe::egui::{
+    self, Align2, Color32, FontId, Key, Modifiers, Rect, Sense, Stroke, StrokeKind, Ui, pos2, vec2,
+};
 
 use bible_core::calendar::{self, Day, Fast, Style};
 use bible_core::lectionary::{self, Confidence, Reading};
-use bible_core::rule::Rule;
+use bible_core::plans;
+use bible_core::rule::{Kind as ItemKind, Now, Rule, kathismata, minutes};
 use bible_core::study::HighlightColor;
-use bible_core::{ChapterIdx, plans};
 
-use super::rule::{self as rule_view, View};
+use super::rule::{self as rule_view, Pick, View, clock};
+use super::step::{self, Session, Walk};
 use super::{PageEnv, group_label, text};
 use crate::actions::Action;
 use crate::theme::{self, Palette};
@@ -58,6 +65,16 @@ pub struct State {
     to_top: bool,
     /// The day whose readings all show, when it has more than [`FULL`] and they were asked for.
     all_readings: Option<Day>,
+    /// The block (or readings) begun: shown while `view` is [`View::Step`], else paused.
+    session: Option<Session>,
+    /// The blocks whose end page was reached, on that day: the Now card passes over them.
+    ended: (Day, HashSet<String>),
+    /// The Jesus Prayer's count for each counter on each day, kept whichever block is begun.
+    counts: HashMap<(Day, String), u16>,
+    /// A block to begin on the next frame (a reminder's Begin, the palette), by id.
+    begin: Option<String>,
+    /// Points to scroll down on the next frame (the arrow and page keys).
+    scroll: f32,
 }
 
 pub(super) fn today() -> Day {
@@ -70,7 +87,7 @@ fn date_label(d: Day) -> String {
     format!("{}, {dd} {} {y}", WEEKDAYS[calendar::weekday(d) as usize], MONTHS[m as usize - 1])
 }
 
-fn short_date(d: Day) -> String {
+pub(super) fn short_date(d: Day) -> String {
     let (_, m, dd) = calendar::civil_date(d);
     format!("{} {dd} {}", &WEEKDAYS[calendar::weekday(d) as usize][..3], &MONTHS[m as usize - 1][..3])
 }
@@ -104,7 +121,7 @@ const FASTS: [(Fast, &str); 5] = [
 ];
 
 /// A great feast's mark: a small cross centred on `c`.
-fn cross(painter: &egui::Painter, c: egui::Pos2, color: Color32) {
+pub(super) fn cross(painter: &egui::Painter, c: egui::Pos2, color: Color32) {
     let s = Stroke::new(1.25, color);
     painter.line_segment([c - vec2(0.0, 4.0), c + vec2(0.0, 4.0)], s);
     painter.line_segment([c + vec2(-2.75, -1.5), c + vec2(2.75, -1.5)], s);
@@ -138,7 +155,7 @@ fn coming_up(from: Day, style: Style) -> Vec<(Day, String)> {
 
 /// `s` wrapped to `width` on `lh` lines from `top`; returns the height used.
 #[allow(clippy::too_many_arguments)]
-fn paragraph(
+pub(super) fn paragraph(
     painter: &eframe::egui::Painter,
     s: &str,
     font: &FontId,
@@ -242,8 +259,8 @@ const FULL: usize = 9;
 /// The day's `lessons` (`bible_core::lectionary`) at `top`: the Liturgy's Epistle and Gospel
 /// first, a row each with what it's read for (`feast` and `named` as for [`read_for`]), then the
 /// other services' readings smaller, under each service, folded on a day of many unless `all`.
-/// A row opens its passage in the reader; a reading the tables are unsure of says to check the
-/// parish calendar, first. Returns the bottom.
+/// A row opens its reading as a step; a reading the tables are unsure of says to check the
+/// parish calendar, first. Returns the bottom, and the reading clicked.
 #[allow(clippy::too_many_arguments)]
 fn readings(
     ui: &mut Ui,
@@ -254,16 +271,16 @@ fn readings(
     lessons: &[Reading],
     (feast, named): (bool, bool),
     all: &mut bool,
-    actions: &mut Vec<Action>,
-) -> f32 {
+) -> (f32, Option<usize>) {
     let p = env.settings.theme.palette();
     let painter = ui.painter().clone();
     let right = left + width;
     group_label(&painter, p, left, top, "Readings");
     let mut y = top + 26.0;
+    let mut picked = None;
     if lessons.is_empty() {
         text(&painter, left, y, 20.0, "No readings for this day.", theme::ui_font(13.0), p.ink_2, false);
-        return y + 20.0;
+        return (y + 20.0, None);
     }
     const CHECK: &str = "check your parish calendar";
     let unsure = |r: &Reading| r.confidence == Confidence::Low;
@@ -316,7 +333,7 @@ fn readings(
             text(&painter, x, at.top() + 25.0, 18.0, &note, theme::ui_font(12.0), p.ink_3, false);
         }
         if clicked {
-            actions.push(Action::ReadPassage(r.passages));
+            picked = Some(i);
         }
         y += 48.0;
     }
@@ -361,7 +378,7 @@ fn readings(
             text(&painter, x + w, ty, 20.0, &title, theme::ui_font(12.0), p.ink_3, false);
         }
         if clicked {
-            actions.push(Action::ReadPassage(r.passages));
+            picked = Some(i);
         }
         y += h;
     }
@@ -374,29 +391,76 @@ fn readings(
         text(&painter, left + 12.0, at.top() + 6.0, 20.0, &show, theme::ui_medium(12.0), p.accent, false);
         y = at.bottom();
     }
-    y
+    (y, picked)
 }
 
 impl State {
-    /// The Jesus Prayer's counter is open (Space counts).
+    /// A step of the Jesus Prayer's counter is open (Space counts).
     pub fn counting(&self) -> bool {
-        matches!(self.view, Some(View::Count { .. }))
+        self.stepping() && self.session.as_ref().is_some_and(|s| s.counting)
     }
 
-    /// A view is open in the page's place (Escape goes back).
+    /// A view is open in the page's place (Escape and Back go back to Today).
     pub fn viewing(&self) -> bool {
         self.view.is_some()
     }
 
-    /// `edit` (or `edit:<item id>`, that item open), `day:<offset>`, `count:<n>` or an item's
-    /// id to open it, on the next frame (demo captures).
+    /// A step (or a block's end page) is open.
+    pub fn stepping(&self) -> bool {
+        matches!(self.view, Some(View::Step))
+    }
+
+    /// The block (or readings) begun, open or paused.
+    pub fn session(&self) -> Option<&Session> {
+        self.session.as_ref()
+    }
+
+    /// The Jesus Prayer's count so far on day `d` for the counter `item`.
+    pub fn count(&self, d: Day, item: &str) -> u16 {
+        self.counts.get(&(d, item.to_string())).copied().unwrap_or(0)
+    }
+
+    /// Back to Today from a view: a step is paused, for Continue. The rule's editor stays while
+    /// it has changes to save, as with Escape.
+    pub fn close(&mut self) {
+        if !matches!(&self.view, Some(View::Edit(editor)) if editor.changed()) {
+            self.view = None;
+        }
+    }
+
+    /// Begins block `id` today on the next frame, at its first item not done: a reminder's
+    /// Begin. Today shows today first.
+    pub fn begin(&mut self, id: &str) {
+        self.offset = 0;
+        self.month = None;
+        self.begin = Some(id.to_string());
+    }
+
+    /// Back on the paused step (from the reader's Back to Today).
+    pub fn resume(&mut self) {
+        if let Some(s) = &mut self.session {
+            s.resume();
+            self.view = Some(View::Step);
+        }
+    }
+
+    /// Scrolls the page by `dy` points (the arrow and page keys).
+    pub fn scroll(&mut self, dy: f32) {
+        self.scroll += dy;
+    }
+
+    /// `edit` (or `edit:<item id>`, that item open), `day:<offset>`, `count:<n>`, `begin:<block>`,
+    /// `done`, `skip`, `verse:<n>` (the Fathers' verse), `scroll:<points>`, `reader` (Open in
+    /// reader), `kathisma:<n>`, `reading:<n>` (the day's readings from the n-th, from 0) or an
+    /// item's id to open it as a step, on the next frame (demo captures).
     pub fn demo(&mut self, step: &str) {
         self.demo = Some(step.to_string());
     }
 
-    fn run_demo(&mut self, env: &PageEnv<'_>, rule: &Rule, actions: &mut Vec<Action>) {
+    fn run_demo(&mut self, env: &PageEnv<'_>, rule: &Rule) {
         let Some(step) = self.demo.take() else { return };
         let (cmd, arg) = step.split_once(':').unwrap_or((&step, ""));
+        let d = today() + self.offset;
         match cmd {
             "edit" => {
                 let mut editor = super::rule_editor::Editor::new(rule.clone(), env.settings.rule_reminders);
@@ -407,12 +471,74 @@ impl State {
             }
             "day" => self.offset = arg.parse().unwrap_or(0),
             "count" => {
-                if let Some(View::Count { n, target, .. }) = &mut self.view {
-                    *n = arg.parse::<u16>().unwrap_or(0).min(*target);
+                if let Some(s) = &self.session
+                    && let Some(id) = s.item.clone()
+                {
+                    self.counts.insert((s.day, id), arg.parse().unwrap_or(0));
                 }
             }
-            id => rule_view::open_item(rule, id, today() + self.offset, env, &mut self.view, actions),
+            "begin" => self.begin_block(env, rule, arg, d, None),
+            "done" | "skip" => {
+                if let Some(s) = &mut self.session {
+                    s.press = Some(if cmd == "done" { step::Press::Done } else { step::Press::Skip });
+                }
+            }
+            "scroll" => self.scroll += arg.parse::<f32>().unwrap_or(0.0),
+            "kathisma" => self.open_kathisma(env, rule, d, arg.parse().unwrap_or(1)),
+            "reading" => self.open_walk(Walk::Readings, d, arg.to_string()),
+            "verse" => {
+                if let Some(s) = &mut self.session {
+                    s.demo_verse(arg.parse().unwrap_or(1));
+                }
+            }
+            "reader" => {
+                if let Some(s) = &mut self.session {
+                    s.demo_reader = true;
+                }
+            }
+            id => {
+                let block = rule
+                    .for_day(d, env.settings.calendar)
+                    .into_iter()
+                    .find(|(_, items)| items.iter().any(|i| i.id == id));
+                if let Some((b, _)) = block {
+                    let b = b.id.clone();
+                    self.begin_block(env, rule, &b, d, Some(id));
+                }
+            }
         }
+    }
+
+    /// Begins (or continues) block `block` on day `d`: at `item`, else at the step paused there,
+    /// else its first item not done. Beginning another block forgets where the last one was
+    /// paused; its ticks stay. With nothing to do, Today stays as it is.
+    fn begin_block(&mut self, env: &PageEnv<'_>, rule: &Rule, block: &str, d: Day, item: Option<&str>) {
+        let walk = Walk::Block(block.to_string());
+        if !self.session.as_ref().is_some_and(|s| s.walk == walk && s.day == d) {
+            self.session = Some(Session::new(d, walk, None));
+        }
+        let Some(s) = &mut self.session else { return };
+        let (_, _, steps) = step::steps(&s.walk, d, env, rule);
+        let at = match item {
+            Some(i) => Some(i.to_string()),
+            None => step::resume_at(rule, env, s, &steps),
+        };
+        if let Some(at) = at {
+            if s.item.as_deref() == Some(at.as_str()) {
+                s.resume();
+            } else {
+                s.open(Some(at));
+            }
+            self.view = Some(View::Step);
+        }
+    }
+
+    /// Opens `walk` on day `d` at step `item`.
+    fn open_walk(&mut self, walk: Walk, d: Day, item: String) {
+        let mut s = Session::new(d, walk, None);
+        s.open(Some(item));
+        self.session = Some(s);
+        self.view = Some(View::Step);
     }
 
     /// The page, or the view open in its place. A view starts at the top; closing it goes back
@@ -427,38 +553,79 @@ impl State {
         if let Some(offset) = self.restore.take() {
             scroll_to(ui, offset);
         }
-        let bottom = self.page(ui, content, env, actions);
+        let (bottom, scrolled) = self.page(ui, content, env, actions);
         if std::mem::take(&mut self.to_top) {
             scroll_to(ui, 0.0);
         }
         match (viewing, self.view.is_some()) {
             (false, true) => {
                 self.scrolled = ui.clip_rect().top() - origin;
-                scroll_to(ui, 0.0);
+                if !scrolled {
+                    scroll_to(ui, 0.0);
+                }
             }
             (true, false) => self.restore = Some(self.scrolled),
             _ => {}
         }
+        let dy = std::mem::take(&mut self.scroll);
+        if dy != 0.0 {
+            ui.scroll_with_delta_animation(vec2(0.0, -dy), egui::style::ScrollAnimation::duration(0.12));
+        }
         bottom
     }
 
-    fn page(&mut self, ui: &mut Ui, content: Rect, env: &PageEnv<'_>, actions: &mut Vec<Action>) -> f32 {
+    /// The page's content; returns its bottom and whether a step scrolled the page itself.
+    fn page(
+        &mut self,
+        ui: &mut Ui,
+        content: Rect,
+        env: &PageEnv<'_>,
+        actions: &mut Vec<Action>,
+    ) -> (f32, bool) {
         let p = env.settings.theme.palette();
         let painter = ui.painter().clone();
         let (left, right, top) = (content.left(), content.right(), content.top());
         let style = env.settings.calendar;
         let prayer_rule = env.study.rule();
-        self.run_demo(env, &prayer_rule, actions);
+        if let Some(block) = self.begin.take() {
+            self.begin_block(env, &prayer_rule, &block, today(), None);
+        }
+        self.run_demo(env, &prayer_rule);
         if let Some(View::Edit(editor)) = &mut self.view {
             editor.follow(&prayer_rule);
         }
+        if self.ended.0 != today() {
+            self.ended = (today(), HashSet::new());
+        }
+        if let (Some(View::Step), Some(s)) = (&self.view, &mut self.session) {
+            let shown =
+                step::show(s, ui, content, env, &prayer_rule, &self.ended.1, &mut self.counts, actions);
+            if let (true, Walk::Block(b)) = (shown.ended, &s.walk)
+                && s.day == self.ended.0
+            {
+                self.ended.1.insert(b.clone());
+            }
+            if shown.back {
+                self.view = None;
+                ui.ctx().request_repaint();
+            }
+            return (shown.bottom, shown.scrolled);
+        }
         if let Some(view) = &mut self.view {
-            let (bottom, back) = view.show(ui, content, env, actions);
+            let (bottom, back) = match view {
+                View::Edit(editor) => {
+                    let escape =
+                        env.keyboard && ui.input_mut(|i| i.consume_key(Modifiers::NONE, Key::Escape));
+                    let (bottom, back) = editor.show(ui, content, env, actions);
+                    (bottom, back || escape && !editor.changed())
+                }
+                View::Step => (content.top(), true),
+            };
             if back {
                 self.view = None;
                 ui.ctx().request_repaint();
             }
-            return bottom;
+            return (bottom, false);
         }
         let d = today() + self.offset;
         let info = calendar::day(d, style);
@@ -567,6 +734,13 @@ impl State {
         let mut y = ny + 16.0 + 32.0;
         let rule = |y: f32| painter.hline(left..=left + width, y, Stroke::new(1.0, p.separator));
 
+        // The part of the rule due now, or next later today.
+        if self.offset == 0
+            && let Some(bottom) = self.now_card(ui, env, &prayer_rule, left, width, y)
+        {
+            y = bottom + 28.0;
+        }
+
         // The day.
         group_label(&painter, p, left, y, "The day");
         y += 26.0;
@@ -591,15 +765,33 @@ impl State {
         let told = (info.feasts.iter().any(|f| great(f)), !info.feasts.is_empty());
         let mut all = self.all_readings == Some(d);
         let lessons = lectionary::readings_in(d, style, env.settings.usage);
-        y = readings(ui, env, left, width, y, &lessons, told, &mut all, actions) + 20.0;
+        let (bottom, picked) = readings(ui, env, left, width, y, &lessons, told, &mut all);
+        y = bottom + 20.0;
         if all {
             self.all_readings = Some(d);
+        }
+        if let Some(i) = picked {
+            self.open_walk(Walk::Readings, d, i.to_string());
         }
         rule(y);
         y += 20.0;
 
         // The prayer rule, then the reading plans.
-        y = rule_view::section(ui, env, &prayer_rule, left, width, y, d, &mut self.view, actions) + 20.0;
+        let paused =
+            self.session.as_ref().and_then(|s| s.paused_in(d)).map(|(b, i)| (b.to_string(), i.to_string()));
+        let paused = paused.as_ref().map(|(b, i)| (b.as_str(), i.as_str()));
+        let (bottom, pick) = rule_view::section(ui, env, &prayer_rule, left, width, y, d, paused, actions);
+        y = bottom + 20.0;
+        match pick {
+            Some(Pick::Edit) => {
+                let editor =
+                    super::rule_editor::Editor::new(prayer_rule.clone(), env.settings.rule_reminders);
+                self.view = Some(View::Edit(Box::new(editor)));
+            }
+            Some(Pick::Begin(b)) => self.begin_block(env, &prayer_rule, &b, d, None),
+            Some(Pick::Item { block, item }) => self.begin_block(env, &prayer_rule, &block, d, Some(&item)),
+            None => {}
+        }
         rule(y);
         y += 20.0;
         if !beside {
@@ -707,12 +899,8 @@ impl State {
                     p.accent,
                     true,
                 );
-                if resp.on_hover_cursor(eframe::egui::CursorIcon::PointingHand).clicked()
-                    && let Some((book, chapter)) = calendar::kathisma_start(k)
-                    && let Some(c) = ChapterIdx::new(book, chapter)
-                {
-                    actions.push(Action::Jump { chapter: c, verse: None, flash: false });
-                    actions.push(Action::OpenPage(super::Page::Reader));
+                if resp.on_hover_cursor(eframe::egui::CursorIcon::PointingHand).clicked() {
+                    self.open_kathisma(env, &prayer_rule, d, k);
                 }
                 y += 40.0;
             }
@@ -788,12 +976,112 @@ impl State {
             }
             y += 36.0;
         }
+        // Woken at the next block's time, so the Now card moves on.
+        let now = bible_core::study::now();
+        let t = crate::time::local(now);
+        let minute = i64::from(t.hour) * 60 + i64::from(t.minute);
+        let times = prayer_rule.blocks.iter().filter_map(|b| b.time.as_deref().and_then(minutes));
+        let wait = times.filter(|m| *m > minute).min().unwrap_or(24 * 60) - minute;
+        let secs = (wait * 60 - now.rem_euclid(60)).clamp(1, 3600) as u64;
+        ui.ctx().request_repaint_after(std::time::Duration::from_secs(secs));
         if beside {
             let bottom = self.month(ui, env, &prayer_rule, right - MONTH_W, ny + 16.0 + 32.0, d);
-            y.max(bottom)
+            (y.max(bottom), false)
         } else {
-            y
+            (y, false)
         }
+    }
+
+    /// A kathisma of the Psalter section on day `d`: the rule's kathisma item when it reads it
+    /// that day and it isn't done (Done then ticks it), else the kathisma alone.
+    fn open_kathisma(&mut self, env: &PageEnv<'_>, rule: &Rule, d: Day, k: u8) {
+        let done = env.study.rule_done(d);
+        let item = rule.for_day(d, env.settings.calendar).into_iter().find_map(|(b, items)| {
+            let reads =
+                |i: &&bible_core::rule::Item| i.kind == ItemKind::Kathisma && kathismata(b, d).contains(&k);
+            items
+                .into_iter()
+                .find(|i| reads(i) && !done.contains(&i.id))
+                .map(|i| (b.id.clone(), i.id.clone()))
+        });
+        match item {
+            Some((b, i)) => self.begin_block(env, rule, &b, d, Some(&i)),
+            None => self.open_walk(Walk::Kathisma(k), d, k.to_string()),
+        }
+    }
+
+    /// The Now card at `top`, `width` wide: the part of the rule due now (or next later today),
+    /// its items, done ones ticked, and Begin, or Continue once begun. ⌘↩ presses it. Returns its
+    /// bottom, or `None` when there is nothing to offer.
+    fn now_card(
+        &mut self,
+        ui: &mut Ui,
+        env: &PageEnv<'_>,
+        rule: &Rule,
+        left: f32,
+        width: f32,
+        top: f32,
+    ) -> Option<f32> {
+        let p = env.settings.theme.palette();
+        let painter = ui.painter().clone();
+        let d = today();
+        let t = crate::time::local(bible_core::study::now());
+        let minute = i64::from(t.hour) * 60 + i64::from(t.minute);
+        let (now, steps) = step::now(rule, env, d, minute, &self.ended.1)?;
+        let block = match now {
+            Now::Due(b) | Now::Next(b) => b,
+        };
+        let paused = self.session.as_ref().and_then(|s| s.paused_in(d)).is_some_and(|(b, _)| b == block.id);
+        let begun = paused || steps.iter().any(|s| s.done);
+        // Its items, done ones ticked in the tertiary ink; a line breaks after a dot, never
+        // inside a name.
+        let mut job = egui::text::LayoutJob::default();
+        for (i, st) in steps.iter().filter(|s| !s.idle).enumerate() {
+            let ink = if st.done { p.ink_3 } else { p.ink_2 };
+            let format = egui::TextFormat {
+                font_id: theme::ui_font(13.0),
+                color: ink,
+                line_height: Some(20.0),
+                ..Default::default()
+            };
+            if i > 0 {
+                job.append("\u{a0}· ", 0.0, egui::TextFormat { color: p.ink_3, ..format.clone() });
+            }
+            let name = if st.done { format!("✓ {}", st.title) } else { st.title.clone() };
+            job.append(&name.replace(' ', "\u{a0}"), 0.0, format);
+        }
+        job.wrap.max_width = width - 32.0;
+        let names = painter.layout_job(job);
+        let next = begun.then(|| {
+            let at = self.session.as_ref().filter(|s| s.paused_in(d).is_some_and(|(b, _)| b == block.id));
+            let first = match at {
+                Some(s) => step::resume_at(rule, env, s, &steps),
+                None => step::first(rule, env, &Walk::Block(block.id.clone()), d, &steps, &HashSet::new()),
+            };
+            first.and_then(|id| steps.iter().find(|s| s.id == id)).map(|s| format!("Next: {}", s.title))
+        });
+        let next = next.flatten();
+        let h = 16.0 + 24.0 + 6.0 + names.size().y + if next.is_some() { 24.0 } else { 0.0 } + 16.0;
+        let card = Rect::from_min_size(pos2(left, top), vec2(width, h));
+        painter.rect_filled(card, 12.0, p.fill);
+        let title = match block.time.as_deref().and_then(minutes) {
+            Some(at) => format!("{} · {}", block.title, clock(at)),
+            None => block.title.clone(),
+        };
+        text(&painter, left + 16.0, top + 16.0, 24.0, &title, theme::ui_semibold(15.0), p.ink, false);
+        painter.galley(pos2(left + 16.0, top + 16.0 + 24.0 + 6.0), names.clone(), p.ink_2);
+        if let Some(next) = &next {
+            let y = top + 16.0 + 24.0 + 6.0 + names.size().y + 4.0;
+            text(&painter, left + 16.0, y, 20.0, next, theme::ui_medium(13.0), p.ink, false);
+        }
+        let b = Button::new(Kind::Primary, if begun { "Continue" } else { "Begin" });
+        let (_, resp) = b.show_right(ui, p, card.right() - 16.0, top + 28.0, ui.id().with("now-begin"));
+        let enter = env.keyboard && ui.input_mut(|i| i.consume_key(Modifiers::COMMAND, Key::Enter));
+        if resp.on_hover_text("⌘↩").clicked() || enter {
+            let id = block.id.clone();
+            self.begin_block(env, rule, &id, d, None);
+        }
+        Some(card.bottom())
     }
 
     /// The reading plans under way with their passages for day `d`, a row and a check box
@@ -863,7 +1151,7 @@ impl State {
                     let (plan, day, passage) = (plan.id.to_string(), day as u16, i as u8);
                     actions.push(Action::SetPlanRead { plan, day, passage, read: !done });
                 } else if resp.on_hover_cursor(egui::CursorIcon::PointingHand).clicked() {
-                    super::plans::open_passage(ps, actions);
+                    self.open_walk(Walk::Plan(plan.id, day), d, i.to_string());
                 }
                 y += h;
             }
@@ -964,7 +1252,7 @@ impl State {
                 let some =
                     rule.for_day(day, style).iter().flat_map(|(_, i)| i).any(|i| ticked.contains(&i.id));
                 let mut kept_or_idle = ticked.clone();
-                kept_or_idle.extend(rule_view::idle(rule, day, style));
+                kept_or_idle.extend(rule.idle(day, style));
                 let (kept, of) = rule.kept(day, style, &kept_or_idle);
                 let c = pos2(cell.center().x, cell.top() + 29.0);
                 if of > 0 && some && kept == of {

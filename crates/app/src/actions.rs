@@ -118,6 +118,24 @@ pub enum Action {
     ScrollLines(f32),
     ScrollPages(f32),
     Toast(String),
+    /// Today in the Church (⌘⇧T), as its sidebar row opens it.
+    OpenToday,
+    /// Begin a block of the prayer rule today, by id, at its first item not done (a reminder's
+    /// Begin, the palette).
+    BeginBlock(String),
+    /// Pause the step on Today and open the reader at verse `at` of its reading (`passages`),
+    /// the reading selected there, with a band back to the step `from` ("Morning › Scripture").
+    OpenInReader {
+        passages: Vec<bible_core::lectionary::Passage>,
+        at: VerseRef,
+        from: String,
+    },
+    /// From the reader's band: back to the paused step, or stay in the reader without it.
+    ReturnToStep,
+    CloseReturn,
+    /// A quote from the Fathers added to the note on a verse; the quotes installed from a file.
+    AddToNote(VerseRef, String),
+    InstallFathers(std::path::PathBuf),
     Quit,
 }
 

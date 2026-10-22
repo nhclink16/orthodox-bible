@@ -6,9 +6,11 @@ pub mod bookmarks;
 pub mod highlights;
 pub mod history;
 pub mod notes;
+pub mod passage;
 pub mod plans;
 pub mod rule;
 pub mod rule_editor;
+pub mod step;
 pub mod today;
 pub mod translations;
 
@@ -75,6 +77,11 @@ pub struct PageEnv<'a> {
     pub query: &'a str,
     /// The toolbar's height (content starts 24 pt below it).
     pub toolbar: f32,
+    /// The Church Fathers' quotes, once installed (a step on Today shows them).
+    pub fathers: Option<&'a bible_core::fathers::Fathers>,
+    /// The page may take keys: no field is being typed in and nothing (the palette, the
+    /// shortcuts, Settings) is open over it.
+    pub keyboard: bool,
 }
 
 /// The open page and each page's own state.

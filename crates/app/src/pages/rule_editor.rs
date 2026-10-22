@@ -7,10 +7,10 @@ use std::collections::{HashMap, HashSet};
 
 use eframe::egui::{self, Id, Rect, Sense, Stroke, StrokeKind, Ui, pos2, vec2};
 
-use bible_core::rule::{Block, Item, Kind, Rule, Season};
+use bible_core::rule::{Block, Item, Kind, Rule, Season, minutes};
 use bible_core::{lxx, plans, prayers};
 
-use super::rule::{clock, crumb, minutes, shown_psalm};
+use super::rule::{clock, crumb, shown_psalm};
 use super::{PageEnv, text};
 use crate::actions::Action;
 use crate::icons;
@@ -277,7 +277,7 @@ impl Editor {
         let left = content.left();
         let width = content.width().min(640.0);
         let right = left + width;
-        let mut close = crumb(ui, p, left, content.top(), width, "Your rule");
+        let mut close = crumb(ui, p, (left, content.top(), width), "Today", &["Your rule"]);
         let top = content.top() + 36.0;
         super::title(&painter, p, left, top, "Your rule", "Changes to your rule apply when you save.");
         // Saved only while every time reads as one.

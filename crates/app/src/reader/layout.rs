@@ -5,7 +5,7 @@
 //! geometry (see [`Block::char_rects`]), so clicking a verse or highlighting it never forces a
 //! relayout.
 
-use std::ops::Range;
+use std::ops::{Range, RangeInclusive};
 use std::sync::Arc;
 
 use bible_core::model::{MarkKind, Style, Translation, VerseView};
@@ -754,10 +754,17 @@ fn shown_verse(c: ChapterIdx, number: u8) -> u8 {
     bible_core::lxx::shown(c.book(), c.chapter(), number).2
 }
 
-fn chapter_head(b: &mut Builder<'_, '_>, t: Option<&Translation>, c: ChapterIdx, single_column: bool) {
+fn chapter_head(
+    b: &mut Builder<'_, '_>,
+    t: Option<&Translation>,
+    c: ChapterIdx,
+    first: u8,
+    single_column: bool,
+) {
     let cx = b.cx;
-    // The chapter's number as shown (Septuagint psalm numbers when they're on).
-    let number = bible_core::lxx::shown(c.book(), c.chapter(), 1).1.unwrap_or(c.chapter());
+    // The number of the chapter, or of the psalm verse `first` opens, as shown (Septuagint psalm
+    // numbers when they're on).
+    let number = bible_core::lxx::shown(c.book(), c.chapter(), first).1.unwrap_or(c.chapter());
     let p = cx.p();
     let short =
         t.map(|t| t.meta.book_short(c.book()).to_string()).unwrap_or_else(|| c.book().name().to_string());
@@ -813,13 +820,36 @@ pub fn layout_chapter(
     t: &Translation,
     c: ChapterIdx,
 ) -> ChapterLayout {
+    layout_verses(fonts, cx, t, c, None)
+}
+
+/// Lays out the verses `verses` of a chapter (all of it when `None`) in a single column. Only
+/// those verses are typeset, so none of a paragraph's other verses shows, and the chapter's
+/// heading comes only with its first verse. A step on Today reads a reading this way.
+///
+/// In Septuagint numbering a span's heading goes with the psalm as shown: one that starts inside
+/// the grid's chapter has its own (the Septuagint's Psalm 115 is the grid's 116:10–19), and the
+/// grid's chapter that goes on with the psalm before has none (its Psalm 10 is the 9th's 22–39).
+pub fn layout_verses(
+    fonts: &mut FontsView<'_>,
+    cx: &Ctx<'_>,
+    t: &Translation,
+    c: ChapterIdx,
+    verses: Option<RangeInclusive<u8>>,
+) -> ChapterLayout {
     let cx = &cx.measured(fonts);
     let mut b = Builder::new(cx, fonts);
-    chapter_head(&mut b, Some(t), c, true);
+    let first = verses.as_ref().map_or(1, |r| (*r.start()).max(1));
+    if verses.is_none() || shown_verse(c, first) == 1 {
+        chapter_head(&mut b, Some(t), c, first, true);
+    }
     let em = b.em();
     let per_line = cx.typo.mode == Mode::VersePerLine;
     let mut kind = Kind::Prose { indent: false };
-    for v in t.verses_in(c) {
+    let wanted = |v: &VerseView<'_>| {
+        verses.as_ref().is_none_or(|r| v.number <= *r.end() && v.number_end >= *r.start())
+    };
+    for v in t.verses_in(c).filter(wanted) {
         let styles = style_mask(&v);
         // Break points inside the verse: (offset, mark).
         let mut cursor = 0usize;
@@ -1107,7 +1137,7 @@ pub fn layout_message(
     message: &str,
 ) -> ChapterLayout {
     let mut b = Builder::new(cx, fonts);
-    chapter_head(&mut b, None, c, true);
+    chapter_head(&mut b, None, c, 1, true);
     let em = cx.typo.size;
     let mut job = LayoutJob::default();
     job.wrap.max_width = cx.width;

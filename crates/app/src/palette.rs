@@ -28,6 +28,8 @@ pub struct CommandPalette {
     opened: bool,
     /// Recent reading, loaded when the palette opens.
     recent: Option<Vec<ReadingSession>>,
+    /// The prayer rule's blocks that can be begun today (two or more items): id and title.
+    blocks: Option<Vec<(String, String)>>,
 }
 
 #[derive(Clone, Copy, PartialEq, Eq)]
@@ -316,6 +318,18 @@ impl CommandPalette {
             }
         }
         let ql = q.to_lowercase();
+        // Today in the Church, and "Begin morning", "Begin evening".
+        let today =
+            command(icons::calendar, "Today in the Church".into(), vec!["⇧", "⌘", "T"], Action::OpenToday);
+        let begin = self.blocks.iter().flatten().map(|(id, title)| {
+            let title = format!("Begin {}", title.to_lowercase());
+            command(icons::calendar, title, Vec::new(), Action::BeginBlock(id.clone()))
+        });
+        for item in std::iter::once(today).chain(begin) {
+            if q.is_empty() || item.title.to_lowercase().contains(&ql) {
+                items.push(item);
+            }
+        }
         for (title, icon, keys, action) in command_list(settings) {
             if q.is_empty() || title.to_lowercase().contains(&ql) {
                 items.push(command(icon, title.to_string(), keys, action));
@@ -336,6 +350,14 @@ impl CommandPalette {
         let p = settings.theme.palette();
         if self.recent.is_none() {
             self.recent = Some(study.reading_since(bible_core::study::now() - 30 * 86_400));
+        }
+        if self.blocks.is_none() {
+            let t = crate::time::local(bible_core::study::now());
+            let today = bible_core::calendar::civil(t.year, t.month, t.day);
+            let rule = study.rule();
+            let blocks =
+                rule.for_day(today, settings.calendar).into_iter().filter(|(_, items)| items.len() >= 2);
+            self.blocks = Some(blocks.map(|(b, _)| (b.id.clone(), b.title.clone())).collect());
         }
         let items = self.items(library, settings);
         if self.selected >= items.len() {

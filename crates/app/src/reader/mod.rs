@@ -95,6 +95,8 @@ pub struct Reader {
     frames: u64,
     /// Chapters typeset so far (`BIBLE_RS_SIDEBAR_PROBE` counts them per transition).
     pub layouts: u64,
+    /// How full the font atlas was last frame (see [`atlas_rebuilt`]).
+    atlas: f32,
 }
 
 impl Reader {
@@ -125,6 +127,7 @@ impl Reader {
             selection_rect: None,
             frames: 0,
             layouts: 0,
+            atlas: 0.0,
         };
         if verse > 1 {
             r.pending_jump = Some((chapter, verse, false));
@@ -382,6 +385,10 @@ impl Reader {
         self.viewport_h = rect.height();
 
         // Re-key the cache when anything that affects layout changes, keeping the position.
+        if atlas_rebuilt(ui.ctx(), &mut self.atlas) {
+            // The same layouts again, with glyphs from the new atlas.
+            self.cache.clear();
+        }
         let key = Self::layout_key(env, geom.col_w);
         if key != self.key {
             if self.key != 0
@@ -524,20 +531,18 @@ impl Reader {
                     }
                 }
             }
-            for block in &l.blocks {
-                let br = block.rect().translate(origin);
-                if br.bottom() < rect.top() || br.top() > rect.bottom() {
-                    continue;
-                }
-                under_toolbar |= br.top() < toolbar_bottom;
-                let bo = origin + block.pos;
-                // Parallel: a selected verse is marked as a whole row across the columns.
-                let parallel = env.columns.len() > 1;
-                if parallel
-                    && block.column == 0
-                    && let Some((_, _, number)) = block.verses.first()
-                    && selected.contains(&VerseRef::new(ch.book(), ch.chapter(), *number))
-                {
+            // Parallel: a selected verse is marked as a whole row across the columns.
+            let parallel = env.columns.len() > 1;
+            if parallel {
+                for block in l.blocks.iter().filter(|b| b.column == 0) {
+                    let br = block.rect().translate(origin);
+                    if br.bottom() < rect.top() || br.top() > rect.bottom() {
+                        continue;
+                    }
+                    let Some((_, _, number)) = block.verses.first() else { continue };
+                    if !selected.contains(&VerseRef::new(ch.book(), ch.chapter(), *number)) {
+                        continue;
+                    }
                     let row: Vec<Rect> = l
                         .blocks
                         .iter()
@@ -555,62 +560,25 @@ impl Reader {
                     painter.rect_filled(band, CornerRadius::same(10), p.selection);
                     self.selection_rect = Some(self.selection_rect.map_or(band, |s| s.union(band)));
                 }
-                // Underlays: highlights, selection, flash.
-                for (k, (start, _vi, number)) in block.verses.iter().enumerate() {
-                    let end = block.verses.get(k + 1).map_or(usize::MAX, |(s, _, _)| *s);
-                    let vref = VerseRef::new(ch.book(), ch.chapter(), *number);
-                    let mut fills: Vec<Color32> = Vec::new();
-                    if let Some(hc) = env.study.highlight(vref) {
-                        fills.push(p.highlight(hc));
-                    }
-                    let is_selected = selected.contains(&vref);
-                    if is_selected && !parallel {
-                        fills.push(p.selection);
-                    }
-                    if let (Some((fv, _)), Some(a)) = (self.flash, flash_alpha)
-                        && fv == vref
-                        && a > 0.0
-                    {
-                        fills.push(p.accent_soft.gamma_multiply(a));
-                    }
-                    if fills.is_empty() {
-                        continue;
-                    }
-                    // The design's highlight is the verse text's own 28 pt line box (at 20 pt),
-                    // rounded 4 pt: from 1.13 em above the baseline to 0.27 em below, leaving the
-                    // verse number and the space before the next verse unmarked.
-                    let (above, below) = (self.em * 1.1345, self.em * 0.2655);
-                    let end = end.min(block.galley.job.text.chars().count());
-                    for (x0, x1, baseline) in block.char_runs(block.text_chars(*start..end)) {
-                        let r = Rect::from_min_max(
-                            pos2(bo.x + x0, bo.y + baseline - above),
-                            pos2(bo.x + x1, bo.y + baseline + below),
-                        );
-                        for f in &fills {
-                            painter.rect_filled(r, CornerRadius::same(4), *f);
-                        }
-                        if is_selected && !parallel {
-                            self.selection_rect = Some(self.selection_rect.map_or(r, |s| s.union(r)));
-                        }
-                    }
-                }
-                painter.galley(bo.to_pos2(), block.galley.clone(), p.ink);
-                if let Some((g, gp)) = &block.gutter {
-                    painter.galley((origin + *gp).to_pos2(), g.clone(), p.verse);
-                }
-                if let Some(ptr) = pointer.filter(|pt| br.expand2(vec2(8.0, 2.0)).contains(*pt)) {
-                    let cur = block.galley.cursor_from_pos((ptr - bo).to_vec2());
-                    if let Some(vi) = block.verse_at_char(cur.index.0) {
-                        let num =
-                            block.verses.iter().find(|(_, v, _)| *v == vi).map(|(_, _, n)| *n).unwrap_or(1);
-                        hit = Some(VerseRef::new(ch.book(), ch.chapter(), num));
-                    }
-                }
             }
-            // Margin markers (notes, bookmarks) at each verse's first line, 32 pt right of the text.
-            let right = geom.x0 + geom.total_w + layout::MARKER_GAP * self.em / layout::DESIGN_EM;
+            let marks = Marks {
+                study: env.study,
+                typo: env.typo,
+                selected: if parallel { &[] } else { selected.as_slice() },
+                lit: self.flash.zip(flash_alpha).map(|((v, _), a)| (v, a)).filter(|(_, a)| *a > 0.0),
+                // Margin markers (notes, bookmarks) 32 pt right of the text.
+                markers_x: geom.x0 + geom.total_w + layout::MARKER_GAP * self.em / layout::DESIGN_EM,
+                note_open: self.marker_for,
+            };
+            let painted = paint_blocks(&painter, p, &l, origin, rect, &marks, pointer);
+            under_toolbar |= painted.top.is_some_and(|t| t < toolbar_bottom);
+            hit = painted.hit.or(hit);
+            marker_hit = painted.marker_hit.or(marker_hit);
+            if let Some(s) = painted.selection {
+                self.selection_rect = Some(self.selection_rect.map_or(s, |r| r.union(s)));
+            }
+            self.marker_rect = painted.marker.or(self.marker_rect);
             for a in l.anchors.iter().filter(|a| a.column == 0) {
-                let vref = VerseRef::new(ch.book(), ch.chapter(), a.number);
                 let top = y + a.top;
                 if top > rect.bottom() || top + self.em * 2.0 < rect.top() {
                     continue;
@@ -622,32 +590,6 @@ impl Reader {
                     match in_view.last_mut() {
                         Some((c, n)) if *c == ch => *n = (*n).max(a.number),
                         _ => in_view.push((ch, a.number)),
-                    }
-                }
-                // 16 pt glyphs in 20 pt boxes, centred on the first line.
-                let mut x = right;
-                let lh = (self.em * env.typo.line_height).round();
-                let cy = top + lh / 2.0 - 1.0;
-                if env.study.is_bookmarked(vref) {
-                    let r = Rect::from_center_size(pos2(x + 10.0, cy), vec2(16.0, 16.0));
-                    icons::bookmark(&painter, r, p.accent, true);
-                    if pointer.is_some_and(|pt| r.expand(4.0).contains(pt)) {
-                        marker_hit = Some(vref);
-                    }
-                    x += 24.0;
-                }
-                let open = self.marker_for == Some(vref);
-                if env.study.note(vref).is_some() || open {
-                    let r = Rect::from_center_size(pos2(x + 10.0, cy), vec2(16.0, 16.0));
-                    if open {
-                        // The note being written: its marker carries the popover's beak.
-                        let box_ = Rect::from_center_size(r.center(), vec2(20.0, 20.0));
-                        painter.rect_filled(box_, CornerRadius::same(6), p.accent_soft);
-                        self.marker_rect = Some(box_);
-                    }
-                    icons::note(&painter, r, p.accent);
-                    if pointer.is_some_and(|pt| r.expand(4.0).contains(pt)) {
-                        marker_hit = Some(vref);
                     }
                 }
             }
@@ -828,6 +770,149 @@ impl Reader {
             });
         }
     }
+}
+
+/// Whether egui made its font atlas afresh since `last` (how full it was then), as it does once
+/// it is almost full: text laid out before then points at glyphs that are gone, so it is laid
+/// out again.
+pub fn atlas_rebuilt(ctx: &egui::Context, last: &mut f32) -> bool {
+    let fill = ctx.fonts(|f| f.font_atlas_fill_ratio());
+    std::mem::replace(last, fill) > fill
+}
+
+/// What [`paint_blocks`] draws besides the text.
+pub struct Marks<'a> {
+    pub study: &'a StudyStore,
+    pub typo: &'a Typography,
+    /// Verses washed as selected, one by one (the reader marks parallel rows whole itself).
+    pub selected: &'a [VerseRef],
+    /// A verse lit in the accent, and how strongly: the flash on a verse jumped to, or the verse a
+    /// step on Today is on.
+    pub lit: Option<(VerseRef, f32)>,
+    /// Where the margin markers (bookmarks, notes) start, and the verse whose note is being
+    /// written.
+    pub markers_x: f32,
+    pub note_open: Option<VerseRef>,
+}
+
+/// What [`paint_blocks`] found while painting.
+#[derive(Default)]
+pub struct Painted {
+    /// The verse and the margin marker under the pointer.
+    pub hit: Option<VerseRef>,
+    pub marker_hit: Option<VerseRef>,
+    /// Where the selected verses are, and the marker of the note being written.
+    pub selection: Option<Rect>,
+    pub marker: Option<Rect>,
+    /// The top of the highest block painted.
+    pub top: Option<f32>,
+}
+
+/// Paints chapter `l`, laid out with its top-left corner at `origin`, where it is in `view`:
+/// highlights, the selection and a lit verse under the text, the text with its gutter numbers,
+/// and the margin markers. The reader and a step on Today (`pages::passage`) both paint text this
+/// way, so a reading looks the same in each.
+pub fn paint_blocks(
+    painter: &egui::Painter,
+    p: &crate::theme::Palette,
+    l: &ChapterLayout,
+    origin: egui::Vec2,
+    view: Rect,
+    marks: &Marks<'_>,
+    pointer: Option<egui::Pos2>,
+) -> Painted {
+    let ch = l.chapter;
+    let em = marks.typo.size;
+    let mut out = Painted::default();
+    for block in &l.blocks {
+        let br = block.rect().translate(origin);
+        if br.bottom() < view.top() || br.top() > view.bottom() {
+            continue;
+        }
+        out.top = Some(out.top.map_or(br.top(), |t| t.min(br.top())));
+        let bo = origin + block.pos;
+        // Underlays: highlights, selection, the lit verse.
+        for (k, (start, _vi, number)) in block.verses.iter().enumerate() {
+            let end = block.verses.get(k + 1).map_or(usize::MAX, |(s, _, _)| *s);
+            let vref = VerseRef::new(ch.book(), ch.chapter(), *number);
+            let mut fills: Vec<Color32> = Vec::new();
+            if let Some(hc) = marks.study.highlight(vref) {
+                fills.push(p.highlight(hc));
+            }
+            let is_selected = marks.selected.contains(&vref);
+            if is_selected {
+                fills.push(p.selection);
+            }
+            if let Some((_, a)) = marks.lit.filter(|(v, _)| *v == vref) {
+                fills.push(p.accent_soft.gamma_multiply(a));
+            }
+            if fills.is_empty() {
+                continue;
+            }
+            // The design's highlight is the verse text's own 28 pt line box (at 20 pt), rounded
+            // 4 pt: from 1.13 em above the baseline to 0.27 em below, leaving the verse number and
+            // the space before the next verse unmarked.
+            let (above, below) = (em * 1.1345, em * 0.2655);
+            let end = end.min(block.galley.job.text.chars().count());
+            for (x0, x1, baseline) in block.char_runs(block.text_chars(*start..end)) {
+                let r = Rect::from_min_max(
+                    pos2(bo.x + x0, bo.y + baseline - above),
+                    pos2(bo.x + x1, bo.y + baseline + below),
+                );
+                for f in &fills {
+                    painter.rect_filled(r, CornerRadius::same(4), *f);
+                }
+                if is_selected {
+                    out.selection = Some(out.selection.map_or(r, |s| s.union(r)));
+                }
+            }
+        }
+        painter.galley(bo.to_pos2(), block.galley.clone(), p.ink);
+        if let Some((g, gp)) = &block.gutter {
+            painter.galley((origin + *gp).to_pos2(), g.clone(), p.verse);
+        }
+        if let Some(ptr) = pointer.filter(|pt| br.expand2(vec2(8.0, 2.0)).contains(*pt)) {
+            let cur = block.galley.cursor_from_pos((ptr - bo).to_vec2());
+            if let Some(vi) = block.verse_at_char(cur.index.0) {
+                let num = block.verses.iter().find(|(_, v, _)| *v == vi).map(|(_, _, n)| *n).unwrap_or(1);
+                out.hit = Some(VerseRef::new(ch.book(), ch.chapter(), num));
+            }
+        }
+    }
+    // Margin markers at each verse's first line: 16 pt glyphs in 20 pt boxes, centred on it.
+    let lh = (em * marks.typo.line_height).round();
+    for a in l.anchors.iter().filter(|a| a.column == 0) {
+        let top = origin.y + a.top;
+        if top > view.bottom() || top + em * 2.0 < view.top() {
+            continue;
+        }
+        let vref = VerseRef::new(ch.book(), ch.chapter(), a.number);
+        let mut x = marks.markers_x;
+        let cy = top + lh / 2.0 - 1.0;
+        if marks.study.is_bookmarked(vref) {
+            let r = Rect::from_center_size(pos2(x + 10.0, cy), vec2(16.0, 16.0));
+            icons::bookmark(painter, r, p.accent, true);
+            if pointer.is_some_and(|pt| r.expand(4.0).contains(pt)) {
+                out.marker_hit = Some(vref);
+            }
+            x += 24.0;
+        }
+        let open = marks.note_open == Some(vref);
+        if marks.study.note(vref).is_some() || open {
+            let r = Rect::from_center_size(pos2(x + 10.0, cy), vec2(16.0, 16.0));
+            if open {
+                // The note being written: its marker carries the popover's beak.
+                let box_ = Rect::from_center_size(r.center(), vec2(20.0, 20.0));
+                painter.rect_filled(box_, CornerRadius::same(6), p.accent_soft);
+                out.marker = Some(box_);
+            }
+            icons::note(painter, r, p.accent);
+            if pointer.is_some_and(|pt| r.expand(4.0).contains(pt)) {
+                out.marker_hit = Some(vref);
+            }
+        }
+    }
+    out
 }
 
 /// Column placement for the current window width. The columns start on a whole pixel, so text

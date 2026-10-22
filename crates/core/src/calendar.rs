@@ -7,7 +7,8 @@
 //! The fasting rules are the general ones most English-speaking Orthodox parishes publish. Local
 //! practice varies, and a priest's guidance comes first; the app says so where it shows them.
 
-use crate::books::BookId;
+use crate::books::{BookId, ChapterIdx};
+use crate::lectionary::Passage;
 
 /// A day, counted from 1970-01-01 in the proleptic Gregorian (civil) calendar.
 pub type Day = i64;
@@ -323,12 +324,37 @@ pub fn kathismata(weekday: u8) -> (&'static [u8], &'static [u8]) {
     }
 }
 
+/// A Septuagint psalm's number in the numbering shown ([`crate::lxx::numbering`]): the grid
+/// chapter it starts in when that numbering is off.
+pub(crate) fn shown_psalm(p: u8) -> u8 {
+    if crate::lxx::numbering() { p } else { crate::lxx::from_lxx(p, 1).map_or(p, |(_, c, _)| c) }
+}
+
 /// "Psalms 24–31": kathisma `n`'s psalms in the numbering shown ([`crate::lxx::numbering`]).
 pub fn kathisma_psalms(n: u8) -> String {
     let Some(&(a, b)) = KATHISMATA.get(n.saturating_sub(1) as usize) else { return String::new() };
-    let shown =
-        |p: u8| if crate::lxx::numbering() { p } else { crate::lxx::from_lxx(p, 1).map_or(p, |(_, c, _)| c) };
+    let shown = shown_psalm;
     if a == b { format!("Psalm {}", shown(a)) } else { format!("Psalms {}–{}", shown(a), shown(b)) }
+}
+
+/// Kathisma `n`'s psalms in the grid, one passage per Septuagint psalm: its Psalm 9 runs over the
+/// grid's 9 and 10, and its 114 and 115 share the grid's 116.
+pub fn kathisma_passages(n: u8) -> Vec<Passage> {
+    let Some(&(a, b)) = KATHISMATA.get(n.wrapping_sub(1) as usize) else { return Vec::new() };
+    (a..=b).filter_map(psalm_passage).collect()
+}
+
+/// Septuagint psalm `n` in the grid: from its first verse to the verse before the next psalm.
+pub(crate) fn psalm_passage(n: u8) -> Option<Passage> {
+    let (book, c, v) = crate::lxx::from_lxx(n, 1)?;
+    let end_of = |c: u8| Some((c, ChapterIdx::new(book, c)?.kjv_verses()));
+    let to = match crate::lxx::from_lxx(n.saturating_add(1), 1) {
+        Some((b, next, 1)) if b == book => end_of(next - 1)?,
+        Some((b, next, v)) if b == book => (next, v - 1),
+        // Psalm 150, and 151 (a book of one psalm).
+        _ => end_of(c)?,
+    };
+    Some(Passage { book, from: (c, v), to })
 }
 
 /// Where kathisma `n` (1–20) begins in the grid: its first psalm.
@@ -411,5 +437,46 @@ mod tests {
         assert_eq!(ps, 150);
         assert_eq!(kathisma_start(17), Some((BookId::PSALMS, 119)));
         assert_eq!(kathisma_start(1), Some((BookId::PSALMS, 1)));
+    }
+
+    /// Kathisma `n`'s passages as (first chapter, first verse, last chapter, last verse).
+    fn psalms(n: u8) -> Vec<(u8, u8, u8, u8)> {
+        let ps = kathisma_passages(n);
+        assert!(ps.iter().all(|p| p.book == BookId::PSALMS));
+        ps.iter().map(|p| (p.from.0, p.from.1, p.to.0, p.to.1)).collect()
+    }
+
+    #[test]
+    fn kathismata_open_the_septuagint_psalms_in_the_grid() {
+        // Psalms 85–90 are the grid's 86–91, whole.
+        assert_eq!(
+            psalms(12),
+            [
+                (86, 1, 86, 17),
+                (87, 1, 87, 7),
+                (88, 1, 88, 18),
+                (89, 1, 89, 52),
+                (90, 1, 90, 17),
+                (91, 1, 91, 16)
+            ]
+        );
+        // The psalms the two numberings join or split.
+        let second = psalms(2);
+        assert_eq!((second.len(), second[0], second[7]), (8, (9, 1, 10, 18), (17, 1, 17, 15)));
+        assert_eq!(
+            psalms(16)[3..7],
+            [(113, 1, 113, 9), (114, 1, 115, 18), (116, 1, 116, 9), (116, 10, 116, 19)]
+        );
+        assert_eq!(psalms(20)[2..5], [(146, 1, 146, 10), (147, 1, 147, 11), (147, 12, 147, 20)]);
+        assert_eq!(psalms(20).last(), Some(&(150, 1, 150, 6)));
+        assert!(kathisma_passages(0).is_empty() && kathisma_passages(21).is_empty());
+        // Together they read every verse of the Psalter once, in order.
+        let read: Vec<crate::VerseRef> =
+            (1..=20).flat_map(kathisma_passages).flat_map(|p| p.verses().collect::<Vec<_>>()).collect();
+        let psalter: Vec<crate::VerseRef> = (1..=150)
+            .flat_map(|c| (1..=ChapterIdx::new(BookId::PSALMS, c).unwrap().kjv_verses()).map(move |v| (c, v)))
+            .map(|(c, v)| crate::VerseRef::new(BookId::PSALMS, c, v))
+            .collect();
+        assert_eq!(read, psalter);
     }
 }
